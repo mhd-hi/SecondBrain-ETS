@@ -1,6 +1,4 @@
-import type { Task, Subtask } from "./task";
-
-export type AISubtask = Pick<Subtask, 'title' | 'estimatedEffort' | 'notes'>;
+import type { Task } from "./task";
 
 export interface Course {
   id: string;
@@ -10,14 +8,6 @@ export interface Course {
   createdAt: Date;
   updatedAt: Date;
   tasks: Task[];
-}
-
-export interface CourseAIResponse {
-  courseCode: string;
-  term: string;
-  tasks: Array<Omit<Task, 'id' | 'status' | 'courseId' | 'createdAt' | 'updatedAt'> & {
-    subtasks?: AISubtask[];
-  }>;
 }
 
 export interface CourseCreateRequest {

@@ -1,7 +1,6 @@
 import { MOCK_COURSES } from './mocks/openai-data';
 import { setMockOpenAI } from './mocks/helper';
-
-import type { CourseAIResponse } from '@/types/course';
+import type { CourseAIResponse } from '@/types/api';
 
 // Set this to true to use mock data instead of making API calls
 const USE_MOCK_DATA = true;
