@@ -78,7 +78,7 @@ export const AddCourseForm = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           courseId: course.id,
-          tasks: data.drafts.map(draft => ({
+          tasks: data.tasks.map(draft => ({
             ...draft
           })),
         }),

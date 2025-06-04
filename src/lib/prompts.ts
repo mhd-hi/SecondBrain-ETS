@@ -8,7 +8,8 @@ export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS cours
 7. ALWAYS start your response with [ and end with ]
 8. ALWAYS return ONLY the JSON array, nothing else
 9. ALWAYS group related tasks into subtasks when they share the same week, type, and main topic
-10. ALWAYS assign weeks sequentially when not explicitly provided`;
+10. ALWAYS assign weeks sequentially when not explicitly provided
+11. NEVER add any fields not explicitly shown in the example object`;
 
 export function buildCoursePlanParsePrompt(pageHtml: string) {
   return `
@@ -30,6 +31,7 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
         * If it's part of a sequence, increment the week number from the previous item
         * If it's a major topic change, increment the week number
         * If it's a subtopic of the previous item, use the same week number
+      - If it's a final exam, ALWAYS place it in the last week of the course
    b. Read the "Content" cell(s) (or "Subject" / "Course"):
       - Split by bullets (\`•\`), line breaks, or indented lists to get one or more text fragments.
 
@@ -40,6 +42,7 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    - If the text contains "Exam", "Midterm", "Test", "Quiz", then \`type = "exam"\`.
    - If the text contains "Homework", "Project", "TP to submit", then \`type = "homework"\`.
    - If multiple different keywords appear in the same fragment (e.g., "Midterm exam + Practical work"), create two distinct objects (one \`exam\`, one \`pratique\`) with the same \`week\`.
+   - If it's a final exam, ALWAYS set \`type = "exam"\` and place it in the last week
 
 4. **Content Grouping**
    - If multiple fragments in the same week and type are related (e.g., different algorithms, different parts of the same topic), group them as subtasks
@@ -51,9 +54,10 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
      * Use logical progression to determine week numbers
      * Consider topic changes as week boundaries
      * Maintain consistent week numbering across the course
+     * ALWAYS place final exams in the last week
 
 5. **JSON Object Construction**
-   For each main task (with optional subtasks), generate an object:
+   For each main task (with optional subtasks), generate an object with EXACTLY these fields:
    \`\`\`jsonc
    {
      "week": <integer>,

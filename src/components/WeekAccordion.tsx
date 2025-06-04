@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DraftCard } from './DraftCard';
 import { toast } from 'sonner';
 import type { Task } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 
 interface WeekAccordionProps {
   courseId: string;

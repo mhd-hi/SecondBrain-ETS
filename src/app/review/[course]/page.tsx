@@ -5,7 +5,7 @@ import { use } from 'react';
 import CourseSidebar from '@/components/CourseSidebar';
 import { toast } from 'sonner';
 import type { Course, Task } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from "@/components/ui/input"

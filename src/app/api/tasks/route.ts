@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Subtask, Task } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
+import type {Task, Subtask} from '@/types/task'
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +30,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { courseId, tasks: newTasks } = await request.json() as { courseId: string; tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>> };
+    const { courseId, tasks: newTasks } = await request.json() as { 
+      courseId: string; 
+      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & { 
+        subtasks?: Subtask[];
+        notes?: string;
+      }> 
+    };
 
     if (!courseId || !newTasks?.length) {
       return NextResponse.json(
@@ -66,7 +72,12 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, ...updates } = await request.json() as { id: string } & Partial<Task>;
+    const { id, ...updates } = await request.json() as { 
+      id: string 
+    } & Partial<Task> & {
+      subtasks?: Subtask[];
+      notes?: string;
+    };
 
     if (!id) {
       return NextResponse.json(

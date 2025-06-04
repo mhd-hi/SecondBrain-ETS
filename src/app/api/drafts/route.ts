@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Draft } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import type { Task } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 
 export async function GET(request: Request) {
   try {
@@ -30,19 +30,20 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { courseId, ...data } = await request.json() as Draft & { courseId: string };
+    const { courseId, ...data } = await request.json() as Task & { courseId: string };
     const [draft] = await db.insert(tasks).values({
       courseId,
       title: data.title,
       week: data.week,
       notes: data.notes,
-      status: TaskStatus.PENDING,
+      status: TaskStatus.DRAFT,
+      type: data.type,
+      estimatedEffort: data.estimatedEffort,
       subtasks: data.subtasks?.map(subtask => ({
         id: crypto.randomUUID(),
         title: subtask.title,
         completed: false
-      })),
-      isDraft: true
+      }))
     }).returning();
     return NextResponse.json(draft);
   } catch (error) {
@@ -56,19 +57,20 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, ...updates } = await request.json() as { id: string } & Partial<Draft>;
+    const { id, ...updates } = await request.json() as { id: string } & Partial<Task>;
     const [draft] = await db.update(tasks)
       .set({
         title: updates.title,
         week: updates.week,
         notes: updates.notes,
-        status: updates.status ?? TaskStatus.PENDING,
+        status: updates.status ?? TaskStatus.DRAFT,
+        type: updates.type,
+        estimatedEffort: updates.estimatedEffort,
         subtasks: updates.subtasks?.map(subtask => ({
           id: crypto.randomUUID(),
           title: subtask.title,
           completed: false
-        })),
-        isDraft: updates.isDraft ?? true
+        }))
       })
       .where(eq(tasks.id, id))
       .returning();

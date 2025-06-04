@@ -1,7 +1,7 @@
 "use client";
 
 import type { Course } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 import { getCourseColor } from '@/lib/utils';
 import {
   DropdownMenu,
@@ -34,10 +34,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const nextTask = sortedTasks.length > 0 ? sortedTasks[0] : null;
   const upcomingTask = sortedTasks.length > 1 ? sortedTasks[1] : null;
 
-
-  // Handler for delete click
   const handleDeleteClick = () => {
-    // Call the onDeleteCourse prop with the course ID
     onDeleteCourse(course.id);
   };
 
@@ -78,12 +75,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="space-y-2 text-sm mt-auto">
         {nextTask && (
           <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Next:</span> W{nextTask.week}: {nextTask.title}
+            <span className="font-medium">Next:</span>{nextTask.title}
           </p>
         )}
         {upcomingTask && (
           <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Upcoming:</span> W{upcomingTask.week}: {upcomingTask.title}
+            <span className="font-medium">Upcoming:</span>{upcomingTask.title}
           </p>
         )}
         {!nextTask && !upcomingTask && (

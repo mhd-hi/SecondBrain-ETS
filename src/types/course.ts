@@ -1,17 +1,5 @@
-export enum TaskStatus {
-  DRAFT = 'draft',
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed'
-}
+import type { Subtask, TaskStatus } from "./task";
 
-export interface Subtask {
-  id: string;
-  title: string;
-  completed: boolean;
-  notes?: string;
-  estimatedEffort?: number;
-}
 
 export interface Task {
   id: string;
@@ -40,7 +28,7 @@ export interface Course {
 export interface CourseImportResponse {
   courseCode: string;
   term: string;
-  drafts: Array<{
+  tasks: Array<{
     title: string;
     week: number;
     type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';

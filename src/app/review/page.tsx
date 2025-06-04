@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Course } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -61,7 +62,7 @@ export default function ReviewPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map((course) => {
-            const pendingTasks = course.tasks?.filter(task => task.isDraft).length ?? 0;
+            const pendingTasks = course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
             
             return (
               <Card

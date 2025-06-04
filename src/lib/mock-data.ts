@@ -4,83 +4,197 @@ const MOCK_COURSES: Record<string, ParseCourseResponse> = {
   MAT145: {
     courseCode: "MAT145",
     term: "20252",
-    drafts: [
+    tasks: [
       {
         "week": 1,
         "type": "theorie",
         "title": "Modélisation. Fonctions. Graphes. Limites et asymptotes.",
         "estimatedEffort": 180,
-        "notes": "Commencez par bien comprendre les concepts de base."
+        "notes": "Commencez par les concepts de base des fonctions et des graphes.",
+        "subtasks": [
+          {
+            "title": "Introduction aux fonctions",
+            "estimatedEffort": 90,
+            "notes": "Comprendre les types de fonctions."
+          },
+          {
+            "title": "Graphes et limites",
+            "estimatedEffort": 90,
+            "notes": "Visualiser les fonctions et leurs limites."
+          }
+        ]
       },
       {
         "week": 2,
         "type": "theorie",
         "title": "Définition, interprétation géométrique et contexte d’utilisation de la dérivée.",
         "estimatedEffort": 540,
-        "notes": "Concentrez-vous sur les règles de dérivation."
-      },
-      {
-        "week": 3,
-        "type": "theorie",
-        "title": "Règles de dérivation. Dérivation en chaîne. Dérivation implicite.",
-        "estimatedEffort": 540,
-        "notes": "Pratiquez avec des exemples variés."
+        "notes": "Concentrez-vous sur les règles de dérivation et leur application.",
+        "subtasks": [
+          {
+            "title": "Règles de dérivation",
+            "estimatedEffort": 180,
+            "notes": "Apprenez les règles de base."
+          },
+          {
+            "title": "Dérivation en chaîne",
+            "estimatedEffort": 180,
+            "notes": "Comprendre la dérivation des fonctions composées."
+          },
+          {
+            "title": "Dérivation implicite",
+            "estimatedEffort": 180,
+            "notes": "Explorez les dérivées des fonctions implicites."
+          }
+        ]
       },
       {
         "week": 5,
         "type": "theorie",
         "title": "Utilisation de la dérivée première et seconde.",
         "estimatedEffort": 360,
-        "notes": "Analysez les graphes pour mieux comprendre."
+        "notes": "Analysez les applications des dérivées dans divers contextes.",
+        "subtasks": [
+          {
+            "title": "Analyse de graphe",
+            "estimatedEffort": 120,
+            "notes": "Interprétez les graphiques des fonctions."
+          },
+          {
+            "title": "Règle de L’Hospital",
+            "estimatedEffort": 120,
+            "notes": "Utilisez cette règle pour résoudre des limites."
+          },
+          {
+            "title": "Optimisation et méthode de Newton",
+            "estimatedEffort": 120,
+            "notes": "Apprenez à optimiser des fonctions."
+          }
+        ]
       },
       {
         "week": 7,
         "type": "exam",
         "title": "Examen intra",
         "estimatedEffort": 180,
-        "notes": "Révisez tous les chapitres précédents."
+        "notes": "Préparez-vous pour l'examen avec des révisions.",
+        "subtasks": [
+          {
+            "title": "Révisions pour l'examen",
+            "estimatedEffort": 180,
+            "notes": "Concentrez-vous sur les sujets clés."
+          }
+        ]
       },
       {
         "week": 8,
         "type": "theorie",
-        "title": "Primitives. Sommes de Riemann. Intégrale définie.",
+        "title": "Primitives et intégrales définies.",
         "estimatedEffort": 180,
-        "notes": "Familiarisez-vous avec les propriétés des intégrales."
+        "notes": "Comprendre les concepts d'intégration.",
+        "subtasks": [
+          {
+            "title": "Sommes de Riemann",
+            "estimatedEffort": 90,
+            "notes": "Apprenez à calculer les sommes de Riemann."
+          },
+          {
+            "title": "Propriétés des intégrales définies",
+            "estimatedEffort": 90,
+            "notes": "Explorez les propriétés fondamentales."
+          }
+        ]
       },
       {
         "week": 9,
         "type": "theorie",
-        "title": "Théorème fondamental du calcul. Techniques d’intégration.",
+        "title": "Théorème fondamental du calcul et techniques d’intégration.",
         "estimatedEffort": 360,
-        "notes": "Pratiquez les différentes techniques d’intégration."
+        "notes": "Maîtrisez les techniques d'intégration avancées.",
+        "subtasks": [
+          {
+            "title": "Intégration par substitution",
+            "estimatedEffort": 90,
+            "notes": "Apprenez cette technique essentielle."
+          },
+          {
+            "title": "Intégration par parties",
+            "estimatedEffort": 90,
+            "notes": "Comprendre cette méthode."
+          },
+          {
+            "title": "Utilisation de tables d’intégrales",
+            "estimatedEffort": 90,
+            "notes": "Utilisez des tables pour simplifier les calculs."
+          },
+          {
+            "title": "Intégrales impropres",
+            "estimatedEffort": 90,
+            "notes": "Explorez les intégrales qui ne sont pas définies."
+          }
+        ]
       },
       {
         "week": 11,
         "type": "theorie",
         "title": "Applications de l’intégrale définie.",
         "estimatedEffort": 180,
-        "notes": "Comprenez les applications pratiques des intégrales."
+        "notes": "Apprenez à appliquer les intégrales dans des contextes pratiques.",
+        "subtasks": [
+          {
+            "title": "Aire et volume de solides de révolution",
+            "estimatedEffort": 90,
+            "notes": "Comprendre les applications géométriques."
+          },
+          {
+            "title": "Longueur d’arc",
+            "estimatedEffort": 90,
+            "notes": "Calculez la longueur d'arc des courbes."
+          }
+        ]
       },
       {
         "week": 12,
         "type": "theorie",
         "title": "Développement des fonctions en série de Taylor.",
         "estimatedEffort": 360,
-        "notes": "Étudiez les séries alternées et leur convergence."
+        "notes": "Explorez les séries et leur convergence.",
+        "subtasks": [
+          {
+            "title": "Séries alternées",
+            "estimatedEffort": 90,
+            "notes": "Comprendre les séries alternées."
+          },
+          {
+            "title": "Intervalle de convergence",
+            "estimatedEffort": 90,
+            "notes": "Déterminez où les séries convergent."
+          },
+          {
+            "title": "Utilisation des séries",
+            "estimatedEffort": 90,
+            "notes": "Apprenez à utiliser les séries dans des problèmes."
+          },
+          {
+            "title": "Séries géométriques",
+            "estimatedEffort": 90,
+            "notes": "Explorez les propriétés des séries géométriques."
+          }
+        ]
       },
       {
-        "week": 13,
+        "week": 0,
         "type": "exam",
         "title": "Examen final",
         "estimatedEffort": 0,
-        "notes": "Préparez-vous bien pour l'examen final."
+        "notes": "Préparez-vous pour l'examen final."
       }
     ]
   },
   LOG210: {
     courseCode: "LOG210",
     term: "20252",
-    drafts: [
+    tasks: [
       {
         week: 1,
         type: "theorie",

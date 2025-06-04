@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Draft } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 
 interface ModifyPanelProps {
   draft: Draft;

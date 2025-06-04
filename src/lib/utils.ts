@@ -19,5 +19,5 @@ export function getCourseColor(courseId: string): string {
   // Use the course ID to consistently map to a color
   // Ensure the character code reduction results in a non-negative index
   const index = courseId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  return COURSE_COLORS[Math.abs(index) % COURSE_COLORS.length];
+  return COURSE_COLORS[Math.abs(index) % COURSE_COLORS.length] as string;
 }

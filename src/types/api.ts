@@ -1,7 +1,7 @@
 export interface ParseCourseResponse {
   courseCode: string;
   term: string;
-  drafts: Array<{
+  tasks: Array<{
     week: number;
     type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
     title: string;

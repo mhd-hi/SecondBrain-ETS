@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import ModifyPanel from '@/app/components/ModifyPanel';
 import type { Task } from '@/types/course';
-import { TaskStatus } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 
 interface DraftCardProps {
   draft: Task;

@@ -10,12 +10,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export interface ParseResult {
-  drafts: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>>;
+export interface ParseAIResult {
+  tasks: Array<Omit<Task, 'id' | 'courseId'>>;
   logs: string[];
 }
 
-export async function parseContentWithAI(html: string): Promise<ParseResult> {
+export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
   const logs: string[] = [];
   const log = (message: string) => {
     console.log(message);
@@ -70,17 +70,13 @@ export async function parseContentWithAI(html: string): Promise<ParseResult> {
 
     // 3) Parse the JSON array
     log('Attempting to parse JSON response...');
-    const drafts = JSON.parse(aiText) as Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>>;
-    log(`Successfully parsed JSON. Number of drafts: ${drafts.length}`);
-    console.log('Drafts content:', JSON.stringify(drafts, null, 2));
+    const tasks = JSON.parse(aiText) as Array<Omit<Task, 'id' | 'courseId'>>;
+    log(`Successfully parsed JSON. Number of tasks: ${tasks.length}`);
+    console.log('OpenAI response:', JSON.stringify(tasks, null, 2));
 
-    return {
-      drafts,
-      logs,
-    };
+    return { tasks, logs };
   } catch (error) {
-    const errorMessage = `Error processing with AI: ${error instanceof Error ? error.message : String(error)}`;
-    log(errorMessage);
-    throw new Error(errorMessage);
+    log(`Error in parseContentWithAI: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw error;
   }
 } 

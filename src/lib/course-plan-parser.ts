@@ -1,11 +1,11 @@
-import { type Draft } from '@/types/course';
+import { type Task } from '@/types/course';
 import { fetchPlanETSContent } from './planets';
 import { parseContentWithAI } from './openai';
 
 export interface ParseCourseResult {
   courseCode: string;
   term: string;
-  drafts: Array<Omit<Draft, 'id' | 'courseId'>>;
+  tasks: Array<Omit<Task, 'id' | 'courseId'>>;
   logs: string[];
 }
 
@@ -20,14 +20,14 @@ export async function parseCoursePlan(
   logs.push(...fetchLogs);
 
   // 2) Process with OpenAI
-  const { drafts, logs: aiLogs } = await parseContentWithAI(relevantHtml);
+  const { tasks, logs: aiLogs } = await parseContentWithAI(relevantHtml);
   logs.push(...aiLogs);
 
   // 3) Return the result
   return {
     courseCode,
     term,
-    drafts,
+    tasks,
     logs,
   };
 } 
