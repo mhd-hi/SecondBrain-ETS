@@ -1,39 +1,30 @@
 export enum TaskStatus {
+  DRAFT = 'draft',
   PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed'
-}
-
-export enum ReviewStatus {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected'
 }
 
 export interface Subtask {
   id: string;
   title: string;
   completed: boolean;
+  notes?: string;
+  estimatedEffort?: number;
 }
 
-export interface Draft {
+export interface Task {
   id: string;
   title: string;
   notes?: string;
   week: number;
-  type: string;
-  estimatedEffort: string;
-  suggestedDueDate: string;
-  tags: string[];
-  subtasks: Subtask[];
+  type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
+  estimatedEffort: number;
+  subtasks?: Subtask[];
   status: TaskStatus;
-  isDraft: boolean;
+  courseId: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface Task extends Omit<Draft, 'isDraft'> {
-  courseId: string;
 }
 
 export interface Course {
@@ -43,7 +34,7 @@ export interface Course {
   description: string;
   createdAt: Date;
   updatedAt: Date;
-  tasks: Draft[];
+  tasks: Task[];
 }
 
 export interface CourseImportResponse {
@@ -52,7 +43,8 @@ export interface CourseImportResponse {
   drafts: Array<{
     title: string;
     week: number;
-    tags: string[];
+    type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
+    subtasks?: Subtask[];
   }>;
 }
 
@@ -72,16 +64,6 @@ export interface CourseCreateResponse {
 // API Response Types
 export interface CourseResponse {
   data: Course;
-  error?: string;
-}
-
-export interface DraftResponse {
-  data: Draft;
-  error?: string;
-}
-
-export interface DraftsResponse {
-  data: Draft[];
   error?: string;
 }
 

@@ -1,6 +1,6 @@
 import { OpenAI } from 'openai';
-import { type Draft } from '@/types/course';
 import { COURSE_PLAN_PARSER_SYSTEM_PROMPT, buildCoursePlanParsePrompt } from './prompts';
+import type { Task } from '@/types/course';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set in environment variables');
@@ -11,7 +11,7 @@ const openai = new OpenAI({
 });
 
 export interface ParseResult {
-  drafts: Array<Omit<Draft, 'id' | 'courseId'>>;
+  drafts: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>>;
   logs: string[];
 }
 
@@ -44,6 +44,10 @@ export async function parseContentWithAI(html: string): Promise<ParseResult> {
 
     log('OpenAI API call completed');
     log(`Response status: ${completion.choices[0]?.finish_reason}`);
+    log(`Model used: ${completion.model}`);
+    log(`Total tokens: ${completion.usage?.total_tokens}`);
+    log(`Prompt tokens: ${completion.usage?.prompt_tokens}`);
+    log(`Completion tokens: ${completion.usage?.completion_tokens}`);
     
     const aiText = completion.choices[0]?.message?.content;
     if (!aiText) {
@@ -59,15 +63,16 @@ export async function parseContentWithAI(html: string): Promise<ParseResult> {
         JSON.parse(aiText);
         return true;
       } catch (e) {
-        console.log(e);
+        console.log('JSON parse error:', e);
         return false;
       }
     })()}`);
 
     // 3) Parse the JSON array
     log('Attempting to parse JSON response...');
-    const drafts = JSON.parse(aiText) as Array<Omit<Draft, 'id' | 'courseId'>>;
+    const drafts = JSON.parse(aiText) as Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>>;
     log(`Successfully parsed JSON. Number of drafts: ${drafts.length}`);
+    console.log('Drafts content:', JSON.stringify(drafts, null, 2));
 
     return {
       drafts,

@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import ModifyPanel from '@/app/components/ModifyPanel';
-import type { Draft } from '@/types/course';
+import type { Task } from '@/types/course';
+import { TaskStatus } from '@/types/course';
 
 interface DraftCardProps {
-  draft: Draft;
+  draft: Task;
   onDraftUpdate: () => Promise<void>;
 }
 
@@ -17,7 +18,7 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
       const response = await fetch(`/api/tasks/${draft.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isDraft: false }),
+        body: JSON.stringify({ status: TaskStatus.PENDING }),
       });
 
       if (!response.ok) {
@@ -58,7 +59,7 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
     }
   };
 
-  const handleUpdate = async (updatedDraft: Draft) => {
+  const handleUpdate = async (updatedDraft: Task) => {
     try {
       const response = await fetch(`/api/tasks/${draft.id}`, {
         method: 'PATCH',
@@ -125,4 +126,4 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
       </div>
     </div>
   );
-} 
+}

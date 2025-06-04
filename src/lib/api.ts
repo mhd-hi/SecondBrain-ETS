@@ -8,6 +8,7 @@ export async function parseCourse(courseCode: string, term = '20252'): Promise<P
   if (USE_MOCK_DATA) {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
+    if (!MOCK_COURSE_DATA) throw new Error('Mock data is not available');
     return MOCK_COURSE_DATA;
   }
 

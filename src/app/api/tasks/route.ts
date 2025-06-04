@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
-import { tasks, reviewQueue } from '@/server/db/schema';
+import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Draft, Subtask } from '@/types/course';
-import { TaskStatus, ReviewStatus } from '@/types/course';
+import type { Subtask, Task } from '@/types/course';
+import { TaskStatus } from '@/types/course';
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { courseId, tasks: newTasks } = await request.json() as { courseId: string; tasks: Draft[] };
+    const { courseId, tasks: newTasks } = await request.json() as { courseId: string; tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'>> };
 
     if (!courseId || !newTasks?.length) {
       return NextResponse.json(
@@ -39,35 +39,20 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert tasks and create review queue entries in a transaction
-    const insertedTasks = await db.transaction(async (tx) => {
-      const insertedTasks = await tx.insert(tasks).values(
-        newTasks.map(task => ({
-          courseId,
-          title: task.title,
-          week: task.week,
-          isDraft: task.isDraft,
-          status: TaskStatus.PENDING,
-          description: task.suggestedDueDate,
-          subtasks: task.subtasks?.map((subtask: Subtask) => ({
-            id: subtask.id ?? crypto.randomUUID(),
-            title: subtask.title,
-            completed: subtask.completed ?? false
-          })) ?? [],
-          notes: task.notes
-        }))
-      ).returning();
-
-      // Create review queue entries for each task
-      await tx.insert(reviewQueue).values(
-        insertedTasks.map(task => ({
-          taskId: task.id,
-          status: ReviewStatus.PENDING,
-        }))
-      );
-
-      return insertedTasks;
-    });
+    // Insert tasks
+    const insertedTasks = await db.insert(tasks).values(
+      newTasks.map(task => ({
+        courseId,
+        title: task.title,
+        week: task.week,
+        type: task.type,
+        status: TaskStatus.DRAFT,
+        subtasks: task.subtasks?.map((subtask: Subtask) => ({
+          ...subtask
+        })),
+        notes: task.notes
+      }))
+    ).returning();
 
     return NextResponse.json(insertedTasks);
   } catch (error) {
@@ -81,7 +66,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, ...updates } = await request.json() as { id: string } & Partial<Draft>;
+    const { id, ...updates } = await request.json() as { id: string } & Partial<Task>;
 
     if (!id) {
       return NextResponse.json(
@@ -95,12 +80,9 @@ export async function PATCH(request: Request) {
         title: updates.title,
         week: updates.week,
         status: updates.status ?? TaskStatus.PENDING,
-        isDraft: updates.isDraft ?? true,
         subtasks: updates.subtasks?.map((subtask: Subtask) => ({
-          id: subtask.id ?? crypto.randomUUID(),
-          title: subtask.title,
-          completed: subtask.completed ?? false
-        })) ?? [],
+          ...subtask
+        })),
         notes: updates.notes
       })
       .where(eq(tasks.id, id))

@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { DraftCard } from './DraftCard';
 import { toast } from 'sonner';
-import type { Draft } from '@/types/course';
+import type { Task } from '@/types/course';
+import { TaskStatus } from '@/types/course';
 
 interface WeekAccordionProps {
   courseId: string;
   week: number;
-  drafts: Draft[];
+  drafts: Task[];
   onDraftUpdate: () => Promise<void>;
 }
 
@@ -27,7 +28,7 @@ export default function WeekAccordion({
         fetch(`/api/tasks/${draft.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ isDraft: false }),
+          body: JSON.stringify({ status: TaskStatus.PENDING }),
         })
       );
 
@@ -118,7 +119,7 @@ export default function WeekAccordion({
                   await fetch(`/api/tasks/${draft.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isDraft: false }),
+                    body: JSON.stringify({ status: TaskStatus.PENDING }),
                   });
                   await onDraftUpdate();
                 }}

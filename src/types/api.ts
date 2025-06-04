@@ -3,17 +3,14 @@ export interface ParseCourseResponse {
   term: string;
   drafts: Array<{
     week: number;
-    type: string;
+    type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
     title: string;
     estimatedEffort: number;
-    suggestedDueDate: string;
     notes: string;
-    tags: string[];
-    subtasks: Array<{
+    subtasks?: Array<{
       title: string;
       estimatedEffort: number;
       notes: string;
-      tags: string[];
     }>;
   }>;
 } 

@@ -7,7 +7,8 @@ export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS cours
 6. NEVER include any markdown formatting or code blocks
 7. ALWAYS start your response with [ and end with ]
 8. ALWAYS return ONLY the JSON array, nothing else
-9. ALWAYS group related tasks into subtasks when they share the same week, type, and main topic`;
+9. ALWAYS group related tasks into subtasks when they share the same week, type, and main topic
+10. ALWAYS assign weeks sequentially when not explicitly provided`;
 
 export function buildCoursePlanParsePrompt(pageHtml: string) {
   return `
@@ -24,7 +25,11 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    a. Read the "Week" cell:
       - If it contains a single integer X (1 ≤ X ≤ 20), then \`week = X\`.
       - If it contains "Y to Z" or "Y and Z" (e.g., "2 to 4", "5 and 6"), consider each intermediate week number: create an object for each week Y, Y+1, ..., Z.
-      - If the cell is empty or non-numeric, ignore the line (or merge it with the same week as the previous line).
+      - If the cell is empty or non-numeric:
+        * If it's the first item in a logical sequence, assign \`week = 1\`
+        * If it's part of a sequence, increment the week number from the previous item
+        * If it's a major topic change, increment the week number
+        * If it's a subtopic of the previous item, use the same week number
    b. Read the "Content" cell(s) (or "Subject" / "Course"):
       - Split by bullets (\`•\`), line breaks, or indented lists to get one or more text fragments.
 
@@ -41,24 +46,26 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    - The main task should have a general title that encompasses all subtasks
    - Each subtask should have its specific title and details
    - The total estimated effort should be distributed among subtasks
+   - When grouping items without explicit weeks:
+     * Group related items under the same week
+     * Use logical progression to determine week numbers
+     * Consider topic changes as week boundaries
+     * Maintain consistent week numbering across the course
 
 5. **JSON Object Construction**
    For each main task (with optional subtasks), generate an object:
    \`\`\`jsonc
    {
      "week": <integer>,
-     "type": "<theorie|pratique|exam|homework>",
-     "title": "W{week} <main topic or general description>",
+     "type": "<theorie|pratique|exam|homework|lab>",
+     "title": "<main topic or general description>",
      "estimatedEffort": <total minutes for all subtasks>,
-     "suggestedDueDate": "<YYYY-MM-DD>",
-     "notes": "<short tip in French, 15–25 words max>",
-     "tags": ["#reading"|"#practice"|"#exam"|"#homework", "<optional keyword>"],
+     "notes": "<short tip in French, 15-25 words max>",
      "subtasks": [
        {
          "title": "<specific subtask title>",
          "estimatedEffort": <minutes for this subtask>,
-         "notes": "<specific tip for this subtask>",
-         "tags": ["#reading"|"#practice"|"#exam"|"#homework", "<optional keyword>"]
+         "notes": "<specific tip for this subtask>"
        }
      ]
    }

@@ -91,12 +91,12 @@ export const AddCourseForm = () => {
       }
 
       setCourseCode('');
-      toast.success('Cours importé avec succès', {
-        description: `${data.drafts.length} tâches trouvées pour ${data.courseCode} (${data.term})`,
+      toast.success('Course created successfully', {
+        description: 'Redirecting to review page...',
       });
-
-      // Refresh the page to show new course
-      router.refresh();
+      
+      // Redirect to review page
+      router.push(`/review/${course.id}`);
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Une erreur inconnue est survenue');
       console.error('Error importing course:', error);

@@ -4,12 +4,6 @@ export enum TaskStatus {
   COMPLETED = 'completed'
 }
 
-export enum ReviewStatus {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
-  REJECTED = 'rejected'
-}
-
 export interface Task {
   id: string;
   title: string;

@@ -38,4 +38,41 @@ export async function GET(
       { status: 500 }
     );
   }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: { courseId: string } }
+) {
+  try {
+    const { courseId } = context.params;
+
+    if (!courseId) {
+      return NextResponse.json(
+        { error: 'Course ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Delete the course from the database
+    const deletedCourses = await db.delete(courses)
+      .where(eq(courses.id, courseId))
+      .returning();
+
+    if (deletedCourses.length === 0) {
+       return NextResponse.json(
+        { error: 'Course not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+
+  } catch (error) {
+    console.error('Error deleting course:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete course' },
+      { status: 500 }
+    );
+  }
 } 

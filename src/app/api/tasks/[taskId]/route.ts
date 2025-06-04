@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Draft } from '@/types/course';
+import type { Task } from '@/types/course';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const body = await request.json() as Partial<Draft>;
+    const body = await request.json() as Partial<Task>;
     const { taskId } = await params;
 
     // Update the task
@@ -21,11 +21,10 @@ export async function PATCH(
         week: body.week,
         status: body.status,
         subtasks: body.subtasks ? body.subtasks.map(subtask => ({
-          id: subtask.id || crypto.randomUUID(),
+          id: subtask.id ?? crypto.randomUUID(),
           title: subtask.title,
           completed: subtask.completed ?? false
         })) : null,
-        isDraft: body.isDraft,
         updatedAt: new Date(),
       })
       .where(eq(tasks.id, taskId));

@@ -4,7 +4,6 @@ import {
   text,
   timestamp,
   uuid,
-  boolean,
   integer,
   json,
 } from "drizzle-orm/pg-core";
@@ -29,17 +28,10 @@ export const tasks = pgTable("tasks", {
   title: text("title").notNull(),
   notes: text("notes"),
   week: integer("week").notNull(),
-  status: text("status", { enum: ["pending", "in_progress", "completed"] }).default("pending").notNull(),
-  subtasks: json("subtasks").$type<{ id: string; title: string; completed: boolean }[]>(),
-  isDraft: boolean("is_draft").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-export const reviewQueue = pgTable("review_queue", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  taskId: uuid("task_id").references(() => tasks.id, { onDelete: "cascade" }).notNull(),
-  status: text("status", { enum: ["pending", "accepted", "rejected"] }).default("pending").notNull(),
+  type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
+  status: text("status", { enum: ["draft", "pending", "in_progress", "completed"] }).default("draft").notNull(),
+  estimatedEffort: integer("estimated_effort").notNull().default(1),
+  subtasks: json("subtasks").$type<{ id: string; title: string; completed: boolean; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -53,10 +45,6 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   course: one(courses, {
     fields: [tasks.courseId],
     references: [courses.id],
-  }),
-  reviewQueue: one(reviewQueue, {
-    fields: [tasks.id],
-    references: [reviewQueue.taskId],
   }),
 }));
 
