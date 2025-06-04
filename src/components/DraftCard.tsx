@@ -1,26 +1,30 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useSecondBrainStore } from '@/store/useSecondBrainStore';
-import type { Draft } from '@/store/useSecondBrainStore';
+import { useState } from "react";
+import { useSecondBrainStore } from "@/store/useSecondBrainStore";
+import type {  Draft } from "@/types/course";
+import { DraftStatus, DraftType } from "@/types/course";
+import type { SecondBrainState } from "@/store/useSecondBrainStore";
 
 interface DraftCardProps {
-  courseId: string;
   draft: Draft;
+  courseId: string;
 }
 
-export default function DraftCard({ courseId, draft }: DraftCardProps) {
-  const acceptDraft = useSecondBrainStore((state) => state.acceptDraft);
-  const removeDraft = useSecondBrainStore((state) => state.removeDraft);
-  const updateDraft = useSecondBrainStore((state) => state.updateDraft);
+export const DraftCard = ({ draft, courseId }: DraftCardProps) => {
+  const store = useSecondBrainStore() as unknown as SecondBrainState;
+  const updateDraft = store.updateDraft;
+  const removeDraft = store.removeDraft;
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing] = useState(false);
 
   const handleAccept = () => {
-    acceptDraft(courseId, draft);
+    updateDraft(courseId, draft.id, { status: DraftStatus.ACCEPTED } as {
+      status: DraftStatus;
+    });
   };
 
-  const handleDiscard = () => {
+  const handleReject = () => {
     removeDraft(courseId, draft.id);
   };
 
@@ -31,34 +35,32 @@ export default function DraftCard({ courseId, draft }: DraftCardProps) {
   };
 
   return (
-    <div className="border rounded-lg p-4 bg-white shadow-sm">
-      <div className="flex justify-between items-start gap-4">
+    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            {draft.type === 'theorie' && (
-              <span role="img" aria-label="theory">
-                ▶
-              </span>
+          <div className="flex items-center gap-2">
+            {draft.type === (DraftType.THEORIE) && (
+              <span className="text-blue-500">▶</span>
             )}
-            {draft.title}
-          </h3>
-          
-          <div className="mt-2 text-sm text-gray-600 space-y-1">
-            <p>
-              Est. {formatEffort(draft.estimatedEffort)} • Due{' '}
-              {new Date(draft.suggestedDueDate).toLocaleDateString()}
-            </p>
-            {draft.notes && (
-              <p className="text-gray-500 italic">{draft.notes}</p>
-            )}
+            <h3 className="text-lg font-semibold">{draft.title}</h3>
           </div>
+
+          <div className="mt-2 space-y-1 text-sm text-gray-600">
+            <p>Week {draft.week}</p>
+            <p>Estimated effort: {draft.estimatedEffort} hours</p>
+            <p>
+              Due date: {new Date(draft.suggestedDueDate).toLocaleDateString()}
+            </p>
+          </div>
+
+          {draft.notes && <p className="text-gray-500 italic">{draft.notes}</p>}
 
           {draft.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {draft.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                  className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800"
                 >
                   {tag}
                 </span>
@@ -73,9 +75,9 @@ export default function DraftCard({ courseId, draft }: DraftCardProps) {
                 {draft.subtasks.map((subtask, index) => (
                   <li
                     key={index}
-                    className="text-sm pl-4 border-l-2 border-gray-200"
+                    className="border-l-2 border-gray-200 pl-4 text-sm"
                   >
-                    <div className="flex justify-between items-start">
+                    <div className="flex items-start justify-between">
                       <div>
                         <p className="font-medium text-gray-900">
                           {subtask.title}
@@ -84,7 +86,7 @@ export default function DraftCard({ courseId, draft }: DraftCardProps) {
                           Est. {formatEffort(subtask.estimatedEffort)}
                         </p>
                         {subtask.notes && (
-                          <p className="text-gray-500 italic text-xs mt-1">
+                          <p className="mt-1 text-xs text-gray-500 italic">
                             {subtask.notes}
                           </p>
                         )}
@@ -94,7 +96,7 @@ export default function DraftCard({ courseId, draft }: DraftCardProps) {
                           {subtask.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                              className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-800"
                             >
                               {tag}
                             </span>
@@ -109,35 +111,29 @@ export default function DraftCard({ courseId, draft }: DraftCardProps) {
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex gap-2">
           <button
             onClick={handleAccept}
-            className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors text-sm font-medium"
+            className="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
           >
             Accept
           </button>
           <button
-            onClick={() => setIsEditing(true)}
-            className="bg-yellow-600 text-white px-3 py-1.5 rounded hover:bg-yellow-700 transition-colors text-sm font-medium"
+            onClick={handleReject}
+            className="rounded-md bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
           >
-            Modify
-          </button>
-          <button
-            onClick={handleDiscard}
-            className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors text-sm font-medium"
-          >
-            Discard
+            Reject
           </button>
         </div>
       </div>
 
       {isEditing && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <p className="text-gray-600 text-sm">
+        <div className="mt-4 rounded-lg bg-gray-50 p-4">
+          <p className="text-sm text-gray-600">
             Edit functionality coming in Sprint 3
           </p>
         </div>
       )}
     </div>
   );
-} 
+};

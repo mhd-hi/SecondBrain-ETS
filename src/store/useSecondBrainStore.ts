@@ -9,7 +9,7 @@ export interface Subtask {
   tags: string[];
 }
 
-interface SecondBrainState {
+export interface SecondBrainState {
   courses: Course[];
   draftsByCourse: Record<string, Draft[]>;
   addCourse: (course: Course) => void;
