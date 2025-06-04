@@ -6,6 +6,14 @@ import type { Course } from '@/types/course';
 import { TaskStatus } from '@/types/task';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 export default function ReviewPage() {
   const router = useRouter();
@@ -46,8 +54,42 @@ export default function ReviewPage() {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8">Review Tasks</h1>
-      <p className="text-muted-foreground mb-8">Select a course to review its tasks</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Review Tasks</h1>
+          <p className="text-muted-foreground mt-2">Select a course to review its tasks</p>
+        </div>
+        
+        {!isLoading && courses.length > 0 && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-[200px] justify-between">
+                Select Course
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[200px]">
+              {courses.map((course) => {
+                const pendingTasks = course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
+                return (
+                  <DropdownMenuItem
+                    key={course.id}
+                    onClick={() => router.push(`/review/${course.id}`)}
+                    className="flex items-center justify-between"
+                  >
+                    <span>{course.code}</span>
+                    {pendingTasks > 0 && (
+                      <span className="text-xs text-destructive">
+                        {pendingTasks} pending
+                      </span>
+                    )}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -60,33 +102,16 @@ export default function ReviewPage() {
           No courses found. Add a course to get started.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => {
-            const pendingTasks = course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
-            
-            return (
-              <Card
-                key={course.id}
-                className="cursor-pointer transition-colors hover:bg-accent"
-                onClick={() => router.push(`/review/${course.id}`)}
-              >
-                <CardHeader>
-                  <CardTitle className="flex justify-between items-center">
-                    <span>{course.code}</span>
-                    {pendingTasks > 0 && (
-                      <span className="text-sm font-medium text-destructive">
-                        {pendingTasks} pending
-                      </span>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">{course.name}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Select a course from the dropdown above to review its tasks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">
+              You can review and manage tasks for each course, including drafts and pending tasks.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

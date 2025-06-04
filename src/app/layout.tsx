@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+import { SidebarWrapper } from "@/components/sidebar-wrapper";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -34,8 +35,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="container py-6">{children}</main>
+          <div className="flex min-h-screen">
+            <SidebarWrapper />
+            <div className="flex-1">
+              <Navbar />
+              <main className="container py-6">{children}</main>
+            </div>
+          </div>
           <Toaster />
         </ThemeProvider>
       </body>

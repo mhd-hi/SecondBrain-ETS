@@ -1,59 +1,23 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { tasks, courses } from '@/server/db/schema';
+import { eq, sql } from 'drizzle-orm';
+import { TaskStatus } from '@/types/task';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-
-    if (code) {
-      // Fetch specific course by code
-      const course = await db
-        .select()
-        .from(courses)
-        .where(eq(courses.code, code))
-        .limit(1);
-
-      if (!course.length) {
-        return NextResponse.json(
-          { error: 'Course not found' },
-          { status: 404 }
-        );
-      }
-
-      const existingCourse = course[0]!;
-      const courseTasks = await db
-        .select()
-        .from(tasks)
-        .where(eq(tasks.courseId, existingCourse.id));
-
-      return NextResponse.json([{
-        ...existingCourse,
-        tasks: courseTasks || [],
-      }]);
-    }
-
-    // Fetch all courses
-    const allCourses = await db.select().from(courses);
-    console.log('Raw courses from DB:', allCourses);
-
-    const coursesWithTasks = await Promise.all(
-      allCourses.map(async (course) => {
-        const courseTasks = await db
-          .select()
-          .from(tasks)
-          .where(eq(tasks.courseId, course.id));
-        return {
-          ...course,
-          tasks: courseTasks || [],
-        };
+    const coursesWithCounts = await db
+      .select({
+        id: courses.id,
+        code: courses.code,
+        name: courses.name,
+        inProgressCount: sql<number>`count(*) filter (where ${tasks.status} = ${TaskStatus.IN_PROGRESS})`,
       })
-    );
+      .from(courses)
+      .leftJoin(tasks, eq(courses.id, tasks.courseId))
+      .groupBy(courses.id, courses.code, courses.name);
 
-    console.log('Courses with tasks:', coursesWithTasks);
-    return NextResponse.json(coursesWithTasks);
+    return NextResponse.json(coursesWithCounts);
   } catch (error) {
     console.error('Error fetching courses:', error);
     return NextResponse.json(
@@ -88,6 +52,28 @@ export async function POST(request: Request) {
     console.error('Error creating course:', error);
     return NextResponse.json(
       { error: 'Failed to create course' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function getCoursesWithInProgressCount() {
+  try {
+    const coursesWithCounts = await db
+      .select({
+        id: courses.id,
+        code: courses.code,
+        inProgressCount: sql<number>`count(*) filter (where ${tasks.status} = ${TaskStatus.IN_PROGRESS})`,
+      })
+      .from(courses)
+      .leftJoin(tasks, eq(courses.id, tasks.courseId))
+      .groupBy(courses.id, courses.code);
+
+    return NextResponse.json(coursesWithCounts);
+  } catch (error) {
+    console.error('Error fetching courses:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch courses' },
       { status: 500 }
     );
   }
