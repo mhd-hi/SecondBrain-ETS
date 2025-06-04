@@ -1,39 +1,25 @@
-import { MOCK_COURSE_DATA, setMockCourse } from './mock-data';
+import { MOCK_COURSES } from './mocks/openai-data';
+import { setMockOpenAI } from './mocks/helper';
+
 import type { CourseImportResponse } from '@/types/course';
 
 // Set this to true to use mock data instead of making API calls
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseImportResponse> {
   if (USE_MOCK_DATA) {
     // Set the mock course based on the course code
-    setMockCourse(courseCode);
     
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     // Get the mock data for the selected course
-    if (!MOCK_COURSE_DATA) {
+    if (!MOCK_COURSES) {
       throw new Error(`Mock data not available for course ${courseCode}`);
     }
 
     // Transform ParseCourseResponse to CourseImportResponse
-    return {
-      courseCode: MOCK_COURSE_DATA.courseCode,
-      term: MOCK_COURSE_DATA.term,
-      tasks: MOCK_COURSE_DATA.tasks.map(task => ({
-        title: task.title,
-        week: task.week,
-        type: task.type,
-        subtasks: task.subtasks?.map(subtask => ({
-          id: crypto.randomUUID(),
-          title: subtask.title,
-          completed: false,
-          notes: subtask.notes,
-          estimatedEffort: subtask.estimatedEffort
-        }))
-      }))
-    };
+    return setMockOpenAI(courseCode);
   }
 
   const response = await fetch(

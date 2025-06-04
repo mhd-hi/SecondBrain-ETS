@@ -56,7 +56,6 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       <div className="flex justify-between items-start">
         <h2 className="text-xl font-bold">{course.code}</h2>
-        <p className="text-muted-foreground text-sm">{course.name}</p>
       </div>
 
       <div>
