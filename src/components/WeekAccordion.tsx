@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import DraftCard from './DraftCard';
-import type { Draft } from '@/store/useSecondBrainStore';
+import { DraftCard } from './DraftCard';
+import type { Draft } from '@/types/course';
 
 interface WeekAccordionProps {
   courseId: string;
