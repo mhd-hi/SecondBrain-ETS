@@ -7,6 +7,7 @@ import {
   integer,
   json,
 } from "drizzle-orm/pg-core";
+import type { TaskStatus } from "@/types/task";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -32,7 +33,7 @@ export const tasks = pgTable("tasks", {
   type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
   status: text("status", { enum: ["DRAFT", "IN_PROGRESS", "PENDING", "COMPLETED"] }).default("DRAFT").notNull(),
   estimatedEffort: integer("estimated_effort").notNull().default(1),
-  subtasks: json("subtasks").$type<{ id: string; title: string; completed: boolean; notes?: string; estimatedEffort?: number }[]>(),
+  subtasks: json("subtasks").$type<{ id: string; title: string; status: TaskStatus; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

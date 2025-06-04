@@ -1,12 +1,12 @@
 import { MOCK_COURSES } from './mocks/openai-data';
 import { setMockOpenAI } from './mocks/helper';
 
-import type { CourseImportResponse } from '@/types/course';
+import type { CourseAIResponse } from '@/types/course';
 
 // Set this to true to use mock data instead of making API calls
 const USE_MOCK_DATA = true;
 
-export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseImportResponse> {
+export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseAIResponse> {
   if (USE_MOCK_DATA) {
     // Set the mock course based on the course code
     
@@ -18,7 +18,7 @@ export async function parseCourse(courseCode: string, term = '20252'): Promise<C
       throw new Error(`Mock data not available for course ${courseCode}`);
     }
 
-    // Transform ParseCourseResponse to CourseImportResponse
+    // Transform ParseCourseResponse to CourseAIResponse
     return setMockOpenAI(courseCode);
   }
 
@@ -30,5 +30,5 @@ export async function parseCourse(courseCode: string, term = '20252'): Promise<C
     throw new Error('Failed to parse course')
   }
 
-  return response.json() as Promise<CourseImportResponse>
+  return response.json() as Promise<CourseAIResponse>
 } 

@@ -11,19 +11,20 @@ export interface Task {
   id: string;
   courseId: string;
   title: string;
+  notes?: string;
   week: number;
   type: TaskType;
   status: TaskStatus;
-  estimatedEffort?: number;
-  notes?: string;
+  estimatedEffort: number;
   subtasks?: Subtask[];
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Subtask {
-  id: string;
+  id?: string;
   title: string;
-  completed: boolean;
+  status?: TaskStatus;
   notes?: string;
   estimatedEffort?: number;
 }

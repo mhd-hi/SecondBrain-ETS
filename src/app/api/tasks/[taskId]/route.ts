@@ -2,34 +2,37 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Task } from '@/types/course';
+import type { Task } from '@/types/task';
+import { TaskStatus } from '@/types/task';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ taskId: string }> }
+  { params }: { params: { taskId: string } }
 ) {
   try {
-    const body = await request.json() as Partial<Task>;
-    const { taskId } = await params;
-
-    // Update the task
-    await db
+    const body = await request.json() as Task;
+    const task = await db
       .update(tasks)
       .set({
         title: body.title,
         notes: body.notes,
         week: body.week,
+        type: body.type,
+        estimatedEffort: body.estimatedEffort,
         status: body.status,
         subtasks: body.subtasks ? body.subtasks.map(subtask => ({
-          id: subtask.id ?? crypto.randomUUID(),
+          id: crypto.randomUUID(),
           title: subtask.title,
-          completed: subtask.completed ?? false
+          status: subtask.status ?? TaskStatus.PENDING,
+          notes: subtask.notes,
+          estimatedEffort: subtask.estimatedEffort
         })) : null,
         updatedAt: new Date(),
       })
-      .where(eq(tasks.id, taskId));
+      .where(eq(tasks.id, params.taskId))
+      .returning();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ data: task[0] });
   } catch (error) {
     console.error('Error updating task:', error);
     return NextResponse.json(

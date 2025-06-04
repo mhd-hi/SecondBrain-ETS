@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Task } from '@/types/course';
+import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 
 interface ModifyPanelProps {

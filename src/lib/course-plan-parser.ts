@@ -1,4 +1,4 @@
-import { type Task } from '@/types/course';
+import { type Task } from '@/types/task';
 import { fetchPlanETSContent } from './planets';
 import { parseContentWithAI } from './openai';
 

@@ -53,8 +53,12 @@ export async function POST(request: Request) {
         week: task.week,
         type: task.type,
         status: TaskStatus.DRAFT,
-        subtasks: task.subtasks?.map((subtask: Subtask) => ({
-          ...subtask
+        subtasks: task.subtasks?.map(subtask => ({
+          id: crypto.randomUUID(),
+          title: subtask.title,
+          status: subtask.status ?? TaskStatus.PENDING,
+          notes: subtask.notes,
+          estimatedEffort: subtask.estimatedEffort
         })),
         notes: task.notes
       }))
@@ -91,8 +95,12 @@ export async function PATCH(request: Request) {
         title: updates.title,
         week: updates.week,
         status: updates.status ?? TaskStatus.PENDING,
-        subtasks: updates.subtasks?.map((subtask: Subtask) => ({
-          ...subtask
+        subtasks: updates.subtasks?.map(subtask => ({
+          id: crypto.randomUUID(),
+          title: subtask.title,
+          status: subtask.status ?? TaskStatus.PENDING,
+          notes: subtask.notes,
+          estimatedEffort: subtask.estimatedEffort
         })),
         notes: updates.notes
       })

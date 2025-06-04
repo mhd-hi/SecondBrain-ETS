@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { DraftCard } from './DraftCard';
 import { toast } from 'sonner';
-import type { Task } from '@/types/course';
+import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 
 interface WeekAccordionProps {

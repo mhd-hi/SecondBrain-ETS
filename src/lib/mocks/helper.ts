@@ -1,13 +1,14 @@
-import type { CourseImportResponse } from '@/types/course';
+import type { CourseAIResponse } from '@/types/course';
+import { TaskStatus } from '@/types/task';
 import { MOCK_COURSES } from './openai-data';
 
-export function setMockOpenAI(courseCode: string): CourseImportResponse {
+export function setMockOpenAI(courseCode: string): CourseAIResponse {
     const course = MOCK_COURSES[courseCode];
     if (!course) {
       throw new Error(`Invalid course code: ${courseCode}`);
     }
 
-    // Transform ParseCourseResponse to CourseImportResponse
+    // Transform ParseCourseResponse to CourseAIResponse
     return {
       courseCode: course.courseCode,
       term: course.term,
@@ -16,8 +17,8 @@ export function setMockOpenAI(courseCode: string): CourseImportResponse {
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),
-          completed: false
+          status: TaskStatus.PENDING
         }))
       }))
     };
-  } 
+} 

@@ -1,6 +1,6 @@
 import { OpenAI } from 'openai';
 import { COURSE_PLAN_PARSER_SYSTEM_PROMPT, buildCoursePlanParsePrompt } from './prompts';
-import type { Task } from '@/types/course';
+import type { Task } from '@/types/task';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY is not set in environment variables');

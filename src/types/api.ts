@@ -1,16 +1,11 @@
-export interface ParseCourseResponse {
+import type { Task, Subtask } from './task';
+
+type AISubtask = Pick<Subtask, 'title' | 'estimatedEffort' | 'notes'>;
+
+export interface ParseCourseAIResponse {
   courseCode: string;
   term: string;
-  tasks: Array<{
-    week: number;
-    type: 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
-    title: string;
-    estimatedEffort: number;
-    notes: string;
-    subtasks?: Array<{
-      title: string;
-      estimatedEffort: number;
-      notes: string;
-    }>;
+  tasks: Array<Omit<Task, 'id' | 'status' | 'courseId' | 'createdAt' | 'updatedAt'> & {
+    subtasks?: AISubtask[];
   }>;
 } 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
-import type { Task } from '@/types/course';
+import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 
 export async function GET(request: Request) {
@@ -39,10 +39,10 @@ export async function POST(request: Request) {
       status: TaskStatus.DRAFT,
       type: data.type,
       estimatedEffort: data.estimatedEffort,
-      subtasks: data.subtasks?.map(subtask => ({
+      subtasks: data.subtasks?.map(({ status, ...subtask }) => ({
+        ...subtask,
         id: crypto.randomUUID(),
-        title: subtask.title,
-        completed: false
+        status: status ?? TaskStatus.PENDING
       }))
     }).returning();
     return NextResponse.json(draft);
@@ -66,10 +66,10 @@ export async function PATCH(request: Request) {
         status: updates.status ?? TaskStatus.DRAFT,
         type: updates.type,
         estimatedEffort: updates.estimatedEffort,
-        subtasks: updates.subtasks?.map(subtask => ({
+        subtasks: updates.subtasks?.map(({ status, ...subtask }) => ({
+          ...subtask,
           id: crypto.randomUUID(),
-          title: subtask.title,
-          completed: false
+          status: status ?? TaskStatus.PENDING
         }))
       })
       .where(eq(tasks.id, id))
