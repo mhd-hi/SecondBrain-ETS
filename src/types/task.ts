@@ -2,6 +2,7 @@ export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
 
 export enum TaskStatus {
   DRAFT = 'DRAFT',
+  IN_PROGRESS = 'IN_PROGRESS',
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED'
 }
@@ -16,6 +17,7 @@ export interface Task {
   estimatedEffort?: number;
   notes?: string;
   subtasks?: Subtask[];
+  updatedAt?: Date;
 }
 
 export interface Subtask {

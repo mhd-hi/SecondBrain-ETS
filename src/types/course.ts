@@ -1,13 +1,5 @@
 import type { Subtask, TaskStatus } from "./task";
 
-export interface Draft {
-  id?: string;
-  title?: string;
-  notes?: string;
-  week?: number;
-  status?: TaskStatus;
-}
-
 export interface Task {
   id: string;
   title: string;
