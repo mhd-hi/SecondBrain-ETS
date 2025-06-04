@@ -19,7 +19,6 @@ export const courses = pgTable("courses", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   code: text("code").notNull(),
-  description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -28,7 +27,7 @@ export const tasks = pgTable("tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
   courseId: uuid("course_id").references(() => courses.id, { onDelete: "cascade" }).notNull(),
   title: text("title").notNull(),
-  description: text("description"),
+  notes: text("notes"),
   week: integer("week").notNull(),
   status: text("status", { enum: ["pending", "in_progress", "completed"] }).default("pending").notNull(),
   subtasks: json("subtasks").$type<{ id: string; title: string; completed: boolean }[]>(),

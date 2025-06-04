@@ -2,18 +2,14 @@
 
 import * as React from "react"
 import { useTheme } from "next-themes"
-import { Toaster as Sonner } from "sonner"
-import type { ToasterProps } from "sonner"
+import { toast } from "sonner"
 
-type Theme = "light" | "dark" | "system"
-
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  const { theme = "system" } = useTheme() as { theme: Theme }
+  useTheme()
 
   return (
-    <Sonner
-      theme={theme}
+    <div
       className="toaster group"
       style={
         {
@@ -22,9 +18,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
         } as React.CSSProperties
       }
-      {...props}
     />
   )
 }
 
-export { Toaster }
+export { Toaster, toast }

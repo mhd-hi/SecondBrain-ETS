@@ -1,139 +1,138 @@
 "use client";
 
 import { useState } from "react";
-import { useSecondBrainStore } from "@/store/useSecondBrainStore";
-import type {  Draft } from "@/types/course";
-import { DraftStatus, DraftType } from "@/types/course";
-import type { SecondBrainState } from "@/store/useSecondBrainStore";
+import { toast } from "sonner";
+import type { Draft } from "@/types/course";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Tag, CheckCircle2, Pencil, Trash2 } from "lucide-react";
+import { ModifyPanel } from './ModifyPanel';
 
 interface DraftCardProps {
   draft: Draft;
-  courseId: string;
+  onAccept: (id: string) => void;
+  onAcceptAll: (id: string) => void;
+  onModify: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export const DraftCard = ({ draft, courseId }: DraftCardProps) => {
-  const store = useSecondBrainStore() as unknown as SecondBrainState;
-  const updateDraft = store.updateDraft;
-  const removeDraft = store.removeDraft;
+export const DraftCard = ({
+  draft,
+  onAccept,
+  onAcceptAll,
+  onModify,
+  onDelete,
+}: DraftCardProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [isEditing] = useState(false);
+  const handleAccept = () => onAccept(draft.id);
+  const handleAcceptAll = () => onAcceptAll(draft.id);
+  const handleModify = () => setIsEditing(true);
+  const handleDelete = () => onDelete(draft.id);
 
-  const handleAccept = () => {
-    updateDraft(courseId, draft.id, { status: DraftStatus.ACCEPTED } as {
-      status: DraftStatus;
-    });
-  };
+  const handleSave = async (updatedDraft: Partial<Draft>) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/tasks/${draft.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedDraft),
+      });
 
-  const handleReject = () => {
-    removeDraft(courseId, draft.id);
-  };
+      if (!response.ok) {
+        throw new Error('Failed to update draft');
+      }
 
-  const formatEffort = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
+      toast.success('Brouillon mis à jour', {
+        description: `"${draft.title}" a été mis à jour`,
+      });
+      onModify(draft.id);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating draft:', error);
+      toast.error('Échec de la mise à jour', {
+        description: 'Une erreur est survenue lors de la mise à jour du brouillon',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            {draft.type === (DraftType.THEORIE) && (
-              <span className="text-blue-500">▶</span>
-            )}
-            <h3 className="text-lg font-semibold">{draft.title}</h3>
-          </div>
-
-          <div className="mt-2 space-y-1 text-sm text-gray-600">
-            <p>Week {draft.week}</p>
-            <p>Estimated effort: {draft.estimatedEffort} hours</p>
-            <p>
-              Due date: {new Date(draft.suggestedDueDate).toLocaleDateString()}
-            </p>
-          </div>
-
-          {draft.notes && <p className="text-gray-500 italic">{draft.notes}</p>}
-
-          {draft.tags.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1">
-              {draft.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-800"
-                >
-                  {tag}
-                </span>
-              ))}
+    <Card className="rounded-lg border bg-card p-4 shadow-sm">
+      <CardHeader className="p-0">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-lg font-semibold">{draft.title}</CardTitle>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>Week {draft.week}</span>
+              {draft.tags && draft.tags.length > 0 && (
+                <>
+                  <span>•</span>
+                  <Tag className="h-4 w-4" />
+                  <span>{draft.tags.join(', ')}</span>
+                </>
+              )}
             </div>
-          )}
-
-          {draft.subtasks && draft.subtasks.length > 0 && (
-            <div className="mt-3 space-y-2">
-              <h4 className="text-sm font-medium text-gray-700">Subtasks:</h4>
-              <ul className="space-y-2">
-                {draft.subtasks.map((subtask, index) => (
-                  <li
-                    key={index}
-                    className="border-l-2 border-gray-200 pl-4 text-sm"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {subtask.title}
-                        </p>
-                        <p className="text-gray-600">
-                          Est. {formatEffort(subtask.estimatedEffort)}
-                        </p>
-                        {subtask.notes && (
-                          <p className="mt-1 text-xs text-gray-500 italic">
-                            {subtask.notes}
-                          </p>
-                        )}
-                      </div>
-                      {subtask.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {subtask.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-800"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleAcceptAll}
+              className="h-8 w-8"
+              disabled={isLoading}
+              aria-label="Accept all"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleAccept}
+              className="h-8 w-8"
+              disabled={isLoading}
+              aria-label="Accept"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleModify}
+              className="h-8 w-8"
+              disabled={isLoading}
+              aria-label="Modify"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDelete}
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              disabled={isLoading}
+              aria-label="Delete"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={handleAccept}
-            className="rounded-md bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
-          >
-            Accept
-          </button>
-          <button
-            onClick={handleReject}
-            className="rounded-md bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
-          >
-            Reject
-          </button>
-        </div>
-      </div>
-
-      {isEditing && (
-        <div className="mt-4 rounded-lg bg-gray-50 p-4">
-          <p className="text-sm text-gray-600">
-            Edit functionality coming in Sprint 3
-          </p>
-        </div>
-      )}
-    </div>
+      </CardHeader>
+      <CardContent className="p-0 pt-4">
+        <p className="text-sm text-muted-foreground">{draft.notes}</p>
+        {isEditing && (
+          <div className="mt-4 pt-4 border-t">
+            <ModifyPanel
+              draft={draft}
+              onSave={handleSave}
+              onCancel={() => setIsEditing(false)}
+            />
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

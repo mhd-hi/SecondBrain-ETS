@@ -2,24 +2,73 @@
 
 import { useState } from 'react';
 import { DraftCard } from './DraftCard';
+import { toast } from 'sonner';
 import type { Draft } from '@/types/course';
 
 interface WeekAccordionProps {
   courseId: string;
   week: number;
   drafts: Draft[];
-  onAcceptAll: () => void;
-  onDiscardAll: () => void;
+  onDraftUpdate: () => Promise<void>;
 }
 
 export default function WeekAccordion({
-  courseId,
   week,
   drafts,
-  onAcceptAll,
-  onDiscardAll,
+  onDraftUpdate,
 }: WeekAccordionProps) {
   const [expanded, setExpanded] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleAcceptAll = async () => {
+    setIsLoading(true);
+    try {
+      const promises = drafts.map(draft =>
+        fetch(`/api/tasks/${draft.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isDraft: false }),
+        })
+      );
+
+      await Promise.all(promises);
+      toast.success(`${drafts.length} tâches ajoutées`, {
+        description: `Toutes les tâches de la semaine ${week} ont été acceptées`,
+      });
+      await onDraftUpdate();
+    } catch (error) {
+      console.error('Error accepting all drafts:', error);
+      toast.error('Échec de l\'acceptation', {
+        description: 'Une erreur est survenue lors de l\'acceptation des tâches',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDiscardAll = async () => {
+    setIsLoading(true);
+    try {
+      const promises = drafts.map(draft =>
+        fetch(`/api/tasks/${draft.id}`, {
+          method: 'DELETE',
+        })
+      );
+
+      await Promise.all(promises);
+      toast.success('Brouillons supprimés', {
+        description: `Tous les brouillons de la semaine ${week} ont été supprimés`,
+      });
+      await onDraftUpdate();
+    } catch (error) {
+      console.error('Error discarding all drafts:', error);
+      toast.error('Échec de la suppression', {
+        description: 'Une erreur est survenue lors de la suppression des brouillons',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="mb-4 border rounded-lg shadow-sm bg-white">
@@ -27,6 +76,7 @@ export default function WeekAccordion({
         onClick={() => setExpanded(!expanded)}
         className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-t-lg transition-colors"
         aria-expanded={expanded}
+        aria-label={`Semaine ${week} (${drafts.length} brouillons)`}
       >
         <span className="font-medium flex items-center gap-2">
           <span role="img" aria-label="calendar">
@@ -43,24 +93,45 @@ export default function WeekAccordion({
         <div className="p-4 space-y-4">
           <div className="flex gap-2 mb-4">
             <button
-              onClick={onAcceptAll}
-              className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors text-sm font-medium"
+              onClick={handleAcceptAll}
+              disabled={isLoading}
+              className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Accepter tous les brouillons de la semaine ${week}`}
             >
-              Accept All (Week {week})
+              {isLoading ? 'Chargement...' : `Accept All (Week ${week})`}
             </button>
             <button
-              onClick={onDiscardAll}
-              className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors text-sm font-medium"
+              onClick={handleDiscardAll}
+              disabled={isLoading}
+              className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label={`Supprimer tous les brouillons de la semaine ${week}`}
             >
-              Discard All (Week {week})
+              {isLoading ? 'Chargement...' : `Discard All (Week ${week})`}
             </button>
           </div>
           <div className="space-y-3">
             {drafts.map((draft) => (
               <DraftCard
                 key={draft.id}
-                courseId={courseId}
                 draft={draft}
+                onAccept={async () => {
+                  await fetch(`/api/tasks/${draft.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ isDraft: false }),
+                  });
+                  await onDraftUpdate();
+                }}
+                onAcceptAll={handleAcceptAll}
+                onModify={async () => {
+                  await onDraftUpdate();
+                }}
+                onDelete={async () => {
+                  await fetch(`/api/tasks/${draft.id}`, {
+                    method: 'DELETE',
+                  });
+                  await onDraftUpdate();
+                }}
               />
             ))}
           </div>

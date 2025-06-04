@@ -1,12 +1,16 @@
-import { type Draft } from '@/types/course'
+import { type ParseCourseResponse } from '@/types/api'
+import { MOCK_COURSE_DATA } from './mock-data';
 
-interface ParseCourseResponse {
-  courseCode: string
-  term: string
-  drafts: Array<Omit<Draft, 'id' | 'courseId'>>
-}
+// Set this to true to use mock data instead of making API calls
+const USE_MOCK_DATA = true;
 
 export async function parseCourse(courseCode: string, term = '20252'): Promise<ParseCourseResponse> {
+  if (USE_MOCK_DATA) {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return MOCK_COURSE_DATA;
+  }
+
   const response = await fetch(
     `/api/parse-course?courseCode=${encodeURIComponent(courseCode.trim())}&term=${term}`
   )
