@@ -1,5 +1,5 @@
 import { OpenAI } from 'openai';
-import { type Draft } from '~/store/useSecondBrainStore';
+import { type Draft } from '@/types/course';
 import { COURSE_PLAN_PARSER_SYSTEM_PROMPT, buildCoursePlanParsePrompt } from './prompts';
 
 if (!process.env.OPENAI_API_KEY) {

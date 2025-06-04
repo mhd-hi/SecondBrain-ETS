@@ -1,4 +1,4 @@
-import { type Draft } from '~/store/useSecondBrainStore';
+import { type Draft } from '@/types/course';
 import { fetchPlanETSContent } from './planets';
 import { parseContentWithAI } from './openai';
 
@@ -14,10 +14,6 @@ export async function parseCoursePlan(
   term: string,
 ): Promise<ParseCourseResult> {
   const logs: string[] = [];
-  const log = (message: string) => {
-    console.log(message);
-    logs.push(message);
-  };
 
   // 1) Fetch and parse PlanETS content
   const { html: relevantHtml, logs: fetchLogs } = await fetchPlanETSContent(courseCode, term);

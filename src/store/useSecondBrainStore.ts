@@ -1,98 +1,73 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { Course, Draft } from '@/types/course';
 
-export interface Course {
-  id: string;
-  code: string;
-  term: string;
-}
-
-export interface Draft {
-  id: string;
-  courseId: string;
-  week: number;
-  type: 'theorie' | 'pratique' | 'exam' | 'homework';
+export interface Subtask {
   title: string;
   estimatedEffort: number;
-  suggestedDueDate: string;
-  notes: string;
+  notes?: string;
   tags: string[];
-  subtasks?: Array<{
-    title: string;
-    estimatedEffort: number;
-    notes: string;
-    tags: string[];
-  }>;
 }
 
 interface SecondBrainState {
   courses: Course[];
   draftsByCourse: Record<string, Draft[]>;
-  acceptedTasks: Draft[];
-  addCourse: (course: Course, drafts: Draft[]) => void;
+  addCourse: (course: Course) => void;
   updateDraft: (courseId: string, draftId: string, updates: Partial<Draft>) => void;
   removeDraft: (courseId: string, draftId: string) => void;
-  acceptDraft: (courseId: string, draftId: string) => void;
+  acceptDraft: (courseId: string, draft: Draft) => void;
   addDrafts: (courseId: string, drafts: Draft[]) => void;
 }
+
+type StateData = Pick<SecondBrainState, 'courses' | 'draftsByCourse'>;
+
+const initialState: StateData = {
+  courses: [],
+  draftsByCourse: {},
+};
 
 export const useSecondBrainStore = create<SecondBrainState>()(
   persist(
     (set) => ({
-      courses: [],
-      draftsByCourse: {},
-      acceptedTasks: [],
-
-      addCourse: (course, drafts) =>
-        set((state) => ({
+      ...initialState,
+      addCourse: (course) =>
+        set((state: StateData) => ({
           courses: [...state.courses, course],
-          draftsByCourse: {
-            ...state.draftsByCourse,
-            [course.id]: drafts,
-          },
         })),
-
       updateDraft: (courseId, draftId, updates) =>
-        set((state) => {
+        set((state: StateData) => {
           const currentDrafts = state.draftsByCourse[courseId] ?? [];
           return {
             draftsByCourse: {
               ...state.draftsByCourse,
-              [courseId]: currentDrafts.map((draft) =>
-                draft.id === draftId ? { ...draft, ...updates } : draft,
+              [courseId]: currentDrafts.map((draft: Draft) =>
+                draft.id === draftId ? { ...draft, ...updates } : draft
               ),
             },
           };
         }),
-
       removeDraft: (courseId, draftId) =>
-        set((state) => {
+        set((state: StateData) => {
           const currentDrafts = state.draftsByCourse[courseId] ?? [];
           return {
             draftsByCourse: {
               ...state.draftsByCourse,
-              [courseId]: currentDrafts.filter((draft) => draft.id !== draftId),
+              [courseId]: currentDrafts.filter((draft: Draft) => draft.id !== draftId),
             },
           };
         }),
-
-      acceptDraft: (courseId, draftId) =>
-        set((state) => {
+      acceptDraft: (courseId, draft) =>
+        set((state: StateData) => {
           const currentDrafts = state.draftsByCourse[courseId] ?? [];
-          const draft = currentDrafts.find((d) => d.id === draftId);
-          if (!draft) return state;
-
           return {
             draftsByCourse: {
               ...state.draftsByCourse,
-              [courseId]: currentDrafts.filter((d) => d.id !== draftId),
+              [courseId]: currentDrafts.filter((d: Draft) => d.id !== draft.id),
             },
-            acceptedTasks: [...state.acceptedTasks, draft],
           };
         }),
-
       addDrafts: (courseId, drafts) =>
-        set((state) => {
+        set((state: StateData) => {
           const currentDrafts = state.draftsByCourse[courseId] ?? [];
           return {
             draftsByCourse: {

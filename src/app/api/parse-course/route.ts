@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { parseCoursePlan } from '~/lib/course-plan-parser';
+import { parseCoursePlan } from '@/lib/course-plan-parser';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

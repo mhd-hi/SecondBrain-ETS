@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useSecondBrainStore, type Draft } from '~/store/useSecondBrainStore';
+import { useSecondBrainStore } from '@/store/useSecondBrainStore';
+import { type Draft } from '@/types/course';
 
 interface ParseCourseResponse {
   courseCode: string;
@@ -13,6 +14,7 @@ export const AddCourseForm = () => {
   const [courseCode, setCourseCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const addCourse = useSecondBrainStore((state) => state.addCourse);
+  const addDrafts = useSecondBrainStore((state) => state.addDrafts);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,17 +35,19 @@ export const AddCourseForm = () => {
       const data = (await response.json()) as ParseCourseResponse;
       const courseId = `${data.courseCode}-${data.term}`;
 
-      addCourse(
-        {
-          id: courseId,
-          code: data.courseCode,
-          term: data.term,
-        },
+      addCourse({
+        id: courseId,
+        code: data.courseCode,
+        term: data.term,
+      });
+
+      addDrafts(
+        courseId,
         data.drafts.map((draft) => ({
           ...draft,
           id: `${courseId}-${draft.week}-${draft.type}`,
           courseId,
-        })),
+        }))
       );
 
       setCourseCode('');

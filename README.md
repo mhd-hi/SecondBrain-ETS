@@ -1,29 +1,80 @@
-# Create T3 App
+# SecondBrain - Your Course Management Assistant
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A Next.js application that helps students manage their course workload by intelligently parsing course plans and creating manageable tasks.
 
-## What's next? How do I make an app with this?
+## Project Overview
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+SecondBrain uses AI to parse ETS course plans and break them down into manageable tasks, helping students stay organized and on track with their studies.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Completed Sprints
+
+### Sprint 1: Core Store & Add-Course Flow ✅
+- Implemented Zustand store with IndexedDB persistence
+- Created AddCourseForm component for course imports
+- Built minimal dashboard UI
+- Implemented `/api/parse-course` API route with OpenAI integration
+- Added support for subtasks in course plan parsing
+
+## Current Sprint
+
+### Sprint 2: Review Queue & Task Management
+**Goal:** Build the Review Queue interface to manage AI-generated task drafts.
+
+#### Tasks:
+1. **Review Queue Page**
+   - Create `/app/review/[course]/page.tsx`
+   - Implement CourseSidebar component
+   - Build WeekAccordion for task grouping
+   - Add DraftCard component for individual tasks
+
+2. **Task Management Features**
+   - Add "Accept All" and "Discard All" functionality
+   - Implement per-week task management
+   - Create task modification interface
+   - Add progress tracking
+
+3. **UI/UX Improvements**
+   - Implement responsive design
+   - Add loading states
+   - Improve error handling
+   - Enhance accessibility
+
+## Tech Stack
 
 - [Next.js](https://nextjs.org)
 - [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
 - [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- [Zustand](https://github.com/pmndrs/zustand)
+- [OpenAI API](https://openai.com)
 
-## Learn More
+## Getting Started
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Set up environment variables:
+   ```env
+   OPENAI_API_KEY=your_api_key_here
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Development
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run typecheck` - Run TypeScript compiler check
 
-## How do I deploy this?
+## Contributing
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
