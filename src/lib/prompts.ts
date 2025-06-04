@@ -1,4 +1,4 @@
-export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS course plan parser. Your ONLY task is to extract course information from HTML tables and return it as a JSON array. You MUST:
+export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS course plan parser. Your ONLY task is to extract course information from HTML tables or elements and return it as a JSON array. You MUST:
 1. NEVER include any explanations or disclaimers
 2. NEVER include any text outside the JSON array
 3. ALWAYS return a valid JSON array of objects
@@ -48,7 +48,7 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    {
      "week": <integer>,
      "type": "<theorie|pratique|exam|homework>",
-     "title": "S{week} ▶ <main topic or general description>",
+     "title": "W{week} <main topic or general description>",
      "estimatedEffort": <total minutes for all subtasks>,
      "suggestedDueDate": "<YYYY-MM-DD>",
      "notes": "<short tip in French, 15–25 words max>",

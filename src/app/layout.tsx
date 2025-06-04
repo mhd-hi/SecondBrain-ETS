@@ -1,7 +1,11 @@
 import "@/styles/globals.css";
-
+import { ThemeProvider } from "@/components/ui/theme-provider";
+import { cn } from "@/lib/utils";
+import { Inter } from "next/font/google";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Navbar } from "@/components/navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
@@ -14,12 +18,27 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+const inter = Inter({ subsets: ["latin"] });
+
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning className={`${geist.variable}`}>
+      <body className={cn(inter.className, "min-h-screen bg-background")}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <main className="container py-6">{children}</main>
+          <Toaster />
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

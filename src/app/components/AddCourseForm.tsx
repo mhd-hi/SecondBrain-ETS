@@ -2,13 +2,8 @@
 
 import { useState } from 'react';
 import { useSecondBrainStore } from '@/store/useSecondBrainStore';
-import { type Draft } from '@/types/course';
-
-interface ParseCourseResponse {
-  courseCode: string;
-  term: string;
-  drafts: Array<Omit<Draft, 'id' | 'courseId'>>;
-}
+import { parseCourse } from '@/lib/api';
+import { toast } from 'sonner';
 
 export const AddCourseForm = () => {
   const [courseCode, setCourseCode] = useState('');
@@ -22,17 +17,7 @@ export const AddCourseForm = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/parse-course?courseCode=${encodeURIComponent(
-          courseCode.trim(),
-        )}&term=20252`,
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to parse course');
-      }
-
-      const data = (await response.json()) as ParseCourseResponse;
+      const data = await parseCourse(courseCode);
       const courseId = `${data.courseCode}-${data.term}`;
 
       addCourse({
@@ -51,9 +36,18 @@ export const AddCourseForm = () => {
       );
 
       setCourseCode('');
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      toast('Course imported successfully', {
+        description: `Successfully imported ${data.courseCode} for term ${data.term}`,
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error('Unknown error occurred');
       console.error('Error importing course:', error);
-      // TODO: Add toast notification for error
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      toast('Failed to import course', {
+        description: 'Please check the course code and try again',
+        className: 'bg-destructive text-destructive-foreground',
+      });
     } finally {
       setIsLoading(false);
     }
