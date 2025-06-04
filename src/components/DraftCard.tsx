@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import type { Draft } from "@/types/course";
+import type { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Tag, CheckCircle2, Pencil, Trash2 } from "lucide-react";
 import { ModifyPanel } from './ModifyPanel';
 
 interface DraftCardProps {
-  draft: Draft;
+  draft: Task;
   onAccept: (id: string) => void;
   onAcceptAll: (id: string) => void;
   onModify: (id: string) => void;
@@ -31,7 +31,7 @@ export const DraftCard = ({
   const handleModify = () => setIsEditing(true);
   const handleDelete = () => onDelete(draft.id);
 
-  const handleSave = async (updatedDraft: Partial<Draft>) => {
+  const handleSave = async (updatedDraft: Partial<Task>) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/tasks/${draft.id}`, {

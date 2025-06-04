@@ -19,6 +19,7 @@ export interface Task {
   subtasks?: Subtask[];
   createdAt: Date;
   updatedAt: Date;
+  tags?: string[];
 }
 
 export interface Subtask {
