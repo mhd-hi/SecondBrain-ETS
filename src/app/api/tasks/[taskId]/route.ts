@@ -4,6 +4,7 @@ import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
+import { calculateTaskDueDate } from '@/lib/task/util';
 
 export async function PATCH(
   request: Request,
@@ -11,6 +12,7 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json() as Task;
+
     const task = await db
       .update(tasks)
       .set({
@@ -28,6 +30,7 @@ export async function PATCH(
           estimatedEffort: subtask.estimatedEffort
         })) : null,
         updatedAt: new Date(),
+        dueDate: calculateTaskDueDate(body.week)
       })
       .where(eq(tasks.id, params.taskId))
       .returning();

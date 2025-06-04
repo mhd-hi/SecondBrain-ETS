@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 interface CourseCardProps {
   course: Course;
@@ -85,6 +87,19 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
         {!nextTask && !upcomingTask && (
           <p className="text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
         )}
+      </div>
+
+      <div className="flex justify-end mt-4">
+        <Link href={`/courses/${course.id}`}>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            className="text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+            style={{ color: courseColor }}
+          >
+            View course
+          </Button>
+        </Link>
       </div>
     </div>
   );

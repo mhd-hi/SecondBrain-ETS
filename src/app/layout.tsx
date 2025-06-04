@@ -35,11 +35,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="flex min-h-screen">
-            <SidebarWrapper />
-            <div className="flex-1">
-              <Navbar />
-              <main className="container py-6">{children}</main>
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <div className="flex flex-1">
+              <SidebarWrapper />
+              <main className="flex-1 container py-6">{children}</main>
             </div>
           </div>
           <Toaster />

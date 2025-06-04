@@ -38,9 +38,8 @@ export function Sidebar({ courses }: SidebarProps) {
             <Separator className="my-4" />
             <ScrollArea className="h-[calc(100vh-8rem)]">
               <div className="space-y-1">
-                {courses.map((course, index) => {
+                {courses.map((course) => {
                   const isActive = pathname === `/courses/${course.id}`;
-                  const isLast = index === courses.length - 1;
                   return (
                     <Link
                       key={course.id}
@@ -77,9 +76,8 @@ export function Sidebar({ courses }: SidebarProps) {
           <Separator className="my-4" />
           <ScrollArea className="h-[calc(100vh-8rem)]">
             <div className="space-y-1">
-              {courses.map((course, index) => {
+              {courses.map((course) => {
                 const isActive = pathname === `/courses/${course.id}`;
-                const isLast = index === courses.length - 1;
                 return (
                   <Link
                     key={course.id}

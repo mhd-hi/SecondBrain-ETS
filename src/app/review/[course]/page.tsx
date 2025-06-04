@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { calculateTaskDueDate, getSessionWeeks, getCurrentSession } from '@/lib/task/util';
 
 interface ReviewQueueProps {
   params: Promise<{
@@ -148,13 +149,19 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
   // Handlers for global accept/discard
   const handleAcceptAllCourse = async () => {
     try {
-      const promises = tasks.map(task =>
-        fetch(`/api/tasks/${task.id}`, {
+      const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
+      const sessionWeeks = getSessionWeeks(currentSession);
+
+      const promises = tasks.map(task => {
+        return fetch(`/api/tasks/${task.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: TaskStatus.PENDING }),
-        })
-      );
+          body: JSON.stringify({ 
+            status: TaskStatus.PENDING,
+            dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
+          }),
+        });
+      });
 
       await Promise.all(promises);
       toast.success(`${tasks.length} tâches ajoutées`, {
@@ -192,10 +199,21 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
 
   const handleAccept = async (id: string) => {
     try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
+      const sessionWeeks = getSessionWeeks(currentSession);
+
       const response = await fetch(`/api/tasks/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: TaskStatus.PENDING }),
+        body: JSON.stringify({ 
+          status: TaskStatus.PENDING,
+          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
+        }),
       });
 
       if (!response.ok) {

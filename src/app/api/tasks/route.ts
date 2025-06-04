@@ -4,6 +4,7 @@ import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { TaskStatus } from '@/types/task';
 import type {Task, Subtask} from '@/types/task'
+import { calculateTaskDueDate } from '@/lib/task/util';
 
 export async function GET(request: Request) {
   try {
@@ -60,7 +61,8 @@ export async function POST(request: Request) {
           notes: subtask.notes,
           estimatedEffort: subtask.estimatedEffort
         })),
-        notes: task.notes
+        notes: task.notes,
+        dueDate: calculateTaskDueDate(task.week)
       }))
     ).returning();
 
@@ -102,7 +104,8 @@ export async function PATCH(request: Request) {
           notes: subtask.notes,
           estimatedEffort: subtask.estimatedEffort
         })),
-        notes: updates.notes
+        notes: updates.notes,
+        dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined // Using standard 15 weeks
       })
       .where(eq(tasks.id, id))
       .returning();

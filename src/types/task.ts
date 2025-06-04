@@ -20,6 +20,7 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   tags?: string[];
+  dueDate: Date;
 }
 
 export interface Subtask {

@@ -4,6 +4,7 @@ import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
+import { calculateTaskDueDate } from '@/lib/task/util';
 
 export async function GET(request: Request) {
   try {
@@ -43,7 +44,8 @@ export async function POST(request: Request) {
         ...subtask,
         id: crypto.randomUUID(),
         status: status ?? TaskStatus.PENDING
-      }))
+      })),
+      dueDate: calculateTaskDueDate(data.week)
     }).returning();
     return NextResponse.json(draft);
   } catch (error) {

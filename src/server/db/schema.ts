@@ -36,6 +36,7 @@ export const tasks = pgTable("tasks", {
   subtasks: json("subtasks").$type<{ id: string; title: string; status: TaskStatus; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  dueDate: timestamp("due_date").notNull(),
 });
 
 // Relations
