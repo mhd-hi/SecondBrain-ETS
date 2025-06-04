@@ -75,12 +75,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="space-y-2 text-sm mt-auto">
         {nextTask && (
           <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Next:</span>{nextTask.title}
+            <span className="font-medium">Next: </span>{nextTask.title}
           </p>
         )}
         {upcomingTask && (
           <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Upcoming:</span>{upcomingTask.title}
+            <span className="font-medium">Upcoming: </span>{upcomingTask.title}
           </p>
         )}
         {!nextTask && !upcomingTask && (

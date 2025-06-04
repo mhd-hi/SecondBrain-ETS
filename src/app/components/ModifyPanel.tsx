@@ -1,27 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import type { Draft } from '@/types/course';
+import type { Task } from '@/types/course';
 import { TaskStatus } from '@/types/task';
 
 interface ModifyPanelProps {
-  draft: Draft;
-  onSave: (updatedDraft: Draft) => Promise<void>;
+  draft: Task;
+  onSave: (updatedDraft: Task) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProps) {
-  const [title, setTitle] = useState<string>(draft.title ?? '');
+  const [title, setTitle] = useState<string>(draft.title);
   const [notes, setDescription] = useState<string>(draft.notes ?? '');
-  const [week, setWeek] = useState<number>(draft.week ?? 1);
-  const [status, setStatus] = useState<TaskStatus>(draft.status ?? TaskStatus.PENDING);
+  const [week, setWeek] = useState<number>(draft.week);
+  const [status, setStatus] = useState<TaskStatus>(draft.status);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const updatedDraft: Draft = {
+    const updatedDraft: Task = {
       ...draft,
       title,
-      notes: notes,
+      notes,
       week,
       status,
     };
@@ -83,8 +83,8 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
             required
           >
+            <option value={TaskStatus.DRAFT}>Brouillon</option>
             <option value={TaskStatus.PENDING}>En attente</option>
-            <option value={TaskStatus.IN_PROGRESS}>En cours</option>
             <option value={TaskStatus.COMPLETED}>Terminé</option>
           </select>
         </div>

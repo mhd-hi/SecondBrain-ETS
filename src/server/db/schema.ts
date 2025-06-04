@@ -18,6 +18,7 @@ export const courses = pgTable("courses", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   code: text("code").notNull(),
+  term: text("term").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -29,7 +30,7 @@ export const tasks = pgTable("tasks", {
   notes: text("notes"),
   week: integer("week").notNull(),
   type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
-  status: text("status", { enum: ["draft", "pending", "in_progress", "completed"] }).default("draft").notNull(),
+  status: text("status", { enum: ["DRAFT", "PENDING", "COMPLETED"] }).default("DRAFT").notNull(),
   estimatedEffort: integer("estimated_effort").notNull().default(1),
   subtasks: json("subtasks").$type<{ id: string; title: string; completed: boolean; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -1,21 +1,21 @@
+export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
+
 export enum TaskStatus {
-  DRAFT = "draft",
-  PENDING = "pending",
-  IN_PROGRESS = "in_progress",
-  COMPLETED = "completed",
+  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED'
 }
 
 export interface Task {
   id: string;
+  courseId: string;
   title: string;
   week: number;
-  isDraft: boolean;
-  type: "theorie" | "pratique";
-  estimatedEffort: number;
-  suggestedDueDate: string;
-  tags: string[];
-  modified?: boolean;
-  status?: TaskStatus;
+  type: TaskType;
+  status: TaskStatus;
+  estimatedEffort?: number;
+  notes?: string;
+  subtasks?: Subtask[];
 }
 
 export interface Subtask {

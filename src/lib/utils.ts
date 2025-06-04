@@ -11,7 +11,6 @@ const COURSE_COLORS = [
 ] as const;
 
 export function cn(...inputs: ClassValue[]): string {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return twMerge(clsx(...inputs));
 }
 

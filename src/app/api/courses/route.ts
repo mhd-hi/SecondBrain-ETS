@@ -80,6 +80,7 @@ export async function POST(request: Request) {
     const [course] = await db.insert(courses).values({
       code,
       name,
+      term: '20252', // Default term
     }).returning();
 
     return NextResponse.json(course);
