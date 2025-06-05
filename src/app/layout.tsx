@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarWrapper } from "@/components/sidebar-wrapper";
 
 export const metadata: Metadata = {
-  title: "Second brain",
+  title: "Second Brain",
   description: "SecondBrain: Your AI-powered course management assistant. Helps students manage workload by parsing course plans and creating tasks.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };

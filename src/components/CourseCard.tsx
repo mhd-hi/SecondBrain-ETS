@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import Link from 'next/link';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRef, useEffect, useState } from 'react';
 
 // Helper function to format date for display
 const formatDate = (date: Date | null | undefined): string => {
@@ -57,6 +59,26 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   // The upcoming task is the soonest non-completed task of type exam or homework with a due date
   const upcomingTask = sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
 
+  const nextTaskTitleRef = useRef<HTMLParagraphElement>(null);
+  const [isNextTaskTitleTruncated, setIsNextTaskTitleTruncated] = useState(false);
+
+  const upcomingTaskTitleRef = useRef<HTMLParagraphElement>(null);
+  const [isUpcomingTaskTitleTruncated, setIsUpcomingTaskTitleTruncated] = useState(false);
+
+  useEffect(() => {
+    const element = nextTaskTitleRef.current;
+    if (element) {
+      setIsNextTaskTitleTruncated(element.scrollWidth > element.clientWidth);
+    }
+  }, [nextTask]);
+
+  useEffect(() => {
+    const element = upcomingTaskTitleRef.current;
+    if (element) {
+      setIsUpcomingTaskTitleTruncated(element.scrollWidth > element.clientWidth);
+    }
+  }, [upcomingTask]);
+
   const handleDeleteClick = () => {
     onDeleteCourse(course.id);
   };
@@ -97,9 +119,24 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="space-y-2 text-sm mt-auto">
         {nextTask && (
           <div>
-            <p className="text-gray-700 dark:text-gray-300 truncate">
-              <span className="font-medium">Next: </span>{nextTask.title}
-            </p>
+            {isNextTaskTitleTruncated ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p ref={nextTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate">
+                      <span className="font-medium">Next: </span>{nextTask.title}
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{nextTask.title}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <p ref={nextTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate">
+                <span className="font-medium">Next: </span>{nextTask.title}
+              </p>
+            )}
             {nextTask.dueDate && (
               <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
                 Due: {formatDate(nextTask.dueDate)}
@@ -110,9 +147,24 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
         {upcomingTask && upcomingTask !== nextTask && (
              <div>
-                <p className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                   <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-                </p>
+                {isUpcomingTaskTitleTruncated ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                           <span className="font-medium">Upcoming: </span>{upcomingTask.title}
+                        </p>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{upcomingTask.title}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                   <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <span className="font-medium">Upcoming: </span>{upcomingTask.title}
+                   </p>
+                )}
                  {upcomingTask.dueDate && (
                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
                      Due: {formatDate(upcomingTask.dueDate)}
