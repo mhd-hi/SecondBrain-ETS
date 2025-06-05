@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import type { Task, TaskStatus } from "@/types/task";
 import { AddTaskDialog } from "./AddTaskDialog";
 
@@ -24,22 +24,9 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded }: DayColum
     <div className="space-y-4 group">
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">{formattedDate}</span>
-        <AddTaskDialog
-          selectedDate={date}
-          onTaskAdded={onTaskAdded}
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              className="opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              Add Task
-            </Button>
-          }
-        />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 flex-grow">
         {tasks.map((task) => (
           <div
             key={task.id}
@@ -51,7 +38,9 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded }: DayColum
                   {task.estimatedEffort} min
                 </Badge>
                 <h3 className="font-medium">{task.title}</h3>
-                <p className="text-sm text-muted-foreground">{task.course?.code}</p>
+                {task.course?.code && (
+                  <p className="text-sm text-muted-foreground">{task.course.code}</p>
+                )}
               </div>
               <Button
                 variant="ghost"
@@ -64,6 +53,19 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded }: DayColum
             </div>
           </div>
         ))}
+
+        <AddTaskDialog
+          selectedDate={date}
+          onTaskAdded={onTaskAdded}
+          trigger={
+            <button
+              className="flex items-center justify-center w-full p-3 rounded-lg border border-dashed bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors min-h-[70px]"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Task
+            </button>
+          }
+        />
       </div>
     </div>
   );

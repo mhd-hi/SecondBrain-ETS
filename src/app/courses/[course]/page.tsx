@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface CoursePageProps {
   params: Promise<{
@@ -115,8 +116,16 @@ export default function CoursePage({ params }: CoursePageProps) {
         throw new Error('Failed to update task');
       }
 
+      // Update local state instead of refetching
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === taskId 
+            ? { ...task, ...updates }
+            : task
+        )
+      );
+
       toast.success('Task updated successfully');
-      await fetchCourse();
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Failed to update task', {
@@ -258,9 +267,16 @@ export default function CoursePage({ params }: CoursePageProps) {
                         <h3 className="text-lg font-medium">{task.title}</h3>
                         <div className="flex items-center gap-2">
                            {task.dueDate && (
-                              <span className="text-sm text-muted-foreground">
-                                Due: {formatDateToInput(task.dueDate)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <DatePicker
+                                  date={task.dueDate}
+                                  onDateChange={(date) => {
+                                    if (date) {
+                                      void handleUpdateTask(task.id, { dueDate: date });
+                                    }
+                                  }}
+                                />
+                              </div>
                            )}
 
                         <DropdownMenu>

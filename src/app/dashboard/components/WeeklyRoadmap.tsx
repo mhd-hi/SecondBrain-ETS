@@ -130,7 +130,6 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between w-full">
-        <h2 className="text-2xl font-bold">Weekly Roadmap</h2>
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
