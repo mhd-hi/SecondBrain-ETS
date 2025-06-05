@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,12 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { TaskStatus, type TaskType } from "@/types/task";
+import type { Course } from "@/types/course";
 import { DatePicker } from "@/components/ui/date-picker";
+
+interface ErrorResponse {
+  error?: string;
+}
 
 interface AddTaskDialogProps {
   courseId?: string;
@@ -25,6 +30,7 @@ interface AddTaskDialogProps {
   selectedDate?: Date;
   onTaskAdded: () => void;
   trigger?: React.ReactNode;
+  courses?: Course[];
 }
 
 export const AddTaskDialog = ({ 
@@ -32,7 +38,8 @@ export const AddTaskDialog = ({
   courseCode, 
   selectedDate,
   onTaskAdded,
-  trigger 
+  trigger,
+  courses,
 }: AddTaskDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -45,16 +52,28 @@ export const AddTaskDialog = ({
     type: 'theorie' as TaskType,
     status: TaskStatus.PENDING,
   });
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
+
+  useEffect(() => {
+    setSelectedCourseId(courseId ?? null);
+  }, [courseId]);
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    if (!courseId && !selectedCourseId) {
+      toast.error("Please select a course.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      setIsLoading(true);
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          courseId,
+          courseId: courseId ?? selectedCourseId,
           tasks: [
             {
               ...newTask,
@@ -66,7 +85,8 @@ export const AddTaskDialog = ({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add task');
+        const errorData = await response.json() as ErrorResponse;
+        throw new Error(errorData.error ?? 'Failed to add task');
       }
 
       toast.success('Task added successfully');
@@ -84,7 +104,7 @@ export const AddTaskDialog = ({
     } catch (error) {
       console.error('Error adding task:', error);
       toast.error('Failed to add task', {
-        description: 'An error occurred while adding the task',
+        description: error instanceof Error ? error.message : 'An unknown error occurred',
       });
     } finally {
       setIsLoading(false);
@@ -110,6 +130,26 @@ export const AddTaskDialog = ({
         </DialogHeader>
         <form onSubmit={handleAddTask}>
           <div className="grid gap-4 py-4">
+            {!courseId && courses && courses.length > 0 && (
+              <div className="grid gap-2">
+                <Label htmlFor="course">Course</Label>
+                <select
+                  id="course"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={selectedCourseId ?? ''}
+                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  required={!courseId}
+                >
+                  <option value="" disabled>Select a course</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input

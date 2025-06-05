@@ -67,8 +67,8 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       style={{ borderLeft: `4px solid ${courseColor}` }}
     >
       <DropdownMenu>
-        <DropdownMenuTrigger className="absolute -top-[10px] -right-[10px] z-10 rounded-full bg-background p-[6px] hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity opacity-0 group-hover:opacity-100">
-          <MoreHorizontal className="h-5 w-5" aria-label="Course actions" />
+        <DropdownMenuTrigger className="absolute -top-[10px] -right-[10px] z-10 rounded-full bg-accent p-[6px] hover:bg-gray-300 hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity opacity-0 group-hover:opacity-100">
+          <MoreHorizontal className="h-5 w-5 text-gray-600" aria-label="Course actions" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive focus:text-destructive">

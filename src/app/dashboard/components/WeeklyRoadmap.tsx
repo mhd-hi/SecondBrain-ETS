@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DayColumn } from "./DayColumn";
 import type { Task, TaskStatus } from "@/types/task";
+import type { Course } from "@/types/course";
 import { getNextTaskStatus } from "@/lib/task/utils";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -16,6 +17,27 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   const [weekOffset, setWeekOffset] = useState(0); // 0 is current week, -1 is last week, 1 is next week, etc.
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  // Fetch courses
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch('/api/courses');
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses');
+        }
+        const coursesData = await response.json() as Course[];
+        console.log('Fetched courses in WeeklyRoadmap:', coursesData);
+        setCourses(coursesData);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+        toast.error("Failed to load courses");
+      }
+    };
+
+    void fetchCourses();
+  }, []);
 
   // Get the start of the current week (Sunday)
   const getWeekStart = (weekOffset: number) => {
@@ -65,13 +87,12 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     void loadTasks();
   }, [weekOffset]);
 
-  const handleStatusChange = async (taskId: string, currentStatus: TaskStatus) => {
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
-      const nextStatus = getNextTaskStatus(currentStatus);
       const response = await fetch(`/api/tasks/${taskId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: nextStatus }),
+        body: JSON.stringify({ status: newStatus }),
       });
 
       if (!response.ok) {
@@ -81,7 +102,7 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
       // Update local state
       setTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === taskId ? { ...task, status: nextStatus } : task
+          task.id === taskId ? { ...task, status: newStatus } : task
         )
       );
     } catch (error) {
@@ -167,6 +188,7 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
             tasks={tasksByDate[date.toDateString()] ?? []}
             onStatusChange={handleStatusChange}
             onTaskAdded={handleTaskAdded}
+            courses={courses}
           />
         ))}
       </div>
