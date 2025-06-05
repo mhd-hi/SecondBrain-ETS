@@ -3,7 +3,6 @@ import { TaskStatus } from "@/types/task";
 // Session date ranges
 const getSessionDates = () => {
   const currentYear = new Date().getFullYear();
-  const nextYear = currentYear + 1;
   
   return {
     winter: {
@@ -63,6 +62,12 @@ export function calculateDueDate(
   const dueDate = new Date(sessionDates.start);
   dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
   
+  // Check if the calculated date is valid
+  if (isNaN(dueDate.getTime())) {
+      console.error(`Invalid date calculated for session: ${session}, week: ${week}, totalCourseWeeks: ${totalCourseWeeks}`);
+      return sessionDates.end; // Return session end date as a fallback
+  }
+
   // Ensure the due date doesn't exceed the session end date
   if (dueDate > sessionDates.end) {
     return sessionDates.end;

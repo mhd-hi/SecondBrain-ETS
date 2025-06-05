@@ -8,10 +8,27 @@ import { calculateTaskDueDate } from '@/lib/task/util';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
+    const { taskId } = await params;
     const body = await request.json() as Task;
+
+    console.log('PATCH /api/tasks/[taskId]: taskId', taskId);
+    console.log('PATCH /api/tasks/[taskId]: request body week', body.week);
+    const calculatedDueDate = body.week !== undefined ? calculateTaskDueDate(body.week, 15) : undefined;
+    console.log('PATCH /api/tasks/[taskId]: calculatedDueDate', calculatedDueDate);
+    if (calculatedDueDate instanceof Date && !isNaN(calculatedDueDate.getTime())) {
+      console.log('PATCH /api/tasks/[taskId]: calculatedDueDate.toISOString()', calculatedDueDate.toISOString());
+    }
+
+    const sanitizedSubtasks = body.subtasks ? body.subtasks.map(subtask => ({
+      id: subtask.id || crypto.randomUUID(),
+      title: subtask.title,
+      status: subtask.status ?? TaskStatus.PENDING,
+      notes: subtask.notes,
+      estimatedEffort: subtask.estimatedEffort
+    })) : null;
 
     const task = await db
       .update(tasks)
@@ -22,17 +39,11 @@ export async function PATCH(
         type: body.type,
         estimatedEffort: body.estimatedEffort,
         status: body.status,
-        subtasks: body.subtasks ? body.subtasks.map(subtask => ({
-          id: crypto.randomUUID(),
-          title: subtask.title,
-          status: subtask.status ?? TaskStatus.PENDING,
-          notes: subtask.notes,
-          estimatedEffort: subtask.estimatedEffort
-        })) : null,
+        subtasks: sanitizedSubtasks,
         updatedAt: new Date(),
-        dueDate: calculateTaskDueDate(body.week)
+        ...(calculatedDueDate !== undefined && { dueDate: calculatedDueDate }),
       })
-      .where(eq(tasks.id, params.taskId))
+      .where(eq(tasks.id, taskId))
       .returning();
 
     return NextResponse.json({ data: task[0] });

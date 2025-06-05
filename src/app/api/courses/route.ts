@@ -6,18 +6,15 @@ import { TaskStatus } from '@/types/task';
 
 export async function GET() {
   try {
-    const coursesWithCounts = await db
-      .select({
-        id: courses.id,
-        code: courses.code,
-        name: courses.name,
-        inProgressCount: sql<number>`count(*) filter (where ${tasks.status} = ${TaskStatus.IN_PROGRESS})`,
-      })
-      .from(courses)
-      .leftJoin(tasks, eq(courses.id, tasks.courseId))
-      .groupBy(courses.id, courses.code, courses.name);
+    // Fetch all courses and their associated tasks
+    const coursesWithTasks = await db.query.courses.findMany({
+      with: {
+        tasks: true, // Include all tasks related to the course
+      },
+    });
 
-    return NextResponse.json(coursesWithCounts);
+    // The fetched data will already be in the desired structure based on the schema relations
+    return NextResponse.json(coursesWithTasks);
   } catch (error) {
     console.error('Error fetching courses:', error);
     return NextResponse.json(

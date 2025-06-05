@@ -359,6 +359,254 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         ]
       }
     ]
-  }
+  },
+  LOG320: {
+    courseCode: "LOG320",
+    term: "20252",
+    tasks: [
+      {
+        "week": 1,
+        "type": "theorie",
+        "title": "Introduction au cours et analyse asymptotique",
+        "estimatedEffort": 210,
+        "notes": "Commencez par bien comprendre les algorithmes de tri.",
+        "subtasks": [
+          {
+            "title": "Introduction au cours",
+            "estimatedEffort": 30,
+            "notes": "Familiarisez-vous avec le contenu du cours."
+          },
+          {
+            "title": "Analyse asymptotique : grand oh, grand omega et grand theta",
+            "estimatedEffort": 60,
+            "notes": "Concentrez-vous sur les notations asymptotiques."
+          },
+          {
+            "title": "Algorithmes de tri",
+            "estimatedEffort": 120,
+            "notes": "Étudiez les différents algorithmes de tri."
+          }
+        ]
+      },
+      {
+        "week": 2,
+        "type": "theorie",
+        "title": "Algorithmes récursifs et analyse asymptotique",
+        "estimatedEffort": 240,
+        "notes": "La récursion est essentielle pour comprendre les algorithmes.",
+        "subtasks": [
+          {
+            "title": "Algorithme récursif",
+            "estimatedEffort": 120,
+            "notes": "Revoyez les concepts de récursion."
+          },
+          {
+            "title": "Analyse asymptotique",
+            "estimatedEffort": 120,
+            "notes": "Apprenez les méthodes d'analyse asymptotique."
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "type": "theorie",
+        "title": "Arbres de jeu et structures de données de base",
+        "estimatedEffort": 240,
+        "notes": "Les arbres de jeu sont cruciaux pour les algorithmes.",
+        "subtasks": [
+          {
+            "title": "Arbres de jeu",
+            "estimatedEffort": 120,
+            "notes": "Comprenez les algorithmes Minimax et alpha-beta."
+          },
+          {
+            "title": "Structures de données de base",
+            "estimatedEffort": 120,
+            "notes": "Familiarisez-vous avec les piles, files et listes."
+          }
+        ]
+      },
+      {
+        "week": 4,
+        "type": "theorie",
+        "title": "Arbres binaires et arbres rouge-noir",
+        "estimatedEffort": 240,
+        "notes": "Les opérations sur les arbres sont fondamentales.",
+        "subtasks": [
+          {
+            "title": "Arbre binaire de recherche",
+            "estimatedEffort": 120,
+            "notes": "Étudiez les opérations de base sur les arbres."
+          },
+          {
+            "title": "Arbre rouge-noir",
+            "estimatedEffort": 120,
+            "notes": "Comprenez les rotations et insertions."
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "type": "theorie",
+        "title": "Arbre rouge-noir et table de hachage",
+        "estimatedEffort": 180,
+        "notes": "Consolidez vos connaissances sur les arbres.",
+        "subtasks": [
+          {
+            "title": "Arbre rouge-noir (suite)",
+            "estimatedEffort": 90,
+            "notes": "Revoyez la suppression et l'augmentation de structure."
+          },
+          {
+            "title": "Table de hachage",
+            "estimatedEffort": 90,
+            "notes": "Comprenez le fonctionnement des tables de hachage."
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "type": "theorie",
+        "title": "Graphes et exercices pour l'examen intra",
+        "estimatedEffort": 240,
+        "notes": "Les graphes sont un sujet clé en algorithmique.",
+        "subtasks": [
+          {
+            "title": "Graphes",
+            "estimatedEffort": 150,
+            "notes": "Étudiez les recherches en largeur et profondeur."
+          },
+          {
+            "title": "Exercices pour l'examen intra",
+            "estimatedEffort": 90,
+            "notes": "Préparez-vous pour l'examen intra."
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "type": "exam",
+        "title": "Examen intra",
+        "estimatedEffort": 210,
+        "notes": "Préparez-vous bien pour l'examen.",
+        "subtasks": [
+          {
+            "title": "Examen intra",
+            "estimatedEffort": 210,
+            "notes": "Assurez-vous de bien réviser tous les sujets."
+          }
+        ]
+      },
+      {
+        "week": 8,
+        "type": "theorie",
+        "title": "Optimisation combinatoire et algorithmes gloutons",
+        "estimatedEffort": 240,
+        "notes": "L'optimisation est un sujet complexe mais important.",
+        "subtasks": [
+          {
+            "title": "Introduction à l'optimisation combinatoire",
+            "estimatedEffort": 60,
+            "notes": "Comprenez le concept de NP-Complet."
+          },
+          {
+            "title": "Algorithmes gloutons",
+            "estimatedEffort": 180,
+            "notes": "Étudiez les algorithmes comme Dijkstra et A*."
+          }
+        ]
+      },
+      {
+        "week": 9,
+        "type": "theorie",
+        "title": "Programmation dynamique",
+        "estimatedEffort": 180,
+        "notes": "La programmation dynamique est essentielle pour résoudre des problèmes complexes.",
+        "subtasks": [
+          {
+            "title": "Programmation dynamique",
+            "estimatedEffort": 180,
+            "notes": "Familiarisez-vous avec les concepts de mémoïsation."
+          }
+        ]
+      },
+      {
+        "week": 10,
+        "type": "theorie",
+        "title": "Programmation dynamique - Exemples pratiques",
+        "estimatedEffort": 90,
+        "notes": "Mettez en pratique vos connaissances en classe.",
+        "subtasks": [
+          {
+            "title": "Exemples pratiques en classe",
+            "estimatedEffort": 90,
+            "notes": "Participez activement aux exercices."
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "type": "theorie",
+        "title": "Branch and bound et introduction à l'IA",
+        "estimatedEffort": 240,
+        "notes": "Ces concepts sont cruciaux pour l'IA.",
+        "subtasks": [
+          {
+            "title": "Branch and bound",
+            "estimatedEffort": 120,
+            "notes": "Comprenez les bases de cette méthode."
+          },
+          {
+            "title": "Introduction à l'IA",
+            "estimatedEffort": 120,
+            "notes": "Familiarisez-vous avec K-means et les réseaux de neurones."
+          }
+        ]
+      },
+      {
+        "week": 12,
+        "type": "theorie",
+        "title": "Recherche dans les chaînes de caractères",
+        "estimatedEffort": 240,
+        "notes": "Les algorithmes de recherche sont fondamentaux.",
+        "subtasks": [
+          {
+            "title": "Algorithme naïf",
+            "estimatedEffort": 60,
+            "notes": "Comprenez le fonctionnement de l'algorithme."
+          },
+          {
+            "title": "Algorithme Boyer-Moore",
+            "estimatedEffort": 60,
+            "notes": "Étudiez les avantages de cet algorithme."
+          },
+          {
+            "title": "Algorithme Knuth-Morris-Pratt",
+            "estimatedEffort": 60,
+            "notes": "Familiarisez-vous avec cet algorithme efficace."
+          },
+          {
+            "title": "Distance de Leivenstein",
+            "estimatedEffort": 60,
+            "notes": "Comprenez l'importance de cette distance."
+          }
+        ]
+      },
+      {
+        "week": 13,
+        "type": "homework",
+        "title": "Exercices pour l'examen final",
+        "estimatedEffort": 90,
+        "notes": "Préparez-vous pour l'examen final.",
+        "subtasks": [
+          {
+            "title": "Exercices pour l'examen final",
+            "estimatedEffort": 90,
+            "notes": "Consolidez vos connaissances avec des exercices."
+          }
+        ]
+      }
+    ]
+  },
 };
 

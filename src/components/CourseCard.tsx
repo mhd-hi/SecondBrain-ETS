@@ -11,7 +11,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+
+// Helper function to format date for display
+const formatDate = (date: Date | null | undefined): string => {
+  if (!date) return '';
+  // Explicitly convert to Date object if it's not already
+  const dateObj = date instanceof Date ? date : new Date(date);
+  if (isNaN(dateObj.getTime())) return ''; // Return empty string if date is invalid
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  return dateObj.toLocaleDateString(undefined, options);
+};
 
 interface CourseCardProps {
   course: Course;
@@ -20,7 +29,7 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   // Ensure course.tasks is an array
-  const tasks = course.tasks || [];
+  const tasks = course.tasks ?? []; // Use nullish coalescing operator
   const courseColor = getCourseColor(course.id);
 
   // Calculate progress
@@ -28,13 +37,25 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const totalTasks = tasks.length;
   const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-  // Find next and upcoming tasks - Adjusted filtering and sorting
+  // Find next and upcoming tasks - Filter and sort by dueDate, handling potential invalid dates
   const sortedTasks = tasks
-    .filter(task => task.status !== TaskStatus.COMPLETED) // Filter out only completed tasks
-    .sort((a, b) => (a.week || 0) - (b.week || 0));
+    .filter(task => task.status !== TaskStatus.COMPLETED && task.dueDate != null)
+    .sort((a, b) => {
+      // Attempt to create Date objects and get time, handling invalid dates
+      const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
+      const dateB = b.dueDate instanceof Date ? b.dueDate : new Date(b.dueDate);
 
+      const timeA = isNaN(dateA.getTime()) ? Number.MAX_SAFE_INTEGER : dateA.getTime();
+      const timeB = isNaN(dateB.getTime()) ? Number.MAX_SAFE_INTEGER : dateB.getTime();
+
+      return timeA - timeB;
+    });
+
+  // The next task is the soonest non-completed task with a due date
   const nextTask = sortedTasks.length > 0 ? sortedTasks[0] : null;
-  const upcomingTask = sortedTasks.length > 1 ? sortedTasks[1] : null;
+
+  // The upcoming task is the soonest non-completed task of type exam or homework with a due date
+  const upcomingTask = sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
 
   const handleDeleteClick = () => {
     onDeleteCourse(course.id);
@@ -75,30 +96,50 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       <div className="space-y-2 text-sm mt-auto">
         {nextTask && (
-          <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Next: </span>{nextTask.title}
-          </p>
+          <div>
+            <p className="text-gray-700 dark:text-gray-300 truncate">
+              <span className="font-medium">Next: </span>{nextTask.title}
+            </p>
+            {nextTask.dueDate && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
+                Due: {formatDate(nextTask.dueDate)}
+              </p>
+            )}
+          </div>
         )}
-        {upcomingTask && (
-          <p className="text-gray-700 dark:text-gray-300">
-            <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-          </p>
+
+        {upcomingTask && upcomingTask !== nextTask && (
+             <div>
+                <p className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                   <span className="font-medium">Upcoming: </span>{upcomingTask.title}
+                </p>
+                 {upcomingTask.dueDate && (
+                   <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
+                     Due: {formatDate(upcomingTask.dueDate)}
+                   </p>
+                 )}
+             </div>
         )}
+
+        {/* Display message when no upcoming tasks are found */}
         {!nextTask && !upcomingTask && (
-          <p className="text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
+             <p className="text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
         )}
+
+        {/* Display specific message if next task exists but no upcoming exam/homework is found */}
+        {nextTask && !upcomingTask && (
+             <p className="text-gray-700 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">No upcoming exams or homework.</p>
+        )}
+
       </div>
 
       <div className="flex justify-end mt-4">
-        <Link href={`/courses/${course.id}`}>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className="text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
-            style={{ color: courseColor }}
-          >
-            View course
-          </Button>
+        <Link 
+          href={`/courses/${course.id}`}
+          className="text-sm text-muted-foreground hover:text-accent-foreground transition-colors"
+          style={{ color: courseColor }}
+        >
+          View course
         </Link>
       </div>
     </div>

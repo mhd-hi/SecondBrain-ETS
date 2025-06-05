@@ -31,12 +31,13 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { courseId, tasks: newTasks } = await request.json() as { 
-      courseId: string; 
-      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & { 
+    const { courseId, tasks: newTasks } = await request.json() as {
+      courseId: string;
+      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
         subtasks?: Subtask[];
         notes?: string;
-      }> 
+        dueDate?: string; // Allow dueDate as string from frontend
+      }>
     };
 
     if (!courseId || !newTasks?.length) {
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
           estimatedEffort: subtask.estimatedEffort
         })),
         notes: task.notes,
-        dueDate: calculateTaskDueDate(task.week)
+        dueDate: task.dueDate ? new Date(task.dueDate) : calculateTaskDueDate(task.week), // Use provided dueDate or calculate
       }))
     ).returning();
 
@@ -141,4 +142,8 @@ export async function DELETE(request: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function getCoursesWithInProgressCount() {
+  // ... existing getCoursesWithInProgressCount function ...
 } 

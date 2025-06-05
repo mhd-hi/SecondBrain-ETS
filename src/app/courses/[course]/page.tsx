@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
 import type { Course } from '@/types/course';
-import { TaskStatus, type Task } from '@/types/task';
-import { getNextTaskStatus } from '@/lib/task/util';
+import { TaskStatus, type Task, type TaskType } from '@/types/task';
+import { getNextTaskStatus, calculateTaskDueDate } from '@/lib/task/util';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, MoreHorizontal } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +39,22 @@ interface CourseResponse extends Course {
   tasks: Task[];
 }
 
+// Helper to format Date to YYYY-MM-DD string for input value
+const formatDateToInput = (date: Date | string | null | undefined): string => {
+    console.log('formatDateToInput received:', date, typeof date); // Log input
+    if (!date) return '';
+    // Explicitly convert to Date object if it's not already
+    const dateObj = date instanceof Date ? date : new Date(date);
+    if (isNaN(dateObj.getTime())) {
+        console.error('formatDateToInput: Invalid Date object created from:', date);
+        return ''; // Return empty string if date is invalid
+    }
+    const year = dateObj.getFullYear();
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export default function CoursePage({ params }: CoursePageProps) {
   const router = useRouter();
   const unwrappedParams = use(params);
@@ -54,6 +70,8 @@ export default function CoursePage({ params }: CoursePageProps) {
     week: 1,
     notes: '',
     estimatedEffort: 1,
+    dueDate: undefined as Date | undefined,
+    type: 'theorie' as TaskType,
   });
 
   const fetchCourses = useCallback(async () => {
@@ -81,8 +99,30 @@ export default function CoursePage({ params }: CoursePageProps) {
         throw new Error('Failed to fetch course');
       }
       const data = await response.json() as CourseResponse;
+
+      // Convert dueDate strings to Date objects and handle invalid dates
+      const tasksWithValidatedDates: Task[] = data.tasks.map(task => {
+          let dueDate: Date;
+          // Attempt to create Date from fetched dueDate
+          const fetchedDate = task.dueDate ? new Date(task.dueDate) : undefined;
+
+          // If fetched dueDate is invalid or missing, calculate based on week
+          if (!fetchedDate || isNaN(fetchedDate.getTime())) {
+              // Fallback: calculate dueDate based on week if original is invalid or missing
+              dueDate = calculateTaskDueDate(task.week);
+          } else {
+              // Otherwise, use the valid fetched date
+              dueDate = fetchedDate;
+          }
+
+          return {
+              ...task,
+              dueDate: dueDate, // Ensure dueDate is always a Date
+          } as Task; // Cast to Task to match state type
+      });
+
       setCourse(data);
-      setTasks(data.tasks);
+      setTasks(tasksWithValidatedDates);
     } catch (err) {
       console.error('Error fetching course:', err);
       setError('Failed to load course data');
@@ -110,7 +150,8 @@ export default function CoursePage({ params }: CoursePageProps) {
           tasks: [
             {
               ...newTask,
-              status: TaskStatus.PENDING
+              status: TaskStatus.PENDING,
+              dueDate: newTask.dueDate ? newTask.dueDate.toISOString() : undefined,
             }
           ]
         }),
@@ -127,6 +168,8 @@ export default function CoursePage({ params }: CoursePageProps) {
         week: 1,
         notes: '',
         estimatedEffort: 1,
+        dueDate: undefined,
+        type: 'theorie',
       });
       await fetchCourse();
     } catch (error) {
@@ -179,6 +222,14 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
+  // Group tasks by week
+  const tasksByWeek = tasks.reduce((acc, task) => {
+    const week = task.week;
+    acc[week] ??= [];
+    acc[week]?.push(task);
+    return acc;
+  }, {} as Record<number, Task[]>);
+
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -196,14 +247,6 @@ export default function CoursePage({ params }: CoursePageProps) {
       </div>
     );
   }
-
-  // Group tasks by week
-  const tasksByWeek = tasks.reduce((acc, task) => {
-    const week = task.week;
-    acc[week] ??= [];
-    acc[week]?.push(task);
-    return acc;
-  }, {} as Record<number, Task[]>);
 
   if (!course) {
     return (
@@ -257,7 +300,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
         <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button size="lg">
               <Plus className="h-4 w-4 mr-2" />
               Add Task
             </Button>
@@ -291,6 +334,21 @@ export default function CoursePage({ params }: CoursePageProps) {
                     onChange={(e) => setNewTask({ ...newTask, week: parseInt(e.target.value) })}
                     required
                   />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="dueDate">Due Date</Label>
+                    <Input
+                        id="dueDate"
+                        type="date"
+                        value={formatDateToInput(newTask.dueDate)}
+                        onChange={(e) => {
+                            const dateValue = e.target.value;
+                            setNewTask({ 
+                                ...newTask,
+                                dueDate: dateValue ? new Date(dateValue + 'T00:00:00') : undefined  // Append time to ensure correct Date object creation
+                            });
+                        }}
+                    />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="notes">Notes</Label>
@@ -351,66 +409,66 @@ export default function CoursePage({ params }: CoursePageProps) {
                       key={task.id}
                       className="text-card-foreground rounded-lg border bg-card p-4 shadow-sm"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="space-y-1">
-                          <h3 className="font-semibold">{task.title}</h3>
-                          {task.notes && (
-                            <p className="text-sm text-muted-foreground">
-                              {task.notes}
-                            </p>
-                          )}
-                          <p className="text-sm text-muted-foreground">
-                            Estimated effort: {task.estimatedEffort} hours
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          {task.status !== TaskStatus.COMPLETED && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleUpdateTask(task.id, { status: getNextTaskStatus(task.status) })}
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              Mark as {getNextTaskStatus(task.status)}
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-medium">{task.title}</h3>
+                        <div className="flex items-center gap-2">
+                           {task.dueDate && (
+                              <span className="text-sm text-muted-foreground">
+                                Due: {formatDateToInput(task.dueDate)}
+                              </span>
+                           )}
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            Delete
-                          </Button>
-                        </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleUpdateTask(task.id, { status: getNextTaskStatus(task.status) })}>
+                              Mark as {getNextTaskStatus(task.status)}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteTask(task.id)}>
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <div className="space-y-2 mt-4 pt-4 border-t">
-                          <h4 className="text-sm font-medium">Subtasks:</h4>
-                          <div className="space-y-2">
-                            {task.subtasks.map((subtask, index) => (
-                              <div
-                                key={index}
-                                className="text-sm bg-muted/50 p-2 rounded"
-                              >
-                                <div className="font-medium">{subtask.title}</div>
-                                {subtask.notes && (
-                                  <p className="text-muted-foreground">
-                                    {subtask.notes}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-        </div>
-      ) : (
+                    {task.notes && (
+                      <p className="text-sm text-muted-foreground mt-2">{task.notes}</p>
+                    )}
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                      <span>Type: {task.type}</span>
+                      <span>Effort: {task.estimatedEffort}h</span>
+                      <span>Status: {task.status}</span>
+                    </div>
+
+                  {task.subtasks && task.subtasks.length > 0 && (
+                     <div className="mt-4 border-t pt-4">
+                         <h4 className="text-md font-medium mb-2">Subtasks</h4>
+                         <ul className="space-y-2">
+                            {task.subtasks.map(subtask => (
+                                <li key={subtask.id} className="flex items-center justify-between text-sm text-muted-foreground">
+                                    <span>{subtask.title}</span>
+                                    <span>{subtask.status}</span>
+                                </li>
+                            ))}
+                           </ul>
+                       </div>
+                    )}
+
+                    </div>
+                  ))
+                }
+              </div>
+            </section>
+          ))
+        }
+      </div>
+    )
+   : (
         <div className="text-center text-muted-foreground">
           No tasks found. Add a task to get started.
         </div>

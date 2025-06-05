@@ -4,10 +4,10 @@ export interface Course {
   id: string;
   code: string;
   name: string;
-  description: string;
+  description?: string;
   createdAt: Date;
   updatedAt: Date;
-  tasks: Task[];
+  tasks?: Task[];
 }
 
 export interface CourseCreateRequest {
