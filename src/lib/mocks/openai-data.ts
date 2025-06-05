@@ -608,5 +608,204 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
       }
     ]
   },
+  PHY144: {
+    courseCode: "PHY144",
+    term: "20252",
+    tasks: [
+      {
+        "week": 1,
+        "type": "theorie",
+        "title": "Dimensions, unités et algèbre vectorielle",
+        "estimatedEffort": 180,
+        "notes": "Introduction aux concepts fondamentaux de la physique.",
+        "subtasks": []
+      },
+      {
+        "week": 2,
+        "type": "theorie",
+        "title": "Notion de force",
+        "estimatedEffort": 180,
+        "notes": "Comprendre les bases de la force et de l'équilibre.",
+        "subtasks": [
+          {
+            "title": "Équilibre de translation",
+            "estimatedEffort": 180,
+            "notes": "Étudier les conditions d'équilibre en translation."
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "type": "theorie",
+        "title": "Notion de moment de force",
+        "estimatedEffort": 180,
+        "notes": "Explorer le concept de moment de force.",
+        "subtasks": [
+          {
+            "title": "Équilibre de rotation",
+            "estimatedEffort": 180,
+            "notes": "Analyser l'équilibre en rotation."
+          }
+        ]
+      },
+      {
+        "week": 4,
+        "type": "theorie",
+        "title": "Équilibre d’un corps rigide",
+        "estimatedEffort": 180,
+        "notes": "Étudier l'équilibre des corps rigides.",
+        "subtasks": [
+          {
+            "title": "Translation et rotation",
+            "estimatedEffort": 180,
+            "notes": "Comprendre la relation entre translation et rotation."
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "type": "exam",
+        "title": "EXAMEN N° 1",
+        "estimatedEffort": 0,
+        "notes": "Préparez-vous pour le premier examen.",
+        "subtasks": []
+      },
+      {
+        "week": 5,
+        "type": "theorie",
+        "title": "Cinématique : Translation",
+        "estimatedEffort": 180,
+        "notes": "Introduction à la cinématique de translation.",
+        "subtasks": [
+          {
+            "title": "Définition des paramètres",
+            "estimatedEffort": 60,
+            "notes": "Comprendre les paramètres de la cinématique."
+          },
+          {
+            "title": "Équations du mouvement : MRUA",
+            "estimatedEffort": 60,
+            "notes": "Étudier les équations du mouvement uniformément accéléré."
+          },
+          {
+            "title": "Chute libre",
+            "estimatedEffort": 60,
+            "notes": "Analyser le mouvement de chute libre."
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "type": "theorie",
+        "title": "Cinématique : Projectile",
+        "estimatedEffort": 180,
+        "notes": "Étudier le mouvement des projectiles.",
+        "subtasks": [
+          {
+            "title": "Mouvement balistique",
+            "estimatedEffort": 180,
+            "notes": "Comprendre le mouvement balistique."
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "type": "theorie",
+        "title": "Cinématique : Rotation",
+        "estimatedEffort": 360,
+        "notes": "Explorer la cinématique de rotation.",
+        "subtasks": [
+          {
+            "title": "Définition des paramètres",
+            "estimatedEffort": 120,
+            "notes": "Comprendre les paramètres de la rotation."
+          },
+          {
+            "title": "Équations du mouvement : MCUA",
+            "estimatedEffort": 120,
+            "notes": "Étudier les équations du mouvement circulaire uniformément accéléré."
+          },
+          {
+            "title": "Relations entre paramètres linéaires et angulaires",
+            "estimatedEffort": 120,
+            "notes": "Analyser les relations entre les mouvements linéaires et angulaires."
+          }
+        ]
+      },
+      {
+        "week": 8,
+        "type": "exam",
+        "title": "EXAMEN N° 2",
+        "estimatedEffort": 0,
+        "notes": "Préparez-vous pour le deuxième examen.",
+        "subtasks": []
+      },
+      {
+        "week": 9,
+        "type": "theorie",
+        "title": "Dynamique",
+        "estimatedEffort": 180,
+        "notes": "Introduction à la dynamique.",
+        "subtasks": [
+          {
+            "title": "Lois de Newton",
+            "estimatedEffort": 90,
+            "notes": "Étudier les lois fondamentales de Newton."
+          },
+          {
+            "title": "Mouvements de translation sans et avec frottement",
+            "estimatedEffort": 90,
+            "notes": "Analyser les mouvements avec et sans frottement."
+          }
+        ]
+      },
+      {
+        "week": 10,
+        "type": "theorie",
+        "title": "Dynamique : Frottement",
+        "estimatedEffort": 180,
+        "notes": "Explorer le frottement dans le mouvement curviligne.",
+        "subtasks": [
+          {
+            "title": "Mouvement curviligne",
+            "estimatedEffort": 180,
+            "notes": "Comprendre le mouvement curviligne avec frottement."
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "type": "theorie",
+        "title": "Travail, énergie, puissance",
+        "estimatedEffort": 180,
+        "notes": "Étudier les concepts de travail, énergie et puissance.",
+        "subtasks": []
+      },
+      {
+        "week": 12,
+        "type": "theorie",
+        "title": "Conservation de l’énergie",
+        "estimatedEffort": 180,
+        "notes": "Comprendre le principe de conservation de l'énergie.",
+        "subtasks": []
+      },
+      {
+        "week": 13,
+        "type": "theorie",
+        "title": "Synthèse et/ou activité",
+        "estimatedEffort": 180,
+        "notes": "Activité de synthèse des connaissances acquises.",
+        "subtasks": []
+      },
+      {
+        "week": 13,
+        "type": "exam",
+        "title": "EXAMEN FINAL",
+        "estimatedEffort": 0,
+        "notes": "Préparez-vous pour l'examen final.",
+        "subtasks": []
+      }
+    ]
+  },
 };
 

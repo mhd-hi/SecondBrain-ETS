@@ -4,11 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
 import type { Course } from '@/types/course';
-import { TaskStatus, type Task, type TaskType } from '@/types/task';
-import { getNextTaskStatus, calculateTaskDueDate } from '@/lib/task/util';
+import { TaskStatus, type Task } from '@/types/task';
+import { getNextTaskStatus, calculateTaskDueDate, formatDateToInput } from '@/lib/task/util';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -16,18 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Plus, MoreHorizontal } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
 
 interface CoursePageProps {
   params: Promise<{
@@ -39,22 +28,6 @@ interface CourseResponse extends Course {
   tasks: Task[];
 }
 
-// Helper to format Date to YYYY-MM-DD string for input value
-const formatDateToInput = (date: Date | string | null | undefined): string => {
-    console.log('formatDateToInput received:', date, typeof date); // Log input
-    if (!date) return '';
-    // Explicitly convert to Date object if it's not already
-    const dateObj = date instanceof Date ? date : new Date(date);
-    if (isNaN(dateObj.getTime())) {
-        console.error('formatDateToInput: Invalid Date object created from:', date);
-        return ''; // Return empty string if date is invalid
-    }
-    const year = dateObj.getFullYear();
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-    const day = dateObj.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-};
-
 export default function CoursePage({ params }: CoursePageProps) {
   const router = useRouter();
   const unwrappedParams = use(params);
@@ -64,15 +37,6 @@ export default function CoursePage({ params }: CoursePageProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: '',
-    week: 1,
-    notes: '',
-    estimatedEffort: 1,
-    dueDate: undefined as Date | undefined,
-    type: 'theorie' as TaskType,
-  });
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -138,47 +102,6 @@ export default function CoursePage({ params }: CoursePageProps) {
     void fetchCourses();
     void fetchCourse();
   }, [courseId, fetchCourse, fetchCourses]);
-
-  const handleAddTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          courseId,
-          tasks: [
-            {
-              ...newTask,
-              status: TaskStatus.PENDING,
-              dueDate: newTask.dueDate ? newTask.dueDate.toISOString() : undefined,
-            }
-          ]
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add task');
-      }
-
-      toast.success('Task added successfully');
-      setIsAddTaskOpen(false);
-      setNewTask({
-        title: '',
-        week: 1,
-        notes: '',
-        estimatedEffort: 1,
-        dueDate: undefined,
-        type: 'theorie',
-      });
-      await fetchCourse();
-    } catch (error) {
-      console.error('Error adding task:', error);
-      toast.error('Failed to add task', {
-        description: 'An error occurred while adding the task',
-      });
-    }
-  };
 
   const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
     try {
@@ -298,91 +221,13 @@ export default function CoursePage({ params }: CoursePageProps) {
           )}
         </div>
 
-        <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
-          <DialogTrigger asChild>
-            <Button size="lg">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Task
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Task</DialogTitle>
-              <DialogDescription>
-                Create a new task for {course.code}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddTask}>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="week">Week</Label>
-                  <Input
-                    id="week"
-                    type="number"
-                    min="1"
-                    max="15"
-                    value={newTask.week}
-                    onChange={(e) => setNewTask({ ...newTask, week: parseInt(e.target.value) })}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="dueDate">Due Date</Label>
-                    <Input
-                        id="dueDate"
-                        type="date"
-                        value={formatDateToInput(newTask.dueDate)}
-                        onChange={(e) => {
-                            const dateValue = e.target.value;
-                            setNewTask({ 
-                                ...newTask,
-                                dueDate: dateValue ? new Date(dateValue + 'T00:00:00') : undefined  // Append time to ensure correct Date object creation
-                            });
-                        }}
-                    />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={newTask.notes}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewTask({ ...newTask, notes: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="effort">Estimated Effort (hours)</Label>
-                  <Input
-                    id="effort"
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    value={newTask.estimatedEffort === 0 ? '' : newTask.estimatedEffort}
-                    onChange={e => {
-                      const value = e.target.value;
-                      setNewTask({
-                        ...newTask,
-                        estimatedEffort: value === '' ? 0 : parseFloat(value)
-                      });
-                    }}
-                    required
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Add Task</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {course && (
+          <AddTaskDialog
+            courseId={course.id}
+            courseCode={course.code}
+            onTaskAdded={fetchCourse}
+          />
+        )}
       </div>
 
       {isLoading ? (

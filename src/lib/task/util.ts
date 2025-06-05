@@ -160,3 +160,16 @@ export function getSessionWeeks(session: keyof typeof SESSION_DATES): number {
   const sessionDates = SESSION_DATES[session];
   return calculateWeeksBetweenDates(sessionDates.start, sessionDates.end);
 }
+
+export const formatDateToInput = (date: Date | string | null | undefined): string => {
+  if (!date) return '';
+  const dateObj = date instanceof Date ? date : new Date(date);
+  if (isNaN(dateObj.getTime())) {
+    console.error('formatDateToInput: Invalid Date object created from:', date);
+    return '';
+  }
+  const year = dateObj.getFullYear();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};

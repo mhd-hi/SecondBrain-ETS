@@ -5,7 +5,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex-1">
-      <main className="container py-6">{children}</main>
+      <main className="py-6">{children}</main>
     </div>
   );
 } 

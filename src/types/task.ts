@@ -1,10 +1,20 @@
-export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
+import type { Course } from "./course";
 
 export enum TaskStatus {
-  DRAFT = 'DRAFT',
-  PENDING = 'PENDING',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED'
+  DRAFT = "DRAFT",
+  PENDING = "PENDING",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED"
+}
+
+export type TaskType = "theorie" | "pratique" | "exam" | "homework" | "lab";
+
+export interface Subtask {
+  id: string;
+  title: string;
+  status: TaskStatus;
+  notes?: string;
+  estimatedEffort?: number;
 }
 
 export interface Task {
@@ -19,14 +29,6 @@ export interface Task {
   subtasks?: Subtask[];
   createdAt: Date;
   updatedAt: Date;
-  tags?: string[];
   dueDate: Date;
-}
-
-export interface Subtask {
-  id: string;
-  title: string;
-  status: TaskStatus;
-  notes?: string;
-  estimatedEffort?: number;
+  course?: Course;
 }
