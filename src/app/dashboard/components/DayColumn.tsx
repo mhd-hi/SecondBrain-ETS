@@ -39,7 +39,7 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses }:
                 <Badge variant="secondary" className="text-xs">
                   {task.estimatedEffort} min
                 </Badge>
-                <h3 className="font-medium">{task.title}</h3>
+                <h3 className="text-sm font-normal">{task.title}</h3>
                 {task.course?.code && (
                   <p className="text-sm text-muted-foreground">{task.course.code}</p>
                 )}
