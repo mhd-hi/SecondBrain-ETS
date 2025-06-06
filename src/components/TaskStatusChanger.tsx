@@ -95,7 +95,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
         )}
         aria-label="Cycle to next status"
       >
-        <ChevronRight className="w-2.5 h-2.5 text-gray-900" />
+        <ChevronRight className="w-2.5 h-2.5 text-foreground" />
       </button>
     </div>
   );

@@ -115,20 +115,20 @@ export const AddCourseForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex w-full max-w-md gap-2 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+      className="flex w-full max-w-md gap-2 rounded-lg border border-border bg-card p-4 shadow-sm"
     >
       <input
         type="text"
         value={courseCode}
         onChange={(e) => setCourseCode(e.target.value.toUpperCase())}
         placeholder="Entrez le code du cours (ex: MAT145)"
-        className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+        className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-foreground"
         aria-label="Code du cours"
       />
       <button
         type="submit"
         disabled={isLoading || !courseCode.trim()}
-        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
+        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? 'Importation...' : 'Importer le plan'}
       </button>

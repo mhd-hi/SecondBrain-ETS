@@ -261,8 +261,8 @@ export const getTotalTasksCount = (tasks: Task[]): number => {
 export const STATUS_CONFIG = {
   [TaskStatus.DRAFT]: {
     label: "DRAFT",
-    bgColor: "gray-500",
-    textColor: "gray-50",
+    bgColor: "muted",
+    textColor: "muted-foreground",
   },
   [TaskStatus.TODO]: {
     label: "TODO",

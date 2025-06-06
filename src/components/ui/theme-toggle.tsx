@@ -15,7 +15,6 @@ import {
 type Theme = "light" | "dark" | "system"
 
 export function ThemeToggle() {
-  // eslint-disable-next-line
   const { setTheme } = useTheme() as { setTheme: (theme: Theme) => void }
 
   return (

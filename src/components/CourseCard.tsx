@@ -61,7 +61,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       <div>
         <p className="text-xs font-medium mb-1">Progress</p>
-        <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+        <div className="w-full bg-muted rounded-full h-2">
           <div
             className="h-2 rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%`, backgroundColor: courseColor }}
@@ -105,12 +105,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
         {/* Display message when no upcoming tasks are found */}
         {!nextTask && !upcomingTask && (
-          <p className="text-xs text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
+          <p className="text-xs text-muted-foreground">No upcoming tasks.</p>
         )}
 
         {/* Display specific message if next task exists but no upcoming exam/homework is found */}
         {nextTask && !upcomingTask && (
-          <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 pt-1 border-t border-gray-200 dark:border-gray-700">No upcoming exams or homework.</p>
+          <p className="text-xs text-muted-foreground mt-1 pt-1 border-t border-border">No upcoming exams or homework.</p>
         )}
 
       </div>

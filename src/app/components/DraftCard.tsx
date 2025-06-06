@@ -119,7 +119,7 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
           </button>
         </div>
       </div>
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-muted-foreground">
         <p>Semaine: {draft.week}</p>
         <p>Statut: {draft.status}</p>
         {draft.notes && <p>Notes: {draft.notes}</p>}

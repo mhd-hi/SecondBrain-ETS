@@ -48,7 +48,7 @@ export function Sidebar({ courses }: SidebarProps) {
                         isActive
                           ? "bg-primary text-primary-foreground"
                           : "hover:bg-accent hover:text-accent-foreground"
-                      } border-b border-gray-700`}
+                      } border-b border-border`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="py-0.5">
@@ -70,7 +70,7 @@ export function Sidebar({ courses }: SidebarProps) {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <div className="hidden md:flex w-[300px] flex-col border-r border-gray-700 bg-background">
+      <div className="hidden md:flex w-[300px] flex-col border-r border-border bg-background">
         <div className="px-4 py-6">
           <h2 className="text-lg font-semibold">My Courses</h2>
           <Separator className="my-4" />
@@ -86,7 +86,7 @@ export function Sidebar({ courses }: SidebarProps) {
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "hover:bg-accent hover:text-accent-foreground"
-                    } border-b border-gray-700`}
+                    } border-b border-border`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="py-0.5">

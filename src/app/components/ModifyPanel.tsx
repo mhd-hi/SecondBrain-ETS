@@ -32,7 +32,7 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
     <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow">
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="title" className="block text-sm font-medium text-foreground">
             Titre
           </label>
           <input
@@ -40,47 +40,44 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="description" className="block text-sm font-medium text-foreground">
             Description
-          </label>
-          <textarea
+          </label>          <textarea
             id="description"
             value={notes}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring"
           />
         </div>
 
         <div>
-          <label htmlFor="week" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="week" className="block text-sm font-medium text-foreground">
             Semaine
-          </label>
-          <input
+          </label>          <input
             type="number"
             id="week"
             value={week}
             onChange={(e) => setWeek(Number(e.target.value))}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring"
             min="1"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="status" className="block text-sm font-medium text-foreground">
             Statut
-          </label>
-          <select
+          </label>          <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as TaskStatus)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring"
             required
           >
             <option value={TaskStatus.DRAFT}>Brouillon</option>
@@ -94,7 +91,7 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-sm"
+            className="bg-muted text-muted-foreground px-3 py-1 rounded text-sm"
           >
             Annuler
           </button>

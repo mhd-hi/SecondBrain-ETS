@@ -25,13 +25,12 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses, i
 
   return (
     <div className="flex flex-col">
-      {/* Sticky Date Header */}
-      <div className={`
+      {/* Sticky Date Header */}      <div className={`
         ${isSticky ? 'sticky top-0 z-10' : ''}
         rounded-lg p-3 text-center border mb-2
         ${isToday 
           ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
-          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+          : 'bg-muted text-muted-foreground border-border'
         }
       `}>
         <div className="font-semibold text-sm">{dayName}</div>

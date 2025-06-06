@@ -31,7 +31,7 @@ export const DueDateDisplay = ({
     <span
       className={cn(
         "text-xs font-medium",
-        isOverdue ? "text-red-600 dark:text-red-400" : "text-muted-foreground",
+        isOverdue ? "text-destructive" : "text-muted-foreground",
         className
       )}
     >

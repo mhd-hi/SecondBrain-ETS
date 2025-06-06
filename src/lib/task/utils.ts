@@ -3,7 +3,7 @@ import { TaskStatus } from "@/types/task";
 export const taskStatusOrder: TaskStatus[] = [TaskStatus.DRAFT, TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED];
 
 export const taskStatusColors: Record<TaskStatus, string> = {
-  [TaskStatus.DRAFT]: "bg-gray-500",
+  [TaskStatus.DRAFT]: "bg-muted",
   [TaskStatus.TODO]: "bg-yellow-500",
   [TaskStatus.IN_PROGRESS]: "bg-blue-500",
   [TaskStatus.COMPLETED]: "bg-green-500",
