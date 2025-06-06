@@ -39,11 +39,16 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     void fetchCourses();
   }, []);
 
-  // Get the start of the current week (Sunday)
+  // Get the start of the current week (Monday)
   const getWeekStart = (weekOffset: number) => {
     const now = new Date();
     const start = new Date(now);
-    start.setDate(now.getDate() - now.getDay() + weekOffset * 7);
+    // Get Monday as the start of the week
+    // getDay() returns 0 for Sunday, 1 for Monday, etc.
+    // We want Monday (1) to be our week start
+    const dayOfWeek = now.getDay();
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days, otherwise go to Monday
+    start.setDate(now.getDate() + daysToMonday + weekOffset * 7);
     start.setHours(0, 0, 0, 0);
     return start;
   };
@@ -145,6 +150,12 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     return `${formatDate(start)} - ${formatDate(end)}`;
   };
 
+  // Helper function to check if a date is today
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
   console.log('Rendering WeeklyRoadmap with tasks:', tasks);
   console.log('Tasks by date:', tasksByDate);
 
@@ -189,9 +200,10 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
             onStatusChange={handleStatusChange}
             onTaskAdded={handleTaskAdded}
             courses={courses}
+            isToday={isToday(date)}
           />
         ))}
       </div>
     </div>
   );
-}; 
+};

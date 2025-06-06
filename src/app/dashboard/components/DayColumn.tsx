@@ -10,25 +10,32 @@ import { TaskStatusChanger } from "@/components/TaskStatusChanger";
 interface DayColumnProps {
   date: Date;
   tasks: Task[];
-  onStatusChange: (taskId: string, currentStatus: TaskStatus) => void;
+  onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onTaskAdded: () => void;
   courses: Course[];
+  isToday: boolean;
 }
 
-export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses }: DayColumnProps) => {
-  const formattedDate = date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses, isToday }: DayColumnProps) => {
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
   return (
-    <div className="space-y-4 group">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">{formattedDate}</span>
+    <div className="flex flex-col space-y-2">
+      {/* Date Header Container */}
+      <div className={`
+        rounded-lg p-3 text-center border
+        ${isToday 
+          ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
+          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600'
+        }
+      `}>
+        <div className="font-semibold text-sm">{dayName}</div>
+        <div className="text-xs opacity-75">{dayDate}</div>
       </div>
-
-      <div className="space-y-2 flex-grow">
+      
+      {/* Tasks content */}
+      <div className="flex flex-col space-y-2">
         {tasks.map((task) => (
           <div
             key={task.id}
@@ -70,4 +77,4 @@ export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses }:
       </div>
     </div>
   );
-}; 
+};
