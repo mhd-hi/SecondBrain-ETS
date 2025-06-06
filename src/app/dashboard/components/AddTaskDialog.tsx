@@ -48,7 +48,7 @@ export const AddTaskDialog = ({
     week: 1,
     notes: '',
     estimatedEffort: 1,
-    dueDate: selectedDate ?? new Date(),
+    dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
     type: 'theorie' as TaskType,
     status: TaskStatus.TODO,
   });
@@ -96,7 +96,7 @@ export const AddTaskDialog = ({
         week: 1,
         notes: '',
         estimatedEffort: 1,
-        dueDate: selectedDate ?? new Date(),
+        dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
         type: 'theorie',
         status: TaskStatus.TODO,
       });

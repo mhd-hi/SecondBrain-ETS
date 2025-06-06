@@ -22,7 +22,7 @@ export function formatRelativeDate(date: Date | string): string {
     
     // Less than 1 day overdue
     if (overdueDays < 1) {
-      return "Overdue by less than 1 day";
+      return "Overdue";
     }
     
     // Less than 7 days overdue
