@@ -50,7 +50,7 @@ export const AddTaskDialog = ({
     estimatedEffort: 1,
     dueDate: selectedDate ?? new Date(),
     type: 'theorie' as TaskType,
-    status: TaskStatus.PENDING,
+    status: TaskStatus.TODO,
   });
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
 
@@ -77,7 +77,7 @@ export const AddTaskDialog = ({
           tasks: [
             {
               ...newTask,
-              status: TaskStatus.PENDING,
+              status: TaskStatus.TODO,
               dueDate: newTask.dueDate.toISOString(),
             }
           ]
@@ -98,7 +98,7 @@ export const AddTaskDialog = ({
         estimatedEffort: 1,
         dueDate: selectedDate ?? new Date(),
         type: 'theorie',
-        status: TaskStatus.PENDING,
+        status: TaskStatus.TODO,
       });
       onTaskAdded();
     } catch (error) {

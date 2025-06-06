@@ -31,7 +31,7 @@ export const tasks = pgTable("tasks", {
   notes: text("notes"),
   week: integer("week").notNull(),
   type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
-  status: text("status", { enum: ["DRAFT", "IN_PROGRESS", "PENDING", "COMPLETED"] }).default("DRAFT").notNull(),
+  status: text("status", { enum: ["DRAFT", "IN_PROGRESS", "TODO", "COMPLETED"] }).default("DRAFT").notNull(),
   estimatedEffort: integer("estimated_effort").notNull().default(1),
   subtasks: json("subtasks").$type<{ id: string; title: string; status: TaskStatus; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

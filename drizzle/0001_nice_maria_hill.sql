@@ -1,1 +1,0 @@
-ALTER TABLE "tasks" ADD COLUMN "due_date" timestamp NOT NULL;

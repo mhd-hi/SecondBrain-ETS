@@ -13,16 +13,14 @@ import { MoreHorizontal } from "lucide-react";
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRef, useEffect, useState } from 'react';
-
-// Helper function to format date for display
-const formatDate = (date: Date | null | undefined): string => {
-  if (!date) return '';
-  // Explicitly convert to Date object if it's not already
-  const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) return ''; // Return empty string if date is invalid
-  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  return dateObj.toLocaleDateString(undefined, options);
-};
+import { 
+  formatDate, 
+  getNextTask, 
+  getUpcomingTask, 
+  calculateProgress,
+  getCompletedTasksCount,
+  getTotalTasksCount 
+} from '@/lib/task/util';
 
 interface CourseCardProps {
   course: Course;
@@ -34,30 +32,14 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const tasks = course.tasks ?? []; // Use nullish coalescing operator
   const courseColor = getCourseColor(course.id);
 
-  // Calculate progress
-  const completedTasks = tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
-  const totalTasks = tasks.length;
-  const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+  // Calculate progress and task counts
+  const progressPercentage = calculateProgress(tasks);
+  const completedTasks = getCompletedTasksCount(tasks);
+  const totalTasks = getTotalTasksCount(tasks);
 
-  // Find next and upcoming tasks - Filter and sort by dueDate, handling potential invalid dates
-  const sortedTasks = tasks
-    .filter(task => task.status !== TaskStatus.COMPLETED && task.dueDate != null)
-    .sort((a, b) => {
-      // Attempt to create Date objects and get time, handling invalid dates
-      const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
-      const dateB = b.dueDate instanceof Date ? b.dueDate : new Date(b.dueDate);
-
-      const timeA = isNaN(dateA.getTime()) ? Number.MAX_SAFE_INTEGER : dateA.getTime();
-      const timeB = isNaN(dateB.getTime()) ? Number.MAX_SAFE_INTEGER : dateB.getTime();
-
-      return timeA - timeB;
-    });
-
-  // The next task is the soonest non-completed task with a due date
-  const nextTask = sortedTasks.length > 0 ? sortedTasks[0] : null;
-
-  // The upcoming task is the soonest non-completed task of type exam or homework with a due date
-  const upcomingTask = sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
+  // Get next and upcoming tasks
+  const nextTask = getNextTask(tasks);
+  const upcomingTask = getUpcomingTask(tasks);
 
   const nextTaskTitleRef = useRef<HTMLParagraphElement>(null);
   const [isNextTaskTitleTruncated, setIsNextTaskTitleTruncated] = useState(false);

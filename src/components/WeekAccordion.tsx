@@ -1,143 +1,92 @@
 'use client';
 
 import { useState } from 'react';
-import { DraftCard } from './DraftCard';
-import { toast } from 'sonner';
-import type { Task } from '@/types/task';
-import { TaskStatus } from '@/types/task';
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { Task } from "@/types/task";
+import { TaskStatus } from "@/types/task";
+import { handleApiRequest, handleApiError, handleApiSuccess } from "@/lib/api/util";
 
 interface WeekAccordionProps {
-  courseId: string;
   week: number;
-  drafts: Task[];
-  onDraftUpdate: () => Promise<void>;
+  tasks: Task[];
+  onTaskUpdate: (taskId: string, updates: Partial<Task>) => Promise<void>;
 }
 
-export default function WeekAccordion({
-  week,
-  drafts,
-  onDraftUpdate,
-}: WeekAccordionProps) {
-  const [expanded, setExpanded] = useState(true);
+const WeekAccordion = ({ week, tasks, onTaskUpdate }: WeekAccordionProps) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAcceptAll = async () => {
-    setIsLoading(true);
-    try {
-      const promises = drafts.map(draft =>
-        fetch(`/api/tasks/${draft.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: TaskStatus.PENDING }),
-        })
-      );
-
-      await Promise.all(promises);
-      toast.success(`${drafts.length} tâches ajoutées`, {
-        description: `Toutes les tâches de la semaine ${week} ont été acceptées`,
-      });
-      await onDraftUpdate();
-    } catch (error) {
-      console.error('Error accepting all drafts:', error);
-      toast.error('Échec de l\'acceptation', {
-        description: 'Une erreur est survenue lors de l\'acceptation des tâches',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDiscardAll = async () => {
-    setIsLoading(true);
-    try {
-      const promises = drafts.map(draft =>
-        fetch(`/api/tasks/${draft.id}`, {
-          method: 'DELETE',
-        })
-      );
-
-      await Promise.all(promises);
-      toast.success('Brouillons supprimés', {
-        description: `Tous les brouillons de la semaine ${week} ont été supprimés`,
-      });
-      await onDraftUpdate();
-    } catch (error) {
-      console.error('Error discarding all drafts:', error);
-      toast.error('Échec de la suppression', {
-        description: 'Une erreur est survenue lors de la suppression des brouillons',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleTaskUpdate = async (taskId: string, updates: Partial<Task>) => {
+    await handleApiRequest(
+      async () => {
+        await onTaskUpdate(taskId, updates);
+        handleApiSuccess("Task updated successfully");
+      },
+      (error) => handleApiError(error, "Failed to update task"),
+      "Updating task...",
+      setIsLoading
+    );
   };
 
   return (
-    <section className="mb-4 border rounded-lg shadow-sm bg-white">
+    <div className="border rounded-lg overflow-hidden">
       <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex justify-between items-center px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-t-lg transition-colors"
-        aria-expanded={expanded}
-        aria-label={`Semaine ${week} (${drafts.length} brouillons)`}
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "w-full px-4 py-2 flex items-center justify-between",
+          "bg-gray-50 hover:bg-gray-100",
+          "focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        )}
+        aria-expanded={isOpen}
       >
-        <span className="font-medium flex items-center gap-2">
-          <span role="img" aria-label="calendar">
-            🗓️
-          </span>
-          Week {week} ({drafts.length})
-        </span>
-        <span className="text-xl text-gray-500">
-          {expanded ? '−' : '+'}
-        </span>
+        <span className="font-medium">Week {week}</span>
+        <ChevronDown
+          className={cn(
+            "w-5 h-5 transition-transform",
+            isOpen && "transform rotate-180"
+          )}
+        />
       </button>
 
-      {expanded && (
+      {isOpen && (
         <div className="p-4 space-y-4">
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={handleAcceptAll}
-              disabled={isLoading}
-              className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={`Accepter tous les brouillons de la semaine ${week}`}
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className="p-4 border rounded-lg bg-white"
             >
-              {isLoading ? 'Chargement...' : `Accept All (Week ${week})`}
-            </button>
-            <button
-              onClick={handleDiscardAll}
-              disabled={isLoading}
-              className="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={`Supprimer tous les brouillons de la semaine ${week}`}
-            >
-              {isLoading ? 'Chargement...' : `Discard All (Week ${week})`}
-            </button>
-          </div>
-          <div className="space-y-3">
-            {drafts.map((draft) => (
-              <DraftCard
-                key={draft.id}
-                draft={draft}
-                onAccept={async () => {
-                  await fetch(`/api/tasks/${draft.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: TaskStatus.PENDING }),
-                  });
-                  await onDraftUpdate();
-                }}
-                onAcceptAll={handleAcceptAll}
-                onModify={async () => {
-                  await onDraftUpdate();
-                }}
-                onDelete={async () => {
-                  await fetch(`/api/tasks/${draft.id}`, {
-                    method: 'DELETE',
-                  });
-                  await onDraftUpdate();
-                }}
-              />
-            ))}
-          </div>
+              <h3 className="font-medium">{task.title}</h3>
+              <p className="text-sm text-gray-600 mt-1">{task.notes}</p>
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={() => handleTaskUpdate(task.id, { status: TaskStatus.TODO })}
+                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+                  disabled={isLoading}
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleTaskUpdate(task.id, { status: TaskStatus.DRAFT })}
+                  className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                  disabled={isLoading}
+                >
+                  Modify
+                </button>
+                <button
+                  onClick={() => handleTaskUpdate(task.id, { status: TaskStatus.DRAFT })}
+                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                  disabled={isLoading}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-    </section>
+    </div>
   );
-} 
+};
+
+export { WeekAccordion }; 

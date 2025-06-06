@@ -2,7 +2,7 @@ import type { Course } from "./course";
 
 export enum TaskStatus {
   DRAFT = "DRAFT",
-  PENDING = "PENDING",
+  TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",
   COMPLETED = "COMPLETED"
 }

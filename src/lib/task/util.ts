@@ -1,4 +1,5 @@
 import { TaskStatus } from "@/types/task";
+import type { Task } from "@/types/task";
 
 // Session date ranges
 const getSessionDates = () => {
@@ -31,8 +32,8 @@ const STANDARD_WEEKS_PER_SESSION = 15;
 export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
     switch (currentStatus) {
       case TaskStatus.DRAFT:
-        return TaskStatus.PENDING;
-      case TaskStatus.PENDING:
+        return TaskStatus.TODO;
+      case TaskStatus.TODO:
         return TaskStatus.IN_PROGRESS;
       case TaskStatus.IN_PROGRESS:
         return TaskStatus.COMPLETED;
@@ -172,4 +173,125 @@ export const formatDateToInput = (date: Date | string | null | undefined): strin
   const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
   const day = dateObj.getDate().toString().padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+/**
+ * Formats a date for display in a short format (e.g., "Jan 15")
+ */
+export const formatDate = (date: Date | null | undefined): string => {
+  if (!date) return '';
+  // Explicitly convert to Date object if it's not already
+  const dateObj = date instanceof Date ? date : new Date(date);
+  if (isNaN(dateObj.getTime())) return ''; // Return empty string if date is invalid
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  return dateObj.toLocaleDateString(undefined, options);
+};
+
+/**
+ * Sorts tasks by due date and filters out completed tasks
+ */
+export const getSortedTasks = (tasks: Task[]) => {
+  return tasks
+    .filter(task => task.status !== TaskStatus.COMPLETED && task.dueDate != null)
+    .sort((a, b) => {
+      // Attempt to create Date objects and get time, handling invalid dates
+      const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
+      const dateB = b.dueDate instanceof Date ? b.dueDate : new Date(b.dueDate);
+
+      const timeA = isNaN(dateA.getTime()) ? Number.MAX_SAFE_INTEGER : dateA.getTime();
+      const timeB = isNaN(dateB.getTime()) ? Number.MAX_SAFE_INTEGER : dateB.getTime();
+
+      return timeA - timeB;
+    });
+};
+
+/**
+ * Gets the next task from a list of tasks
+ */
+export const getNextTask = (tasks: Task[]) => {
+  const sortedTasks = getSortedTasks(tasks);
+  return sortedTasks.length > 0 ? sortedTasks[0] : null;
+};
+
+/**
+ * Gets the upcoming task (exam or homework) from a list of tasks
+ */
+export const getUpcomingTask = (tasks: Task[]) => {
+  const sortedTasks = getSortedTasks(tasks);
+  return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
+};
+
+/**
+ * Calculates the progress percentage of completed tasks
+ */
+export const calculateProgress = (tasks: Task[]) => {
+  const completedTasks = tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+  const totalTasks = tasks.length;
+  return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+};
+
+/**
+ * Gets the count of completed tasks
+ */
+export const getCompletedTasksCount = (tasks: Task[]): number => {
+  return tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+};
+
+/**
+ * Gets the total number of tasks
+ */
+export const getTotalTasksCount = (tasks: Task[]): number => {
+  return tasks.length;
+};
+
+/**
+ * Configuration for task statuses including labels and styling
+ */
+export const STATUS_CONFIG = {
+  [TaskStatus.DRAFT]: {
+    label: "DRAFT",
+    bgColor: "bg-gray-500",
+    textColor: "text-gray-50",
+  },
+  [TaskStatus.TODO]: {
+    label: "TODO",
+    bgColor: "bg-blue-500",
+    textColor: "text-white",
+  },
+  [TaskStatus.IN_PROGRESS]: {
+    label: "IN PROGRESS",
+    bgColor: "bg-orange-500",
+    textColor: "text-white",
+  },
+  [TaskStatus.COMPLETED]: {
+    label: "COMPLETED",
+    bgColor: "bg-green-500",
+    textColor: "text-white",
+  },
+} as const;
+
+/**
+ * Order of task statuses for cycling through them
+ */
+export const STATUS_ORDER = [
+  TaskStatus.DRAFT,
+  TaskStatus.TODO,
+  TaskStatus.IN_PROGRESS,
+  TaskStatus.COMPLETED,
+] as const;
+
+/**
+ * Gets the next status in the status order
+ */
+export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
+  const currentIndex = STATUS_ORDER.indexOf(currentStatus);
+  const nextIndex = (currentIndex + 1) % STATUS_ORDER.length;
+  return STATUS_ORDER[nextIndex]!;
+};
+
+/**
+ * Validates if a status is a valid TaskStatus
+ */
+export const isValidStatus = (status: TaskStatus): boolean => {
+  return Object.values(TaskStatus).includes(status);
 };

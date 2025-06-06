@@ -17,7 +17,7 @@ export function setMockOpenAI(courseCode: string): CourseAIResponse {
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),
-          status: TaskStatus.PENDING
+          status: TaskStatus.TODO
         }))
       }))
     };

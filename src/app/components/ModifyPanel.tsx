@@ -85,7 +85,7 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
           >
             <option value={TaskStatus.DRAFT}>Brouillon</option>
             <option value={TaskStatus.IN_PROGRESS}>En cours</option>
-            <option value={TaskStatus.PENDING}>En attente</option>
+            <option value={TaskStatus.TODO}>En attente</option>
             <option value={TaskStatus.COMPLETED}>Terminé</option>
           </select>
         </div>

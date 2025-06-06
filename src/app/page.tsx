@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
 import { toast } from "sonner";
 import { WeeklyRoadmap } from "./dashboard/components/WeeklyRoadmap";
+import { handleConfirm } from "@/lib/dialog/util";
 
 export default function Home() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -14,39 +15,37 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   const handleDeleteCourse = async (courseId: string) => {
-    const confirmed = window.confirm(
+    await handleConfirm(
       "Are you sure you want to delete this course? This action cannot be undone.",
-    );
-    if (!confirmed) {
-      return;
-    }
+      async () => {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`/api/courses/${courseId}`, {
+            method: "DELETE",
+          });
 
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: "DELETE",
-      });
+          if (!response.ok) {
+            const errorData = (await response.json()) as { error?: string };
+            throw new Error(errorData.error ?? "Failed to delete course");
+          }
 
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
-        throw new Error(errorData.error ?? "Failed to delete course");
+          setCourses((prevCourses) =>
+            prevCourses.filter((course) => course.id !== courseId),
+          );
+
+          toast.success("Course deleted successfully");
+        } catch (err) {
+          console.error("Error deleting course:", err);
+          const errorMessage =
+            err instanceof Error ? err.message : "An unknown error occurred";
+          toast.error("Failed to delete course", {
+            description: errorMessage,
+          });
+        } finally {
+          setIsLoading(false);
+        }
       }
-
-      setCourses((prevCourses) =>
-        prevCourses.filter((course) => course.id !== courseId),
-      );
-
-      toast.success("Course deleted successfully");
-    } catch (err) {
-      console.error("Error deleting course:", err);
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      toast.error("Failed to delete course", {
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
   useEffect(() => {

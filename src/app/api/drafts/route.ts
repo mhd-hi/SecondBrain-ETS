@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       subtasks: data.subtasks?.map(({ status, ...subtask }) => ({
         ...subtask,
         id: crypto.randomUUID(),
-        status: status ?? TaskStatus.PENDING
+        status: status ?? TaskStatus.TODO
       })),
       dueDate: calculateTaskDueDate(data.week)
     }).returning();
@@ -71,7 +71,7 @@ export async function PATCH(request: Request) {
         subtasks: updates.subtasks?.map(({ status, ...subtask }) => ({
           ...subtask,
           id: crypto.randomUUID(),
-          status: status ?? TaskStatus.PENDING
+          status: status ?? TaskStatus.TODO
         }))
       })
       .where(eq(tasks.id, id))

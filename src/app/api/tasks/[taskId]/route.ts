@@ -25,7 +25,7 @@ export async function PATCH(
     const sanitizedSubtasks = body.subtasks ? body.subtasks.map(subtask => ({
       id: subtask.id || crypto.randomUUID(),
       title: subtask.title,
-      status: subtask.status ?? TaskStatus.PENDING,
+      status: subtask.status ?? TaskStatus.TODO,
       notes: subtask.notes,
       estimatedEffort: subtask.estimatedEffort
     })) : null;

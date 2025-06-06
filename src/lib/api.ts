@@ -3,7 +3,7 @@ import { setMockOpenAI } from './mocks/helper';
 import type { CourseAIResponse } from '@/types/api';
 
 // Set this to true to use mock data instead of making API calls
-const USE_MOCK_DATA = false;
+const USE_MOCK_DATA = true;
 
 export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseAIResponse> {
   if (USE_MOCK_DATA) {

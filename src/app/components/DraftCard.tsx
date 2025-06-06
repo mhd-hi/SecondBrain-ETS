@@ -18,7 +18,7 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
       const response = await fetch(`/api/tasks/${draft.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: TaskStatus.PENDING }),
+        body: JSON.stringify({ status: TaskStatus.TODO }),
       });
 
       if (!response.ok) {

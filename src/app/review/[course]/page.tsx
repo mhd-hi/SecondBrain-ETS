@@ -9,14 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
 import { calculateTaskDueDate, getSessionWeeks, getCurrentSession } from '@/lib/task/util';
+import { CourseSelector } from '@/components/CourseSelector';
 
 interface ReviewQueueProps {
   params: Promise<{
@@ -157,7 +151,7 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            status: TaskStatus.PENDING,
+            status: TaskStatus.TODO,
             dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
           }),
         });
@@ -211,7 +205,7 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          status: TaskStatus.PENDING,
+          status: TaskStatus.TODO,
           dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
         }),
       });
@@ -274,33 +268,11 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[300px] h-12 text-lg font-bold justify-between">
-                  {course.code}
-                  <ChevronDown className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px]">
-                {courses.map((c) => {
-                  const pendingTasks = c.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
-                  return (
-                    <DropdownMenuItem
-                      key={c.id}
-                      onClick={() => router.push(`/review/${c.id}`)}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <span className="text-lg font-medium">{c.code}</span>
-                      {pendingTasks > 0 && (
-                        <span className="text-sm text-destructive">
-                          {pendingTasks} pending
-                        </span>
-                      )}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CourseSelector
+              courses={courses}
+              selectedCourse={course}
+              onCourseSelect={(courseId) => router.push(`/review/${courseId}`)}
+            />
           )}
         </div>
       </div>

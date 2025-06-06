@@ -18,7 +18,8 @@ CREATE TABLE "tasks" (
 	"estimated_effort" integer DEFAULT 1 NOT NULL,
 	"subtasks" json,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"due_date" timestamp NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "tasks" ADD CONSTRAINT "tasks_course_id_courses_id_fk" FOREIGN KEY ("course_id") REFERENCES "public"."courses"("id") ON DELETE cascade ON UPDATE no action;

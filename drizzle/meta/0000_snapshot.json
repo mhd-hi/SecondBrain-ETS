@@ -1,5 +1,5 @@
 {
-  "id": "c28d4f99-bca3-4ad9-9220-5873b4a304e2",
+  "id": "9db76275-0b58-48b2-9e6b-32a4c33d1d5c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -131,6 +131,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},

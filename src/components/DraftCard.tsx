@@ -5,8 +5,9 @@ import { toast } from "sonner";
 import type { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Tag, CheckCircle2, Pencil, Trash2 } from "lucide-react";
+import { Calendar, CheckCircle2, Pencil, Trash2 } from "lucide-react";
 import { ModifyPanel } from './ModifyPanel';
+import { handleConfirm } from "@/lib/dialog/util";
 
 interface DraftCardProps {
   draft: Task;
@@ -29,9 +30,36 @@ export const DraftCard = ({
   const handleAccept = () => onAccept(draft.id);
   const handleAcceptAll = () => onAcceptAll(draft.id);
   const handleModify = () => setIsEditing(true);
-  const handleDelete = () => onDelete(draft.id);
 
-  const handleSave = async (updatedDraft: Partial<Task>) => {
+  const handleDiscard = async () => {
+    await handleConfirm(
+      "Are you sure you want to delete this draft? This action cannot be undone.",
+      async () => {
+        setIsLoading(true);
+        try {
+          const response = await fetch(`/api/tasks/${draft.id}`, {
+            method: 'DELETE',
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to delete draft');
+          }
+
+          toast.success('Draft deleted successfully');
+          onDelete(draft.id);
+        } catch (error) {
+          console.error('Error deleting draft:', error);
+          toast.error('Failed to delete draft', {
+            description: 'An error occurred while deleting the draft',
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    );
+  };
+
+  const handleSave = async (updatedDraft: Task) => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/tasks/${draft.id}`, {
@@ -44,15 +72,13 @@ export const DraftCard = ({
         throw new Error('Failed to update draft');
       }
 
-      toast.success('Brouillon mis à jour', {
-        description: `"${draft.title}" a été mis à jour`,
-      });
+      toast.success('Draft updated successfully');
       onModify(draft.id);
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating draft:', error);
-      toast.error('Échec de la mise à jour', {
-        description: 'Une erreur est survenue lors de la mise à jour du brouillon',
+      toast.error('Failed to update draft', {
+        description: 'An error occurred while updating the draft',
       });
     } finally {
       setIsLoading(false);
@@ -68,13 +94,6 @@ export const DraftCard = ({
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="h-4 w-4" />
               <span>Week {draft.week}</span>
-              {draft.tags && draft.tags.length > 0 && (
-                <>
-                  <span>•</span>
-                  <Tag className="h-4 w-4" />
-                  <span>{draft.tags.join(', ')}</span>
-                </>
-              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -111,7 +130,7 @@ export const DraftCard = ({
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleDelete}
+              onClick={handleDiscard}
               className="h-8 w-8 text-destructive hover:text-destructive"
               disabled={isLoading}
               aria-label="Delete"
@@ -126,7 +145,7 @@ export const DraftCard = ({
         {isEditing && (
           <div className="mt-4 pt-4 border-t">
             <ModifyPanel
-              draft={draft}
+              task={draft}
               onSave={handleSave}
               onCancel={() => setIsEditing(false)}
             />

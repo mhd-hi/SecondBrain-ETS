@@ -5,7 +5,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import type { Course } from '@/types/course';
 import { TaskStatus, type Task } from '@/types/task';
-import { getNextTaskStatus, calculateTaskDueDate, formatDateToInput } from '@/lib/task/util';
+import { getNextTaskStatus, calculateTaskDueDate } from '@/lib/task/util';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import {
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
 import { DatePicker } from "@/components/ui/date-picker";
+import { CourseSelector } from '@/components/CourseSelector';
 
 interface CoursePageProps {
   params: Promise<{
@@ -200,33 +201,11 @@ export default function CoursePage({ params }: CoursePageProps) {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-[300px] h-12 text-lg font-bold justify-between">
-                  {course.code}
-                  <ChevronDown className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-[300px]">
-                {courses.map((c) => {
-                  const pendingTasks = c.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
-                  return (
-                    <DropdownMenuItem
-                      key={c.id}
-                      onClick={() => router.push(`/courses/${c.id}`)}
-                      className="flex items-center justify-between py-3"
-                    >
-                      <span className="text-lg font-medium">{c.code}</span>
-                      {pendingTasks > 0 && (
-                        <span className="text-sm text-destructive">
-                          {pendingTasks} pending
-                        </span>
-                      )}
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CourseSelector
+              courses={courses}
+              selectedCourse={course}
+              onCourseSelect={(courseId) => router.push(`/courses/${courseId}`)}
+            />
           )}
         </div>
 
@@ -256,7 +235,7 @@ export default function CoursePage({ params }: CoursePageProps) {
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([week, weekTasks]) => (
               <section key={week} className="space-y-4">
-                <h2 className="text-2xl font-semibold">Week {week}</h2>
+                <h2 className="text-xl font-semibold">Week {week}</h2>
                 <div className="grid gap-4">
                   {weekTasks.map((task) => (
                     <div
