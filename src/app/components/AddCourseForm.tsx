@@ -5,6 +5,7 @@ import { parseCourse } from '@/lib/api';
 import { toast } from '@/components/ui/sonner';
 import { useRouter } from 'next/navigation';
 import type { Course } from '@/types/course';
+import { calculateTaskDueDate } from '@/lib/task/util';
 
 export const AddCourseForm = () => {
   const [courseCode, setCourseCode] = useState('');
@@ -14,13 +15,14 @@ export const AddCourseForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseCode.trim()) {
-      toast.error('Code de cours requis', {
-        description: 'Veuillez entrer un code de cours valide',
+      toast.error('Course code required', {
+        description: 'Please enter a valid course code.',
       });
       return;
     }
 
     setIsLoading(true);
+
     try {
       const data = await parseCourse(courseCode);
       
@@ -79,7 +81,8 @@ export const AddCourseForm = () => {
         body: JSON.stringify({
           courseId: course.id,
           tasks: data.tasks.map(draft => ({
-            ...draft
+            ...draft,
+            dueDate: calculateTaskDueDate(draft.week).toISOString()
           })),
         }),
       });
@@ -131,4 +134,4 @@ export const AddCourseForm = () => {
       </button>
     </form>
   );
-}; 
+};

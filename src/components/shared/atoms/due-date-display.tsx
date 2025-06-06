@@ -1,9 +1,10 @@
 "use client";
 
+import { formatDueDate } from "@/lib/date/util";
 import { cn } from "@/lib/utils";
 
 interface DueDateDisplayProps {
-  date: Date;
+  date: Date | string; // Accept both Date and string
   className?: string;
 }
 
@@ -11,31 +12,20 @@ export const DueDateDisplay = ({
   date,
   className,
 }: DueDateDisplayProps) => {
-  const formatDueDate = (date: Date) => {
-    const now = new Date();
-    const diffInMs = date.getTime() - now.getTime();
-    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  // Ensure we have a proper Date object
+  const dateObj = date instanceof Date ? date : new Date(date);
 
-    if (diffInDays < 0) {
-      const overdueDays = Math.abs(diffInDays);
-      if (overdueDays === 1) {
-        return "Overdue by 1 day";
-      } else if (overdueDays < 1) {
-        return "Overdue";
-      } else {
-        return `Overdue by ${overdueDays} days`;
-      }
-    } else if (diffInDays === 0) {
-      return "Due today";
-    } else if (diffInDays === 1) {
-      return "Due tomorrow";
-    } else {
-      return `Due in ${diffInDays} days`;
-    }
-  };
+  // Check if the conversion was successful
+  if (isNaN(dateObj.getTime())) {
+    return (
+      <span className={cn("text-xs font-medium text-red-600", className)}>
+        Invalid date
+      </span>
+    );
+  }
 
-  const dueDateText = formatDueDate(date);
-  const isOverdue = date < new Date();
+  const dueDateText = formatDueDate(dateObj);
+  const isOverdue = dateObj < new Date();
 
   return (
     <span

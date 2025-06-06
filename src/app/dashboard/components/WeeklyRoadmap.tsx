@@ -123,7 +123,6 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     return date.toDateString() === today.toDateString();
   };
 
-  console.log('Rendering WeeklyRoadmap with tasks:', tasks);
   console.log('Tasks by date:', tasksByDate);
 
   return (

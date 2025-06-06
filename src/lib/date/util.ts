@@ -161,3 +161,34 @@ export const formatWeekRange = (dates: Date[]) => {
   };
   return `${formatDate(start)} - ${formatDate(end)}`;
 };
+
+export const formatDueDate = (date: Date | string) => {
+  // Ensure we have a proper Date object
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  if (isNaN(dateObj.getTime())) {
+    console.error('formatDueDate: Invalid Date object created from:', date);
+    return "Invalid date";
+  }
+
+    const now = new Date();
+    const diffInMs = dateObj.getTime() - now.getTime();
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+
+    if (diffInDays < 0) {
+      const overdueDays = Math.abs(diffInDays);
+      if (overdueDays === 1) {
+        return "Overdue by 1 day";
+      } else if (overdueDays < 1) {
+        return "Overdue";
+      } else {
+        return `Overdue by ${overdueDays} days`;
+      }
+    } else if (diffInDays === 0) {
+      return "Due today";
+    } else if (diffInDays === 1) {
+      return "Due tomorrow";
+    } else {
+      return `Due in ${diffInDays} days`;
+    }
+};
