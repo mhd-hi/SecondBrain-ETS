@@ -5,7 +5,9 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types/task";
 import { TaskStatus } from "@/types/task";
-import { handleApiRequest, handleApiError, handleApiSuccess } from "@/lib/api/util";
+import { handleApiSuccess } from "@/lib/api/util";
+import { withLoadingAndErrorHandling } from "@/lib/loading/util";
+import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
 
 interface WeekAccordionProps {
   week: number;
@@ -18,15 +20,16 @@ const WeekAccordion = ({ week, tasks, onTaskUpdate }: WeekAccordionProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTaskUpdate = async (taskId: string, updates: Partial<Task>) => {
-    await handleApiRequest(
+    const result = await withLoadingAndErrorHandling(
       async () => {
         await onTaskUpdate(taskId, updates);
         handleApiSuccess("Task updated successfully");
       },
-      (error) => handleApiError(error, "Failed to update task"),
-      "Updating task...",
-      setIsLoading
+      setIsLoading,
+      (error) => ErrorHandlers.api(error, CommonErrorMessages.TASK_UPDATE_FAILED, 'WeekAccordion')
     );
+    
+    return result;
   };
 
   return (
@@ -89,4 +92,4 @@ const WeekAccordion = ({ week, tasks, onTaskUpdate }: WeekAccordionProps) => {
   );
 };
 
-export { WeekAccordion }; 
+export { WeekAccordion };

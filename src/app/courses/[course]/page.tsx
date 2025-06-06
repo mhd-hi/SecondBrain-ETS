@@ -14,6 +14,9 @@ import { CourseSelector } from '@/components/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
+import { api } from "@/lib/api/util";
+import { withLoadingAndErrorHandling } from "@/lib/loading/util";
+import { ErrorHandlers } from "@/lib/error/util";
 
 interface CoursePageProps {
   params: Promise<{
@@ -37,62 +40,48 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const fetchCourses = useCallback(async () => {
     try {
-      const response = await fetch('/api/courses');
-      if (!response.ok) {
-        throw new Error('Failed to fetch courses');
-      }
-      const data = await response.json() as Course[];
+      const data = await api.get<Course[]>('/api/courses');
       setCourses(data);
-    } catch (err) {
-      console.error('Error fetching courses:', err);
-      toast.error('Error loading courses', {
-        description: 'Please try refreshing the page',
-      });
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to load courses');
     }
   }, []);
 
   const fetchCourse = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/courses/${courseId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch course');
+    await withLoadingAndErrorHandling(
+      async () => {
+        const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);
+
+        // Convert dueDate strings to Date objects and handle invalid dates
+        const tasksWithValidatedDates: Task[] = data.tasks.map(task => {
+            let dueDate: Date;
+            // Attempt to create Date from fetched dueDate
+            const fetchedDate = task.dueDate ? new Date(task.dueDate) : undefined;
+
+            // If fetched dueDate is invalid or missing, calculate based on week
+            if (!fetchedDate || isNaN(fetchedDate.getTime())) {
+                // Fallback: calculate dueDate based on week if original is invalid or missing
+                dueDate = calculateTaskDueDate(task.week);
+            } else {
+                // Otherwise, use the valid fetched date
+                dueDate = fetchedDate;
+            }
+
+            return {
+                ...task,
+                dueDate: dueDate, // Ensure dueDate is always a Date
+            } as Task; // Cast to Task to match state type
+        });
+
+        setCourse(data);
+        setTasks(tasksWithValidatedDates);
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to load course data');
+        ErrorHandlers.api(error, 'Failed to load course');
       }
-      const data = await response.json() as CourseResponse;
-
-      // Convert dueDate strings to Date objects and handle invalid dates
-      const tasksWithValidatedDates: Task[] = data.tasks.map(task => {
-          let dueDate: Date;
-          // Attempt to create Date from fetched dueDate
-          const fetchedDate = task.dueDate ? new Date(task.dueDate) : undefined;
-
-          // If fetched dueDate is invalid or missing, calculate based on week
-          if (!fetchedDate || isNaN(fetchedDate.getTime())) {
-              // Fallback: calculate dueDate based on week if original is invalid or missing
-              dueDate = calculateTaskDueDate(task.week);
-          } else {
-              // Otherwise, use the valid fetched date
-              dueDate = fetchedDate;
-          }
-
-          return {
-              ...task,
-              dueDate: dueDate, // Ensure dueDate is always a Date
-          } as Task; // Cast to Task to match state type
-      });
-
-      setCourse(data);
-      setTasks(tasksWithValidatedDates);
-    } catch (err) {
-      console.error('Error fetching course:', err);
-      setError('Failed to load course data');
-      toast.error('Error loading course', {
-        description: 'Please try refreshing the page',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }, [courseId]);
 
   useEffect(() => {
@@ -102,15 +91,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task');
-      }
+      await api.patch(`/api/tasks/${taskId}`, updates);
 
       // Update local state instead of refetching
       setTasks(prevTasks => 
@@ -123,30 +104,17 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       toast.success('Task updated successfully');
     } catch (error) {
-      console.error('Error updating task:', error);
-      toast.error('Failed to update task', {
-        description: 'An error occurred while updating the task',
-      });
+      ErrorHandlers.api(error, 'Failed to update task');
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete task');
-      }
-
+      await api.delete(`/api/tasks/${taskId}`);
       toast.success('Task deleted successfully');
       await fetchCourse();
     } catch (error) {
-      console.error('Error deleting task:', error);
-      toast.error('Failed to delete task', {
-        description: 'An error occurred while deleting the task',
-      });
+      ErrorHandlers.api(error, 'Failed to delete task');
     }
   };
 

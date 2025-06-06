@@ -1,5 +1,4 @@
 # Fixes
-- Fix estimatedEffort
 - Add a container bg color to each container in the dashboard.
 - Use name of days of week for header in dayColumn.
 - fix week/due date conflict

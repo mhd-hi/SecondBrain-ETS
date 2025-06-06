@@ -5,9 +5,10 @@ import { eq } from 'drizzle-orm';
 import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 import { calculateTaskDueDate } from '@/lib/task/util';
+import { withErrorHandling, successResponse } from '@/lib/api/server-util';
 
-export async function PATCH(request: Request, { params }: { params: { taskId: string } }) {
-  try {
+export const PATCH = withErrorHandling(
+  async (request: Request, { params }: { params: { taskId: string } }) => {
     const { taskId } = params;
     const updates = await request.json() as Partial<Task>;
 
@@ -47,21 +48,13 @@ export async function PATCH(request: Request, { params }: { params: { taskId: st
       );
     }
 
-    return NextResponse.json(updatedTask);
-  } catch (error) {
-    console.error('Error updating task:', error);
-    return NextResponse.json(
-      { error: 'Failed to update task' },
-      { status: 500 }
-    );
-  }
-}
+    return successResponse(updatedTask);
+  },
+  'Error updating task'
+);
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ taskId: string }> }
-) {
-  try {
+export const DELETE = withErrorHandling(
+  async (request: Request, { params }: { params: Promise<{ taskId: string }> }) => {
     const { taskId } = await params;
 
     // Delete the task
@@ -69,12 +62,7 @@ export async function DELETE(
       .delete(tasks)
       .where(eq(tasks.id, taskId));
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting task:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete task' },
-      { status: 500 }
-    );
-  }
-}
+    return successResponse({ success: true });
+  },
+  'Error deleting task'
+);

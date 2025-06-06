@@ -1,32 +1,25 @@
 "use client";
 
 import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
 import type { Course } from '@/types/course';
+import { api } from '@/lib/api/util';
+import { CommonErrorMessages } from '@/lib/error/util';
+import { withLoadingState } from '@/lib/loading/util';
 
 export function useCourses() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const fetchCourses = useCallback(async () => {
-    setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/courses');
-      if (!response.ok) {
-        throw new Error('Failed to fetch courses');
-      }
-      const data = await response.json() as Course[];
+      const data = await withLoadingState(
+        () => api.get<Course[]>('/api/courses', CommonErrorMessages.COURSE_FETCH_FAILED),
+        setIsLoading
+      );
       setCourses(data);
-    } catch (err) {
-      console.error('Error fetching courses:', err);
+    } catch {
       setError('Failed to load courses');
-      toast.error('Error loading courses', {
-        description: 'Please try refreshing the page',
-      });
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -36,4 +29,4 @@ export function useCourses() {
     error,
     fetchCourses,
   };
-} 
+}

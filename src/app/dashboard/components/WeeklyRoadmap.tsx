@@ -126,71 +126,79 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   console.log('Tasks by date:', tasksByDate);
 
   return (
-    <div className="w-full space-y-4">
-      {/* Navigation stays outside the scrollable container */}
-      <div className="flex items-center justify-between w-full">
-        <div className="flex items-center gap-4">
-          {/* Today button - moved before arrow buttons */}
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-md px-3 py-1 text-xs"
-            onClick={() => setWeekOffset(0)}
-          >
-            Today
-          </Button>
-
-          {/* Circular navigation buttons */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full h-8 w-8"
-              onClick={() => setWeekOffset(prev => prev - 1)}
-              disabled={isLoading}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full h-8 w-8"
-              onClick={() => setWeekOffset(prev => prev + 1)}
-              disabled={isLoading}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Week display */}
-          <span className="text-sm font-medium">
-            {weekOffset === 0 ? 'This Week' : 
-             weekOffset === 1 ? 'Next Week' :
-             weekOffset === -1 ? 'Last Week' :
-             `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
-            <span className="text-muted-foreground ml-2">
-              ({formatWeekRange(weekDates)})
-            </span>
-          </span>
+    <div className="w-full">
+      {/* Container with background and title */}
+      <div className="border rounded-lg bg-muted/30">
+        {/* Title */}
+        <div className="p-6 pb-2">
+          <h2 className="text-2xl font-semibold mb-6">Weekly Roadmap</h2>
         </div>
-      </div>
+        
+        {/* Navigation inside the container */}
+        <div className="flex items-center justify-between w-full px-4 pb-4">
+          <div className="flex items-center gap-4">
+            {/* Today button - moved before arrow buttons */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-md px-3 py-1 text-xs"
+              onClick={() => setWeekOffset(0)}
+            >
+              Today
+            </Button>
 
-      {/* Scrollable container with sticky headers */}
-      <div className="border rounded-lg bg-muted/30 h-[calc(100vh-200px)] overflow-y-auto">
-        <div className="grid grid-cols-7 gap-4 p-4">
-          {weekDates.map((date) => (
-            <DayColumn
-              key={date.toDateString()}
-              date={date}
-              tasks={tasksByDate[date.toDateString()] ?? []}
-              onStatusChange={handleStatusChange}
-              onTaskAdded={handleTaskAdded}
-              courses={courses}
-              isToday={isToday(date)}
-              isSticky={true}
-            />
-          ))}
+            {/* Circular navigation buttons */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full h-8 w-8"
+                onClick={() => setWeekOffset(prev => prev - 1)}
+                disabled={isLoading}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full h-8 w-8"
+                onClick={() => setWeekOffset(prev => prev + 1)}
+                disabled={isLoading}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Week display */}
+            <span className="text-sm font-medium">
+              {weekOffset === 0 ? 'This Week' : 
+               weekOffset === 1 ? 'Next Week' :
+               weekOffset === -1 ? 'Last Week' :
+               `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
+              <span className="text-muted-foreground ml-2">
+                ({formatWeekRange(weekDates)})
+              </span>
+            </span>
+          </div>
+        </div>
+
+        {/* Scrollable container with sticky headers */}
+        <div className="h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="grid grid-cols-7 gap-4 p-4 pt-0">
+            {weekDates.map((date) => (
+              <DayColumn
+                key={date.toDateString()}
+                date={date}
+                tasks={tasksByDate[date.toDateString()] ?? []}
+                onStatusChange={handleStatusChange}
+                onTaskAdded={handleTaskAdded}
+                courses={courses}
+                isToday={isToday(date)}
+                isSticky={true}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

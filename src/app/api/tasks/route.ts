@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
@@ -6,47 +5,27 @@ import { TaskStatus } from '@/types/task';
 import type {Task, Subtask} from '@/types/task'
 import { calculateTaskDueDate } from '@/lib/task/util';
 import { calculateWeekFromDueDate } from '@/lib/task/util';
+import { apiRoutePatterns } from '@/lib/api/server-util';
 
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const courseId = searchParams.get('courseId');
+export const GET = apiRoutePatterns.get(
+  async (searchParams) => {
+    const courseId = searchParams.get('courseId')!;
+    return await db.select().from(tasks).where(eq(tasks.courseId, courseId)).orderBy(tasks.week);
+  },
+  'Error fetching tasks',
+  ['courseId']
+);
 
-    if (!courseId) {
-      return NextResponse.json(
-        { error: 'Course ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const courseTasks = await db.select().from(tasks).where(eq(tasks.courseId, courseId)).orderBy(tasks.week);
-    return NextResponse.json(courseTasks);
-  } catch (error) {
-    console.error('Error fetching tasks:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch tasks' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const { courseId, tasks: newTasks } = await request.json() as {
-      courseId: string;
-      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
-        subtasks?: Subtask[];
-        notes?: string;
-        dueDate?: string;
-      }>
-    };
-
-    if (!courseId || !newTasks?.length) {
-      return NextResponse.json(
-        { error: 'Course ID and tasks are required' },
-        { status: 400 }
-      );
-    }
+export const POST = apiRoutePatterns.post(
+  async (data: {
+    courseId: string;
+    tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
+      subtasks?: Subtask[];
+      notes?: string;
+      dueDate?: string;
+    }>
+  }) => {
+    const { courseId, tasks: newTasks } = data;
 
     const insertedTasks = await db.insert(tasks).values(
       newTasks.map(task => ({
@@ -63,32 +42,17 @@ export async function POST(request: Request) {
       }))
     ).returning();
 
-    return NextResponse.json(insertedTasks);
-  } catch (error) {
-    console.error('Error creating tasks:', error);
-    return NextResponse.json(
-      { error: 'Failed to create tasks' },
-      { status: 500 }
-    );
-  }
-}
+    return insertedTasks;
+  },
+  'Error creating tasks',
+  ['courseId', 'tasks']
+);
 
-export async function PATCH(request: Request) {
-  try {
-    const { id, ...updates } = await request.json() as { 
-      id: string 
-    } & Partial<Task> & {
-      subtasks?: Subtask[];
-      notes?: string;
-    };
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Task ID is required' },
-        { status: 400 }
-      );
-    }
-
+export const PATCH = apiRoutePatterns.patch(
+  async (id: string, updates: Partial<Task> & {
+    subtasks?: Subtask[];
+    notes?: string;
+  }) => {
     const [updatedTask] = await db.update(tasks)
       .set({
         ...updates,
@@ -104,38 +68,18 @@ export async function PATCH(request: Request) {
       .where(eq(tasks.id, id))
       .returning();
 
-    return NextResponse.json(updatedTask);
-  } catch (error) {
-    console.error('Error updating task:', error);
-    return NextResponse.json(
-      { error: 'Failed to update task' },
-      { status: 500 }
-    );
-  }
-}
+    return updatedTask;
+  },
+  'Error updating task'
+);
 
-export async function DELETE(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Task ID is required' },
-        { status: 400 }
-      );
-    }
-
+export const DELETE = apiRoutePatterns.delete(
+  async (id: string) => {
     await db.delete(tasks).where(eq(tasks.id, id));
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting task:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete task' },
-      { status: 500 }
-    );
-  }
-}
+    return { success: true };
+  },
+  'Error deleting task'
+);
 
 export async function getCoursesWithInProgressCount() {
   // ... existing getCoursesWithInProgressCount function ...

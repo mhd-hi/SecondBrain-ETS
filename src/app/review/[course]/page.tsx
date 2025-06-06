@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { calculateTaskDueDate, getSessionWeeks, getCurrentSession } from '@/lib/task/util';
 import { CourseSelector } from '@/components/CourseSelector';
+import { api } from '@/lib/api/util';
+import { withLoadingAndErrorHandling } from '@/lib/loading/util';
+import { ErrorHandlers } from '@/lib/error/util';
 
 interface ReviewQueueProps {
   params: Promise<{
@@ -35,67 +38,46 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const fetchCourses = useCallback(async () => {
     try {
-      const response = await fetch('/api/courses');
-      if (!response.ok) {
-        throw new Error('Failed to fetch courses');
-      }
-      const data = await response.json() as Course[];
+      const data = await api.get<Course[]>('/api/courses');
       setCourses(data);
-    } catch (err) {
-      console.error('Error fetching courses:', err);
-      toast.error('Error loading courses', {
-        description: 'Please try refreshing the page',
-      });
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to load courses');
     }
   }, []);
-
   const fetchCourse = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`/api/courses/${unwrappedParams.course}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch course');
+    await withLoadingAndErrorHandling(
+      async () => {
+        const data = await api.get<CourseResponse>(`/api/courses/${unwrappedParams.course}`);
+        setCourse(data);
+        setTasks(data.tasks.filter((task) => task.status === TaskStatus.DRAFT));
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to load course data');
+        ErrorHandlers.api(error, 'Failed to load course');
       }
-      const data = await response.json() as CourseResponse;
-      setCourse(data);
-      setTasks(data.tasks.filter((task) => task.status === TaskStatus.DRAFT));
-    } catch (err) {
-      console.error('Error fetching course:', err);
-      setError('Failed to load course data');
-      toast.error('Error loading course', {
-        description: 'Please try refreshing the page',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    );
   }, [unwrappedParams.course]);
 
   useEffect(() => {
     void fetchCourses();
     void fetchCourse();
   }, [unwrappedParams.course, fetchCourse, fetchCourses]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch(`/api/tasks?courseId=${unwrappedParams.course}`)
-      if (!response.ok) {
-        throw new Error("Failed to fetch tasks")
+    
+    await withLoadingAndErrorHandling(
+      async () => {
+        const data = await api.get<ApiResponse>(`/api/tasks?courseId=${unwrappedParams.course}`);
+        setTasks(data.tasks.filter(task => task.status === TaskStatus.DRAFT));
+      },
+      setIsLoading,
+      (error) => {
+        setError(error instanceof Error ? error.message : "An error occurred");
       }
-      const data = (await response.json()) as ApiResponse
-      setTasks(data.tasks.filter(task => task.status === TaskStatus.DRAFT))
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
-    } finally {
-      setIsLoading(false)
-    }
+    );
   }
 
   if (error) {
@@ -123,23 +105,14 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
     acc[week]?.push(task);
     return acc;
   }, {} as Record<number, Task[]>);
-
   const handleTaskUpdate = async () => {
     try {
-      const response = await fetch(`/api/courses/${courseId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch course');
-      }
-      const data = await response.json() as Course;
+      const data = await api.get<Course>(`/api/courses/${courseId}`);
       setCourse(data);
-    } catch (err) {
-      console.error('Error refreshing course:', err);
-      toast.error('Échec du rafraîchissement', {
-        description: 'Une erreur est survenue lors du rafraîchissement des données',
-      });
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to refresh course data');
     }
   };
-
   // Handlers for global accept/discard
   const handleAcceptAllCourse = async () => {
     try {
@@ -147,13 +120,9 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       const sessionWeeks = getSessionWeeks(currentSession);
 
       const promises = tasks.map(task => {
-        return fetch(`/api/tasks/${task.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            status: TaskStatus.TODO,
-            dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-          }),
+        return api.patch(`/api/tasks/${task.id}`, { 
+          status: TaskStatus.TODO,
+          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
         });
       });
 
@@ -163,20 +132,12 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       });
       router.push('/');
     } catch (error) {
-      console.error('Error accepting all tasks:', error);
-      toast.error('Échec de l\'acceptation', {
-        description: 'Une erreur est survenue lors de l\'acceptation des tâches',
-      });
+      ErrorHandlers.api(error, 'Échec de l\'acceptation des tâches');
     }
   };
-
   const handleDiscardAllCourse = async () => {
     try {
-      const promises = tasks.map(task =>
-        fetch(`/api/tasks/${task.id}`, {
-          method: 'DELETE',
-        })
-      );
+      const promises = tasks.map(task => api.delete(`/api/tasks/${task.id}`));
 
       await Promise.all(promises);
       toast.success('Brouillons supprimés', {
@@ -184,13 +145,9 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       });
       await handleTaskUpdate();
     } catch (error) {
-      console.error('Error discarding all tasks:', error);
-      toast.error('Échec de la suppression', {
-        description: 'Une erreur est survenue lors de la suppression des brouillons',
-      });
+      ErrorHandlers.api(error, 'Échec de la suppression des brouillons');
     }
   };
-
   const handleAccept = async (id: string) => {
     try {
       const task = tasks.find(t => t.id === id);
@@ -201,50 +158,29 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
       const sessionWeeks = getSessionWeeks(currentSession);
 
-      const response = await fetch(`/api/tasks/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          status: TaskStatus.TODO,
-          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-        }),
+      await api.patch(`/api/tasks/${id}`, { 
+        status: TaskStatus.TODO,
+        dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to accept task');
-      }
 
       toast.success('Task accepted', {
         description: 'The task has been accepted successfully',
       });
       await fetchCourse();
     } catch (error) {
-      console.error('Error accepting task:', error);
-      toast.error('Failed to accept task', {
-        description: 'An error occurred while accepting the task',
-      });
+      ErrorHandlers.api(error, 'Failed to accept task');
     }
   };
-
   const handleDiscard = async (id: string) => {
     try {
-      const response = await fetch(`/api/tasks/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to discard task');
-      }
+      await api.delete(`/api/tasks/${id}`);
 
       toast.success('Task discarded', {
         description: 'The task has been discarded successfully',
       });
       await fetchCourse();
     } catch (error) {
-      console.error('Error discarding task:', error);
-      toast.error('Failed to discard task', {
-        description: 'An error occurred while discarding the task',
-      });
+      ErrorHandlers.api(error, 'Failed to discard task');
     }
   };
 

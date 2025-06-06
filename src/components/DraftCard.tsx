@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import type { Task } from "@/types/task";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CheckCircle2, Pencil, Trash2 } from "lucide-react";
 import { ModifyPanel } from './ModifyPanel';
 import { handleConfirm } from "@/lib/dialog/util";
+import { api, handleApiSuccess } from "@/lib/api/util";
+import { withLoadingState } from "@/lib/loading/util";
+import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
 
 interface DraftCardProps {
   draft: Task;
@@ -35,53 +37,35 @@ export const DraftCard = ({
     await handleConfirm(
       "Are you sure you want to delete this draft? This action cannot be undone.",
       async () => {
-        setIsLoading(true);
         try {
-          const response = await fetch(`/api/tasks/${draft.id}`, {
-            method: 'DELETE',
-          });
-
-          if (!response.ok) {
-            throw new Error('Failed to delete draft');
-          }
-
-          toast.success('Draft deleted successfully');
-          onDelete(draft.id);
+          await withLoadingState(
+            async () => {
+              await api.delete(`/api/tasks/${draft.id}`, CommonErrorMessages.DRAFT_DELETE_FAILED);
+              handleApiSuccess('Draft deleted successfully');
+              onDelete(draft.id);
+            },
+            setIsLoading
+          );
         } catch (error) {
-          console.error('Error deleting draft:', error);
-          toast.error('Failed to delete draft', {
-            description: 'An error occurred while deleting the draft',
-          });
-        } finally {
-          setIsLoading(false);
+          ErrorHandlers.api(error, CommonErrorMessages.DRAFT_DELETE_FAILED, 'DraftCard');
         }
       }
     );
   };
 
   const handleSave = async (updatedDraft: Task) => {
-    setIsLoading(true);
     try {
-      const response = await fetch(`/api/tasks/${draft.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedDraft),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update draft');
-      }
-
-      toast.success('Draft updated successfully');
-      onModify(draft.id);
-      setIsEditing(false);
+      await withLoadingState(
+        async () => {
+          await api.patch(`/api/tasks/${draft.id}`, updatedDraft, CommonErrorMessages.DRAFT_UPDATE_FAILED);
+          handleApiSuccess('Draft updated successfully');
+          onModify(draft.id);
+          setIsEditing(false);
+        },
+        setIsLoading
+      );
     } catch (error) {
-      console.error('Error updating draft:', error);
-      toast.error('Failed to update draft', {
-        description: 'An error occurred while updating the draft',
-      });
-    } finally {
-      setIsLoading(false);
+      ErrorHandlers.api(error, CommonErrorMessages.DRAFT_UPDATE_FAILED, 'DraftCard');
     }
   };
 

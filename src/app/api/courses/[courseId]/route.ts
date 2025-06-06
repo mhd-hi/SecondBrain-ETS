@@ -2,12 +2,10 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { courses, tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { withErrorHandling, successResponse } from '@/lib/api/server-util';
 
-export async function GET(
-  request: Request,
-  context: { params: Promise<{ courseId: string }> }
-) {
-  try {
+export const GET = withErrorHandling(
+  async (request: Request, context: { params: Promise<{ courseId: string }> }) => {
     const { courseId } = await context.params;
     const course = await db
       .select()
@@ -27,24 +25,16 @@ export async function GET(
       .from(tasks)
       .where(eq(tasks.courseId, courseId));
 
-    return NextResponse.json({
+    return successResponse({
       ...course[0],
       tasks: courseTasks,
     });
-  } catch (error) {
-    console.error('Error fetching course:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch course' },
-      { status: 500 }
-    );
-  }
-}
+  },
+  'Error fetching course'
+);
 
-export async function DELETE(
-  request: Request,
-  context: { params: { courseId: string } }
-) {
-  try {
+export const DELETE = withErrorHandling(
+  async (request: Request, context: { params: { courseId: string } }) => {
     const { courseId } = context.params;
 
     if (!courseId) {
@@ -66,13 +56,7 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-    console.error('Error deleting course:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete course' },
-      { status: 500 }
-    );
-  }
-} 
+    return successResponse({ success: true });
+  },
+  'Error deleting course'
+);

@@ -19,10 +19,9 @@ import { Plus } from "lucide-react";
 import { TaskStatus, type TaskType } from "@/types/task";
 import type { Course } from "@/types/course";
 import { DatePicker } from "@/components/ui/date-picker";
-
-interface ErrorResponse {
-  error?: string;
-}
+import { api } from "@/lib/api/util";
+import { withLoadingState } from "@/lib/loading/util";
+import { ErrorHandlers } from "@/lib/error/util";
 
 interface AddTaskDialogProps {
   courseId?: string;
@@ -56,22 +55,17 @@ export const AddTaskDialog = ({
   useEffect(() => {
     setSelectedCourseId(courseId ?? null);
   }, [courseId]);
-
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     if (!courseId && !selectedCourseId) {
       toast.error("Please select a course.");
-      setIsLoading(false);
       return;
     }
 
-    try {
-      const response = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    await withLoadingState(async () => {
+      try {
+        await api.post('/api/tasks', {
           courseId: courseId ?? selectedCourseId,
           tasks: [
             {
@@ -80,33 +74,23 @@ export const AddTaskDialog = ({
               dueDate: newTask.dueDate.toISOString(),
             }
           ]
-        }),
-      });
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json() as ErrorResponse;
-        throw new Error(errorData.error ?? 'Failed to add task');
+        toast.success('Task added successfully');
+        setIsOpen(false);
+        setNewTask({
+          title: '',
+          notes: '',
+          estimatedEffort: 1,
+          dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
+          type: 'theorie' as TaskType,
+          status: TaskStatus.TODO,
+        });
+        onTaskAdded();
+      } catch (error) {
+        ErrorHandlers.api(error, 'Failed to add task');
       }
-
-      toast.success('Task added successfully');
-      setIsOpen(false);
-      setNewTask({
-        title: '',
-        notes: '',
-        estimatedEffort: 1,
-        dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
-        type: 'theorie' as TaskType,
-        status: TaskStatus.TODO,
-      });
-      onTaskAdded();
-    } catch (error) {
-      console.error('Error adding task:', error);
-      toast.error('Failed to add task', {
-        description: error instanceof Error ? error.message : 'An unknown error occurred',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, setIsLoading);
   };
 
   return (
