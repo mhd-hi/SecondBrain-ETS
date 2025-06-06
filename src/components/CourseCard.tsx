@@ -1,25 +1,18 @@
 "use client";
 
 import type { Course } from '@/types/course';
-import { TaskStatus } from '@/types/task';
 import { getCourseColor } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { MoreActionsDropdown } from "@/components/shared/more-actions-dropdown";
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRef, useEffect, useState } from 'react';
-import { 
-  formatDate, 
-  getNextTask, 
-  getUpcomingTask, 
+import {
+  formatDate,
+  getNextTask,
+  getUpcomingTask,
   calculateProgress,
   getCompletedTasksCount,
-  getTotalTasksCount 
+  getTotalTasksCount
 } from '@/lib/task/util';
 
 interface CourseCardProps {
@@ -65,21 +58,22 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
     onDeleteCourse(course.id);
   };
 
+
   return (
     <div
       className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-6 gap-4"
       style={{ borderLeft: `4px solid ${courseColor}` }}
     >
-      <DropdownMenu>
-        <DropdownMenuTrigger className="absolute -top-[10px] -right-[10px] z-10 rounded-full bg-accent p-[6px] hover:bg-gray-300 hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity opacity-0 group-hover:opacity-100">
-          <MoreHorizontal className="h-5 w-5 text-gray-600" aria-label="Course actions" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleDeleteClick} className="text-destructive focus:text-destructive">
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <MoreActionsDropdown
+        actions={[
+          {
+            label: "Delete",
+            onClick: handleDeleteClick,
+            destructive: true,
+          }
+          ,]}
+        triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
+      />
 
       <div className="flex justify-between items-start">
         <h2 className="text-xl font-bold">{course.code}</h2>
@@ -128,47 +122,47 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
         )}
 
         {upcomingTask && upcomingTask !== nextTask && (
-             <div>
-                {isUpcomingTaskTitleTruncated ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                           <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{upcomingTask.title}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                   <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div>
+            {isUpcomingTaskTitleTruncated ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                       <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-                   </p>
-                )}
-                 {upcomingTask.dueDate && (
-                   <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
-                     Due: {formatDate(upcomingTask.dueDate)}
-                   </p>
-                 )}
-             </div>
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{upcomingTask.title}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <span className="font-medium">Upcoming: </span>{upcomingTask.title}
+              </p>
+            )}
+            {upcomingTask.dueDate && (
+              <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
+                Due: {formatDate(upcomingTask.dueDate)}
+              </p>
+            )}
+          </div>
         )}
 
         {/* Display message when no upcoming tasks are found */}
         {!nextTask && !upcomingTask && (
-             <p className="text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
+          <p className="text-gray-700 dark:text-gray-300">No upcoming tasks.</p>
         )}
 
         {/* Display specific message if next task exists but no upcoming exam/homework is found */}
         {nextTask && !upcomingTask && (
-             <p className="text-gray-700 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">No upcoming exams or homework.</p>
+          <p className="text-gray-700 dark:text-gray-300 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">No upcoming exams or homework.</p>
         )}
 
       </div>
 
       <div className="flex justify-end mt-4">
-        <Link 
+        <Link
           href={`/courses/${course.id}`}
           className="text-sm text-muted-foreground hover:text-accent-foreground transition-colors"
           style={{ color: courseColor }}
@@ -178,4 +172,4 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       </div>
     </div>
   );
-} 
+}

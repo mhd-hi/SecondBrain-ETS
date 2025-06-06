@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -33,6 +33,17 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.DRAFT;
   const config = STATUS_CONFIG[validStatus];
 
+  // Helper function to get color value from status
+  const getStatusColor = (status: TaskStatus) => {
+    switch(status) {
+      case TaskStatus.DRAFT: return "#9ca3af"; // gray-400
+      case TaskStatus.TODO: return "#3b82f6"; // blue-500
+      case TaskStatus.IN_PROGRESS: return "#f59e0b"; // amber-500
+      case TaskStatus.COMPLETED: return "#10b981"; // emerald-500
+      default: return "#9ca3af"; // gray-400
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -43,7 +54,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
       role="group"
       aria-label="Task status changer"
     >
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
             className={cn(
@@ -59,24 +70,35 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
-          className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0"
+          className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0 rounded-md overflow-hidden"
         >
-          {STATUS_ORDER.map((status) => (
-            <DropdownMenuItem
-              key={status}
-              onClick={() => handleDropdownSelect(status)}
-              className={cn(
-                "h-8 px-4",
-                STATUS_CONFIG[status].bgColor,
-                STATUS_CONFIG[status].textColor,
-                "font-medium text-xs uppercase",
-                "hover:bg-black/5 focus:outline-none",
-                "cursor-pointer"
-              )}
-            >
-              {STATUS_CONFIG[status].label}
-            </DropdownMenuItem>
-          ))}
+          {STATUS_ORDER.map((status, index) => {
+            const statusConfig = STATUS_CONFIG[status];
+            const isCompleted = status === TaskStatus.COMPLETED;
+            const color = getStatusColor(status);
+
+            return (
+              <DropdownMenuItem
+                key={status}
+                onClick={() => handleDropdownSelect(status)}
+                className={cn(
+                  "h-8 px-4 rounded-none flex items-center gap-2",
+                  "font-medium text-xs uppercase text-gray-800",
+                  "hover:bg-gray-50 focus:outline-none",
+                  "cursor-pointer",
+                  // Add border to all items except the last one
+                  index !== STATUS_ORDER.length - 1 && "border-b border-gray-100"
+                )}
+              >
+                {isCompleted ? (
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                ) : (
+                  <div className="w-3 h-3 rounded-full border-2" style={{ borderColor: color }} />
+                )}
+                {statusConfig.label}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -95,4 +117,4 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   );
 };
 
-export { TaskStatusChanger }; 
+export { TaskStatusChanger };

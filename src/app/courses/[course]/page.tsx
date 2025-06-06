@@ -4,21 +4,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
 import type { Course } from '@/types/course';
-import { TaskStatus, type Task } from '@/types/task';
-import { getNextTaskStatus, calculateTaskDueDate } from '@/lib/task/util';
+import { type Task } from '@/types/task';
+import { calculateTaskDueDate } from '@/lib/task/util';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
-import { DatePicker } from "@/components/ui/date-picker";
 import { CourseSelector } from '@/components/CourseSelector';
+import { TaskStatusChanger } from '@/components/TaskStatusChanger';
+import { MoreActionsDropdown } from "@/components/shared/more-actions-dropdown";
 
 interface CoursePageProps {
   params: Promise<{
@@ -234,85 +228,53 @@ export default function CoursePage({ params }: CoursePageProps) {
           {Object.entries(tasksByWeek)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([week, weekTasks]) => (
-              <section key={week} className="space-y-4">
-                <h2 className="text-xl font-semibold">Week {week}</h2>
+              <div key={week} className="space-y-4">
+                <h3 className="text-lg font-semibold">Week {week}</h3>
                 <div className="grid gap-4">
                   {weekTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="text-card-foreground rounded-lg border bg-card p-4 shadow-sm"
+                      className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
                     >
-                      <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-medium">{task.title}</h3>
+                      <MoreActionsDropdown
+                        actions={[
+                          {
+                            label: "Delete",
+                            onClick: () => void handleDeleteTask(task.id),
+                            destructive: true,
+                          },
+                        ]}
+                        triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
+                      />
+                      
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="space-y-1 flex-grow">
+                          <h4 className="font-medium">{task.title}</h4>
+                          <p className="text-sm text-muted-foreground">{task.notes}</p>
+                          {task.dueDate && (
+                            <p className="text-sm text-muted-foreground">
+                              Due: {task.dueDate.toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
-                           {task.dueDate && (
-                              <div className="flex items-center gap-2">
-                                <DatePicker
-                                  date={task.dueDate}
-                                  onDateChange={(date) => {
-                                    if (date) {
-                                      void handleUpdateTask(task.id, { dueDate: date });
-                                    }
-                                  }}
-                                />
-                              </div>
-                           )}
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleUpdateTask(task.id, { status: getNextTaskStatus(task.status) })}>
-                              Mark as {getNextTaskStatus(task.status)}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDeleteTask(task.id)}>
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          <TaskStatusChanger
+                            currentStatus={task.status}
+                            onStatusChange={(newStatus) => handleUpdateTask(task.id, { status: newStatus })}
+                          />
+                        </div>
                       </div>
                     </div>
-                    {task.notes && (
-                      <p className="text-sm text-muted-foreground mt-2">{task.notes}</p>
-                    )}
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                      <span>Type: {task.type}</span>
-                      <span>Effort: {task.estimatedEffort}h</span>
-                      <span>Status: {task.status}</span>
-                    </div>
-
-                  {task.subtasks && task.subtasks.length > 0 && (
-                     <div className="mt-4 border-t pt-4">
-                         <h4 className="text-md font-medium mb-2">Subtasks</h4>
-                         <ul className="space-y-2">
-                            {task.subtasks.map(subtask => (
-                                <li key={subtask.id} className="flex items-center justify-between text-sm text-muted-foreground">
-                                    <span>{subtask.title}</span>
-                                    <span>{subtask.status}</span>
-                                </li>
-                            ))}
-                           </ul>
-                       </div>
-                    )}
-
-                    </div>
-                  ))
-                }
+                  ))}
+                </div>
               </div>
-            </section>
-          ))
-        }
-      </div>
-    )
-   : (
+            ))}
+        </div>
+      ) : (
         <div className="text-center text-muted-foreground">
           No tasks found. Add a task to get started.
         </div>
       )}
     </div>
   );
-} 
+}
