@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from 'react';
-import type { Course } from '@/types/course';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CourseSelector } from '@/components/CourseSelector';
 import { ErrorState } from '@/components/ui/error-state';

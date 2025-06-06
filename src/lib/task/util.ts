@@ -221,52 +221,41 @@ export const getUpcomingTask = (tasks: Task[]) => {
   return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
 };
 
-/**
- * Calculates the progress percentage of completed tasks
- */
 export const calculateProgress = (tasks: Task[]) => {
   const completedTasks = tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
   const totalTasks = tasks.length;
   return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 };
 
-/**
- * Gets the count of completed tasks
- */
 export const getCompletedTasksCount = (tasks: Task[]): number => {
   return tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
 };
 
-/**
- * Gets the total number of tasks
- */
+
 export const getTotalTasksCount = (tasks: Task[]): number => {
   return tasks.length;
 };
 
-/**
- * Configuration for task statuses including labels and styling
- */
 export const STATUS_CONFIG = {
   [TaskStatus.DRAFT]: {
     label: "DRAFT",
-    bgColor: "bg-gray-500",
-    textColor: "text-gray-50",
+    bgColor: "gray-500",
+    textColor: "gray-50",
   },
   [TaskStatus.TODO]: {
     label: "TODO",
-    bgColor: "bg-blue-500",
-    textColor: "text-white",
+    bgColor: "blue-500",
+    textColor: "white",
   },
   [TaskStatus.IN_PROGRESS]: {
     label: "IN PROGRESS",
-    bgColor: "bg-orange-500",
-    textColor: "text-white",
+    bgColor: "yellow-500",
+    textColor: "white",
   },
   [TaskStatus.COMPLETED]: {
     label: "COMPLETED",
-    bgColor: "bg-green-500",
-    textColor: "text-white",
+    bgColor: "green-600",
+    textColor: "white",
   },
 } as const;
 

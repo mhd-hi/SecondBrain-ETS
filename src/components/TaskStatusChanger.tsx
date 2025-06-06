@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -18,37 +17,23 @@ interface TaskStatusChangerProps {
 }
 
 const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
   const handleArrowClick = () => {
     onStatusChange(getNextStatus(currentStatus));
   };
 
   const handleDropdownSelect = (status: TaskStatus) => {
     onStatusChange(status);
-    setIsDropdownOpen(false);
   };
 
   // Ensure currentStatus is a valid TaskStatus
   const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.DRAFT;
   const config = STATUS_CONFIG[validStatus];
 
-  // Helper function to get color value from status
-  const getStatusColor = (status: TaskStatus) => {
-    switch(status) {
-      case TaskStatus.DRAFT: return "#9ca3af"; // gray-400
-      case TaskStatus.TODO: return "#3b82f6"; // blue-500
-      case TaskStatus.IN_PROGRESS: return "#f59e0b"; // amber-500
-      case TaskStatus.COMPLETED: return "#10b981"; // emerald-500
-      default: return "#9ca3af"; // gray-400
-    }
-  };
-
   return (
     <div
       className={cn(
         "inline-flex items-center h-8 rounded-md overflow-hidden",
-        config.bgColor,
+        `bg-${config.bgColor}`,
         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       )}
       role="group"
@@ -59,7 +44,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           <button
             className={cn(
               "px-3 h-full flex items-center",
-              config.textColor,
+              `text-${config.textColor}`,
               "font-medium text-xs uppercase",
               "hover:bg-black/5 focus:outline-none"
             )}
@@ -75,7 +60,6 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           {STATUS_ORDER.map((status, index) => {
             const statusConfig = STATUS_CONFIG[status];
             const isCompleted = status === TaskStatus.COMPLETED;
-            const color = getStatusColor(status);
 
             return (
               <DropdownMenuItem
@@ -83,18 +67,18 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                 onClick={() => handleDropdownSelect(status)}
                 className={cn(
                   "h-8 px-4 rounded-none flex items-center gap-2",
-                  "font-medium text-xs uppercase text-gray-800",
-                  "hover:bg-gray-50 focus:outline-none",
+                  "font-medium text-xs uppercase",
+                  "hover:bg-accent hover:text-accent-foreground focus:outline-none",
                   "cursor-pointer",
-                  // Add border to all items except the last one
-                  index !== STATUS_ORDER.length - 1 && "border-b border-gray-100"
+                  index !== STATUS_ORDER.length - 1 && "border-b border-border"
                 )}
               >
-                {isCompleted ? (
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                ) : (
-                  <div className="w-3 h-3 rounded-full border-2" style={{ borderColor: color }} />
-                )}
+                <div className={cn(
+                  "w-3 h-3 rounded-full",
+                  isCompleted 
+                    ? `bg-${statusConfig.bgColor}` 
+                    : `bg-${statusConfig.bgColor} border border-${statusConfig.bgColor}`
+                )} />
                 {statusConfig.label}
               </DropdownMenuItem>
             );

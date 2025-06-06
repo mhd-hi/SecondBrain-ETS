@@ -63,12 +63,12 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
      "week": <integer>,
      "type": "<theorie|pratique|exam|homework|lab>",
      "title": "<main topic or general description>",
-     "estimatedEffort": <total minutes for all subtasks>,
+     "estimatedEffort": <total hours for all subtasks>,
      "notes": "<short tip in French, 15-25 words max>",
      "subtasks": [
        {
          "title": "<specific subtask title>",
-         "estimatedEffort": <minutes for this subtask>,
+         "estimatedEffort": <hours for this subtask>,
          "notes": "<specific tip for this subtask>"
        }
      ]

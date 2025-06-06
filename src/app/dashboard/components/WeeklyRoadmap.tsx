@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { DayColumn } from "./DayColumn";
 import type { Task, TaskStatus } from "@/types/task";
 import type { Course } from "@/types/course";
-import { getNextTaskStatus } from "@/lib/task/utils";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -14,7 +13,7 @@ interface WeeklyRoadmapProps {
 }
 
 export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
-  const [weekOffset, setWeekOffset] = useState(0); // 0 is current week, -1 is last week, 1 is next week, etc.
+  const [weekOffset, setWeekOffset] = useState(0);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);

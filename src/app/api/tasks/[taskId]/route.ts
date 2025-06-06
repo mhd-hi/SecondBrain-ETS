@@ -6,47 +6,48 @@ import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 import { calculateTaskDueDate } from '@/lib/task/util';
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ taskId: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: { taskId: string } }) {
   try {
-    const { taskId } = await params;
-    const body = await request.json() as Task;
+    const { taskId } = params;
+    const updates = await request.json() as Partial<Task>;
 
-    console.log('PATCH /api/tasks/[taskId]: taskId', taskId);
-    console.log('PATCH /api/tasks/[taskId]: request body week', body.week);
-    const calculatedDueDate = body.week !== undefined ? calculateTaskDueDate(body.week, 15) : undefined;
-    console.log('PATCH /api/tasks/[taskId]: calculatedDueDate', calculatedDueDate);
-    if (calculatedDueDate instanceof Date && !isNaN(calculatedDueDate.getTime())) {
-      console.log('PATCH /api/tasks/[taskId]: calculatedDueDate.toISOString()', calculatedDueDate.toISOString());
+    // Handle date fields properly
+    const processedUpdates: Partial<Task> = { ...updates };
+    
+    if (updates.dueDate) {
+      // Ensure dueDate is a proper Date object
+      processedUpdates.dueDate = updates.dueDate instanceof Date 
+        ? updates.dueDate 
+        : new Date(updates.dueDate as string | number | Date);
     }
 
-    const sanitizedSubtasks = body.subtasks ? body.subtasks.map(subtask => ({
-      id: subtask.id || crypto.randomUUID(),
-      title: subtask.title,
-      status: subtask.status ?? TaskStatus.TODO,
-      notes: subtask.notes,
-      estimatedEffort: subtask.estimatedEffort
-    })) : null;
+    // If week is provided but dueDate is not, calculate dueDate from week
+    if (updates.week && !updates.dueDate) {
+      processedUpdates.dueDate = calculateTaskDueDate(updates.week);
+    }
 
-    const task = await db
-      .update(tasks)
-      .set({
-        title: body.title,
-        notes: body.notes,
-        week: body.week,
-        type: body.type,
-        estimatedEffort: body.estimatedEffort,
-        status: body.status,
-        subtasks: sanitizedSubtasks,
-        updatedAt: new Date(),
-        ...(calculatedDueDate !== undefined && { dueDate: calculatedDueDate }),
-      })
+    // Process subtasks if they exist
+    if (updates.subtasks) {
+      processedUpdates.subtasks = updates.subtasks.map(subtask => ({
+        ...subtask,
+        id: subtask.id || crypto.randomUUID(),
+        status: subtask.status ?? TaskStatus.TODO,
+      }));
+    }
+
+    const [updatedTask] = await db.update(tasks)
+      .set(processedUpdates)
       .where(eq(tasks.id, taskId))
       .returning();
 
-    return NextResponse.json({ data: task[0] });
+    if (!updatedTask) {
+      return NextResponse.json(
+        { error: 'Task not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(updatedTask);
   } catch (error) {
     console.error('Error updating task:', error);
     return NextResponse.json(
@@ -76,4 +77,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

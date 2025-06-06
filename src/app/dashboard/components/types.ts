@@ -4,7 +4,7 @@ export interface Task {
   id: string;
   title: string;
   courseCode: string;
-  effort: number; // in minutes
+  effort: number; // in hours
   status: TaskStatus;
   dueDate: Date;
 } 

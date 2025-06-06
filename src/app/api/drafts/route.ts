@@ -32,18 +32,20 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { courseId, ...data } = await request.json() as Task & { courseId: string };
+
+    // NOTE: Untrusted data source, don't use spread operator
     const [draft] = await db.insert(tasks).values({
       courseId,
       title: data.title,
       week: data.week,
       notes: data.notes,
-      status: TaskStatus.DRAFT,
       type: data.type,
       estimatedEffort: data.estimatedEffort,
+      status: TaskStatus.DRAFT,
       subtasks: data.subtasks?.map(({ status, ...subtask }) => ({
         ...subtask,
         id: crypto.randomUUID(),
-        status: status ?? TaskStatus.TODO
+        status: status ?? TaskStatus.DRAFT
       })),
       dueDate: calculateTaskDueDate(data.week)
     }).returning();
@@ -62,12 +64,8 @@ export async function PATCH(request: Request) {
     const { id, ...updates } = await request.json() as { id: string } & Partial<Task>;
     const [draft] = await db.update(tasks)
       .set({
-        title: updates.title,
-        week: updates.week,
-        notes: updates.notes,
+        ...updates,
         status: updates.status ?? TaskStatus.DRAFT,
-        type: updates.type,
-        estimatedEffort: updates.estimatedEffort,
         subtasks: updates.subtasks?.map(({ status, ...subtask }) => ({
           ...subtask,
           id: crypto.randomUUID(),
@@ -107,4 +105,4 @@ export async function DELETE(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

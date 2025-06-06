@@ -78,7 +78,7 @@ export default function Home() {
   }
 
   return (
-    <main className="container flex min-h-screen flex-col gap-12 p-4">
+    <main className="container mx-auto flex min-h-screen max-w-7xl flex-col gap-12" style={{ marginTop: '8px', marginLeft: '16px', marginRight: '16px', marginBottom: '14px' }}>
       <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
         Dashboard
       </h1>
@@ -86,7 +86,7 @@ export default function Home() {
       <section className="space-y-6">
         <h2 className="text-2xl font-semibold">Courses</h2>
         <AddCourseForm />
-        <div className="grid w-full max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading ? (
             // Loading state: Display skeletons
             Array.from({ length: 6 }).map((_, index) => (

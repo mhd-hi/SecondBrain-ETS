@@ -50,20 +50,15 @@ export async function POST(request: Request) {
     // Insert tasks
     const insertedTasks = await db.insert(tasks).values(
       newTasks.map(task => ({
+        ...task,
         courseId,
-        title: task.title,
-        week: task.week,
-        type: task.type,
-        status: TaskStatus.DRAFT,
+        status: task.status ?? TaskStatus.TODO,
         subtasks: task.subtasks?.map(subtask => ({
+          ...subtask,
           id: crypto.randomUUID(),
-          title: subtask.title,
           status: subtask.status ?? TaskStatus.TODO,
-          notes: subtask.notes,
-          estimatedEffort: subtask.estimatedEffort
         })),
-        notes: task.notes,
-        dueDate: task.dueDate ? new Date(task.dueDate) : calculateTaskDueDate(task.week), // Use provided dueDate or calculate
+        dueDate: task.dueDate ? new Date(task.dueDate) : calculateTaskDueDate(task.week),
       }))
     ).returning();
 
@@ -95,18 +90,15 @@ export async function PATCH(request: Request) {
 
     const [updatedTask] = await db.update(tasks)
       .set({
-        title: updates.title,
-        week: updates.week,
+        ...updates,
         status: updates.status ?? TaskStatus.TODO,
         subtasks: updates.subtasks?.map(subtask => ({
+          ...subtask,
           id: crypto.randomUUID(),
-          title: subtask.title,
           status: subtask.status ?? TaskStatus.TODO,
-          notes: subtask.notes,
-          estimatedEffort: subtask.estimatedEffort
         })),
         notes: updates.notes,
-        dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined // Using standard 15 weeks
+        dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined
       })
       .where(eq(tasks.id, id))
       .returning();
@@ -146,4 +138,4 @@ export async function DELETE(request: Request) {
 
 export async function getCoursesWithInProgressCount() {
   // ... existing getCoursesWithInProgressCount function ...
-} 
+}

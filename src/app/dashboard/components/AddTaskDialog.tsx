@@ -204,20 +204,13 @@ export const AddTaskDialog = ({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="effort">Estimated Effort (hours)</Label>
+              <Label htmlFor="estimatedEffort">Estimated Effort (hours)</Label>
               <Input
-                id="effort"
+                id="estimatedEffort"
                 type="number"
-                min="0"
-                step="0.1"
-                value={newTask.estimatedEffort === 0 ? '' : newTask.estimatedEffort}
-                onChange={e => {
-                  const value = e.target.value;
-                  setNewTask({
-                    ...newTask,
-                    estimatedEffort: value === '' ? 0 : parseFloat(value)
-                  });
-                }}
+                value={newTask.estimatedEffort}
+                onChange={(e) => setNewTask({ ...newTask, estimatedEffort: parseInt(e.target.value) || 1 })}
+                min="1"
                 required
               />
             </div>
@@ -231,4 +224,4 @@ export const AddTaskDialog = ({
       </DialogContent>
     </Dialog>
   );
-}; 
+};
