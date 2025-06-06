@@ -7,6 +7,7 @@ import type { Course } from "@/types/course";
 import { AddTaskDialog } from "./AddTaskDialog";
 import { TaskStatusChanger } from "@/components/TaskStatusChanger";
 
+// This is the expected structure for DayColumn component
 interface DayColumnProps {
   date: Date;
   tasks: Task[];
@@ -14,17 +15,19 @@ interface DayColumnProps {
   onTaskAdded: () => void;
   courses: Course[];
   isToday: boolean;
+  isSticky?: boolean;
 }
 
-export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses, isToday }: DayColumnProps) => {
+export const DayColumn = ({ date, tasks, onStatusChange, onTaskAdded, courses, isToday, isSticky = false }: DayColumnProps) => {
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
   const dayDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 
   return (
-    <div className="flex flex-col space-y-2">
-      {/* Date Header Container */}
+    <div className="flex flex-col">
+      {/* Sticky Date Header */}
       <div className={`
-        rounded-lg p-3 text-center border
+        ${isSticky ? 'sticky top-0 z-10' : ''}
+        rounded-lg p-3 text-center border mb-2
         ${isToday 
           ? 'bg-primary text-primary-foreground border-primary shadow-sm' 
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600'
