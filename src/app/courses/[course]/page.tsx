@@ -12,7 +12,8 @@ import { useRouter } from "next/navigation";
 import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
 import { CourseSelector } from '@/components/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
-import { MoreActionsDropdown } from "@/components/shared/more-actions-dropdown";
+import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
+import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 
 interface CoursePageProps {
   params: Promise<{
@@ -252,9 +253,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                           <h4 className="font-medium">{task.title}</h4>
                           <p className="text-sm text-muted-foreground">{task.notes}</p>
                           {task.dueDate && (
-                            <p className="text-sm text-muted-foreground">
-                              Due: {task.dueDate.toLocaleDateString()}
-                            </p>
+                            <DueDateDisplay date={task.dueDate} />
                           )}
                         </div>
                         <div className="flex items-center gap-2">

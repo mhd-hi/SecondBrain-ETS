@@ -2,12 +2,12 @@
 
 import type { Course } from '@/types/course';
 import { getCourseColor } from '@/lib/utils';
-import { MoreActionsDropdown } from "@/components/shared/more-actions-dropdown";
+import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
+import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRef, useEffect, useState } from 'react';
 import {
-  formatDate,
   getNextTask,
   getUpcomingTask,
   calculateProgress,
@@ -58,20 +58,21 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
     onDeleteCourse(course.id);
   };
 
+  const dropdownActions = [
+    {
+      label: "Delete",
+      onClick: handleDeleteClick,
+      destructive: true,
+    },
+  ];
 
   return (
     <div
       className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-6 gap-4"
       style={{ borderLeft: `4px solid ${courseColor}` }}
     >
-      <MoreActionsDropdown
-        actions={[
-          {
-            label: "Delete",
-            onClick: handleDeleteClick,
-            destructive: true,
-          }
-          ,]}
+      <MoreActionsDropdown 
+        actions={dropdownActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
       />
 
@@ -114,9 +115,9 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
               </p>
             )}
             {nextTask.dueDate && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
-                Due: {formatDate(nextTask.dueDate)}
-              </p>
+              <div className="ml-3">
+                <DueDateDisplay date={nextTask.dueDate} className="text-xs" />
+              </div>
             )}
           </div>
         )}
@@ -142,9 +143,9 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
               </p>
             )}
             {upcomingTask.dueDate && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 ml-3">
-                Due: {formatDate(upcomingTask.dueDate)}
-              </p>
+              <div className="ml-3">
+                <DueDateDisplay date={upcomingTask.dueDate} className="text-xs" />
+              </div>
             )}
           </div>
         )}
@@ -162,7 +163,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       </div>
 
       <div className="flex justify-end mt-4">
-        <Link
+        <Link 
           href={`/courses/${course.id}`}
           className="text-sm text-muted-foreground hover:text-accent-foreground transition-colors"
           style={{ color: courseColor }}
