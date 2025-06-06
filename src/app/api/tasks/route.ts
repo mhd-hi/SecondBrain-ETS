@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { TaskStatus } from '@/types/task';
 import type {Task, Subtask} from '@/types/task'
 import { calculateTaskDueDate } from '@/lib/task/util';
+import { calculateWeekFromDueDate } from '@/lib/task/util';
 
 export async function GET(request: Request) {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
         subtasks?: Subtask[];
         notes?: string;
-        dueDate?: string; // Allow dueDate as string from frontend
+        dueDate?: string;
       }>
     };
 
@@ -47,18 +48,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Insert tasks
     const insertedTasks = await db.insert(tasks).values(
       newTasks.map(task => ({
         ...task,
         courseId,
-        status: task.status ?? TaskStatus.TODO,
+        week: calculateWeekFromDueDate(new Date(task.dueDate)),
+        status: task.status ?? TaskStatus.DRAFT,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),
           status: subtask.status ?? TaskStatus.TODO,
         })),
-        dueDate: task.dueDate ? new Date(task.dueDate) : calculateTaskDueDate(task.week),
+        dueDate: new Date(task.dueDate),
       }))
     ).returning();
 

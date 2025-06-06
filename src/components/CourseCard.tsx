@@ -5,8 +5,6 @@ import { getCourseColor } from '@/lib/utils';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import Link from 'next/link';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRef, useEffect, useState } from 'react';
 import {
   getNextTask,
   getUpcomingTask,
@@ -14,6 +12,7 @@ import {
   getCompletedTasksCount,
   getTotalTasksCount
 } from '@/lib/task/util';
+import { TruncatedTextWithTooltip } from "@/components/shared/atoms/text-with-tooltip";
 
 interface CourseCardProps {
   course: Course;
@@ -22,7 +21,7 @@ interface CourseCardProps {
 
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   // Ensure course.tasks is an array
-  const tasks = course.tasks ?? []; // Use nullish coalescing operator
+  const tasks = course.tasks ?? [];
   const courseColor = getCourseColor(course.id);
 
   // Calculate progress and task counts
@@ -33,26 +32,6 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   // Get next and upcoming tasks
   const nextTask = getNextTask(tasks);
   const upcomingTask = getUpcomingTask(tasks);
-
-  const nextTaskTitleRef = useRef<HTMLParagraphElement>(null);
-  const [isNextTaskTitleTruncated, setIsNextTaskTitleTruncated] = useState(false);
-
-  const upcomingTaskTitleRef = useRef<HTMLParagraphElement>(null);
-  const [isUpcomingTaskTitleTruncated, setIsUpcomingTaskTitleTruncated] = useState(false);
-
-  useEffect(() => {
-    const element = nextTaskTitleRef.current;
-    if (element) {
-      setIsNextTaskTitleTruncated(element.scrollWidth > element.clientWidth);
-    }
-  }, [nextTask]);
-
-  useEffect(() => {
-    const element = upcomingTaskTitleRef.current;
-    if (element) {
-      setIsUpcomingTaskTitleTruncated(element.scrollWidth > element.clientWidth);
-    }
-  }, [upcomingTask]);
 
   const handleDeleteClick = () => {
     onDeleteCourse(course.id);
@@ -96,24 +75,11 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="space-y-2 text-sm mt-auto">
         {nextTask && (
           <div>
-            {isNextTaskTitleTruncated ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p ref={nextTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate">
-                      <span className="font-medium">Next: </span>{nextTask.title}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{nextTask.title}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <p ref={nextTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate">
-                <span className="font-medium">Next: </span>{nextTask.title}
-              </p>
-            )}
+            <TruncatedTextWithTooltip 
+              text={nextTask.title}
+              className="text-sm text-muted-foreground line-clamp-2 leading-tight"
+              maxLines={2}
+            />
             {nextTask.dueDate && (
               <div className="ml-3">
                 <DueDateDisplay date={nextTask.dueDate} className="text-xs" />
@@ -124,24 +90,11 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
         {upcomingTask && upcomingTask !== nextTask && (
           <div>
-            {isUpcomingTaskTitleTruncated ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                      <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{upcomingTask.title}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : (
-              <p ref={upcomingTaskTitleRef} className="text-gray-700 dark:text-gray-300 truncate mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <span className="font-medium">Upcoming: </span>{upcomingTask.title}
-              </p>
-            )}
+            <TruncatedTextWithTooltip 
+              text={upcomingTask.title}
+              className="text-sm text-muted-foreground line-clamp-2 leading-tight"
+              maxLines={2}
+            />
             {upcomingTask.dueDate && (
               <div className="ml-3">
                 <DueDateDisplay date={upcomingTask.dueDate} className="text-xs" />

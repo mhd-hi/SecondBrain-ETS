@@ -7,6 +7,7 @@ import type { Task, TaskStatus } from "@/types/task";
 import type { Course } from "@/types/course";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getWeekStart, getWeekDates, formatWeekRange } from "@/lib/date/util";
 
 interface WeeklyRoadmapProps {
   initialTasks?: Task[];
@@ -38,29 +39,7 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     void fetchCourses();
   }, []);
 
-  // Get the start of the current week (Monday)
-  const getWeekStart = (weekOffset: number) => {
-    const now = new Date();
-    const start = new Date(now);
-    // Get Monday as the start of the week
-    // getDay() returns 0 for Sunday, 1 for Monday, etc.
-    // We want Monday (1) to be our week start
-    const dayOfWeek = now.getDay();
-    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days, otherwise go to Monday
-    start.setDate(now.getDate() + daysToMonday + weekOffset * 7);
-    start.setHours(0, 0, 0, 0);
-    return start;
-  };
 
-  // Generate array of dates for the week
-  const getWeekDates = (weekOffset: number) => {
-    const start = getWeekStart(weekOffset);
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(start);
-      date.setDate(start.getDate() + i);
-      return date;
-    });
-  };
 
   // Load tasks for the selected week
   useEffect(() => {
@@ -137,17 +116,6 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     acc[dateKey].push(task);
     return acc;
   }, {});
-
-  // Format week range for display
-  const formatWeekRange = (dates: Date[]) => {
-    if (dates.length === 0) return '';
-    const start = dates[0]!;
-    const end = dates[dates.length - 1]!;
-    const formatDate = (date: Date) => {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    };
-    return `${formatDate(start)} - ${formatDate(end)}`;
-  };
 
   // Helper function to check if a date is today
   const isToday = (date: Date) => {

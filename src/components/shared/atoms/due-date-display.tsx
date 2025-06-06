@@ -1,43 +1,51 @@
 "use client";
 
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
-import { formatRelativeDate, formatTooltipDate, getDueDateColor } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
-import { Calendar } from "lucide-react";
 
 interface DueDateDisplayProps {
   date: Date;
   className?: string;
-  showTooltip?: boolean;
 }
 
-export function DueDateDisplay({ date, className, showTooltip = true }: DueDateDisplayProps) {
-  const relativeDate = formatRelativeDate(date);
-  const tooltipDate = formatTooltipDate(date);
-  const colorClass = getDueDateColor(date);
+export const DueDateDisplay = ({
+  date,
+  className,
+}: DueDateDisplayProps) => {
+  const formatDueDate = (date: Date) => {
+    const now = new Date();
+    const diffInMs = date.getTime() - now.getTime();
+    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (!showTooltip) {
-    return (
-      <span className={cn(colorClass, "text-sm inline-flex items-center gap-1", className)}>
-        <Calendar className="w-3 h-3" />
-        {relativeDate}
-      </span>
-    );
-  }
+    if (diffInDays < 0) {
+      const overdueDays = Math.abs(diffInDays);
+      if (overdueDays === 1) {
+        return "Overdue by 1 day";
+      } else if (overdueDays < 1) {
+        return "Overdue";
+      } else {
+        return `Overdue by ${overdueDays} days`;
+      }
+    } else if (diffInDays === 0) {
+      return "Due today";
+    } else if (diffInDays === 1) {
+      return "Due tomorrow";
+    } else {
+      return `Due in ${diffInDays} days`;
+    }
+  };
+
+  const dueDateText = formatDueDate(date);
+  const isOverdue = date < new Date();
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className={cn(colorClass, "text-sm inline-flex items-center gap-1", className)}>
-            <Calendar className="w-3 h-3" />
-            {relativeDate}
-          </span>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{tooltipDate}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <span
+      className={cn(
+        "text-xs font-medium",
+        isOverdue ? "text-red-600 dark:text-red-400" : "text-muted-foreground",
+        className
+      )}
+    >
+      {dueDateText}
+    </span>
   );
-}
+};

@@ -162,30 +162,52 @@ export function getSessionWeeks(session: keyof typeof SESSION_DATES): number {
   return calculateWeeksBetweenDates(sessionDates.start, sessionDates.end);
 }
 
-export const formatDateToInput = (date: Date | string | null | undefined): string => {
-  if (!date) return '';
-  const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) {
-    console.error('formatDateToInput: Invalid Date object created from:', date);
-    return '';
-  }
-  const year = dateObj.getFullYear();
-  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-  const day = dateObj.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 /**
- * Formats a date for display in a short format (e.g., "Jan 15")
+ * Calculates the week number from a due date based on academic sessions
+ * This is the inverse of calculateTaskDueDate
+ * @param dueDate The due date to calculate week from
+ * @param totalCourseWeeks The total number of weeks in the course
+ * @returns The calculated week number
  */
-export const formatDate = (date: Date | null | undefined): string => {
-  if (!date) return '';
-  // Explicitly convert to Date object if it's not already
-  const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) return ''; // Return empty string if date is invalid
-  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  return dateObj.toLocaleDateString(undefined, options);
-};
+export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): number {
+  // Determine which session the due date falls into
+  let session: keyof typeof SESSION_DATES;
+  
+  if (dueDate >= SESSION_DATES.winter.start && dueDate <= SESSION_DATES.winter.end) {
+    session = 'winter';
+  } else if (dueDate >= SESSION_DATES.summer.start && dueDate <= SESSION_DATES.summer.end) {
+    session = 'summer';
+  } else if (dueDate >= SESSION_DATES.autumn.start && dueDate <= SESSION_DATES.autumn.end) {
+    session = 'autumn';
+  } else {
+    // If the date doesn't fall in any session, find the closest one
+    const now = new Date();
+    if (now < SESSION_DATES.winter.start) {
+      session = 'winter';
+    } else if (now < SESSION_DATES.summer.start) {
+      session = 'summer';
+    } else if (now < SESSION_DATES.autumn.start) {
+      session = 'autumn';
+    } else {
+      session = 'winter';
+    }
+  }
+  
+  const sessionDates = SESSION_DATES[session];
+  
+  // Calculate the number of days from session start to due date
+  const daysDiff = Math.max(0, Math.floor((dueDate.getTime() - sessionDates.start.getTime()) / (1000 * 60 * 60 * 24)));
+  
+  // Convert days to weeks within the session
+  const weeksFromStart = daysDiff / 7;
+  
+  // Convert from session weeks back to course weeks
+  const adjustedWeek = (weeksFromStart / STANDARD_WEEKS_PER_SESSION) * totalCourseWeeks;
+  
+  // Ensure we return at least week 1 and don't exceed total course weeks
+  return Math.max(1, Math.min(Math.round(adjustedWeek), totalCourseWeeks));
+}
+
 
 /**
  * Sorts tasks by due date and filters out completed tasks
@@ -259,9 +281,34 @@ export const STATUS_CONFIG = {
   },
 } as const;
 
-/**
- * Order of task statuses for cycling through them
- */
+export function getDueDateColor(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  // Check if the date is valid
+  if (!dateObj || isNaN(dateObj.getTime())) {
+    return "text-muted-foreground";
+  }
+
+  const now = new Date();
+  const diffMs = dateObj.getTime() - now.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  
+  // Overdue
+  if (diffMs < 0) return "text-red-500";
+  
+  // Due today
+  if (diffDays <= 1) return "text-red-300";
+  
+  // Due within 3 days
+  if (diffDays <= 3) return "text-orange-500";
+  
+  // Due within 1 week
+  if (diffDays <= 7) return "text-yellow-600";
+  
+  // Default
+  return "text-muted-foreground";
+}
+
 export const STATUS_ORDER = [
   TaskStatus.DRAFT,
   TaskStatus.TODO,
@@ -269,18 +316,12 @@ export const STATUS_ORDER = [
   TaskStatus.COMPLETED,
 ] as const;
 
-/**
- * Gets the next status in the status order
- */
 export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus);
   const nextIndex = (currentIndex + 1) % STATUS_ORDER.length;
   return STATUS_ORDER[nextIndex]!;
 };
 
-/**
- * Validates if a status is a valid TaskStatus
- */
 export const isValidStatus = (status: TaskStatus): boolean => {
   return Object.values(TaskStatus).includes(status);
 };

@@ -60,7 +60,7 @@ export const createTask = async (data: {
   return db.insert(tasks).values({
     ...data,
     week,
-    type: "theorie", // Default type as required by schema
+    type: "theorie",
     status: "DRAFT",
   }).returning();
 }; 

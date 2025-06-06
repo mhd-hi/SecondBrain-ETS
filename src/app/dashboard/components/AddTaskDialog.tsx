@@ -45,7 +45,6 @@ export const AddTaskDialog = ({
   const [isLoading, setIsLoading] = useState(false);
   const [newTask, setNewTask] = useState({
     title: '',
-    week: 1,
     notes: '',
     estimatedEffort: 1,
     dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
@@ -93,11 +92,10 @@ export const AddTaskDialog = ({
       setIsOpen(false);
       setNewTask({
         title: '',
-        week: 1,
         notes: '',
         estimatedEffort: 1,
         dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
-        type: 'theorie',
+        type: 'theorie' as TaskType,
         status: TaskStatus.TODO,
       });
       onTaskAdded();
@@ -166,18 +164,6 @@ export const AddTaskDialog = ({
                 value={newTask.notes}
                 onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
                 placeholder="Add any additional notes or details about the task"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="week">Week</Label>
-              <Input
-                id="week"
-                type="number"
-                min="1"
-                max="15"
-                value={newTask.week}
-                onChange={(e) => setNewTask({ ...newTask, week: parseInt(e.target.value) })}
-                required
               />
             </div>
             <div className="grid gap-2">
