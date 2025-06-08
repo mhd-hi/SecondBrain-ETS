@@ -29,11 +29,41 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.DRAFT;
   const config = STATUS_CONFIG[validStatus];
 
+  // Helper function to get background class for status
+  const getStatusBgClass = (status: TaskStatus) => {
+    switch (status) {
+      case TaskStatus.DRAFT:
+        return "bg-muted";
+      case TaskStatus.TODO:
+        return "bg-blue-500";
+      case TaskStatus.IN_PROGRESS:
+        return "bg-yellow-500";
+      case TaskStatus.COMPLETED:
+        return "bg-green-600";
+      default:
+        return "bg-muted";
+    }
+  };
+
+  // Helper function to get text class for status
+  const getStatusTextClass = (status: TaskStatus) => {
+    switch (status) {
+      case TaskStatus.DRAFT:
+        return "text-muted-foreground";
+      case TaskStatus.TODO:
+      case TaskStatus.IN_PROGRESS:
+      case TaskStatus.COMPLETED:
+        return "text-white";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
   return (
     <div
       className={cn(
         "inline-flex items-center h-8 rounded-md overflow-hidden",
-        `bg-${config.bgColor}`,
+        getStatusBgClass(validStatus),
         "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       )}
       role="group"
@@ -44,7 +74,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           <button
             className={cn(
               "px-3 h-full flex items-center",
-              `text-${config.textColor}`,
+              getStatusTextClass(validStatus),
               "font-medium text-xs uppercase",
               "hover:bg-black/5 focus:outline-none"
             )}
@@ -76,8 +106,8 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                 <div className={cn(
                   "w-3 h-3 rounded-full",
                   isCompleted 
-                    ? `bg-${statusConfig.bgColor}` 
-                    : `bg-${statusConfig.bgColor} border border-${statusConfig.bgColor}`
+                    ? getStatusBgClass(status)
+                    : `${getStatusBgClass(status)} border border-current`
                 )} />
                 {statusConfig.label}
               </DropdownMenuItem>

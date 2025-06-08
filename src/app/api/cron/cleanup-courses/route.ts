@@ -1,7 +1,7 @@
 import { cleanupOldCourses } from "@/server/db/queries";
 import { NextResponse } from "next/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function GET() {
   try {

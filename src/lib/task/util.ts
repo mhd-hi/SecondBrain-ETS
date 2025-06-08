@@ -1,6 +1,9 @@
 import { TaskStatus } from "@/types/task";
 import type { Task } from "@/types/task";
 
+// Standard number of weeks per session
+const STANDARD_WEEKS_PER_SESSION = 15;
+
 // Session date ranges
 const getSessionDates = () => {
   const currentYear = new Date().getFullYear();
@@ -9,25 +12,24 @@ const getSessionDates = () => {
     winter: {
       start: new Date(currentYear, 0, 5), // January 5
       end: new Date(currentYear, 3, 27), // April 27
-      weeks: 15, // ~15 weeks
+      weeks: STANDARD_WEEKS_PER_SESSION, // ~15 weeks
     },
     summer: {
       start: new Date(currentYear, 4, 1), // May 1
       end: new Date(currentYear, 7, 16), // August 16
-      weeks: 15, // ~15 weeks
+      weeks: STANDARD_WEEKS_PER_SESSION, // ~15 weeks
     },
     autumn: {
       start: new Date(currentYear, 8, 2), // September 2
       end: new Date(currentYear, 11, 18), // December 18
-      weeks: 15, // ~15 weeks
+      weeks: STANDARD_WEEKS_PER_SESSION, // ~15 weeks
     },
   };
 };
 
 const SESSION_DATES = getSessionDates();
 
-// Standard number of weeks per session
-const STANDARD_WEEKS_PER_SESSION = 15;
+
 
 export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
     switch (currentStatus) {

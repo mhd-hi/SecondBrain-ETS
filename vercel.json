@@ -1,6 +1,11 @@
 {
-  "crons": [{
-    "path": "/api/cron/cleanup-courses",
-    "schedule": "0 0 1 * *"
-  }]
-} 
+  "crons": [
+    {
+      "path": "/api/cron/cleanup-courses",
+      "schedule": "0 0 1 * *"
+    }
+  ],
+  "buildCommand": "bun run build",
+  "devCommand": "bun run dev",
+  "installCommand": "bun install"
+}

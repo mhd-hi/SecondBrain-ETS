@@ -15,10 +15,6 @@
 
 
 # Tech debt
-- Remove review page and use course page instead
-    - move the review buttons to courses (accept/delete all). 
-    - accept/delete specific course
-    - list subtasks
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
 - Fix this: "// Default to winter if between sessions."
     - It should select the last session, not winter.

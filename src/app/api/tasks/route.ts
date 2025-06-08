@@ -80,7 +80,3 @@ export const DELETE = apiRoutePatterns.delete(
   },
   'Error deleting task'
 );
-
-export async function getCoursesWithInProgressCount() {
-  // ... existing getCoursesWithInProgressCount function ...
-}

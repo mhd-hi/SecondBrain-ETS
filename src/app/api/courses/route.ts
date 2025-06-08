@@ -1,7 +1,6 @@
 import { db } from '@/server/db';
-import { tasks, courses } from '@/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
-import { TaskStatus } from '@/types/task';
+import { courses } from '@/server/db/schema';
+import { eq } from 'drizzle-orm';
 import { apiRoutePatterns, withErrorHandling, successResponse } from '@/lib/api/server-util';
 
 export const GET = withErrorHandling(async () => {
@@ -38,17 +37,3 @@ export const POST = apiRoutePatterns.post(
   'Error creating course',
   ['code', 'name']
 );
-
-export const getCoursesWithInProgressCount = withErrorHandling(async () => {
-  const coursesWithCounts = await db
-    .select({
-      id: courses.id,
-      code: courses.code,
-      inProgressCount: sql<number>`count(*) filter (where ${tasks.status} = ${TaskStatus.IN_PROGRESS})`,
-    })
-    .from(courses)
-    .leftJoin(tasks, eq(courses.id, tasks.courseId))
-    .groupBy(courses.id, courses.code);
-
-  return successResponse(coursesWithCounts);
-}, 'Error fetching courses');

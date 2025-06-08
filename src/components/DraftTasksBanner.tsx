@@ -34,10 +34,9 @@ export function DraftTasksBanner({
                         You have <strong>{taskCount}</strong> draft task
                         {taskCount !== 1 ? "s" : ""} awaiting your review.
                     </span>
-                </div>
-
-                {/* right side: buttons */}
-                <div className="flex gap-2 ml-4">                    <Button
+                </div>                {/* right side: buttons */}
+                <div className="flex gap-2 ml-4">
+                    <Button
                         variant="outline"
                         size="sm"
                         onClick={onAcceptAll}
