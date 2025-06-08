@@ -26,12 +26,11 @@ export const DueDateDisplay = ({
 
   const dueDateText = formatDueDate(dateObj);
   const isOverdue = dateObj < new Date();
-
   return (
     <span
       className={cn(
         "text-xs font-medium",
-        isOverdue ? "text-destructive" : "text-muted-foreground",
+        isOverdue ? "text-yellow-600" : "text-muted-foreground",
         className
       )}
     >

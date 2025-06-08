@@ -25,6 +25,7 @@ import { ErrorHandlers } from '@/lib/error/util';
 import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
+import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 
 interface CoursePageProps {
   params: Promise<{
@@ -248,6 +249,14 @@ export default function CoursePage({ params }: CoursePageProps) {
           </div>
         )}
       </div>
+
+      {/* Draft Tasks Banner */}
+      <DraftTasksBanner
+        draftTasks={draftTasks}
+        onAcceptAll={handleAcceptAllDrafts}
+        onDeleteAll={handleDeleteAllDrafts}
+        isLoading={isLoading}
+      />
 
       {isLoading ? (
         <div className="space-y-4">

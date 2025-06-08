@@ -290,11 +290,10 @@ export function getDueDateColor(date: Date | string): string {
   }
 
   const now = new Date();
-  const diffMs = dateObj.getTime() - now.getTime();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  const diffMs = dateObj.getTime() - now.getTime();  const diffDays = diffMs / (1000 * 60 * 60 * 24);
   
   // Overdue
-  if (diffMs < 0) return "text-red-500";
+  if (diffMs < 0) return "text-yellow-600";
   
   // Due today
   if (diffDays <= 1) return "text-red-300";
