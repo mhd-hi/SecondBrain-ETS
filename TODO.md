@@ -1,6 +1,9 @@
 # Fixes
 - when adding a course, disable "close dialog" (when clicking outside the dialog) and persist the info in the dialog until course is dealt with.
 - Delete all tasks will put the tasks as completed, it should be deleted.
+- Enter doesnt submit input when adding a course
+
+
 
 # Enhancement
 - move the add task to the sidebar 
@@ -9,10 +12,13 @@
         - implement Group, per due date (by default). overdue come first.
         - implement Filter per due date this week (by default), this month, next quarter. This also takes the overdue.
         - Expanded - collapsed (ifts its expanded, when task has subtasks, it will show as a child)
-
+- Add a way to store courses tasks to prevent from using openai to reprocess the same data
+- Add auth to launch the app to vercel
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Add search bar for searching a course in course page
-- 
+- Add course link in todays focus
+    - Remove course link from the tasks (right link icon)
+
 
 
 # Tech debt

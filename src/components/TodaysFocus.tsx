@@ -11,6 +11,7 @@ import { TaskStatus } from "@/types/task";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getCourseColor } from "@/lib/utils";
 
 type FilterType = "week" | "month" | "quarter";
 
@@ -48,6 +49,7 @@ const TaskItem = ({
   };
 
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+  const courseColor = task.course?.id ? getCourseColor(task.course.id) : undefined;
 
   return (
     <Card className="p-4 border border-border/40 hover:border-border bg-card/50">
@@ -67,9 +69,16 @@ const TaskItem = ({
                   <ChevronRight className="h-3 w-3" />
                 )}
               </Button>
-            )}
-            {task.course?.code && (
-              <Badge variant="outline" className="text-xs flex-shrink-0">
+            )}            {task.course?.code && (
+              <Badge 
+                variant="outline" 
+                className="text-xs flex-shrink-0"
+                style={{ 
+                  borderColor: courseColor,
+                  color: courseColor,
+                  backgroundColor: courseColor ? `${courseColor}15` : undefined
+                }}
+              >
                 {task.course.code}
               </Badge>
             )}
@@ -136,6 +145,7 @@ export const TodaysFocus = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>("week");
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const fetchFocusTasks = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -211,7 +221,6 @@ export const TodaysFocus = () => {
       toast.error("Failed to update subtask status");
     }
   };
-
   const toggleTaskExpanded = (taskId: string) => {
     setExpandedTasks(prev => {
       const newSet = new Set(prev);
@@ -219,6 +228,18 @@ export const TodaysFocus = () => {
         newSet.delete(taskId);
       } else {
         newSet.add(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSectionExpanded = (sectionKey: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sectionKey)) {
+        newSet.delete(sectionKey);
+      } else {
+        newSet.add(sectionKey);
       }
       return newSet;
     });
@@ -236,9 +257,7 @@ export const TodaysFocus = () => {
       
       return priorityOrder[a.status] - priorityOrder[b.status];
     });
-  };
-
-  // Group tasks by due date
+  };  // Group tasks by due date
   const groupTasksByDate = (tasks: TaskType[]): GroupedTasks => {
     const now = new Date();
     const today = new Date(now);
@@ -279,7 +298,6 @@ export const TodaysFocus = () => {
   };
 
   const groupedTasksRaw = groupTasksByDate(tasks);
-  
   // Sort tasks within each group by priority
   const groupedTasks = {
     overdue: sortTasksByPriority(groupedTasksRaw.overdue),
@@ -289,29 +307,34 @@ export const TodaysFocus = () => {
     later: sortTasksByPriority(groupedTasksRaw.later)
   };
 
-  const hasAnyTasks = tasks.length > 0;
-
-  // Determine which groups to show based on filter
+  const hasAnyTasks = tasks.length > 0;  // Determine which groups to show based on filter
   const getVisibleGroups = () => {
     switch (filter) {
       case "month":
       case "quarter":
         return ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
       default: // week
-        return ["overdue", "today", "tomorrow", "thisWeek"] as const;
+        return ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
     }
   };
 
-  const visibleGroups = getVisibleGroups();
-  const GroupSection = ({ title, tasks, count, isOverdue = false }: { title: string; tasks: TaskType[]; count?: number; isOverdue?: boolean }) => {
+  const visibleGroups = getVisibleGroups();  const GroupSection = ({ title, tasks, count, sectionKey }: { 
+    title: string; 
+    tasks: TaskType[]; 
+    count?: number; 
+    sectionKey: string;
+  }) => {
     if (tasks.length === 0) return null;
 
-    // Limit overdue tasks to 5 for display, but show total count in badge
-    const displayTasks = isOverdue ? tasks.slice(0, 5) : tasks;
+    const isExpanded = expandedSections.has(sectionKey);
+    const maxDisplayTasks = 5;
+    const shouldLimit = tasks.length > maxDisplayTasks;
+    const displayTasks = shouldLimit && !isExpanded ? tasks.slice(0, maxDisplayTasks) : tasks;
     const totalCount = count ?? tasks.length;
-    const hiddenCount = isOverdue && tasks.length > 5 ? tasks.length - 5 : 0;
+    const hiddenCount = shouldLimit && !isExpanded ? tasks.length - maxDisplayTasks : 0;
 
-    return (      <div className="space-y-3">
+    return (
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <h4 className="text-base font-semibold text-foreground">{title}</h4>
           <Badge variant="secondary" className="text-xs">
@@ -334,6 +357,16 @@ export const TodaysFocus = () => {
               onToggleExpanded={() => toggleTaskExpanded(task.id)}
             />
           ))}
+          {shouldLimit && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleSectionExpanded(sectionKey)}
+              className="text-xs text-muted-foreground hover:text-foreground w-full justify-center"
+            >
+              {isExpanded ? 'See less' : `See ${hiddenCount} more`}
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -388,11 +421,11 @@ export const TodaysFocus = () => {
         ) : (
           <div className="space-y-6">            {visibleGroups.map(groupKey => {
               const groupConfig = {
-                overdue: { title: "Overdue", tasks: groupedTasks.overdue, isOverdue: true },
-                today: { title: "Due Today", tasks: groupedTasks.today, isOverdue: false },
-                tomorrow: { title: "Due Tomorrow", tasks: groupedTasks.tomorrow, isOverdue: false },
-                thisWeek: { title: "Due This Week", tasks: groupedTasks.thisWeek, isOverdue: false },
-                later: { title: "Due Later", tasks: groupedTasks.later, isOverdue: false }
+                overdue: { title: "Overdue", tasks: groupedTasks.overdue },
+                today: { title: "Due Today", tasks: groupedTasks.today },
+                tomorrow: { title: "Due Tomorrow", tasks: groupedTasks.tomorrow },
+                thisWeek: { title: "Due This Week", tasks: groupedTasks.thisWeek },
+                later: { title: "Due Later", tasks: groupedTasks.later }
               };
 
               const config = groupConfig[groupKey];
@@ -401,7 +434,7 @@ export const TodaysFocus = () => {
                   key={groupKey}
                   title={config.title}
                   tasks={config.tasks}
-                  isOverdue={config.isOverdue}
+                  sectionKey={groupKey}
                 />
               );
             })}
