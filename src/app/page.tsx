@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AddCourseDialog } from "@/components/AddCourseDialog";
+import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
 import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
