@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { SubtaskProgress } from "@/components/SubtaskProgress";
@@ -17,6 +17,8 @@ interface TaskCardProps {
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
   onUpdateSubtaskStatus: (taskId: string, subtaskId: string, newStatus: TaskStatus) => void;
   showCourseBadge?: boolean;
+  isSubtasksExpanded?: boolean;
+  onToggleSubtasksExpanded?: () => void;
   actions?: Array<{
     label: string;
     onClick: () => void;
@@ -30,10 +32,15 @@ export function TaskCard({
   onUpdateTaskStatus,
   onUpdateSubtaskStatus,
   showCourseBadge = false,
+  isSubtasksExpanded: controlledSubtasksExpanded,
+  onToggleSubtasksExpanded,
   actions
-}: TaskCardProps) {
-  const router = useRouter();
+}: TaskCardProps) {  const router = useRouter();
   const courseColor = task.course ? getCourseColor(task.course) : undefined;
+  const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
+  
+  // Use controlled state if provided, otherwise use internal state
+  const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
 
   const handleNavigateToTask = () => {
     if (task.course?.id) {
@@ -93,9 +100,7 @@ export function TaskCard({
             onStatusChange={(newStatus) => onUpdateTaskStatus(task.id, newStatus)}
           />
         </div>
-      </div>
-
-      {/* Subtasks Display - Collapsed by default */}
+      </div>      {/* Subtasks Display - Collapsed by default */}
       <SubtasksList
         subtasks={task.subtasks ?? []}
         onSubtaskStatusChange={(subtaskId, newStatus) => 
@@ -103,6 +108,8 @@ export function TaskCard({
         }
         collapsible={true}
         defaultExpanded={false}
+        isExpanded={isSubtasksExpanded}
+        onToggleExpanded={onToggleSubtasksExpanded ?? (() => setInternalSubtasksExpanded(!internalSubtasksExpanded))}
       />
     </div>
   );

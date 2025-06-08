@@ -14,6 +14,8 @@ interface SubtasksListProps {
   readonly?: boolean;
   collapsible?: boolean;
   defaultExpanded?: boolean;
+  isExpanded?: boolean;
+  onToggleExpanded?: () => void;
 }
 
 const SubtasksList = ({ 
@@ -21,9 +23,13 @@ const SubtasksList = ({
   onSubtaskStatusChange, 
   readonly = false, 
   collapsible = false,
-  defaultExpanded = true 
+  defaultExpanded = true,
+  isExpanded: controlledIsExpanded,
+  onToggleExpanded
 }: SubtasksListProps) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [internalIsExpanded, setInternalIsExpanded] = useState(defaultExpanded);
+    // Use controlled state if provided, otherwise use internal state
+  const isExpanded = controlledIsExpanded ?? internalIsExpanded;
 
   if (!subtasks || subtasks.length === 0) {
     return null;
@@ -31,7 +37,13 @@ const SubtasksList = ({
 
   const toggleExpanded = () => {
     if (collapsible) {
-      setIsExpanded(!isExpanded);
+      if (onToggleExpanded) {
+        // Use controlled toggle
+        onToggleExpanded();
+      } else {
+        // Use internal toggle
+        setInternalIsExpanded(!internalIsExpanded);
+      }
     }
   };
 

@@ -23,6 +23,7 @@ export const TodaysFocus = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>("week");
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(new Set());
   const fetchFocusTasks = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -104,6 +105,18 @@ export const TodaysFocus = () => {
         newSet.delete(sectionKey);
       } else {
         newSet.add(sectionKey);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSubtasksExpanded = (taskId: string) => {
+    setExpandedSubtasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
       }
       return newSet;
     });
@@ -218,6 +231,8 @@ export const TodaysFocus = () => {
               onUpdateTaskStatus={handleStatusChange}
               onUpdateSubtaskStatus={handleSubtaskStatusChange}
               showCourseBadge={true}
+              isSubtasksExpanded={expandedSubtasks.has(task.id)}
+              onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
               actions={task.course?.id ? [{
                 label: `Go to ${task.course.code}`,
                 onClick: () => {
