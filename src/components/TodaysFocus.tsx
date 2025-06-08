@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { TaskStatusChanger } from "@/components/TaskStatusChanger";
 import { TruncatedTextWithTooltip } from "@/components/shared/atoms/text-with-tooltip";
-import type { Task as TaskType, TaskStatus } from "@/types/task";
+import type { Task as TaskType } from "@/types/task";
+import { TaskStatus } from "@/types/task";
 import { toast } from "sonner";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -223,6 +224,20 @@ export const TodaysFocus = () => {
     });
   };
 
+  // Sort tasks by priority: IN_PROGRESS > TODO > DRAFT > COMPLETED
+  const sortTasksByPriority = (tasks: TaskType[]): TaskType[] => {
+    return tasks.sort((a, b) => {
+      const priorityOrder = {
+        [TaskStatus.IN_PROGRESS]: 1,
+        [TaskStatus.TODO]: 2,
+        [TaskStatus.DRAFT]: 3,
+        [TaskStatus.COMPLETED]: 4
+      };
+      
+      return priorityOrder[a.status] - priorityOrder[b.status];
+    });
+  };
+
   // Group tasks by due date
   const groupTasksByDate = (tasks: TaskType[]): GroupedTasks => {
     const now = new Date();
@@ -231,16 +246,18 @@ export const TodaysFocus = () => {
     
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    
-    const endOfWeek = new Date(today);
+      const endOfWeek = new Date(today);
     endOfWeek.setDate(today.getDate() + 7);
 
     return tasks.reduce<GroupedTasks>((groups, task) => {
       const taskDate = new Date(task.dueDate);
       taskDate.setHours(0, 0, 0, 0);
 
-      if (taskDate < today) {
-        groups.overdue.push(task);
+      if (taskDate < today) {        
+        // Only include in overdue if the task is not completed
+        if (task.status !== TaskStatus.COMPLETED) {
+          groups.overdue.push(task);
+        }
       } else if (taskDate.getTime() === today.getTime()) {
         groups.today.push(task);
       } else if (taskDate.getTime() === tomorrow.getTime()) {
@@ -261,7 +278,17 @@ export const TodaysFocus = () => {
     });
   };
 
-  const groupedTasks = groupTasksByDate(tasks);
+  const groupedTasksRaw = groupTasksByDate(tasks);
+  
+  // Sort tasks within each group by priority
+  const groupedTasks = {
+    overdue: sortTasksByPriority(groupedTasksRaw.overdue),
+    today: sortTasksByPriority(groupedTasksRaw.today),
+    tomorrow: sortTasksByPriority(groupedTasksRaw.tomorrow),
+    thisWeek: sortTasksByPriority(groupedTasksRaw.thisWeek),
+    later: sortTasksByPriority(groupedTasksRaw.later)
+  };
+
   const hasAnyTasks = tasks.length > 0;
 
   // Determine which groups to show based on filter
@@ -284,10 +311,9 @@ export const TodaysFocus = () => {
     const totalCount = count ?? tasks.length;
     const hiddenCount = isOverdue && tasks.length > 5 ? tasks.length - 5 : 0;
 
-    return (
-      <div className="space-y-3">
+    return (      <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-medium text-foreground">{title}</h4>
+          <h4 className="text-base font-semibold text-foreground">{title}</h4>
           <Badge variant="secondary" className="text-xs">
             {totalCount}
           </Badge>

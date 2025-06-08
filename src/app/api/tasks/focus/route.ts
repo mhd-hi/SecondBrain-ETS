@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq, gte, lt, or } from "drizzle-orm";
+import { and, eq, gte, lt, ne, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { tasks, courses } from "@/server/db/schema";
@@ -31,22 +31,25 @@ export async function GET(request: Request) {
       default: // week
         endDate = new Date(now);
         endDate.setDate(now.getDate() + 7);
-        break;
-    }
-
-    // Fetch tasks that are:
-    // 1. Overdue (due date < today) OR
-    // 2. Due within the selected time range AND are in progress
+        break;    }    // Fetch tasks that are:
+    // 1. Overdue (due date < today) and not completed OR
+    // 2. Due within the selected time range AND are actionable (IN_PROGRESS or TODO)
     const results = await db.select().from(tasks)
       .where(
         or(
-          // Overdue tasks (any status)
-          lt(tasks.dueDate, now),
-          // Tasks due within filter range that are in progress
+          // Overdue tasks (not completed)
+          and(
+            lt(tasks.dueDate, now),
+            ne(tasks.status, "COMPLETED")
+          ),
+          // Tasks due within filter range that are actionable (IN_PROGRESS or TODO)
           and(
             gte(tasks.dueDate, now),
             lt(tasks.dueDate, endDate),
-            eq(tasks.status, "IN_PROGRESS")
+            or(
+              eq(tasks.status, "IN_PROGRESS"),
+              eq(tasks.status, "TODO")
+            )
           )
         )
       )

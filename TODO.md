@@ -1,5 +1,6 @@
 # Fixes
-- when adding a course, disable close dialog (when clicking outside the dialog) and persist the info in the dialog until course is dealt with.
+- when adding a course, disable "close dialog" (when clicking outside the dialog) and persist the info in the dialog until course is dealt with.
+- Delete all tasks will put the tasks as completed, it should be deleted.
 
 # Enhancement
 - move the add task to the sidebar 

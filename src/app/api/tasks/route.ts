@@ -3,8 +3,7 @@ import { tasks } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { TaskStatus } from '@/types/task';
 import type {Task, Subtask} from '@/types/task'
-import { calculateTaskDueDate } from '@/lib/task/util';
-import { calculateWeekFromDueDate } from '@/lib/task/util';
+import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
 import { apiRoutePatterns } from '@/lib/api/server-util';
 
 export const GET = apiRoutePatterns.get(
@@ -28,18 +27,24 @@ export const POST = apiRoutePatterns.post(
     const { courseId, tasks: newTasks } = data;
 
     const insertedTasks = await db.insert(tasks).values(
-      newTasks.map(task => ({
-        ...task,
-        courseId,
-        week: calculateWeekFromDueDate(new Date(task.dueDate)),
-        status: task.status ?? TaskStatus.DRAFT,
-        subtasks: task.subtasks?.map(subtask => ({
-          ...subtask,
-          id: crypto.randomUUID(),
-          status: subtask.status ?? TaskStatus.TODO,
-        })),
-        dueDate: new Date(task.dueDate),
-      }))
+      newTasks.map(task => {
+        const dueDate = new Date(task.dueDate);
+        
+        return {
+          ...task,
+          courseId,
+          // Calculate week from due date if not provided (for manual task creation)
+          // Otherwise preserve the original week number from AI parsing
+          week: task.week ?? calculateWeekFromDueDate(dueDate),
+          status: task.status ?? TaskStatus.DRAFT,
+          subtasks: task.subtasks?.map(subtask => ({
+            ...subtask,
+            id: crypto.randomUUID(),
+            status: subtask.status ?? TaskStatus.TODO,
+          })),
+          dueDate,
+        };
+      })
     ).returning();
 
     return insertedTasks;
