@@ -3,9 +3,10 @@ import { TaskStatus } from '@/types/task';
 import { MOCK_COURSES } from './openai-data';
 
 export function setMockOpenAI(courseCode: string): CourseAIResponse {
+    console.info(`Using mock data for course ${courseCode}`);
     const course = MOCK_COURSES[courseCode];
     if (!course) {
-      throw new Error(`Invalid course code: ${courseCode}`);
+      throw new Error(`Course code "${courseCode}" not found in mock data. Available courses: ${Object.keys(MOCK_COURSES).join(', ')}`);
     }
 
     // Transform ParseCourseResponse to CourseAIResponse
@@ -21,4 +22,4 @@ export function setMockOpenAI(courseCode: string): CourseAIResponse {
         }))
       }))
     };
-} 
+}

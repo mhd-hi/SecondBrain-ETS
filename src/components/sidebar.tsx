@@ -17,6 +17,7 @@ interface Course {
 
 interface SidebarProps {
   courses: Course[];
+  onCourseAdded?: () => void;
 }
 
 export function Sidebar({ courses }: SidebarProps) {

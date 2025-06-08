@@ -53,7 +53,7 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 1. Clone the repository
 2. Install dependencies:
    ```bash
-   npm install
+   bun install
    ```
 3. Set up environment variables:
    ```env
@@ -61,15 +61,15 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
    ```
 4. Run the development server:
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 ## Development
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run typecheck` - Run TypeScript compiler check
+- `bun dev` - Start development server
+- `bun build` - Build for production
+- `bun lint` - Run ESLint
+- `bun typecheck` - Run TypeScript compiler check
 
 ## Contributing
 

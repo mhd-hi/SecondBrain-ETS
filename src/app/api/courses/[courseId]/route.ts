@@ -34,8 +34,8 @@ export const GET = withErrorHandling(
 );
 
 export const DELETE = withErrorHandling(
-  async (request: Request, context: { params: { courseId: string } }) => {
-    const { courseId } = context.params;
+  async (request: Request, context: { params: Promise<{ courseId: string }> }) => {
+    const { courseId } = await context.params;
 
     if (!courseId) {
       return NextResponse.json(

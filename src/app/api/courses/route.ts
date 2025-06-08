@@ -23,7 +23,8 @@ export const POST = apiRoutePatterns.post(
     const existingCourse = await db.select().from(courses).where(eq(courses.code, code));
 
     if (existingCourse.length > 0) {
-      throw new Error('Course already exists');
+      // Return the existing course instead of throwing an error
+      return existingCourse[0];
     }
 
     const [course] = await db.insert(courses).values({

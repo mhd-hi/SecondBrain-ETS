@@ -8,8 +8,8 @@ import { calculateTaskDueDate } from '@/lib/task/util';
 import { withErrorHandling, successResponse } from '@/lib/api/server-util';
 
 export const PATCH = withErrorHandling(
-  async (request: Request, { params }: { params: { taskId: string } }) => {
-    const { taskId } = params;
+  async (request: Request, { params }: { params: Promise<{ taskId: string }> }) => {
+    const { taskId } = await params;
     const updates = await request.json() as Partial<Task>;
 
     // Handle date fields properly

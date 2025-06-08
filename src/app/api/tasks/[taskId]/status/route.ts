@@ -4,10 +4,10 @@ import type { TaskStatus } from "@/types/task";
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { taskId: string } }
+  { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const taskId = params.taskId;
+    const { taskId } = await params;
     const { status } = await request.json() as { status: TaskStatus };
 
     if (!status) {

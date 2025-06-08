@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AddCourseForm } from "./components/AddCourseForm";
+import { AddCourseDialog } from "@/components/AddCourseDialog";
 import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
@@ -15,6 +15,21 @@ export default function Home() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const fetchCourses = async () => {
+    setError(null);
+    try {
+      const data = await withLoadingState(
+        () => api.get<Course[]>("/api/courses", CommonErrorMessages.COURSE_FETCH_FAILED),
+        setIsLoading
+      );
+      setCourses(data || []);
+      console.log("Courses data received by page.tsx:", data);
+    } catch (error) {
+      ErrorHandlers.silent(error, 'HomePage fetchCourses');
+      setError("Failed to load courses");
+    }
+  };
 
   const handleDeleteCourse = async (courseId: string) => {
     await handleConfirm(
@@ -39,21 +54,6 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      setError(null);
-      try {
-        const data = await withLoadingState(
-          () => api.get<Course[]>("/api/courses", CommonErrorMessages.COURSE_FETCH_FAILED),
-          setIsLoading
-        );
-        setCourses(data || []);
-        console.log("Courses data received by page.tsx:", data);
-      } catch (error) {
-        ErrorHandlers.silent(error, 'HomePage fetchCourses');
-        setError("Failed to load courses");
-      }
-    };
-
     void fetchCourses();
   }, []);
 
@@ -68,7 +68,7 @@ export default function Home() {
       </h1>
 
       <section className="space-y-6">
-        <AddCourseForm />
+        <AddCourseDialog onCourseAdded={fetchCourses} />
         <div className="border rounded-lg bg-muted/30 p-6">
           <h2 className="text-2xl font-semibold mb-6">Courses</h2>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">

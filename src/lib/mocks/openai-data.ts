@@ -807,5 +807,192 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
       }
     ]
   },
-};
+  MAT350: {
+    courseCode: "MAT350",
+    term: "20252",
+    tasks: [
 
+      {
+        "week": 1,
+        "type": "theorie",
+        "title": "Statistiques descriptives et présentation graphique",
+        "estimatedEffort": 6,
+        "notes": "Comprendre les mesures sur des échantillons.",
+        "subtasks": [
+          {
+            "title": "Statistiques descriptives",
+            "estimatedEffort": 3,
+            "notes": "Focus sur moyenne, écart-type, médiane."
+          },
+          {
+            "title": "Tableaux et présentation graphique",
+            "estimatedEffort": 3,
+            "notes": "Utiliser des graphiques pour la présentation."
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "type": "theorie",
+        "title": "Probabilités et variables aléatoires",
+        "estimatedEffort": 6,
+        "notes": "Maîtriser les concepts de probabilité.",
+        "subtasks": [
+          {
+            "title": "Axiomes et propriétés des probabilités",
+            "estimatedEffort": 3,
+            "notes": "Comprendre les bases des probabilités."
+          },
+          {
+            "title": "Variables aléatoires et distributions",
+            "estimatedEffort": 3,
+            "notes": "Étudier les modèles discrets et continus."
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "type": "theorie",
+        "title": "Modèles continus",
+        "estimatedEffort": 3,
+        "notes": "Explorer les lois de probabilité continues.",
+        "subtasks": [
+          {
+            "title": "Lois uniforme et exponentielle",
+            "estimatedEffort": 1.5,
+            "notes": "Comprendre les applications de ces lois."
+          },
+          {
+            "title": "Lois Student et normale",
+            "estimatedEffort": 1.5,
+            "notes": "Analyser les caractéristiques de ces lois."
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "type": "theorie",
+        "title": "Applications de la loi normale",
+        "estimatedEffort": 3,
+        "notes": "Appliquer le théorème central limite.",
+        "subtasks": [
+          {
+            "title": "Théorème central limite",
+            "estimatedEffort": 1.5,
+            "notes": "Comprendre son importance en statistiques."
+          },
+          {
+            "title": "Normalité d’une distribution",
+            "estimatedEffort": 1.5,
+            "notes": "Évaluer la normalité des données."
+          }
+        ]
+      },
+      {
+        "week": 7,
+        "type": "exam",
+        "title": "Examen intra",
+        "estimatedEffort": 3,
+        "notes": "Préparer l'examen intra.",
+        "subtasks": [
+          {
+            "title": "Révision pour l'examen",
+            "estimatedEffort": 3,
+            "notes": "Consolider les connaissances acquises."
+          }
+        ]
+      },
+      {
+        "week": 8,
+        "type": "theorie",
+        "title": "Estimation d’une moyenne",
+        "estimatedEffort": 3,
+        "notes": "Apprendre à estimer des moyennes.",
+        "subtasks": [
+          {
+            "title": "Intervalle de confiance",
+            "estimatedEffort": 1.5,
+            "notes": "Comprendre les intervalles de confiance."
+          },
+          {
+            "title": "Estimation d’une proportion",
+            "estimatedEffort": 1.5,
+            "notes": "Appliquer les concepts d'estimation."
+          }
+        ]
+      },
+      {
+        "week": 9,
+        "type": "theorie",
+        "title": "Tests d’hypothèses",
+        "estimatedEffort": 3,
+        "notes": "Maîtriser les tests d’hypothèses.",
+        "subtasks": [
+          {
+            "title": "Tests sur moyenne",
+            "estimatedEffort": 1.5,
+            "notes": "Comprendre les tests d'hypothèses."
+          },
+          {
+            "title": "Seuil descriptif",
+            "estimatedEffort": 1.5,
+            "notes": "Analyser la valeur-p."
+          }
+        ]
+      },
+      {
+        "week": 10,
+        "type": "theorie",
+        "title": "Risques d’erreurs",
+        "estimatedEffort": 3,
+        "notes": "Évaluer les risques d'erreurs.",
+        "subtasks": [
+          {
+            "title": "Risques 1ère et 2ème espèces",
+            "estimatedEffort": 1.5,
+            "notes": "Comprendre les types d'erreurs."
+          },
+          {
+            "title": "Taille d’échantillon",
+            "estimatedEffort": 1.5,
+            "notes": "Calculer la taille d'échantillon nécessaire."
+          }
+        ]
+      },
+      {
+        "week": 11,
+        "type": "theorie",
+        "title": "Tests d’hypothèses sur 2 paramètres",
+        "estimatedEffort": 3,
+        "notes": "Analyser l'égalité de paramètres.",
+        "subtasks": [
+          {
+            "title": "Tests d’égalité de paramètres",
+            "estimatedEffort": 3,
+            "notes": "Approfondir les tests d'hypothèses."
+          }
+        ]
+      },
+      {
+        "week": 12,
+        "type": "theorie",
+        "title": "Régression linéaire et analyse de variance",
+        "estimatedEffort": 6,
+        "notes": "Comprendre la régression et l'analyse de variance.",
+        "subtasks": [
+          {
+            "title": "Régression linéaire simple",
+            "estimatedEffort": 3,
+            "notes": "Étudier la droite de régression."
+          },
+          {
+            "title": "Analyse de variance",
+            "estimatedEffort": 3,
+            "notes": "Analyser les résidus et la variance."
+          }
+        ]
+      }
+
+    ]
+  },
+};

@@ -221,14 +221,14 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
           className="bg-green-600 hover:bg-green-700"
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Accepter tous les brouillons"}
+          {isLoading ? "Loading..." : "Accept all tasks"}
         </Button>
         <Button
           onClick={handleDiscardAllCourse}
           variant="destructive"
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Supprimer tous les brouillons"}
+          {isLoading ? "Loading..." : "Delete all tasks"}
         </Button>
       </div>
 

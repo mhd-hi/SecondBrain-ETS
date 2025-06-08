@@ -1,13 +1,21 @@
 import { OpenAI } from 'openai';
+import { env } from '@/env';
 import { COURSE_PLAN_PARSER_SYSTEM_PROMPT, buildCoursePlanParsePrompt } from './prompts';
 import type { Task } from '@/types/task';
+import { TaskStatus } from '@/types/task';
+import { USE_MOCK_DATA } from './config';
+import { setMockOpenAI } from './mocks/helper';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('OPENAI_API_KEY is not set in environment variables');
+// Custom error class for mock data issues
+export class MockDataError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MockDataError';
+  }
 }
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: env.OPENAI_API_KEY,
 });
 
 export interface ParseAIResult {
@@ -15,13 +23,54 @@ export interface ParseAIResult {
   logs: string[];
 }
 
-export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
+export async function parseContentWithAI(html: string, courseCode?: string): Promise<ParseAIResult> {
   const logs: string[] = [];
   const log = (message: string) => {
     console.log(message);
     logs.push(message);
   };
 
+  // Check if we should use mock data
+  if (USE_MOCK_DATA) {
+    log('Mock mode enabled - returning mock data');
+    
+    if (!courseCode) {
+      throw new MockDataError('Course code is required when using mock data');
+    }
+      // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    try {
+      const mockData = setMockOpenAI(courseCode);
+      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);
+      return {
+        tasks: mockData.tasks.map(task => ({
+          title: task.title,
+          notes: task.notes,
+          week: task.week,
+          type: task.type,
+          status: TaskStatus.TODO,
+          estimatedEffort: task.estimatedEffort,
+          subtasks: task.subtasks?.map(subtask => ({
+            id: crypto.randomUUID(),
+            title: subtask.title,
+            status: TaskStatus.TODO,
+            notes: subtask.notes,
+            estimatedEffort: subtask.estimatedEffort
+          })),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          dueDate: new Date() // This will be calculated properly later
+        })),
+        logs
+      };
+    } catch (error) {
+      // Re-throw mock data errors with the MockDataError type
+      throw new MockDataError(error instanceof Error ? error.message : 'Failed to get mock data');
+    }
+  }
+
+  // Real OpenAI processing
   // 1) Build the AI prompt
   const prompt = buildCoursePlanParsePrompt(html);
   log(`Built prompt. Length: ${prompt.length} characters`);
@@ -79,4 +128,4 @@ export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
     log(`Error in parseContentWithAI: ${error instanceof Error ? error.message : 'Unknown error'}`);
     throw error;
   }
-} 
+}
