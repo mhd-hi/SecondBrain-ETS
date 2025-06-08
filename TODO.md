@@ -1,6 +1,6 @@
 # Fixes
 - dont include the draft tasks in today's focus. You might want to add that check inside the drizzle request directly. 
-- 
+- course colors are always the same sometimes, it should be unique. Maybe randomize and persist it in the db? exclude black and white colors.
 
 # Enhancement
 - move the add task to the sidebar 
