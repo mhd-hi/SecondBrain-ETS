@@ -3,14 +3,20 @@ import { db } from "@/server/db";
 import { tasks, courses } from "@/server/db/schema";
 import type { TaskStatus, Task, Subtask } from "@/types/task";
 
-export const getTasksForWeek = async (startDate: Date, endDate: Date): Promise<Task[]> => {
+export const getTasksForWeek = async (startDate: Date, endDate: Date, userId?: string): Promise<Task[]> => {
   try {
+    const conditions = [
+      gte(tasks.dueDate, startDate),
+      lt(tasks.dueDate, endDate)
+    ];
+    
+    // Add user filter if userId is provided
+    if (userId) {
+      conditions.push(eq(tasks.userId, userId));
+    }
     
     const results = await db.select().from(tasks)
-      .where(and(
-        gte(tasks.dueDate, startDate),
-        lt(tasks.dueDate, endDate)
-      ))
+      .where(and(...conditions))
       .leftJoin(courses, eq(tasks.courseId, courses.id));
 
     return results.map(row => ({
@@ -36,6 +42,7 @@ export const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
 
 export const createTask = async (data: {
   courseId: string;
+  userId: string;
   title: string;
   notes?: string;
   estimatedEffort: number;
@@ -58,4 +65,4 @@ export const createTask = async (data: {
     type: "theorie",
     status: "DRAFT",
   }).returning();
-}; 
+};

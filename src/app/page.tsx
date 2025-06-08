@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
-import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
 import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
