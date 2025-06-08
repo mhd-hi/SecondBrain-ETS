@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
 import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
-import { CourseSelector } from '@/components/CourseSelector';
+import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";

@@ -5,7 +5,7 @@ import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
 import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
-import { WeeklyRoadmap } from "../components/WeeklyRoadmap/WeeklyRoadmap";
+import { WeeklyRoadmap } from "../components/WeeklyRoadmapBoard/WeeklyRoadmap";
 import { handleConfirm } from "@/lib/dialog/util";
 import { api, handleApiSuccess } from "@/lib/api/util";
 import { withLoadingState } from "@/lib/loading/util";
