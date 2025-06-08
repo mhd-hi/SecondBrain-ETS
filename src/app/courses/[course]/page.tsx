@@ -12,9 +12,17 @@ import { CourseSelector } from '@/components/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, batchAcceptTasks } from '@/lib/task/util';
+import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
 
@@ -71,6 +79,10 @@ export default function CoursePage({ params }: CoursePageProps) {
   const draftTasks = tasks.filter(task => task.status === TaskStatus.DRAFT);
   const hasDraftTasks = draftTasks.length > 0;
 
+  // Get overdue tasks for the complete overdue button
+  const overdueTasks = getOverdueTasks(tasks);
+  const hasOverdueTasks = overdueTasks.length > 0;
+
   // Handlers for accept all and delete all DRAFT tasks
   const handleAcceptAllDrafts = async () => {
     try {
@@ -105,6 +117,28 @@ export default function CoursePage({ params }: CoursePageProps) {
       await fetchCourse();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to delete draft tasks');
+    }
+  };
+
+  const handleCompleteOverdueTasks = async () => {
+    try {
+      const currentOverdueTasks = getOverdueTasks(tasks);
+      
+      if (currentOverdueTasks.length === 0) {
+        toast.success('No overdue tasks found');
+        return;
+      }
+
+      const taskIds = currentOverdueTasks.map(task => task.id);
+      
+      await batchUpdateTaskStatus(taskIds, TaskStatus.COMPLETED);
+
+      toast.success('Overdue tasks completed', {
+        description: `${currentOverdueTasks.length} overdue tasks have been marked as completed`,
+      });
+      await fetchCourse();
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to complete overdue tasks');
     }
   };
 
@@ -163,34 +197,57 @@ export default function CoursePage({ params }: CoursePageProps) {
         </div>
 
         {course && (
-          <AddTaskDialog
-            courseId={course.id}
-            courseCode={course.code}
-            onTaskAdded={fetchCourse}
-          />
+          <div className="flex items-center gap-3">
+            {/* Bulk Actions Dropdown */}
+            {(hasDraftTasks || hasOverdueTasks) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" disabled={isLoading}>
+                    Bulk Actions
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {hasOverdueTasks && (
+                    <DropdownMenuItem
+                      onClick={handleCompleteOverdueTasks}
+                      disabled={isLoading}
+                      className="text-yellow-600 hover:text-yellow-700"
+                    >
+                      Complete overdue tasks ({overdueTasks.length})
+                    </DropdownMenuItem>
+                  )}
+                  {hasOverdueTasks && hasDraftTasks && <DropdownMenuSeparator />}
+                  {hasDraftTasks && (
+                    <DropdownMenuItem
+                      onClick={handleAcceptAllDrafts}
+                      disabled={isLoading}
+                      className="text-green-600 hover:text-green-700"
+                    >
+                      Accept all draft tasks ({draftTasks.length})
+                    </DropdownMenuItem>
+                  )}
+                  {hasDraftTasks && (
+                    <DropdownMenuItem
+                      onClick={handleDeleteAllDrafts}
+                      disabled={isLoading}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Delete all draft tasks ({draftTasks.length})
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            
+            <AddTaskDialog
+              courseId={course.id}
+              courseCode={course.code}
+              onTaskAdded={fetchCourse}
+            />
+          </div>
         )}
       </div>
-
-      {/* Accept/Delete All Buttons - Only show when there are draft tasks */}
-      {hasDraftTasks && (
-        <div className="flex gap-2 mb-6">
-          <Button
-            onClick={handleAcceptAllDrafts}
-            variant="default"
-            className="bg-green-600 hover:bg-green-700"
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : `Accept all draft tasks (${draftTasks.length})`}
-          </Button>
-          <Button
-            onClick={handleDeleteAllDrafts}
-            variant="destructive"
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : `Delete all draft tasks (${draftTasks.length})`}
-          </Button>
-        </div>
-      )}
 
       {isLoading ? (
         <div className="space-y-4">

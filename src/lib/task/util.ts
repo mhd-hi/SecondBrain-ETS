@@ -398,3 +398,20 @@ export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Pro
     result: unknown;
   }>;
 };
+
+/**
+ * Filters tasks to get only overdue tasks (tasks with due date in the past and not completed)
+ */
+export const getOverdueTasks = (tasks: Task[]): Task[] => {
+  const now = new Date();
+  return tasks.filter(task => {
+    // Skip completed tasks
+    if (task.status === TaskStatus.COMPLETED) {
+      return false;
+    }
+
+    // Check if task is overdue
+    const dueDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
+    return !isNaN(dueDate.getTime()) && dueDate < now;
+  });
+};
