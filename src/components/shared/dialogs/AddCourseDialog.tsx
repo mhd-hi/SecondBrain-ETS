@@ -44,11 +44,10 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     const resetDialog = () => {
         setCourseCode('');
         reset();
-    };
-
-    const handleDialogClose = (open: boolean) => {
+    };    const handleDialogClose = (open: boolean) => {
         setIsOpen(open);
         if (!open) {
+            // User closed the dialog, treat as cancel - reset everything
             resetDialog();
         }
     };
@@ -64,11 +63,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
 
     const handleRetry = () => {
         retry();
-    };
-
-    const handleTryDifferentCourse = () => {
-        setCourseCode('');
-        reset();
+    };    const handleTryDifferentCourse = () => {
+        resetDialog();
     };
 
     const handleReviewCourse = async () => {
@@ -114,10 +110,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                 throw new Error(errorData.error ?? 'Failed to create tasks');
             }            toast.success('Course created successfully!', {
                 description: 'Redirecting to course page...',
-            });
-
-            // Close dialog and redirect
-            handleDialogClose(false);
+            });            // Close dialog and redirect
+            setIsOpen(false);
             router.push(`/courses/${course.id}`);
 
             if (onCourseAdded) {
@@ -196,16 +190,17 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         Add Course
                     </Button>
                 )}
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md" aria-describedby="add-course-description">
+            </DialogTrigger>            <DialogContent 
+                className="sm:max-w-md"
+                aria-describedby="add-course-description"
+            >
                 <DialogHeader>
                     <DialogTitle>Add Course</DialogTitle>
                     <DialogDescription id="add-course-description">
                         Enter a course code to automatically fetch syllabus data and generate tasks.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
-                    {/* Course Code Input */}
+                <div className="space-y-4">                    {/* Course Code Input */}
                     <div className="space-y-2">
                         <Label htmlFor="courseCode">Course Code</Label>
                         <Input
@@ -247,19 +242,25 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                                 </p>
                             )}
                         </div>
-                    )}
-
-                    {/* Action Buttons */}
+                    )}                    {/* Action Buttons */}
                     <div className="flex justify-end gap-2">
                         {currentStep === 'idle' && (
-                            <Button onClick={handleStartParsing} disabled={!courseCode.trim()}>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Course
-                            </Button>
+                            <>
+                                <Button variant="outline" onClick={() => handleDialogClose(false)}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleStartParsing} disabled={!courseCode.trim()}>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Course
+                                </Button>
+                            </>
                         )}
 
                         {currentStep === 'error' && (
                             <>
+                                <Button variant="outline" onClick={() => handleDialogClose(false)}>
+                                    Cancel
+                                </Button>
                                 <Button variant="outline" onClick={handleRetry}>
                                     <RefreshCw className="h-4 w-4 mr-2" />
                                     Retry
@@ -271,9 +272,14 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         )}
 
                         {currentStep === 'completed' && parsedData && (
-                            <Button onClick={handleReviewCourse}>
-                                Review Course
-                            </Button>
+                            <>
+                                <Button variant="outline" onClick={() => handleDialogClose(false)}>
+                                    Cancel
+                                </Button>
+                                <Button onClick={handleReviewCourse}>
+                                    Review Course
+                                </Button>
+                            </>
                         )}
 
                         {isProcessing && (
