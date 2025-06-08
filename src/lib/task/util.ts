@@ -325,3 +325,76 @@ export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
 export const isValidStatus = (status: TaskStatus): boolean => {
   return Object.values(TaskStatus).includes(status);
 };
+
+/**
+ * Batch update task status for multiple tasks
+ * @param taskIds Array of task IDs to update
+ * @param status New status to set for all tasks
+ * @returns Promise that resolves when the batch update is complete
+ */
+export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
+  updatedCount: number;
+  status: TaskStatus;
+  updatedTasks: Task[];
+}> => {
+  const response = await fetch('/api/tasks/batch/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskIds, status }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to batch update task status: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<{
+    updatedCount: number;
+    status: TaskStatus;
+    updatedTasks: Task[];
+  }>;
+};
+
+/**
+ * Batch update tasks to TODO status and set due dates based on session weeks
+ * @param tasks Array of tasks to update
+ * @param sessionWeeks Number of weeks in the current session
+ * @returns Promise that resolves when all updates are complete
+ */
+export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Promise<{
+  action: string;
+  affectedCount: number;
+  result: unknown;
+}> => {
+  const taskIds = tasks.map(task => task.id);
+  
+  // First, update all task statuses to TODO
+  await batchUpdateTaskStatus(taskIds, TaskStatus.TODO);
+  
+  // Then, update due dates for each task
+  const taskUpdates = tasks.map(task => ({
+    taskId: task.id,
+    updates: {
+      dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
+    }
+  }));
+
+  const response = await fetch('/api/tasks/batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update',
+      taskIds,
+      taskUpdates
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to batch update task due dates: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<{
+    action: string;
+    affectedCount: number;
+    result: unknown;
+  }>;
+};

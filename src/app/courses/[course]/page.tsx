@@ -14,7 +14,7 @@ import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-drop
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, calculateTaskDueDate } from '@/lib/task/util';
+import { getCurrentSession, getSessionWeeks, batchAcceptTasks } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
 
@@ -77,21 +77,8 @@ export default function CoursePage({ params }: CoursePageProps) {
       const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
       const sessionWeeks = getSessionWeeks(currentSession);
 
-      // Create per-task updates with correct due dates for each task
-      const taskUpdates = draftTasks.map(task => ({
-        taskId: task.id,
-        updates: {
-          status: TaskStatus.TODO,
-          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-        }
-      }));
-
-      // Use batch API with per-task updates
-      await api.post('/api/tasks/batch', {
-        action: 'update',
-        taskIds: draftTasks.map(task => task.id),
-        taskUpdates
-      });
+      // Use the new utility function to batch accept tasks
+      await batchAcceptTasks(draftTasks, sessionWeeks);
 
       toast.success(`${draftTasks.length} tasks accepted`, {
         description: `All draft tasks for ${course?.code ?? 'this course'} have been accepted`,

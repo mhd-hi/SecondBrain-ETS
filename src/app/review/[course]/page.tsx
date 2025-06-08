@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation"
 import { CourseSelector } from '@/components/CourseSelector';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, calculateTaskDueDate } from '@/lib/task/util';
+import { getCurrentSession, getSessionWeeks, batchAcceptTasks, calculateTaskDueDate } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
 
@@ -68,34 +68,22 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
     acc[week]?.push(task);
     return acc;
   }, {} as Record<number, Task[]>);
-
   const handleTaskUpdate = async () => {
     try {
       await fetchCourse();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to refresh course data');
     }
-  };  // Handlers for global accept/discard
+  };
+
+  // Handlers for global accept/discard
   const handleAcceptAllCourse = async () => {
     try {
       const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
       const sessionWeeks = getSessionWeeks(currentSession);
 
-      // Create per-task updates with correct due dates for each task
-      const taskUpdates = tasks.map(task => ({
-        taskId: task.id,
-        updates: {
-          status: TaskStatus.TODO,
-          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-        }
-      }));
-
-      // Use batch API with per-task updates
-      await api.post('/api/tasks/batch', {
-        action: 'update',
-        taskIds: tasks.map(task => task.id),
-        taskUpdates
-      });
+      // Use the new modular utility function to batch accept tasks
+      await batchAcceptTasks(tasks, sessionWeeks);
 
       toast.success(`${tasks.length} tâches ajoutées`, {
         description: `Toutes les tâches de ${course?.code ?? 'ce cours'} ont été acceptées`,

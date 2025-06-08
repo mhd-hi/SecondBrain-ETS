@@ -21,3 +21,5 @@
 
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
+- Fix this: "// Default to winter if between sessions."
+    - It should select the last session, not winter.
