@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
-import { type Task } from '@/types/task';
+import { type Task, TaskStatus } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-drop
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
+import { getCurrentSession, getSessionWeeks, calculateTaskDueDate } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
 
@@ -63,6 +64,60 @@ export default function CoursePage({ params }: CoursePageProps) {
       await fetchCourse();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to delete task');
+    }
+  };
+
+  // Get only DRAFT tasks for the accept/delete all buttons
+  const draftTasks = tasks.filter(task => task.status === TaskStatus.DRAFT);
+  const hasDraftTasks = draftTasks.length > 0;
+
+  // Handlers for accept all and delete all DRAFT tasks
+  const handleAcceptAllDrafts = async () => {
+    try {
+      const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
+      const sessionWeeks = getSessionWeeks(currentSession);
+
+      // Create per-task updates with correct due dates for each task
+      const taskUpdates = draftTasks.map(task => ({
+        taskId: task.id,
+        updates: {
+          status: TaskStatus.TODO,
+          dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
+        }
+      }));
+
+      // Use batch API with per-task updates
+      await api.post('/api/tasks/batch', {
+        action: 'update',
+        taskIds: draftTasks.map(task => task.id),
+        taskUpdates
+      });
+
+      toast.success(`${draftTasks.length} tasks accepted`, {
+        description: `All draft tasks for ${course?.code ?? 'this course'} have been accepted`,
+      });
+      await fetchCourse();
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to accept draft tasks');
+    }
+  };
+
+  const handleDeleteAllDrafts = async () => {
+    try {
+      const taskIds = draftTasks.map(task => task.id);
+
+      // Use batch API to delete all tasks in a single request
+      await api.post('/api/tasks/batch', {
+        action: 'delete',
+        taskIds
+      });
+
+      toast.success('Draft tasks deleted', {
+        description: `All draft tasks for ${course?.code ?? 'this course'} have been deleted`,
+      });
+      await fetchCourse();
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to delete draft tasks');
     }
   };
 
@@ -128,6 +183,27 @@ export default function CoursePage({ params }: CoursePageProps) {
           />
         )}
       </div>
+
+      {/* Accept/Delete All Buttons - Only show when there are draft tasks */}
+      {hasDraftTasks && (
+        <div className="flex gap-2 mb-6">
+          <Button
+            onClick={handleAcceptAllDrafts}
+            variant="default"
+            className="bg-green-600 hover:bg-green-700"
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : `Accept all draft tasks (${draftTasks.length})`}
+          </Button>
+          <Button
+            onClick={handleDeleteAllDrafts}
+            variant="destructive"
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : `Delete all draft tasks (${draftTasks.length})`}
+          </Button>
+        </div>
+      )}
 
       {isLoading ? (
         <div className="space-y-4">

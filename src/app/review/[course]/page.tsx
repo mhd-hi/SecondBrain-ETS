@@ -75,22 +75,28 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to refresh course data');
     }
-  };
-
-  // Handlers for global accept/discard
+  };  // Handlers for global accept/discard
   const handleAcceptAllCourse = async () => {
     try {
       const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
       const sessionWeeks = getSessionWeeks(currentSession);
 
-      const promises = tasks.map(task => {
-        return api.patch(`/api/tasks/${task.id}`, { 
+      // Create per-task updates with correct due dates for each task
+      const taskUpdates = tasks.map(task => ({
+        taskId: task.id,
+        updates: {
           status: TaskStatus.TODO,
           dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-        });
+        }
+      }));
+
+      // Use batch API with per-task updates
+      await api.post('/api/tasks/batch', {
+        action: 'update',
+        taskIds: tasks.map(task => task.id),
+        taskUpdates
       });
 
-      await Promise.all(promises);
       toast.success(`${tasks.length} tâches ajoutées`, {
         description: `Toutes les tâches de ${course?.code ?? 'ce cours'} ont été acceptées`,
       });
@@ -102,15 +108,20 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
 
   const handleDiscardAllCourse = async () => {
     try {
-      const promises = tasks.map(task => api.delete(`/api/tasks/${task.id}`));
+      const taskIds = tasks.map(task => task.id);
 
-      await Promise.all(promises);
-      toast.success('Brouillons supprimés', {
-        description: `Tous les brouillons de ${course?.code ?? 'ce cours'} ont été supprimés`,
+      // Use batch API to delete all tasks in a single request
+      await api.post('/api/tasks/batch', {
+        action: 'delete',
+        taskIds
+      });
+
+      toast.success('Tasks deleted', {
+        description: `All tasks of course ${course?.code} have been deleted`,
       });
       await handleTaskUpdate();
     } catch (error) {
-      ErrorHandlers.api(error, 'Échec de la suppression des brouillons');
+      ErrorHandlers.api(error, 'Failed to delete tasks');
     }
   };
 
