@@ -18,7 +18,8 @@
 - Add search bar for searching a course in course page
 - Add course link in todays focus
     - Remove course link from the tasks (right link icon)
-
+- Use TaskCard in both dashboard and courses.
+    -(0/2 subtasks) (progressbar 0%) in the same line. WHen clicking on subtasks badge, it expands  the subtasks.
 
 
 # Tech debt

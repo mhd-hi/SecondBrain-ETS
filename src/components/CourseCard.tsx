@@ -75,13 +75,16 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="space-y-1 text-xs mt-auto">
         {nextTask && (
           <div>
-            <TruncatedTextWithTooltip 
-              text={nextTask.title}
-              className="text-xs text-muted-foreground line-clamp-1 leading-tight"
-              maxLines={1}
-            />
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-bold text-foreground">Next:</span>
+              <TruncatedTextWithTooltip 
+                text={nextTask.title}
+                className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
+                maxLines={1}
+              />
+            </div>
             {nextTask.dueDate && (
-              <div className="ml-2">
+              <div className="flex items-center">
                 <DueDateDisplay date={nextTask.dueDate} className="text-xs" />
               </div>
             )}
@@ -90,13 +93,16 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
         {upcomingTask && upcomingTask !== nextTask && (
           <div>
-            <TruncatedTextWithTooltip 
-              text={upcomingTask.title}
-              className="text-xs text-muted-foreground line-clamp-1 leading-tight"
-              maxLines={1}
-            />
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-bold text-foreground">Upcoming:</span>
+              <TruncatedTextWithTooltip 
+                text={upcomingTask.title}
+                className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
+                maxLines={1}
+              />
+            </div>
             {upcomingTask.dueDate && (
-              <div className="ml-2">
+              <div className="flex items-center">
                 <DueDateDisplay date={upcomingTask.dueDate} className="text-xs" />
               </div>
             )}
