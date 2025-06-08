@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DayColumn } from "./DayColumn";
-import { Task } from "../Task";
+import { Task } from "../shared/Task";
 import type { Task as TaskType, TaskStatus } from "@/types/task";
 import type { Course } from "@/types/course";
 import type { DraggedTask, DropTargetData } from "@/types/drag-drop";
