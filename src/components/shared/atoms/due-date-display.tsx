@@ -25,7 +25,12 @@ export const DueDateDisplay = ({
   }
 
   const dueDateText = formatDueDate(dateObj);
-  const isOverdue = dateObj < new Date();
+  
+  // More robust overdue detection - compare at day level
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const isOverdue = dateObj < today;
+  
   return (
     <span
       className={cn(

@@ -12,6 +12,8 @@ import { CourseSelector } from '@/components/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
+import { DraftTasksBanner } from '@/components/DraftTasksBanner';
+import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +24,9 @@ import {
 import { ChevronDown } from "lucide-react";
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
+import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus, debugOverdueTasks } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
-import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 
 interface CoursePageProps {
   params: Promise<{
@@ -83,6 +84,17 @@ export default function CoursePage({ params }: CoursePageProps) {
   // Get overdue tasks for the complete overdue button
   const overdueTasks = getOverdueTasks(tasks);
   const hasOverdueTasks = overdueTasks.length > 0;
+
+  // Debug logging for overdue tasks
+  console.log('🔍 Debug - Total tasks:', tasks.length);
+  console.log('🔍 Debug - Overdue tasks found:', overdueTasks.length);
+  if (overdueTasks.length > 0) {
+    console.log('🔍 Debug - Overdue tasks:', overdueTasks.map(t => ({ 
+      title: t.title, 
+      dueDate: t.dueDate, 
+      status: t.status 
+    })));
+  }
 
   // Handlers for accept all and delete all DRAFT tasks
   const handleAcceptAllDrafts = async () => {
@@ -255,6 +267,13 @@ export default function CoursePage({ params }: CoursePageProps) {
         draftTasks={draftTasks}
         onAcceptAll={handleAcceptAllDrafts}
         onDeleteAll={handleDeleteAllDrafts}
+        isLoading={isLoading}
+      />
+
+      {/* Overdue Tasks Banner */}
+      <OverdueTasksBanner
+        overdueTasks={overdueTasks}
+        onCompleteAll={handleCompleteOverdueTasks}
         isLoading={isLoading}
       />
 

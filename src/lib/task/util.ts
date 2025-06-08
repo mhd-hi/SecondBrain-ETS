@@ -402,7 +402,10 @@ export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Pro
  * Filters tasks to get only overdue tasks (tasks with due date in the past and not completed)
  */
 export const getOverdueTasks = (tasks: Task[]): Task[] => {
+  // Get current date at start of day to ensure consistent overdue detection
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  
   return tasks.filter(task => {
     // Skip completed tasks
     if (task.status === TaskStatus.COMPLETED) {
@@ -411,6 +414,48 @@ export const getOverdueTasks = (tasks: Task[]): Task[] => {
 
     // Check if task is overdue
     const dueDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
-    return !isNaN(dueDate.getTime()) && dueDate < now;
+    
+    // Return false if invalid date
+    if (isNaN(dueDate.getTime())) {
+      return false;
+    }
+    
+    // Task is overdue if due date is before today (end of day)
+    return dueDate < today;
   });
+};
+
+/**
+ * Debug function to help diagnose overdue task detection issues
+ */
+export const debugOverdueTasks = (tasks: Task[]): void => {
+  console.group('🔍 Overdue Tasks Debug');
+  
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  
+  console.log('Current time:', now.toISOString());
+  console.log('Today end of day:', today.toISOString());
+  console.log('Total tasks:', tasks.length);
+  
+  const overdueTasks = tasks.filter(task => {
+    const isCompleted = task.status === TaskStatus.COMPLETED;
+    const dueDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
+    const isValidDate = !isNaN(dueDate.getTime());
+    const isOverdue = isValidDate && dueDate < today;
+    
+    console.log(`Task: ${task.title}`, {
+      status: task.status,
+      isCompleted,
+      dueDate: dueDate.toISOString(),
+      isValidDate,
+      isOverdue,
+      willBeIncluded: !isCompleted && isOverdue
+    });
+    
+    return !isCompleted && isOverdue;
+  });
+  
+  console.log('Overdue tasks found:', overdueTasks.length);
+  console.groupEnd();
 };
