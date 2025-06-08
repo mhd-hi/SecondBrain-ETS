@@ -47,7 +47,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     };    const handleDialogClose = (open: boolean) => {
         setIsOpen(open);
         if (!open) {
-            // User closed the dialog, treat as cancel - reset everything
             resetDialog();
         }
     };
