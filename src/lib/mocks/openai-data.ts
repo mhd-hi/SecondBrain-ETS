@@ -368,22 +368,22 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 1,
         "type": "theorie",
         "title": "Introduction au cours et analyse asymptotique",
-        "estimatedEffort": 210,
-        "notes": "Commencez par bien comprendre les algorithmes de tri.",
+        "estimatedEffort": 3.5,
+        "notes": "Commencez par bien comprendre les bases de l'analyse asymptotique.",
         "subtasks": [
           {
             "title": "Introduction au cours",
-            "estimatedEffort": 30,
+            "estimatedEffort": 1,
             "notes": "Familiarisez-vous avec le contenu du cours."
           },
           {
             "title": "Analyse asymptotique : grand oh, grand omega et grand theta",
-            "estimatedEffort": 60,
+            "estimatedEffort": 1,
             "notes": "Concentrez-vous sur les notations asymptotiques."
           },
           {
             "title": "Algorithmes de tri",
-            "estimatedEffort": 120,
+            "estimatedEffort": 1.5,
             "notes": "Étudiez les différents algorithmes de tri."
           }
         ]
@@ -392,17 +392,17 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 2,
         "type": "theorie",
         "title": "Algorithmes récursifs et analyse asymptotique",
-        "estimatedEffort": 240,
-        "notes": "La récursion est essentielle pour comprendre les algorithmes.",
+        "estimatedEffort": 3.5,
+        "notes": "La récursion est essentielle pour comprendre les algorithmes avancés.",
         "subtasks": [
           {
             "title": "Algorithme récursif",
-            "estimatedEffort": 120,
+            "estimatedEffort": 2,
             "notes": "Revoyez les concepts de récursion."
           },
           {
             "title": "Analyse asymptotique",
-            "estimatedEffort": 120,
+            "estimatedEffort": 1.5,
             "notes": "Apprenez les méthodes d'analyse asymptotique."
           }
         ]
@@ -411,18 +411,18 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 3,
         "type": "theorie",
         "title": "Arbres de jeu et structures de données de base",
-        "estimatedEffort": 240,
-        "notes": "Les arbres de jeu sont cruciaux pour les algorithmes.",
+        "estimatedEffort": 3.5,
+        "notes": "Les arbres de jeu sont cruciaux pour les algorithmes de décision.",
         "subtasks": [
           {
             "title": "Arbres de jeu",
-            "estimatedEffort": 120,
-            "notes": "Comprenez les algorithmes Minimax et alpha-beta."
+            "estimatedEffort": 2,
+            "notes": "Étudiez les algorithmes Minimax et alpha-beta."
           },
           {
             "title": "Structures de données de base",
-            "estimatedEffort": 120,
-            "notes": "Familiarisez-vous avec les piles, files et listes."
+            "estimatedEffort": 1.5,
+            "notes": "Comprenez les piles, files et listes."
           }
         ]
       },
@@ -430,17 +430,17 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 4,
         "type": "theorie",
         "title": "Arbres binaires et arbres rouge-noir",
-        "estimatedEffort": 240,
-        "notes": "Les opérations sur les arbres sont fondamentales.",
+        "estimatedEffort": 3.5,
+        "notes": "Les arbres sont fondamentaux pour l'optimisation des recherches.",
         "subtasks": [
           {
             "title": "Arbre binaire de recherche",
-            "estimatedEffort": 120,
-            "notes": "Étudiez les opérations de base sur les arbres."
+            "estimatedEffort": 2,
+            "notes": "Maîtrisez les opérations de base."
           },
           {
             "title": "Arbre rouge-noir",
-            "estimatedEffort": 120,
+            "estimatedEffort": 1.5,
             "notes": "Comprenez les rotations et insertions."
           }
         ]
@@ -448,19 +448,19 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
       {
         "week": 5,
         "type": "theorie",
-        "title": "Arbre rouge-noir et table de hachage",
-        "estimatedEffort": 180,
-        "notes": "Consolidez vos connaissances sur les arbres.",
+        "title": "Arbre rouge-noir (suite) et table de hachage",
+        "estimatedEffort": 3.5,
+        "notes": "Les tables de hachage sont essentielles pour la performance.",
         "subtasks": [
           {
             "title": "Arbre rouge-noir (suite)",
-            "estimatedEffort": 90,
-            "notes": "Revoyez la suppression et l'augmentation de structure."
+            "estimatedEffort": 1.5,
+            "notes": "Concentrez-vous sur la suppression et l'augmentation."
           },
           {
             "title": "Table de hachage",
-            "estimatedEffort": 90,
-            "notes": "Comprenez le fonctionnement des tables de hachage."
+            "estimatedEffort": 2,
+            "notes": "Étudiez les concepts de hachage."
           }
         ]
       },
@@ -468,18 +468,18 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 6,
         "type": "theorie",
         "title": "Graphes et exercices pour l'examen intra",
-        "estimatedEffort": 240,
-        "notes": "Les graphes sont un sujet clé en algorithmique.",
+        "estimatedEffort": 3.5,
+        "notes": "Les graphes sont omniprésents dans les algorithmes.",
         "subtasks": [
           {
             "title": "Graphes",
-            "estimatedEffort": 150,
-            "notes": "Étudiez les recherches en largeur et profondeur."
+            "estimatedEffort": 2,
+            "notes": "Familiarisez-vous avec les recherches en largeur et profondeur."
           },
           {
             "title": "Exercices pour l'examen intra",
-            "estimatedEffort": 90,
-            "notes": "Préparez-vous pour l'examen intra."
+            "estimatedEffort": 1.5,
+            "notes": "Pratiquez avec des exercices ciblés."
           }
         ]
       },
@@ -487,31 +487,31 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 7,
         "type": "exam",
         "title": "Examen intra",
-        "estimatedEffort": 210,
-        "notes": "Préparez-vous bien pour l'examen.",
+        "estimatedEffort": 3.5,
+        "notes": "Préparez-vous bien pour l'examen intra.",
         "subtasks": [
           {
             "title": "Examen intra",
-            "estimatedEffort": 210,
-            "notes": "Assurez-vous de bien réviser tous les sujets."
+            "estimatedEffort": 3.5,
+            "notes": "Revoyez tous les concepts clés."
           }
         ]
       },
       {
         "week": 8,
         "type": "theorie",
-        "title": "Optimisation combinatoire et algorithmes gloutons",
-        "estimatedEffort": 240,
-        "notes": "L'optimisation est un sujet complexe mais important.",
+        "title": "Introduction à l'optimisation combinatoire et algorithmes gloutons",
+        "estimatedEffort": 3.5,
+        "notes": "L'optimisation est cruciale pour les problèmes complexes.",
         "subtasks": [
           {
             "title": "Introduction à l'optimisation combinatoire",
-            "estimatedEffort": 60,
-            "notes": "Comprenez le concept de NP-Complet."
+            "estimatedEffort": 1.5,
+            "notes": "Comprenez le NP-Complet."
           },
           {
             "title": "Algorithmes gloutons",
-            "estimatedEffort": 180,
+            "estimatedEffort": 2,
             "notes": "Étudiez les algorithmes comme Dijkstra et A*."
           }
         ]
@@ -520,12 +520,12 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 9,
         "type": "theorie",
         "title": "Programmation dynamique",
-        "estimatedEffort": 180,
-        "notes": "La programmation dynamique est essentielle pour résoudre des problèmes complexes.",
+        "estimatedEffort": 3.5,
+        "notes": "La programmation dynamique est essentielle pour l'optimisation.",
         "subtasks": [
           {
             "title": "Programmation dynamique",
-            "estimatedEffort": 180,
+            "estimatedEffort": 3.5,
             "notes": "Familiarisez-vous avec les concepts de mémoïsation."
           }
         ]
@@ -534,12 +534,12 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 10,
         "type": "theorie",
         "title": "Programmation dynamique - Exemples pratiques",
-        "estimatedEffort": 90,
-        "notes": "Mettez en pratique vos connaissances en classe.",
+        "estimatedEffort": 3.5,
+        "notes": "Les exemples pratiques renforcent la compréhension.",
         "subtasks": [
           {
             "title": "Exemples pratiques en classe",
-            "estimatedEffort": 90,
+            "estimatedEffort": 3.5,
             "notes": "Participez activement aux exercices."
           }
         ]
@@ -548,17 +548,17 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 11,
         "type": "theorie",
         "title": "Branch and bound et introduction à l'IA",
-        "estimatedEffort": 240,
-        "notes": "Ces concepts sont cruciaux pour l'IA.",
+        "estimatedEffort": 3.5,
+        "notes": "L'IA est un domaine en pleine expansion.",
         "subtasks": [
           {
             "title": "Branch and bound",
-            "estimatedEffort": 120,
-            "notes": "Comprenez les bases de cette méthode."
+            "estimatedEffort": 1.5,
+            "notes": "Comprenez les concepts de base."
           },
           {
             "title": "Introduction à l'IA",
-            "estimatedEffort": 120,
+            "estimatedEffort": 2,
             "notes": "Familiarisez-vous avec K-means et les réseaux de neurones."
           }
         ]
@@ -567,28 +567,28 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 12,
         "type": "theorie",
         "title": "Recherche dans les chaînes de caractères",
-        "estimatedEffort": 240,
+        "estimatedEffort": 3.5,
         "notes": "Les algorithmes de recherche sont fondamentaux.",
         "subtasks": [
           {
             "title": "Algorithme naïf",
-            "estimatedEffort": 60,
-            "notes": "Comprenez le fonctionnement de l'algorithme."
+            "estimatedEffort": 1,
+            "notes": "Comprenez les bases de la recherche."
           },
           {
             "title": "Algorithme Boyer-Moore",
-            "estimatedEffort": 60,
-            "notes": "Étudiez les avantages de cet algorithme."
+            "estimatedEffort": 1,
+            "notes": "Étudiez cet algorithme efficace."
           },
           {
             "title": "Algorithme Knuth-Morris-Pratt",
-            "estimatedEffort": 60,
-            "notes": "Familiarisez-vous avec cet algorithme efficace."
+            "estimatedEffort": 1,
+            "notes": "Familiarisez-vous avec cet algorithme."
           },
           {
             "title": "Distance de Leivenstein",
-            "estimatedEffort": 60,
-            "notes": "Comprenez l'importance de cette distance."
+            "estimatedEffort": 0.5,
+            "notes": "Comprenez la distance entre chaînes."
           }
         ]
       },
@@ -596,13 +596,13 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "week": 13,
         "type": "homework",
         "title": "Exercices pour l'examen final",
-        "estimatedEffort": 90,
-        "notes": "Préparez-vous pour l'examen final.",
+        "estimatedEffort": 3.5,
+        "notes": "Préparez-vous bien pour l'examen final.",
         "subtasks": [
           {
             "title": "Exercices pour l'examen final",
-            "estimatedEffort": 90,
-            "notes": "Consolidez vos connaissances avec des exercices."
+            "estimatedEffort": 3.5,
+            "notes": "Concentrez-vous sur les sujets clés."
           }
         ]
       }

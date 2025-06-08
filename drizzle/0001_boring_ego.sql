@@ -1,0 +1,1 @@
+ALTER TABLE "tasks" ALTER COLUMN "estimated_effort" SET DATA TYPE real;

@@ -33,7 +33,7 @@ export function TaskCard({
   actions
 }: TaskCardProps) {
   const router = useRouter();
-  const courseColor = task.course?.id ? getCourseColor(task.course.id) : undefined;
+  const courseColor = task.course ? getCourseColor(task.course) : undefined;
 
   const handleNavigateToTask = () => {
     if (task.course?.id) {

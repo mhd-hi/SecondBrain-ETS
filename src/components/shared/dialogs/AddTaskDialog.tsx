@@ -32,9 +32,9 @@ interface AddTaskDialogProps {
   courses?: Course[];
 }
 
-export const AddTaskDialog = ({ 
-  courseId, 
-  courseCode, 
+export const AddTaskDialog = ({
+  courseId,
+  courseCode,
   selectedDate,
   onTaskAdded,
   trigger,
@@ -174,13 +174,13 @@ export const AddTaskDialog = ({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="estimatedEffort">Estimated Effort (hours)</Label>
-              <Input
+              <Label htmlFor="estimatedEffort">Estimated Effort (hours)</Label>              <Input
                 id="estimatedEffort"
                 type="number"
+                step="0.25"
                 value={newTask.estimatedEffort}
-                onChange={(e) => setNewTask({ ...newTask, estimatedEffort: parseInt(e.target.value) || 1 })}
-                min="1"
+                onChange={(e) => setNewTask({ ...newTask, estimatedEffort: parseFloat(e.target.value) || 1 })}
+                min="0.25"
                 required
               />
             </div>

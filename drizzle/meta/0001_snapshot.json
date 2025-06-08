@@ -1,6 +1,6 @@
 {
-  "id": "e769beaf-4bcd-42f3-a81b-70bae3d05f8d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "1c398025-0a23-4475-9f2f-87242437fe10",
+  "prevId": "e769beaf-4bcd-42f3-a81b-70bae3d05f8d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -113,7 +113,7 @@
         },
         "estimated_effort": {
           "name": "estimated_effort",
-          "type": "integer",
+          "type": "real",
           "primaryKey": false,
           "notNull": true,
           "default": 1

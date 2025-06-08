@@ -6,6 +6,7 @@ import {
   uuid,
   integer,
   json,
+  real,
 } from "drizzle-orm/pg-core";
 import type { TaskStatus } from "@/types/task";
 
@@ -20,6 +21,7 @@ export const courses = pgTable("courses", {
   name: text("name").notNull(),
   code: text("code").notNull(),
   term: text("term").notNull(),
+  color: text("color").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -32,7 +34,7 @@ export const tasks = pgTable("tasks", {
   week: integer("week").notNull(),
   type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
   status: text("status", { enum: ["DRAFT", "IN_PROGRESS", "TODO", "COMPLETED"] }).default("DRAFT").notNull(),
-  estimatedEffort: integer("estimated_effort").notNull().default(1),
+  estimatedEffort: real("estimated_effort").notNull().default(1),
   subtasks: json("subtasks").$type<{ id: string; title: string; status: TaskStatus; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

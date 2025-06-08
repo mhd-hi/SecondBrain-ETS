@@ -2,6 +2,7 @@ import { db } from '@/server/db';
 import { courses } from '@/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { apiRoutePatterns, withErrorHandling, successResponse } from '@/lib/api/server-util';
+import { generateRandomCourseColor } from '@/lib/utils';
 
 export const GET = withErrorHandling(async () => {
   // Fetch all courses and their associated tasks
@@ -24,12 +25,11 @@ export const POST = apiRoutePatterns.post(
     if (existingCourse.length > 0) {
       // Return the existing course instead of throwing an error
       return existingCourse[0];
-    }
-
-    const [course] = await db.insert(courses).values({
+    }    const [course] = await db.insert(courses).values({
       code,
       name,
       term: '20252', // Default term
+      color: generateRandomCourseColor(),
     }).returning();
 
     return course;

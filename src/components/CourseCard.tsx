@@ -22,7 +22,7 @@ interface CourseCardProps {
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   // Ensure course.tasks is an array
   const tasks = course.tasks ?? [];
-  const courseColor = getCourseColor(course.id);
+  const courseColor = getCourseColor(course);
 
   // Calculate progress and task counts
   const progressPercentage = calculateProgress(tasks);

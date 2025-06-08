@@ -4,6 +4,7 @@ export interface Course {
   id: string;
   code: string;
   name: string;
+  color: string;
   description?: string;
   createdAt: Date;
   updatedAt: Date;

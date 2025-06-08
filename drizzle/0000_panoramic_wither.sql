@@ -3,6 +3,7 @@ CREATE TABLE "courses" (
 	"name" text NOT NULL,
 	"code" text NOT NULL,
 	"term" text NOT NULL,
+	"color" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
