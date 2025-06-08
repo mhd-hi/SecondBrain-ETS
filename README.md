@@ -15,30 +15,6 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 - Implemented `/api/parse-course` API route with OpenAI integration
 - Added support for subtasks in course plan parsing
 
-## Current Sprint
-
-### Sprint 2: Review Queue & Task Management
-**Goal:** Build the Review Queue interface to manage AI-generated task drafts.
-
-#### Tasks:
-1. **Review Queue Page**
-   - Create `/app/review/[course]/page.tsx`
-   - Implement CourseSidebar component
-   - Build WeekAccordion for task grouping
-   - Add DraftCard component for individual tasks
-
-2. **Task Management Features**
-   - Add "Accept All" and "Discard All" functionality
-   - Implement per-week task management
-   - Create task modification interface
-   - Add progress tracking
-
-3. **UI/UX Improvements**
-   - Implement responsive design
-   - Add loading states
-   - Improve error handling
-   - Enhance accessibility
-
 ## Tech Stack
 
 - [Next.js](https://nextjs.org)

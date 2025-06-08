@@ -17,20 +17,12 @@ export default function Navbar() {
       <div className="flex h-14 items-center justify-between px-4">
         <Button variant="ghost" asChild className="font-bold text-xl">
           <Link href="/">Second Brain</Link>
-        </Button>
-        <NavigationMenu>
+        </Button>        <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <Button variant="ghost" asChild>
                 <Link href="/" className={navigationMenuTriggerStyle()}>
                   Dashboard
-                </Link>
-              </Button>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Button variant="ghost" asChild>
-                <Link href="/review" className={navigationMenuTriggerStyle()}>
-                  Review tasks
                 </Link>
               </Button>
             </NavigationMenuItem>

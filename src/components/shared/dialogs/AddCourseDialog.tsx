@@ -112,15 +112,13 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             if (!tasksResponse.ok) {
                 const errorData = await tasksResponse.json() as { error?: string };
                 throw new Error(errorData.error ?? 'Failed to create tasks');
-            }
-
-            toast.success('Course created successfully!', {
-                description: 'Redirecting to review page...',
+            }            toast.success('Course created successfully!', {
+                description: 'Redirecting to course page...',
             });
 
             // Close dialog and redirect
             handleDialogClose(false);
-            router.push(`/review/${course.id}`);
+            router.push(`/courses/${course.id}`);
 
             if (onCourseAdded) {
                 onCourseAdded();
