@@ -23,7 +23,6 @@ const WeekAccordion = ({ week, tasks, onTaskUpdate }: WeekAccordionProps) => {
     const result = await withLoadingAndErrorHandling(
       async () => {
         await onTaskUpdate(taskId, updates);
-        handleApiSuccess("Task updated successfully");
       },
       setIsLoading,
       (error) => ErrorHandlers.api(error, CommonErrorMessages.TASK_UPDATE_FAILED, 'WeekAccordion')

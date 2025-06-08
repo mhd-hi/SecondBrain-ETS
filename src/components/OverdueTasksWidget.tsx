@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Task } from "@/types/task";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
-import { cn } from "@/lib/utils";
 
 interface OverdueTasksWidgetProps {
     overdueTasks: Task[];

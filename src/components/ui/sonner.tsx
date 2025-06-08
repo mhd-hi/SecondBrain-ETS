@@ -2,24 +2,28 @@
 
 import * as React from "react"
 import { useTheme } from "next-themes"
-import { toast } from "sonner"
+import { Toaster, toast } from "sonner"
 
-const Toaster = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  useTheme()
+const CustomToaster = () => {
+  const { theme = "system" } = useTheme()
 
   return (
-    <div
+    <Toaster
+      theme={theme as "light" | "dark" | "system"}
       className="toaster group"
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-        } as React.CSSProperties
-      }
+      toastOptions={{
+        classNames: {
+          toast:
+            "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg",
+          description: "group-[.toast]:text-muted-foreground",
+          actionButton:
+            "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+          cancelButton:
+            "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+        },
+      }}
     />
   )
 }
 
-export { Toaster, toast }
+export { CustomToaster as Toaster, toast }

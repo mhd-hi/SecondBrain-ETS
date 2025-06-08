@@ -71,8 +71,8 @@ export default function DraftCard({ draft, onDraftUpdate }: DraftCardProps) {
         throw new Error('Failed to update draft');
       }
 
-      toast.success('Brouillon modifié', {
-        description: 'Le brouillon a été modifié avec succès',
+      toast.success('Task modified', {
+        description: 'The draft has been successfully modified',
       });
       await onDraftUpdate();
       setIsEditing(false);

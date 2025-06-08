@@ -14,17 +14,9 @@ import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-drop
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus, debugOverdueTasks } from '@/lib/task/util';
+import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
 
@@ -38,7 +30,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   const router = useRouter();
   const unwrappedParams = use(params);
   const courseId = unwrappedParams.course;
-  
+
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses } = useCourses();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
@@ -53,15 +45,13 @@ export default function CoursePage({ params }: CoursePageProps) {
       await api.patch(`/api/tasks/${taskId}`, updates);
 
       // Update local state instead of refetching
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.id === taskId 
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId
             ? { ...task, ...updates }
             : task
         )
       );
-
-      toast.success('Task updated successfully');
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to update task');
     }
@@ -79,20 +69,18 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // Get only DRAFT tasks for the accept/delete all buttons
   const draftTasks = tasks.filter(task => task.status === TaskStatus.DRAFT);
-  const hasDraftTasks = draftTasks.length > 0;
 
   // Get overdue tasks for the complete overdue button
   const overdueTasks = getOverdueTasks(tasks);
-  const hasOverdueTasks = overdueTasks.length > 0;
 
   // Debug logging for overdue tasks
   console.log('🔍 Debug - Total tasks:', tasks.length);
   console.log('🔍 Debug - Overdue tasks found:', overdueTasks.length);
   if (overdueTasks.length > 0) {
-    console.log('🔍 Debug - Overdue tasks:', overdueTasks.map(t => ({ 
-      title: t.title, 
-      dueDate: t.dueDate, 
-      status: t.status 
+    console.log('🔍 Debug - Overdue tasks:', overdueTasks.map(t => ({
+      title: t.title,
+      dueDate: t.dueDate,
+      status: t.status
     })));
   }
 
@@ -136,14 +124,14 @@ export default function CoursePage({ params }: CoursePageProps) {
   const handleCompleteOverdueTasks = async () => {
     try {
       const currentOverdueTasks = getOverdueTasks(tasks);
-      
+
       if (currentOverdueTasks.length === 0) {
         toast.success('No overdue tasks found');
         return;
       }
 
       const taskIds = currentOverdueTasks.map(task => task.id);
-      
+
       await batchUpdateTaskStatus(taskIds, TaskStatus.COMPLETED);
 
       toast.success('Overdue tasks completed', {
@@ -211,48 +199,6 @@ export default function CoursePage({ params }: CoursePageProps) {
 
         {course && (
           <div className="flex items-center gap-3">
-            {/* Bulk Actions Dropdown */}
-            {(hasDraftTasks || hasOverdueTasks) && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" disabled={isLoading}>
-                    Bulk Actions
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {hasOverdueTasks && (
-                    <DropdownMenuItem
-                      onClick={handleCompleteOverdueTasks}
-                      disabled={isLoading}
-                      className="text-yellow-600 hover:text-yellow-700"
-                    >
-                      Complete overdue tasks ({overdueTasks.length})
-                    </DropdownMenuItem>
-                  )}
-                  {hasOverdueTasks && hasDraftTasks && <DropdownMenuSeparator />}
-                  {hasDraftTasks && (
-                    <DropdownMenuItem
-                      onClick={handleAcceptAllDrafts}
-                      disabled={isLoading}
-                      className="text-green-600 hover:text-green-700"
-                    >
-                      Accept all draft tasks ({draftTasks.length})
-                    </DropdownMenuItem>
-                  )}
-                  {hasDraftTasks && (
-                    <DropdownMenuItem
-                      onClick={handleDeleteAllDrafts}
-                      disabled={isLoading}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Delete all draft tasks ({draftTasks.length})
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
             <AddTaskDialog
               courseId={course.id}
               courseCode={course.code}
@@ -311,7 +257,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                         ]}
                         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
                       />
-                      
+
                       <div className="flex items-start justify-between gap-4">
                         <div className="space-y-1 flex-grow">
                           <h4 className="font-medium">{task.title}</h4>

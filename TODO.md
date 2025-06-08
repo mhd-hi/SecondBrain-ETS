@@ -23,3 +23,5 @@
 - Fix this: "// Default to winter if between sessions."
     - It should select the last session, not winter.
 - Fix the issue with dueDate being passed as a string.
+    - Convert dueDate strings as soon as possible to Date objects and handle invalid dates
+    - it should never be a string
