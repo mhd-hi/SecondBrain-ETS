@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
+import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
 import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
@@ -63,15 +64,17 @@ export default function Home() {
   }
 
   return (
-    <main className="container mx-auto px-8 py-8 flex min-h-screen flex-col gap-12 mt-2 mb-3.5">
+    <main className="container mx-auto px-8 flex min-h-screen flex-col gap-12 mt-2 mb-3.5">
       <h1 className="text-3xl font-bold text-foreground">
         Dashboard
       </h1>
 
       <section className="space-y-6">
-        <AddCourseDialog onCourseAdded={fetchCourses} />
         <div className="border rounded-lg bg-muted/30 p-6">
-          <h2 className="text-2xl font-semibold mb-6">Courses</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold">Courses</h2>
+            <AddCourseDialog onCourseAdded={fetchCourses} />
+          </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading ? (
               // Loading state: Display skeletons

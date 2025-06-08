@@ -2,8 +2,7 @@
 
 # Enhancement
 - Add auth to launch the app to vercel
-- move the add task button to the courses dashboard (put at the right in same line  as the title container)
-    - add course button to the My Courses on right of the title of sidebar "my courses". 
+- Add Pomodoro on the right of Todays Focus, give 1/3 space to pomodoro.
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Add search bar for searching a course in course page
 - Add course link in todays focus
@@ -12,7 +11,8 @@
     -(0/2 subtasks) (progressbar 0%) in the same line. WHen clicking on subtasks badge, it expands  the subtasks.
 - Add (try a different session) when adding a course, when a course is not available in a specific session.
     - maybe check the planets dropdown and determine the most recent valid session 
-- Add semester progress Board and dashboard (progressbar for all courses) 
+- Add semester progress Board and dashboard page (progressbar for all courses) 
+- Add course progress Board inside the course page (progressBar for courses tasks)
 
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).

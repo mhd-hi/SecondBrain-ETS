@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { db } from "@/server/db";
 import { tasks } from "@/server/db/schema";
 import type { TaskStatus, Subtask } from "@/types/task";
-
-const connectionString = process.env.DATABASE_URL!;
-const queryClient = postgres(connectionString);
-const db = drizzle(queryClient);
 
 export async function PATCH(
   request: Request,

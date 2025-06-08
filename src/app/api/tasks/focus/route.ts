@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 import { and, eq, gte, lt, ne, or } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { db } from "@/server/db";
 import { tasks, courses } from "@/server/db/schema";
 import type { TaskStatus, Task, Subtask } from "@/types/task";
-
-const connectionString = process.env.DATABASE_URL!;
-const queryClient = postgres(connectionString);
-const db = drizzle(queryClient);
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +13,7 @@ export async function GET(request: Request) {
     now.setHours(0, 0, 0, 0); // Start of today
 
     let endDate: Date;
-    
+
     switch (filter) {
       case "month":
         endDate = new Date(now);
@@ -31,7 +26,10 @@ export async function GET(request: Request) {
       default: // week
         endDate = new Date(now);
         endDate.setDate(now.getDate() + 7);
-        break;    }    // Fetch tasks that are:
+        break;
+    }    
+    
+    // Fetch tasks that are:
     // 1. Overdue (due date < today) and not completed and not draft OR
     // 2. Due within the selected time range AND are actionable (IN_PROGRESS or TODO)
     const results = await db.select().from(tasks)

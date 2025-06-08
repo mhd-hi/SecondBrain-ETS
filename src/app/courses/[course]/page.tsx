@@ -7,7 +7,6 @@ import { type Task, TaskStatus } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
-import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
@@ -198,7 +197,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   if (!course) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="container mx-auto px-8">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/4" />
           <div className="space-y-3">
@@ -212,7 +211,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <div className="container mx-auto p-8">
+    <div className="container mx-auto px-8">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (
@@ -223,16 +222,6 @@ export default function CoursePage({ params }: CoursePageProps) {
             />
           )}
         </div>
-
-        {course && (
-          <div className="flex items-center gap-3">
-            <AddTaskDialog
-              courseId={course.id}
-              courseCode={course.code}
-              onTaskAdded={fetchCourse}
-            />
-          </div>
-        )}
       </div>
 
       {/* Draft Tasks Banner */}

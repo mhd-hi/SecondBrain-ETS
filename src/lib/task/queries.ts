@@ -1,12 +1,7 @@
 import { and, eq, gte, lt } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { db } from "@/server/db";
 import { tasks, courses } from "@/server/db/schema";
 import type { TaskStatus, Task, Subtask } from "@/types/task";
-
-const connectionString = process.env.DATABASE_URL!;
-const queryClient = postgres(connectionString);
-const db = drizzle(queryClient);
 
 export const getTasksForWeek = async (startDate: Date, endDate: Date): Promise<Task[]> => {
   try {

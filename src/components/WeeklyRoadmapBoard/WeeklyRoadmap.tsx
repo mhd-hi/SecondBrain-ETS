@@ -228,8 +228,6 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     return date.toDateString() === today.toDateString();
   };
 
-  console.log('Tasks by date:', tasksByDate);
-
   return (
     <DndContext
       sensors={sensors}
