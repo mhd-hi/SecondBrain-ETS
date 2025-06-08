@@ -5,9 +5,9 @@ import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types/task";
 import { TaskStatus } from "@/types/task";
-import { handleApiSuccess } from "@/lib/api/util";
 import { withLoadingAndErrorHandling } from "@/lib/loading/util";
 import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
+import { SubtasksList } from "@/components/SubtasksList";
 
 interface WeekAccordionProps {
   week: number;
@@ -52,13 +52,19 @@ const WeekAccordion = ({ week, tasks, onTaskUpdate }: WeekAccordionProps) => {
 
       {isOpen && (
         <div className="p-4 space-y-4">
-          {tasks.map((task) => (
-            <div
+          {tasks.map((task) => (            <div
               key={task.id}
               className="p-4 border rounded-lg bg-white"
             >
               <h3 className="font-medium">{task.title}</h3>
               <p className="text-sm text-muted-foreground mt-1">{task.notes}</p>
+              
+              {/* Subtasks Display (readonly in this context) */}
+              <SubtasksList
+                subtasks={task.subtasks ?? []}
+                readonly={true}
+              />
+              
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={() => handleTaskUpdate(task.id, { status: TaskStatus.TODO })}

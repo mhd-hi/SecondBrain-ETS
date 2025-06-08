@@ -7,13 +7,15 @@ import { type Task, TaskStatus } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
-import { AddTaskDialog } from "@/app/dashboard/components/AddTaskDialog";
+import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
 import { CourseSelector } from '@/components/CourseSelector';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
+import { SubtasksList } from '@/components/SubtasksList';
+import { SubtaskProgress } from '@/components/SubtaskProgress';
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
 import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
@@ -54,6 +56,35 @@ export default function CoursePage({ params }: CoursePageProps) {
       );
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to update task');
+    }
+  };
+
+  const handleUpdateSubtaskStatus = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
+    try {
+      // Find the current task and its subtasks
+      const currentTask = tasks.find(task => task.id === taskId);
+      if (!currentTask?.subtasks) return;
+
+      // Update the subtask status
+      const updatedSubtasks = currentTask.subtasks.map(subtask =>
+        subtask.id === subtaskId
+          ? { ...subtask, status: newStatus }
+          : subtask
+      );
+
+      // Update the task with new subtasks
+      await api.patch(`/api/tasks/${taskId}`, { subtasks: updatedSubtasks });
+
+      // Update local state
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId
+            ? { ...task, subtasks: updatedSubtasks }
+            : task
+        )
+      );
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to update subtask status');
     }
   };
 
@@ -262,9 +293,12 @@ export default function CoursePage({ params }: CoursePageProps) {
                         <div className="space-y-1 flex-grow">
                           <h4 className="font-medium">{task.title}</h4>
                           <p className="text-sm text-muted-foreground">{task.notes}</p>
-                          {task.dueDate && (
-                            <DueDateDisplay date={task.dueDate} />
-                          )}
+                          <div className="flex items-center gap-3">
+                            {task.dueDate && (
+                              <DueDateDisplay date={task.dueDate} />
+                            )}
+                            <SubtaskProgress subtasks={task.subtasks} />
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <TaskStatusChanger
@@ -273,6 +307,14 @@ export default function CoursePage({ params }: CoursePageProps) {
                           />
                         </div>
                       </div>
+
+                      {/* Subtasks Display */}
+                      <SubtasksList
+                        subtasks={task.subtasks ?? []}
+                        onSubtaskStatusChange={(subtaskId, newStatus) => 
+                          handleUpdateSubtaskStatus(task.id, subtaskId, newStatus)
+                        }
+                      />
                     </div>
                   ))}
                 </div>

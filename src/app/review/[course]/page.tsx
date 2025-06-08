@@ -14,6 +14,7 @@ import { ErrorHandlers } from '@/lib/error/util';
 import { getCurrentSession, getSessionWeeks, batchAcceptTasks, calculateTaskDueDate } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
+import { SubtasksList } from '@/components/SubtasksList';
 
 interface ReviewQueueProps {
   params: Promise<{
@@ -256,32 +257,17 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
                             Discard
                           </Button>
                         </div>
-                      </div>
-                      {task.notes && (
+                      </div>                      {task.notes && (
                         <p className="text-sm text-muted-foreground mb-4">
                           {task.notes}
                         </p>
                       )}
-                      {task.subtasks && task.subtasks.length > 0 && (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium">Subtasks:</h4>
-                          <div className="space-y-2">
-                            {task.subtasks.map((subtask, index) => (
-                              <div
-                                key={index}
-                                className="text-sm bg-muted/50 p-2 rounded"
-                              >
-                                <div className="font-medium">{subtask.title}</div>
-                                {subtask.notes && (
-                                  <p className="text-muted-foreground">
-                                    {subtask.notes}
-                                  </p>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      
+                      {/* Subtasks Display (readonly in review context) */}
+                      <SubtasksList
+                        subtasks={task.subtasks ?? []}
+                        readonly={true}
+                      />
                     </div>
                   ))}
                 </div>

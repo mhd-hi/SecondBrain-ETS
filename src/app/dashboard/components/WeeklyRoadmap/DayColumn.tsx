@@ -5,8 +5,8 @@ import { Plus } from "lucide-react";
 import type { Task as TaskType, TaskStatus } from "@/types/task";
 import type { Course } from "@/types/course";
 import type { DropTargetData } from "@/types/drag-drop";
-import { AddTaskDialog } from "./AddTaskDialog";
-import { Task } from "./Task";
+import { AddTaskDialog } from "../../../../components/shared/dialogs/AddTaskDialog";
+import { Task } from "../Task";
 
 interface DayColumnProps {
   date: Date;
