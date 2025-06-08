@@ -811,7 +811,6 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
     courseCode: "MAT350",
     term: "20252",
     tasks: [
-
       {
         "week": 1,
         "type": "theorie",
@@ -836,12 +835,12 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "type": "theorie",
         "title": "Probabilités et variables aléatoires",
         "estimatedEffort": 6,
-        "notes": "Maîtriser les concepts de probabilité.",
+        "notes": "Maîtriser les concepts de base des probabilités.",
         "subtasks": [
           {
             "title": "Axiomes et propriétés des probabilités",
             "estimatedEffort": 3,
-            "notes": "Comprendre les bases des probabilités."
+            "notes": "Comprendre les fondements des probabilités."
           },
           {
             "title": "Variables aléatoires et distributions",
@@ -911,41 +910,36 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "subtasks": [
           {
             "title": "Intervalle de confiance",
-            "estimatedEffort": 1.5,
-            "notes": "Comprendre les intervalles de confiance."
-          },
-          {
-            "title": "Estimation d’une proportion",
-            "estimatedEffort": 1.5,
-            "notes": "Appliquer les concepts d'estimation."
+            "estimatedEffort": 3,
+            "notes": "Comprendre la construction d'intervalles."
           }
         ]
       },
       {
         "week": 9,
         "type": "theorie",
-        "title": "Tests d’hypothèses",
+        "title": "Estimation d’une proportion et tests d’hypothèses",
         "estimatedEffort": 3,
-        "notes": "Maîtriser les tests d’hypothèses.",
+        "notes": "Maîtriser les tests d'hypothèses.",
         "subtasks": [
           {
-            "title": "Tests sur moyenne",
+            "title": "Estimation d’une proportion",
             "estimatedEffort": 1.5,
-            "notes": "Comprendre les tests d'hypothèses."
+            "notes": "Apprendre à estimer des proportions."
           },
           {
-            "title": "Seuil descriptif",
+            "title": "Tests d’hypothèses sur moyenne",
             "estimatedEffort": 1.5,
-            "notes": "Analyser la valeur-p."
+            "notes": "Comprendre les seuils descriptifs."
           }
         ]
       },
       {
         "week": 10,
         "type": "theorie",
-        "title": "Risques d’erreurs",
+        "title": "Risques et tests d’hypothèses",
         "estimatedEffort": 3,
-        "notes": "Évaluer les risques d'erreurs.",
+        "notes": "Analyser les risques d'erreurs.",
         "subtasks": [
           {
             "title": "Risques 1ère et 2ème espèces",
@@ -962,14 +956,14 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
       {
         "week": 11,
         "type": "theorie",
-        "title": "Tests d’hypothèses sur 2 paramètres",
+        "title": "Tests d’hypothèses sur l’égalité de 2 paramètres",
         "estimatedEffort": 3,
-        "notes": "Analyser l'égalité de paramètres.",
+        "notes": "Évaluer l'égalité de paramètres.",
         "subtasks": [
           {
             "title": "Tests d’égalité de paramètres",
             "estimatedEffort": 3,
-            "notes": "Approfondir les tests d'hypothèses."
+            "notes": "Comprendre les méthodes de test."
           }
         ]
       },
@@ -978,21 +972,19 @@ export const MOCK_COURSES: Record<string, CourseAIResponse> = {
         "type": "theorie",
         "title": "Régression linéaire et analyse de variance",
         "estimatedEffort": 6,
-        "notes": "Comprendre la régression et l'analyse de variance.",
+        "notes": "Apprendre les bases de la régression.",
         "subtasks": [
           {
             "title": "Régression linéaire simple",
             "estimatedEffort": 3,
-            "notes": "Étudier la droite de régression."
+            "notes": "Comprendre la droite de régression."
           },
           {
             "title": "Analyse de variance",
             "estimatedEffort": 3,
-            "notes": "Analyser les résidus et la variance."
+            "notes": "Étudier la décomposition de la variance."
           }
         ]
-      }
-
-    ]
+      }]
   },
 };

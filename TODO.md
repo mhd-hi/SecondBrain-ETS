@@ -1,5 +1,5 @@
 # Fixes
--
+- when adding a course, disable close dialog (when clicking outside the dialog) and persist the info in the dialog until course is dealt with.
 
 # Enhancement
 - move the add task to the sidebar 

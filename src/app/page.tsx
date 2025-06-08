@@ -6,6 +6,7 @@ import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
 import { WeeklyRoadmap } from "../components/WeeklyRoadmapBoard/WeeklyRoadmap";
+import { TodaysFocus } from "@/components/TodaysFocus";
 import { handleConfirm } from "@/lib/dialog/util";
 import { api, handleApiSuccess } from "@/lib/api/util";
 import { withLoadingState } from "@/lib/loading/util";
@@ -93,6 +94,10 @@ export default function Home() {
             )}
           </div>
         </div>
+      </section>
+
+      <section>
+        <TodaysFocus />
       </section>
 
       <section>
