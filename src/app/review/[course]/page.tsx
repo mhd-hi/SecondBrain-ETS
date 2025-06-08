@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
-import type { Course } from '@/types/course';
 import { TaskStatus, type Task } from '@/types/task';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import { calculateTaskDueDate, getSessionWeeks, getCurrentSession } from '@/lib/task/util';
 import { CourseSelector } from '@/components/CourseSelector';
 import { api } from '@/lib/api/util';
-import { withLoadingAndErrorHandling } from '@/lib/loading/util';
 import { ErrorHandlers } from '@/lib/error/util';
+import { getCurrentSession, getSessionWeeks, calculateTaskDueDate } from '@/lib/task/util';
+import { useCourses } from '@/hooks/use-courses';
+import { useCourse } from '@/hooks/use-course';
 
 interface ReviewQueueProps {
   params: Promise<{
@@ -21,63 +21,26 @@ interface ReviewQueueProps {
   }>;
 }
 
-interface CourseResponse extends Course {
-  tasks: Task[];
-}
-
-interface ApiResponse {
-  tasks: Task[]
-}
-
 export default function ReviewQueue({ params }: ReviewQueueProps) {
   const router = useRouter()
   const unwrappedParams = use(params);
   const courseId = unwrappedParams.course;
-  const [course, setCourse] = useState<Course | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const fetchCourses = useCallback(async () => {
-    try {
-      const data = await api.get<Course[]>('/api/courses');
-      setCourses(data);
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to load courses');
-    }
-  }, []);
-  const fetchCourse = useCallback(async () => {
-    await withLoadingAndErrorHandling(
-      async () => {
-        const data = await api.get<CourseResponse>(`/api/courses/${unwrappedParams.course}`);
-        setCourse(data);
-        setTasks(data.tasks.filter((task) => task.status === TaskStatus.DRAFT));
-      },
-      setIsLoading,
-      (error) => {
-        setError('Failed to load course data');
-        ErrorHandlers.api(error, 'Failed to load course');
-      }
-    );
-  }, [unwrappedParams.course]);
+  
+  // Use custom hooks instead of duplicate state management
+  const { courses, fetchCourses } = useCourses();
+  const { course, isLoading, error, fetchCourse, getFilteredTasks } = useCourse(courseId);
+  
+  // Get only DRAFT tasks for review
+  const tasks = getFilteredTasks(TaskStatus.DRAFT);
 
   useEffect(() => {
     void fetchCourses();
     void fetchCourse();
-  }, [unwrappedParams.course, fetchCourse, fetchCourses]);
+  }, [fetchCourses, fetchCourse]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    await withLoadingAndErrorHandling(
-      async () => {
-        const data = await api.get<ApiResponse>(`/api/tasks?courseId=${unwrappedParams.course}`);
-        setTasks(data.tasks.filter(task => task.status === TaskStatus.DRAFT));
-      },
-      setIsLoading,
-      (error) => {
-        setError(error instanceof Error ? error.message : "An error occurred");
-      }
-    );
+    // Search functionality can be implemented here if needed
   }
 
   if (error) {
@@ -105,14 +68,15 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
     acc[week]?.push(task);
     return acc;
   }, {} as Record<number, Task[]>);
+
   const handleTaskUpdate = async () => {
     try {
-      const data = await api.get<Course>(`/api/courses/${courseId}`);
-      setCourse(data);
+      await fetchCourse();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to refresh course data');
     }
   };
+
   // Handlers for global accept/discard
   const handleAcceptAllCourse = async () => {
     try {
@@ -135,6 +99,7 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       ErrorHandlers.api(error, 'Échec de l\'acceptation des tâches');
     }
   };
+
   const handleDiscardAllCourse = async () => {
     try {
       const promises = tasks.map(task => api.delete(`/api/tasks/${task.id}`));
@@ -148,6 +113,7 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       ErrorHandlers.api(error, 'Échec de la suppression des brouillons');
     }
   };
+
   const handleAccept = async (id: string) => {
     try {
       const task = tasks.find(t => t.id === id);
@@ -171,6 +137,7 @@ export default function ReviewQueue({ params }: ReviewQueueProps) {
       ErrorHandlers.api(error, 'Failed to accept task');
     }
   };
+
   const handleDiscard = async (id: string) => {
     try {
       await api.delete(`/api/tasks/${id}`);

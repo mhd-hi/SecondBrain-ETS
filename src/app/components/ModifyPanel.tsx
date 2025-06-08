@@ -12,7 +12,7 @@ interface ModifyPanelProps {
 
 export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProps) {
   const [title, setTitle] = useState<string>(draft.title);
-  const [notes, setDescription] = useState<string>(draft.notes ?? '');
+  const [notes, setNotes] = useState<string>(draft.notes ?? '');
   const [week, setWeek] = useState<number>(draft.week);
   const [status, setStatus] = useState<TaskStatus>(draft.status);
 
@@ -51,7 +51,7 @@ export default function ModifyPanel({ draft, onSave, onCancel }: ModifyPanelProp
           </label>          <textarea
             id="description"
             value={notes}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setNotes(e.target.value)}
             className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-ring focus:ring-ring"
           />
         </div>

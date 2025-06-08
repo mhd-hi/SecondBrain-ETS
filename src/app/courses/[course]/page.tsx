@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
-import type { Course } from '@/types/course';
 import { type Task } from '@/types/task';
-import { calculateTaskDueDate } from '@/lib/task/util';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
@@ -15,8 +13,9 @@ import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
 import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { api } from "@/lib/api/util";
-import { withLoadingAndErrorHandling } from "@/lib/loading/util";
-import { ErrorHandlers } from "@/lib/error/util";
+import { ErrorHandlers } from '@/lib/error/util';
+import { useCourses } from '@/hooks/use-courses';
+import { useCourse } from '@/hooks/use-course';
 
 interface CoursePageProps {
   params: Promise<{
@@ -24,70 +23,19 @@ interface CoursePageProps {
   }>;
 }
 
-interface CourseResponse extends Course {
-  tasks: Task[];
-}
-
 export default function CoursePage({ params }: CoursePageProps) {
   const router = useRouter();
   const unwrappedParams = use(params);
   const courseId = unwrappedParams.course;
-  const [course, setCourse] = useState<Course | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCourses = useCallback(async () => {
-    try {
-      const data = await api.get<Course[]>('/api/courses');
-      setCourses(data);
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to load courses');
-    }
-  }, []);
-
-  const fetchCourse = useCallback(async () => {
-    await withLoadingAndErrorHandling(
-      async () => {
-        const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);
-
-        // Convert dueDate strings to Date objects and handle invalid dates
-        const tasksWithValidatedDates: Task[] = data.tasks.map(task => {
-            let dueDate: Date;
-            // Attempt to create Date from fetched dueDate
-            const fetchedDate = task.dueDate ? new Date(task.dueDate) : undefined;
-
-            // If fetched dueDate is invalid or missing, calculate based on week
-            if (!fetchedDate || isNaN(fetchedDate.getTime())) {
-                // Fallback: calculate dueDate based on week if original is invalid or missing
-                dueDate = calculateTaskDueDate(task.week);
-            } else {
-                // Otherwise, use the valid fetched date
-                dueDate = fetchedDate;
-            }
-
-            return {
-                ...task,
-                dueDate: dueDate, // Ensure dueDate is always a Date
-            } as Task; // Cast to Task to match state type
-        });
-
-        setCourse(data);
-        setTasks(tasksWithValidatedDates);
-      },
-      setIsLoading,
-      (error) => {
-        setError('Failed to load course data');
-        ErrorHandlers.api(error, 'Failed to load course');
-      }
-    );
-  }, [courseId]);
+  
+  // Use custom hooks instead of duplicate state management
+  const { courses, fetchCourses } = useCourses();
+  const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
 
   useEffect(() => {
     void fetchCourses();
     void fetchCourse();
-  }, [courseId, fetchCourse, fetchCourses]);
+  }, [fetchCourses, fetchCourse]);
 
   const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
     try {
