@@ -30,7 +30,7 @@ export function OverdueTasksBanner({
                     <AlertCircleIcon className="h-5 w-5" />
                     <span className="">
                         You have <strong>{taskCount}</strong> overdue task
-                        {taskCount !== 1 ? "s" : ""} that need attention.
+                        {taskCount !== 1 ? "s" : ""} that need your attention.
                     </span>
                 </div>
 

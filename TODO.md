@@ -1,6 +1,6 @@
 # Fixes
-- Enter doesnt submit input when adding a course
-- Bug: We need to click on submit, then go to course page to create the courses and tasks. It should add course and tasks before we click on review tasks. 
+- dont include the draft tasks in today's focus. You might want to add that check inside the drizzle request directly. 
+- 
 
 # Enhancement
 - move the add task to the sidebar 

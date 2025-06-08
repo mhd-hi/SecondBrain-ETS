@@ -9,18 +9,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useRouter } from "next/navigation";
 import { AddTaskDialog } from "@/components/shared/dialogs/AddTaskDialog";
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
-import { TaskStatusChanger } from '@/components/TaskStatusChanger';
-import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
-import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
-import { SubtasksList } from '@/components/SubtasksList';
-import { SubtaskProgress } from '@/components/SubtaskProgress';
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
 import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
 import { useCourses } from '@/hooks/use-courses';
 import { useCourse } from '@/hooks/use-course';
+import { TaskCard } from '@/components/shared/TaskCard';
 
 interface CoursePageProps {
   params: Promise<{
@@ -274,51 +270,16 @@ export default function CoursePage({ params }: CoursePageProps) {
                 <h3 className="text-lg font-semibold">Week {week}</h3>
                 <div className="grid gap-4">
                   {weekTasks.map((task) => (
-                    <div
+                    <TaskCard
                       key={task.id}
-                      className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
-                    >
-                      <MoreActionsDropdown
-                        actions={[
-                          {
-                            label: "Delete",
-                            onClick: () => void handleDeleteTask(task.id),
-                            destructive: true,
-                          },
-                        ]}
-                        triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
-                      />
-
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-1 flex-grow">
-                          <h4 className="font-medium">{task.title}</h4>
-                          <p className="text-sm text-muted-foreground">{task.notes}</p>
-                          <div className="flex items-center gap-3">
-                            {task.dueDate && (
-                              <DueDateDisplay date={task.dueDate} />
-                            )}
-                            <SubtaskProgress subtasks={task.subtasks} />
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <TaskStatusChanger
-                            currentStatus={task.status}
-                            onStatusChange={(newStatus) => handleUpdateTask(task.id, { status: newStatus })}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Subtasks Display */}
-                      <SubtasksList
-                        subtasks={task.subtasks ?? []}
-                        onSubtaskStatusChange={(subtaskId, newStatus) => 
-                          handleUpdateSubtaskStatus(task.id, subtaskId, newStatus)
-                        }
-                      />
-                    </div>
+                      task={task}
+                      onDeleteTask={handleDeleteTask}
+                      onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
+                      onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
+                    />
                   ))}
                 </div>
-              </div>
+              </div>  
             ))}
         </div>
       ) : (

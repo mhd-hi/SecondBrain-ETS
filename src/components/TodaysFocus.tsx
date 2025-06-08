@@ -3,15 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { TaskStatusChanger } from "@/components/TaskStatusChanger";
-import { TruncatedTextWithTooltip } from "@/components/shared/atoms/text-with-tooltip";
+import { TaskCard } from "@/components/shared/TaskCard";
 import type { Task as TaskType } from "@/types/task";
 import { TaskStatus } from "@/types/task";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { getCourseColor } from "@/lib/utils";
 
 type FilterType = "week" | "month" | "quarter";
 
@@ -23,128 +18,10 @@ interface GroupedTasks {
   later: TaskType[];
 }
 
-interface TaskItemProps {
-  task: TaskType;
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
-  onSubtaskStatusChange: (taskId: string, subtaskId: string, newStatus: TaskStatus) => void;
-  isExpanded: boolean;
-  onToggleExpanded: () => void;
-  showNavigateButton?: boolean;
-}
-
-const TaskItem = ({ 
-  task, 
-  onStatusChange, 
-  onSubtaskStatusChange,
-  isExpanded, 
-  onToggleExpanded,
-  showNavigateButton = true 
-}: TaskItemProps) => {
-  const router = useRouter();
-  
-  const handleNavigateToTask = () => {
-    if (task.course?.id) {
-      router.push(`/courses/${task.course.id}#task-${task.id}`);
-    }
-  };
-
-  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
-  const courseColor = task.course?.id ? getCourseColor(task.course.id) : undefined;
-
-  return (
-    <Card className="p-4 border border-border/40 hover:border-border bg-card/50">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            {hasSubtasks && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0 flex-shrink-0"
-                onClick={onToggleExpanded}
-              >
-                {isExpanded ? (
-                  <ChevronDown className="h-3 w-3" />
-                ) : (
-                  <ChevronRight className="h-3 w-3" />
-                )}
-              </Button>
-            )}            {task.course?.code && (
-              <Badge 
-                variant="outline" 
-                className="text-xs flex-shrink-0"
-                style={{ 
-                  borderColor: courseColor,
-                  color: courseColor,
-                  backgroundColor: courseColor ? `${courseColor}15` : undefined
-                }}
-              >
-                {task.course.code}
-              </Badge>
-            )}
-            <Badge variant="secondary" className="text-xs flex-shrink-0">
-              {task.estimatedEffort} hr{task.estimatedEffort !== 1 ? 's' : ''}
-            </Badge>
-          </div>
-          
-          <TruncatedTextWithTooltip
-            text={task.title}
-            className="text-sm font-medium mb-3 leading-tight"
-            maxLines={2}
-          />
-          
-          <div className="flex items-center gap-2">
-            <TaskStatusChanger
-              currentStatus={task.status}
-              onStatusChange={(newStatus: TaskStatus) => onStatusChange(task.id, newStatus)}
-            />
-          </div>
-          
-          {/* Subtasks */}
-          {isExpanded && hasSubtasks && (
-            <div className="mt-3 pl-4 border-l-2 border-border/30 space-y-2">
-              {task.subtasks!.map((subtask) => (
-                <div key={subtask.id} className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <TruncatedTextWithTooltip
-                      text={subtask.title}
-                      className="text-xs text-muted-foreground leading-tight"
-                      maxLines={1}
-                    />
-                  </div>
-                  <TaskStatusChanger
-                    currentStatus={subtask.status}
-                    onStatusChange={(newStatus: TaskStatus) => 
-                      onSubtaskStatusChange(task.id, subtask.id, newStatus)
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {showNavigateButton && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 flex-shrink-0"
-            onClick={handleNavigateToTask}
-            disabled={!task.course?.id}
-          >
-            <ExternalLink className="h-3 w-3" />
-          </Button>
-        )}
-      </div>
-    </Card>
-  );
-};
-
 export const TodaysFocus = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>("week");
-  const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const fetchFocusTasks = useCallback(async () => {
     setIsLoading(true);
@@ -220,20 +97,7 @@ export const TodaysFocus = () => {
       console.error("Failed to update subtask status:", error);
       toast.error("Failed to update subtask status");
     }
-  };
-  const toggleTaskExpanded = (taskId: string) => {
-    setExpandedTasks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(taskId)) {
-        newSet.delete(taskId);
-      } else {
-        newSet.add(taskId);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleSectionExpanded = (sectionKey: string) => {
+  };  const toggleSectionExpanded = (sectionKey: string) => {
     setExpandedSections(prev => {
       const newSet = new Set(prev);
       if (newSet.has(sectionKey)) {
@@ -345,16 +209,24 @@ export const TodaysFocus = () => {
               (+{hiddenCount} more)
             </span>
           )}
-        </div>
-        <div className="space-y-2">
+        </div>        <div className="space-y-2">
           {displayTasks.map((task) => (
-            <TaskItem
+            <TaskCard
               key={task.id}
               task={task}
-              onStatusChange={handleStatusChange}
-              onSubtaskStatusChange={handleSubtaskStatusChange}
-              isExpanded={expandedTasks.has(task.id)}
-              onToggleExpanded={() => toggleTaskExpanded(task.id)}
+              onDeleteTask={() => { /* No delete functionality in TodaysFocus */ }}
+              onUpdateTaskStatus={handleStatusChange}
+              onUpdateSubtaskStatus={handleSubtaskStatusChange}
+              showCourseBadge={true}
+              actions={task.course?.id ? [{
+                label: `Go to ${task.course.code}`,
+                onClick: () => {
+                  if (task.course?.id) {
+                    window.location.href = `/courses/${task.course.id}#task-${task.id}`;
+                  }
+                },
+                destructive: false,
+              }] : undefined}
             />
           ))}
           {shouldLimit && (
