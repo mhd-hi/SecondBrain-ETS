@@ -1,23 +1,14 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { db } from "@/server/db";
-import { tasks } from "@/server/db/schema";
 import type { TaskStatus, Subtask } from "@/types/task";
+import { withAuth } from "@/lib/auth/api";
+import { getUserTask, updateUserTask } from "@/lib/auth/db";
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { taskId: string; subtaskId: string } }
-) {
-  try {
-    const { status } = await request.json() as { status: TaskStatus };
-
-    // First, get the current task
-    const [task] = await db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.id, params.taskId))
-      .limit(1);
-
+export const PATCH = withAuth<{ taskId: string; subtaskId: string }>(
+  async (request, { params, user }) => {
+    const { taskId, subtaskId } = await params;
+    const { status } = await request.json() as { status: TaskStatus };    // Get the task with automatic ownership verification
+    const task = await getUserTask(taskId, user.id);
+    
     if (!task) {
       return NextResponse.json(
         { error: "Task not found" },
@@ -28,26 +19,25 @@ export async function PATCH(
     // Update the subtask status in the subtasks array
     const subtasks = (task.subtasks as Subtask[]) || [];
     const updatedSubtasks = subtasks.map(subtask =>
-      subtask.id === params.subtaskId
+      subtask.id === subtaskId
         ? { ...subtask, status }
         : subtask
     );
 
-    // Update the task with the new subtasks array
-    await db
-      .update(tasks)
-      .set({ 
-        subtasks: updatedSubtasks,
-        updatedAt: new Date()
-      })
-      .where(eq(tasks.id, params.taskId));
+    // Verify subtask exists
+    const subtaskExists = subtasks.some(subtask => subtask.id === subtaskId);
+    if (!subtaskExists) {
+      return NextResponse.json(
+        { error: "Subtask not found" },
+        { status: 404 }
+      );
+    }
+
+    // Update the task with the new subtasks array using secure update
+    await updateUserTask(taskId, user.id, { 
+      subtasks: updatedSubtasks,
+    });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error updating subtask status:", error);
-    return NextResponse.json(
-      { error: "Failed to update subtask status" },
-      { status: 500 }
-    );
   }
-}
+);

@@ -1,130 +1,121 @@
-import { db } from '@/server/db';
-import { tasks, courses } from '@/server/db/schema';
-import { eq, and } from 'drizzle-orm';
 import { TaskStatus } from '@/types/task';
-import type {Task, Subtask} from '@/types/task'
+import type { Task, Subtask } from '@/types/task'
 import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
-import { apiRoutePatterns } from '@/lib/api/server-util';
-import { auth } from '@/server/auth';
+import { withAuthSimple } from '@/lib/auth/api';
+import { getUserCourseTasks, createUserTask, updateUserTask, deleteUserTask, getUserCourse } from '@/lib/auth/db';
+import { NextResponse } from 'next/server';
 
-export const GET = apiRoutePatterns.get(
-  async (searchParams) => {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error('Unauthorized');
-    }
-
-    const courseId = searchParams.get('courseId')!;
+export const GET = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const courseId = searchParams.get('courseId');
     
-    // First verify the course belongs to the user
-    const course = await db.select().from(courses).where(
-      and(eq(courses.id, courseId), eq(courses.userId, session.user.id))
-    ).limit(1);
-
-    if (!course.length) {
-      throw new Error('Course not found');
+    if (!courseId) {
+      return NextResponse.json(
+        { error: 'courseId parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
     }
 
-    return await db.select().from(tasks).where(
-      and(eq(tasks.courseId, courseId), eq(tasks.userId, session.user.id))
-    ).orderBy(tasks.week);
-  },
-  'Error fetching tasks',
-  ['courseId']
+    // Use secure query function that automatically verifies ownership
+    const courseTasks = await getUserCourseTasks(courseId, user.id);
+    return NextResponse.json(courseTasks);
+  }
 );
 
-export const POST = apiRoutePatterns.post(
-  async (data: {
-    courseId: string;
-    tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
-      subtasks?: Subtask[];
-      notes?: string;
-      dueDate?: string;
-    }>
-  }) => {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error('Unauthorized');
-    }
+export const POST = withAuthSimple(
+  async (request, user) => {
+    const data = await request.json() as {
+      courseId: string;
+      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
+        subtasks?: Subtask[];
+        notes?: string;
+        dueDate?: string;
+      }>
+    };
 
     const { courseId, tasks: newTasks } = data;
 
-    // Verify the course belongs to the user
-    const course = await db.select().from(courses).where(
-      and(eq(courses.id, courseId), eq(courses.userId, session.user.id))
-    ).limit(1);
+    // Verify course ownership first
+    await getUserCourse(courseId, user.id);
 
-    if (!course.length) {
-      throw new Error('Course not found');
-    }
-
-    const insertedTasks = await db.insert(tasks).values(
-      newTasks.map(task => {
-        const dueDate = new Date(task.dueDate);
-        
-        return {
-          ...task,
-          courseId,
-          userId: session.user.id,
-          // Calculate week from due date if not provided (for manual task creation)
-          // Otherwise preserve the original week number from AI parsing
-          week: task.week ?? calculateWeekFromDueDate(dueDate),
-          status: task.status ?? TaskStatus.DRAFT,
-          subtasks: task.subtasks?.map(subtask => ({
-            ...subtask,
-            id: crypto.randomUUID(),
-            status: subtask.status ?? TaskStatus.TODO,
-          })),
-          dueDate,
-        };
-      })
-    ).returning();
-
-    return insertedTasks;
-  },
-  'Error creating tasks',
-  ['courseId', 'tasks']
-);
-
-export const PATCH = apiRoutePatterns.patch(
-  async (id: string, updates: Partial<Task> & {
-    subtasks?: Subtask[];
-    notes?: string;
-  }) => {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error('Unauthorized');
-    }
-
-    const [updatedTask] = await db.update(tasks)
-      .set({
-        ...updates,
-        status: updates.status ?? TaskStatus.TODO,
-        subtasks: updates.subtasks?.map(subtask => ({
+    // Create tasks with secure function
+    const tasksToCreate = newTasks.map(task => {
+      const dueDate = new Date(task.dueDate || '');
+      
+      return {
+        ...task,
+        courseId,
+        // Calculate week from due date if not provided (for manual task creation)
+        // Otherwise preserve the original week number from AI parsing
+        week: task.week ?? calculateWeekFromDueDate(dueDate),
+        status: task.status ?? TaskStatus.DRAFT,
+        subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),
           status: subtask.status ?? TaskStatus.TODO,
         })),
-        notes: updates.notes,
-        dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined
-      })
-      .where(and(eq(tasks.id, id), eq(tasks.userId, session.user.id)))
-      .returning();
+        dueDate: calculateTaskDueDate(task.week || 1)
+      };
+    });
 
-    return updatedTask;
-  },
-  'Error updating task'
-);
-
-export const DELETE = apiRoutePatterns.delete(
-  async (id: string) => {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+    // Use secure bulk insert
+    const createdTasks = [];
+    for (const taskData of tasksToCreate) {
+      const task = await createUserTask(user.id, taskData);
+      createdTasks.push(task);
     }
 
-    await db.delete(tasks).where(and(eq(tasks.id, id), eq(tasks.userId, session.user.id)));
-    return { success: true };
-  },
-  'Error deleting task'
+    return NextResponse.json(createdTasks);
+  }
+);
+
+export const PATCH = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
+    }
+
+    const updates = await request.json() as Partial<Task> & {
+      subtasks?: Subtask[];
+      notes?: string;
+    };
+
+    const updatedTask = await updateUserTask(id, user.id, {
+      ...updates,
+      status: updates.status ?? TaskStatus.TODO,
+      subtasks: updates.subtasks?.map(subtask => ({
+        ...subtask,
+        id: crypto.randomUUID(),
+        status: subtask.status ?? TaskStatus.TODO,
+      })),
+      notes: updates.notes,
+      dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined
+    });
+
+    return NextResponse.json(updatedTask);
+  }
+);
+
+export const DELETE = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
+    }
+
+    await deleteUserTask(id, user.id);
+    return NextResponse.json({ success: true });
+  }
 );

@@ -1,29 +1,25 @@
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { updateTaskStatus } from "@/lib/task/queries";
 import type { TaskStatus } from "@/types/task";
+import { withAuth, type AuthenticatedUser } from "@/lib/auth/api";
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ taskId: string }> }
-) {
-  try {
-    const { taskId } = await params;
-    const { status } = await request.json() as { status: TaskStatus };
+async function handleUpdateTaskStatus(
+  request: NextRequest,
+  context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser }
+): Promise<NextResponse> {
+  const { taskId } = await context.params;
+  const { status } = await request.json() as { status: TaskStatus };
 
-    if (!status) {
-      return NextResponse.json(
-        { error: "Status is required" },
-        { status: 400 }
-      );
-    }
-
-    const updatedTask = await updateTaskStatus(taskId, status);
-    return NextResponse.json(updatedTask);
-  } catch (error) {
-    console.error("Error updating task status:", error);
+  if (!status) {
     return NextResponse.json(
-      { error: "Failed to update task status" },
-      { status: 500 }
+      { error: "Status is required" },
+      { status: 400 }
     );
   }
-} 
+
+  const updatedTask = await updateTaskStatus(taskId, status, context.user.id);
+  return NextResponse.json(updatedTask);
+}
+
+export const PATCH = withAuth(handleUpdateTaskStatus);

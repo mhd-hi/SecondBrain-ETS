@@ -92,21 +92,6 @@ export const CommonErrorMessages = {
 } as const;
 
 /**
- * Legacy error messages for backward compatibility
- * @deprecated Use CommonErrorMessages instead
- */
-export const ERROR_MESSAGES = {
-  FETCH_FAILED: 'Failed to fetch data. Please try again.',
-  CREATE_FAILED: 'Failed to create item. Please try again.',
-  UPDATE_FAILED: 'Failed to update item. Please try again.',
-  DELETE_FAILED: 'Failed to delete item. Please try again.',
-  VALIDATION_FAILED: 'Invalid data provided. Please check your input.',
-  NETWORK_ERROR: 'Network error. Please check your connection.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-  SERVER_ERROR: 'Server error. Please try again later.',
-} as const;
-
-/**
  * Enhanced async operation handler with retry capability
  */
 export const handleAsyncOperation = async <T>(

@@ -26,31 +26,38 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 
 ## Getting Started
 
+### Prerequisites
+- [Bun](https://bun.sh) >= 1.0.0 (recommended package manager)
+- Node.js (if you prefer npm/yarn)
+
+### Installation
+
 1. Clone the repository
-2. Install dependencies:
+2. Install dependencies using Bun (recommended):
    ```bash
    bun install
    ```
-3. Set up environment variables:
-   ```env
-   OPENAI_API_KEY=your_api_key_here
+3. Set up environment variables :
+- By copying `.env.example` to `.env`
+
+
+4. Set up the database:
+   ```bash
+   bun run db:push
    ```
-4. Run the development server:
+
+5. Run the development server:
    ```bash
    bun run dev
    ```
 
-## Development
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Development Scripts
+
+### Essential Commands
 - `bun dev` - Start development server
 - `bun build` - Build for production
+- `bun start` - Start production server
 - `bun lint` - Run ESLint
 - `bun typecheck` - Run TypeScript compiler check
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request

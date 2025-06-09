@@ -3,8 +3,22 @@ import { db } from '@/server/db';
 import { sql } from 'drizzle-orm';
 import { generateRandomCourseColor } from '@/lib/utils';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    // Basic API key authentication for admin operations
+    const authHeader = request.headers.get('authorization');
+    const adminSecret = process.env.ADMIN_SECRET;
+
+    if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized - Admin access required",
+          code: "ADMIN_UNAUTHORIZED"
+        },
+        { status: 401 }
+      );
+    }
     // First, try to add the color column if it doesn't exist
     try {
       await db.execute(sql`ALTER TABLE courses ADD COLUMN color text`);
@@ -38,9 +52,9 @@ export async function POST() {
   } catch (error) {
     console.error('Migration error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     );

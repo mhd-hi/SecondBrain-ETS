@@ -3,18 +3,10 @@ import { and, eq, gte, lt, ne, or } from "drizzle-orm";
 import { db } from "@/server/db";
 import { tasks, courses } from "@/server/db/schema";
 import type { TaskStatus, Task, Subtask } from "@/types/task";
-import { auth } from "@/server/auth";
+import { withAuthSimple } from "@/lib/auth/api";
 
-export async function GET(request: Request) {
-  try {
-    // Check authentication
-    const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+export const GET = withAuthSimple(
+  async (request, user) => {
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") ?? "week"; // week, month, quarter
 
@@ -37,14 +29,15 @@ export async function GET(request: Request) {
         endDate.setDate(now.getDate() + 7);
         break;
     }    
-      // Fetch tasks that are:
+      
+    // Fetch tasks that are:
     // 1. Overdue (due date < today) and not completed and not draft OR
     // 2. Due within the selected time range AND are actionable (IN_PROGRESS or TODO)
     // AND belong to the current user
     const results = await db.select().from(tasks)
       .where(
         and(
-          eq(tasks.userId, session.user.id), // Filter by current user
+          eq(tasks.userId, user.id), // Filter by current user
           or(
             // Overdue tasks (not completed and not draft)
             and(
@@ -75,11 +68,5 @@ export async function GET(request: Request) {
     }));
 
     return NextResponse.json(tasksData);
-  } catch (error) {
-    console.error("Error fetching focus tasks:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch focus tasks" },
-      { status: 500 }
-    );
   }
-}
+);

@@ -4,7 +4,6 @@
 export { 
   handleApiError, 
   handleApiSuccess, 
-  ERROR_MESSAGES,
   ErrorHandlers,
   CommonErrorMessages 
 } from '@/lib/error/util';

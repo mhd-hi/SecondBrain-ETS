@@ -1,79 +1,106 @@
-import { db } from '@/server/db';
-import { tasks } from '@/server/db/schema';
-import { eq } from 'drizzle-orm';
-import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
+import type { Task } from '@/types/task';
 import { calculateTaskDueDate } from '@/lib/task/util';
-import { apiRoutePatterns } from '@/lib/api/server-util';
+import { withAuthSimple } from '@/lib/auth/api';
+import { getUserCourseTasks, createUserTask, updateUserTask, deleteUserTask } from '@/lib/auth/db';
+import { NextResponse } from 'next/server';
 
-export async function GET(request: Request) {
-  return apiRoutePatterns.get(
-    async (searchParams) => {
-      const courseId = searchParams.get('courseId')!;
-      return await db.select().from(tasks).where(eq(tasks.courseId, courseId)).orderBy(tasks.week);
-    },
-    'Error fetching drafts',
-    ['courseId']
-  )(request);
-}
+export const GET = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const courseId = searchParams.get('courseId');
+    
+    if (!courseId) {
+      return NextResponse.json(
+        { error: 'courseId parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
+    }
 
-export async function POST(request: Request) {
-  return apiRoutePatterns.post(
-    async (data: Task & { courseId: string }) => {
-      const { courseId, ...taskData } = data;
-      
-      // NOTE: Untrusted data source, don't use spread operator
-      const [draft] = await db.insert(tasks).values({
-        courseId,
-        title: taskData.title,
-        week: taskData.week,
-        notes: taskData.notes,
-        type: taskData.type,
-        estimatedEffort: taskData.estimatedEffort,
-        status: TaskStatus.DRAFT,
-        subtasks: taskData.subtasks?.map(({ status, ...subtask }) => ({
-          ...subtask,
-          id: crypto.randomUUID(),
-          status: status ?? TaskStatus.DRAFT
-        })),
-        dueDate: calculateTaskDueDate(taskData.week)
-      }).returning();
-      
-      return draft;
-    },
-    'Error creating draft',
-    ['courseId', 'title', 'week']
-  )(request);
-}
+    // Use secure query function that automatically verifies ownership
+    const drafts = await getUserCourseTasks(courseId, user.id);
+    
+    // Filter for draft status tasks
+    const draftTasks = drafts.filter(task => task.status === TaskStatus.DRAFT);
+    return NextResponse.json(draftTasks);
+  }
+);
 
-export async function PATCH(request: Request) {
-  return apiRoutePatterns.patch(
-    async (id: string, updates: Partial<Task>) => {
-      const [draft] = await db.update(tasks)
-        .set({
-          ...updates,
-          status: updates.status ?? TaskStatus.DRAFT,
-          subtasks: updates.subtasks?.map(({ status, ...subtask }) => ({
-            ...subtask,
-            id: crypto.randomUUID(),
-            status: status ?? TaskStatus.TODO
-          }))
-        })
-        .where(eq(tasks.id, id))
-        .returning();
-      
-      return draft;
-    },
-    'Error updating draft'
-  )(request);
-}
+export const POST = withAuthSimple(
+  async (request, user) => {
+    const data = await request.json() as Task & { courseId: string };
+    
+    if (!data.courseId || !data.title || !data.week) {
+      return NextResponse.json(
+        { error: 'courseId, title, and week are required', code: 'MISSING_FIELDS' },
+        { status: 400 }
+      );
+    }
 
-export async function DELETE(request: Request) {
-  return apiRoutePatterns.delete(
-    async (id: string) => {
-      await db.delete(tasks).where(eq(tasks.id, id));
-      return { success: true };
-    },
-    'Error deleting draft'
-  )(request);
-}
+    const { courseId, ...taskData } = data;
+
+    // Use secure function to create task with automatic user assignment
+    const draft = await createUserTask(user.id, {
+      courseId,
+      title: taskData.title,
+      week: taskData.week,
+      notes: taskData.notes,
+      type: taskData.type,
+      estimatedEffort: taskData.estimatedEffort,
+      status: TaskStatus.DRAFT,
+      subtasks: taskData.subtasks?.map(subtask => ({
+        ...subtask,
+        id: crypto.randomUUID(),
+        status: subtask.status ?? TaskStatus.DRAFT
+      })),
+      dueDate: calculateTaskDueDate(taskData.week)
+    });
+    
+    return NextResponse.json(draft);
+  }
+);
+
+export const PATCH = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
+    }
+
+    const updates = await request.json() as Partial<Task>;
+
+    const draft = await updateUserTask(id, user.id, {
+      ...updates,
+      status: updates.status ?? TaskStatus.DRAFT,
+      subtasks: updates.subtasks?.map(subtask => ({
+        ...subtask,
+        id: crypto.randomUUID(),
+        status: subtask.status ?? TaskStatus.TODO
+      }))
+    });
+    
+    return NextResponse.json(draft);
+  }
+);
+
+export const DELETE = withAuthSimple(
+  async (request, user) => {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
+        { status: 400 }
+      );
+    }
+
+    await deleteUserTask(id, user.id);
+    return NextResponse.json({ success: true });
+  }
+);

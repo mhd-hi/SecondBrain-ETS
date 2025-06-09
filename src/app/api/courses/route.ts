@@ -1,57 +1,46 @@
-import { db } from '@/server/db';
-import { courses } from '@/server/db/schema';
-import { eq, and } from 'drizzle-orm';
-import { apiRoutePatterns, withErrorHandling, successResponse } from '@/lib/api/server-util';
+import { withAuthSimple } from '@/lib/auth/api';
+import { getUserCourses, createUserCourse } from '@/lib/auth/db';
 import { generateRandomCourseColor } from '@/lib/utils';
-import { auth } from '@/server/auth';
 import { NextResponse } from 'next/server';
 
-export const GET = withErrorHandling(async () => {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export const GET = withAuthSimple(
+  async (request, user) => {
+    // Use secure query function that automatically filters by user
+    const coursesWithTasks = await getUserCourses(user.id);
+    return NextResponse.json(coursesWithTasks);
   }
+);
 
-  // Fetch courses for the authenticated user only
-  const coursesWithTasks = await db.query.courses.findMany({
-    where: eq(courses.userId, session.user.id),
-    with: {
-      tasks: true, // Include all tasks related to the course
-    },
-  });
-
-  return successResponse(coursesWithTasks);
-}, 'Error fetching courses');
-
-export const POST = apiRoutePatterns.post(
-  async (data: { code: string; name: string }) => {
-    const session = await auth();
-    if (!session?.user?.id) {
-      throw new Error('Unauthorized');
+export const POST = withAuthSimple(
+  async (request, user) => {
+    const data = await request.json() as { code: string; name: string };
+    
+    if (!data.code || !data.name) {
+      return NextResponse.json(
+        { error: 'code and name are required', code: 'MISSING_FIELDS' },
+        { status: 400 }
+      );
     }
 
     const { code, name } = data;
     
     // Check if course already exists for this user
-    const existingCourse = await db.select().from(courses).where(
-      and(eq(courses.code, code), eq(courses.userId, session.user.id))
-    );
+    const existingCourses = await getUserCourses(user.id);
+    const existingCourse = existingCourses.find(course => course.code === code);
 
-    if (existingCourse.length > 0) {
+    if (existingCourse) {
       // Return the existing course instead of throwing an error
-      return existingCourse[0];
+      return NextResponse.json(existingCourse);
     }
 
-    const [course] = await db.insert(courses).values({
-      userId: session.user.id,
+    // Use secure function to create course with automatic user assignment
+    const course = await createUserCourse(user.id, {
       code,
       name,
       term: '20252', // Default term
       color: generateRandomCourseColor(),
-    }).returning();
+    });
 
-    return course;
-  },
-  'Error creating course',
-  ['code', 'name']
+    return NextResponse.json(course);
+  }
 );

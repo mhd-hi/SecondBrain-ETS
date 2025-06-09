@@ -11,6 +11,7 @@ interface CourseResponse {
   id: string;
   code: string;
   name: string;
+  color: string;
   description?: string;
   createdAt: string;
   updatedAt: string;
@@ -50,7 +51,7 @@ export function useCourse(courseId: string) {
           ...data,
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
-          tasks: tasksWithValidatedDates
+          tasks: tasksWithValidatedDates,
         });
         setTasks(tasksWithValidatedDates);
       },

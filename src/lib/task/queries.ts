@@ -3,17 +3,17 @@ import { db } from "@/server/db";
 import { tasks, courses } from "@/server/db/schema";
 import type { TaskStatus, Task, Subtask } from "@/types/task";
 
-export const getTasksForWeek = async (startDate: Date, endDate: Date, userId?: string): Promise<Task[]> => {
+export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: string): Promise<Task[]> => {
   try {
+    if (!userId) {
+      throw new Error("User authentication required");
+    }
+    
     const conditions = [
       gte(tasks.dueDate, startDate),
-      lt(tasks.dueDate, endDate)
+      lt(tasks.dueDate, endDate),
+      eq(tasks.userId, userId)
     ];
-    
-    // Add user filter if userId is provided
-    if (userId) {
-      conditions.push(eq(tasks.userId, userId));
-    }
     
     const results = await db.select().from(tasks)
       .where(and(...conditions))
@@ -32,11 +32,20 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId?: s
   }
 };
 
-export const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
+export const updateTaskStatus = async (taskId: string, status: TaskStatus, userId: string) => {
+  if (!userId) {
+    throw new Error("User authentication required");
+  }
+  
+  const conditions = [
+    eq(tasks.id, taskId),
+    eq(tasks.userId, userId)
+  ];
+  
   return db
     .update(tasks)
     .set({ status, updatedAt: new Date() })
-    .where(eq(tasks.id, taskId))
+    .where(and(...conditions))
     .returning();
 };
 
