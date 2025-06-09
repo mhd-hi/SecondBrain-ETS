@@ -43,6 +43,8 @@ jobs:
 
       - name: Lint code
         run: bun run lint
+        env:
+          SKIP_ENV_VALIDATION: true
 
       - name: Deploy Infrastructure
         run: |
