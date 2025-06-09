@@ -46,6 +46,14 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: true
 
+      - name: Debug DATABASE_URL format
+        run: |
+          echo "DATABASE_URL length: ${#DATABASE_URL}"
+          echo "DATABASE_URL starts with: ${DATABASE_URL:0:15}"
+          echo "DATABASE_URL ends with: ${DATABASE_URL: -10}"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Deploy Infrastructure
         run: |
           chmod +x deploy/infrastructure.sh
