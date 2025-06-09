@@ -5,14 +5,14 @@ import type { ReactNode } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import type { Course } from '@/types/course';
-import { TaskStatus } from '@/types/task';
+import { getOverdueTasks } from '@/lib/task/util';
 
 // Simple interface for courses list view (used by sidebar)
 export interface CourseListItem {
   id: string;
   code: string;
   name: string;
-  inProgressCount: number;
+  overdueCount: number;
 }
 
 interface CoursesContextType {
@@ -36,14 +36,13 @@ interface CoursesProviderProps {
 export function CoursesProvider({ children }: CoursesProviderProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // Convert full courses to simplified list items for sidebar
+  const [error, setError] = useState<string | null>(null);  // Convert full courses to simplified list items for sidebar
   const coursesListItems: CourseListItem[] = useMemo(
     () => courses.map(course => ({
       id: course.id,
       code: course.code,
       name: course.name,
-      inProgressCount: course.tasks?.filter(task => task.status === TaskStatus.IN_PROGRESS).length ?? 0
+      overdueCount: getOverdueTasks(course.tasks ?? []).length
     })),
     [courses]
   );

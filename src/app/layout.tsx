@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarWrapper } from "@/components/sidebar-wrapper";
 import { SessionProvider } from "next-auth/react";
 import { CoursesProvider } from "@/contexts/courses-context";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Second Brain",
@@ -43,7 +44,10 @@ export default function RootLayout({
                 <Navbar />
                 <div className="flex flex-1">
                   <SidebarWrapper />
-                  <main className="flex-1 container py-6">{children}</main>
+                  <main className="flex-1 container py-6">
+                    {children}
+                    <Analytics />
+                  </main>
                 </div>
               </div>
               <Toaster />

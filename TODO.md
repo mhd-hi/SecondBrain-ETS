@@ -1,19 +1,25 @@
 # Fixes
-- data is not received when adding a course, we need to manually update the page.
-- update sidebar mycourses data too on add course event 
+- fix middleware signin page
+- For new tasks, set default date as today+1week in the dialog.
+- Drag&drop tasks in today focus
+- Delete task button should be available in the More options inside the Today's FOcus container for each task.
 # Enhancement
-+ Add auth to launch the app to vercel
 - Add Pomodoro on the right of Todays Focus, give 1/3 space to pomodoro.
-- Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
+    - Start pomodoro inside  a task
+    - Select the best task to strat pomodoro. 
 - Add search bar for searching a course in course page
-- Add (try a different session) when adding a course, when a course is not available in a specific session.
-    - maybe check the planets dropdown and determine the most recent valid session
-Progress:
+
+Progress bar:
 - Add semester progress Board and dashboard page (progressbar for all courses) 
 - Add course progress Board inside the course page (progressBar for courses tasks)
+Profile page:
 - Add theme toggle in Profile page.
+Tasks : 
+- Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 -  We can create a task without a course. 
 - Ask user for its course periods to better determine task due dates.
+AI: 
+- cache openai responses in db
 
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).

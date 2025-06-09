@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
+import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
+import { Plus } from 'lucide-react';
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
 import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
@@ -222,6 +224,20 @@ export default function CoursePage({ params }: CoursePageProps) {
             />
           )}
         </div>
+        {course && (
+          <AddTaskDialog
+            courseId={course.id}
+            courseCode={course.code}
+            onTaskAdded={fetchCourse}
+            courses={courses}
+            trigger={
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Task
+              </Button>
+            }
+          />
+        )}
       </div>
 
       {/* Draft Tasks Banner */}
@@ -268,7 +284,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                     />
                   ))}
                 </div>
-              </div>  
+              </div>
             ))}
         </div>
       ) : (
