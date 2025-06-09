@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { DayColumn } from "./DayColumn";
 import { Task } from "../shared/Task";
 import type { Task as TaskType, TaskStatus } from "@/types/task";
-import type { Course } from "@/types/course";
 import type { DraggedTask, DropTargetData } from "@/types/drag-drop";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getWeekStart, getWeekDates, formatWeekRange } from "@/lib/date/util";
+import { useCourses } from "@/contexts/courses-context";
 import {
   DndContext,
   DragOverlay,
@@ -32,7 +32,9 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [tasks, setTasks] = useState<TaskType[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
-  const [courses, setCourses] = useState<Course[]>([]);
+  
+  // Use global courses context
+  const { courses } = useCourses();
 
   // Drag and drop state
   const [isDragActive, setIsDragActive] = useState(false);
@@ -57,28 +59,6 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   });
 
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
-
-  // Fetch courses
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('/api/courses');
-        if (!response.ok) {
-          throw new Error('Failed to fetch courses');
-        }
-        const coursesData = await response.json() as Course[];
-        console.log('Fetched courses in WeeklyRoadmap:', coursesData);
-        setCourses(coursesData);
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-        toast.error("Failed to load courses");
-      }
-    };
-
-    void fetchCourses();
-  }, []);
-
-
 
   // Load tasks for the selected week
   useEffect(() => {

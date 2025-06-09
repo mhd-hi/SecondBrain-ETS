@@ -1,62 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
-import type { Course } from "@/types/course";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
 import { WeeklyRoadmap } from "../components/WeeklyRoadmapBoard/WeeklyRoadmap";
 import { TodaysFocus } from "@/components/TodaysFocus";
 import { handleConfirm } from "@/lib/dialog/util";
 import { api, handleApiSuccess } from "@/lib/api/util";
-import { withLoadingState } from "@/lib/loading/util";
 import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
+import { useCourses } from "@/contexts/courses-context";
 
 export default function Home() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCourses = async () => {
-    setError(null);
-    try {
-      const data = await withLoadingState(
-        () => api.get<Course[]>("/api/courses", CommonErrorMessages.COURSE_FETCH_FAILED),
-        setIsLoading
-      );
-      setCourses(data || []);
-      console.log("Courses data received by page.tsx:", data);
-    } catch (error) {
-      ErrorHandlers.silent(error, 'HomePage fetchCourses');
-      setError("Failed to load courses");
-    }
-  };
+  const { courses, isLoading, error, deleteCourse, refreshCourses } = useCourses();
 
   const handleDeleteCourse = async (courseId: string) => {
     await handleConfirm(
       "Are you sure you want to delete this course? This action cannot be undone.",
       async () => {
         try {
-          await withLoadingState(
-            async () => {
-              await api.delete(`/api/courses/${courseId}`, CommonErrorMessages.COURSE_DELETE_FAILED);
-              setCourses((prevCourses) =>
-                prevCourses.filter((course) => course.id !== courseId)
-              );
-              handleApiSuccess("Course deleted successfully");
-            },
-            setIsLoading
-          );
+          await api.delete(`/api/courses/${courseId}`, CommonErrorMessages.COURSE_DELETE_FAILED);
+          deleteCourse(courseId);
+          handleApiSuccess("Course deleted successfully");
         } catch (error) {
           ErrorHandlers.api(error, CommonErrorMessages.COURSE_DELETE_FAILED, 'HomePage');
         }
       }
     );
   };
-
-  useEffect(() => {
-    void fetchCourses();
-  }, []);
 
   if (error) {
     return <div className="text-center text-red-500">Error: {error}</div>;
@@ -72,7 +42,7 @@ export default function Home() {
         <div className="border rounded-lg bg-muted/30 p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold">Courses</h2>
-            <AddCourseDialog onCourseAdded={fetchCourses} />
+            <AddCourseDialog onCourseAdded={refreshCourses} />
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,8 @@ import {
 import { Plus, Loader2, CheckCircle, AlertCircle, RefreshCw, Database } from 'lucide-react';
 import Image from 'next/image';
 import { useAddCourse } from '@/hooks/use-add-course';
+import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
+import { useCourses } from '@/contexts/courses-context';
 
 interface AddCourseDialogProps {
     onCourseAdded?: () => void;
@@ -29,7 +31,29 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     const [courseCode, setCourseCode] = useState('');
     const [existingCourse, setExistingCourse] = useState<{ id: string; code: string; name: string } | null>(null);
     const [isCheckingExistence, setIsCheckingExistence] = useState(false);
-    const [hasCheckedExistence, setHasCheckedExistence] = useState(false); const {
+    const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
+    
+    const { refreshCourses } = useCourses();
+
+    // Safe error messages to prevent information disclosure
+    const SAFE_ERROR_MESSAGES: Record<string, string> = {
+        'fetch course data': 'Course not found or not available for the current term',
+        'parse course content': 'Unable to process course information. Please try again',
+        'Failed to fetch course data': 'Course not found or not available for the current term',
+        'Failed to parse course content': 'Unable to process course information. Please try again',
+        'Invalid course code format': 'Invalid course code format. Please use format like MAT145 or LOG210'
+    };
+
+    const getSafeErrorMessage = (error: string): string => {
+        // Check for known error patterns
+        for (const [pattern, safeMessage] of Object.entries(SAFE_ERROR_MESSAGES)) {
+            if (error.includes(pattern)) {
+                return safeMessage;
+            }
+        }
+        // Return generic message for unknown errors
+        return 'An error occurred while processing your request. Please try again';
+    }; const {
         currentStep,
         stepStatus,
         parsedData,
@@ -41,7 +65,21 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         reset,
     } = useAddCourse();
 
-    const router = useRouter(); const resetDialog = () => {
+    const router = useRouter();
+
+    // Automatically refresh courses when course creation is completed
+    useEffect(() => {
+        if (currentStep === 'completed' && createdCourseId) {
+            // Refresh global courses state immediately
+            void refreshCourses();
+            // Also call the local callback if provided
+            if (onCourseAdded) {
+                onCourseAdded();
+            }
+        }
+    }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
+
+    const resetDialog = () => {
         setCourseCode('');
         setExistingCourse(null);
         setHasCheckedExistence(false);
@@ -49,12 +87,22 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }; const checkCourseExistence = async (courseCode: string) => {
         setIsCheckingExistence(true);
         try {
-            const response = await fetch('/api/courses');
-            if (response.ok) {
-                const courses = await response.json() as Array<{ id: string; code: string; name: string }>;
-                const existing = courses.find(course => course.code.toLowerCase() === courseCode.toLowerCase());
-                setExistingCourse(existing ?? null);
+            const cleanCode = normalizeCourseCode(courseCode);
+            // Validate course code format client-side for better UX
+            if (!isValidCourseCode(cleanCode)) {
+                toast.error('Invalid course code format. Please use format like MAT145 or LOG210');
                 setHasCheckedExistence(true);
+                return;
+            }
+
+            const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(cleanCode)}`);
+            if (response.ok) {
+                const result = await response.json() as { exists: boolean; course?: { id: string; code: string; name: string } };
+                setExistingCourse(result.course ?? null);
+                setHasCheckedExistence(true);
+            } else {
+                console.error('Failed to check course existence:', response.statusText);
+                // Don't show error to user as this is not critical
             }
         } catch (err) {
             console.error('Failed to check course existence:', err);
@@ -73,26 +121,27 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             return;
         }
 
+        const cleanCode = normalizeCourseCode(courseCode);
+
+        // Validate course code format
+        if (!isValidCourseCode(cleanCode)) {
+            toast.error('Invalid course code format. Please use format like MAT145 or LOG210');
+            return;
+        }
+
         setExistingCourse(null); // Reset existence check
         setHasCheckedExistence(false);
 
-        // First check if course already exists
-        await checkCourseExistence(courseCode);
+        // Check if course already exists
+        await checkCourseExistence(cleanCode);
 
-        // Check the result after the async operation
-        const response = await fetch('/api/courses');
-        if (response.ok) {
-            const courses = await response.json() as Array<{ id: string; code: string; name: string }>;
-            const existing = courses.find(course => course.code.toLowerCase() === courseCode.toLowerCase());
-
-            if (existing) {
-                // Course exists, don't process further
-                return;
-            }
+        // If a course was found, don't proceed with processing
+        if (existingCourse) {
+            return;
         }
 
         // Course doesn't exist, proceed with normal processing
-        await startProcessing(courseCode);
+        await startProcessing(cleanCode);
     };
 
     const handleRetry = () => {
@@ -106,7 +155,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             setIsOpen(false);
             router.push(`/courses/${existingCourse.id}`);
         }
-    };    const getStepIcon = (stepName: 'planets' | 'openai' | 'create-course' | 'create-tasks') => {
+    }; const getStepIcon = (stepName: 'planets' | 'openai' | 'create-course' | 'create-tasks') => {
         if (stepName === 'planets') return '/assets/logo_planets.png';
         if (stepName === 'openai') return '/assets/logo_openai.png';
         if (stepName === 'create-course') return '/favicon-16x16.png';
@@ -120,11 +169,11 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         if (stepName === 'create-course') return 'Create Course';
         if (stepName === 'create-tasks') return 'Create Tasks';
         return stepName;
-    };    const renderStepIndicator = (stepName: 'planets' | 'openai' | 'create-course' | 'create-tasks') => {
+    }; const renderStepIndicator = (stepName: 'planets' | 'openai' | 'create-course' | 'create-tasks') => {
         const logo = getStepIcon(stepName);
         const label = getStepLabel(stepName);
         const status = stepStatus[stepName];
-        
+
         const isDatabaseStep = stepName === 'create-course' || stepName === 'create-tasks';
 
         return (
@@ -203,13 +252,19 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         }
                     }}>
                         <div className="space-y-2">
-                            <Label htmlFor="courseCode">Course Code</Label>
-                            <Input
+                            <Label htmlFor="courseCode">Course Code</Label>                            <Input
                                 id="courseCode"
                                 value={courseCode}
-                                onChange={(e) => setCourseCode(e.target.value.toUpperCase())}
+                                onChange={(e) => {
+                                    const value = e.target.value.toUpperCase();
+                                    // Limit length to prevent excessively long inputs
+                                    if (value.length <= 10) {
+                                        setCourseCode(value);
+                                    }
+                                }}
                                 placeholder="Enter course code (e.g., MAT145)"
                                 disabled={isProcessing}
+                                maxLength={10}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
                                         e.preventDefault();
@@ -239,7 +294,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                             </Alert>) : existingCourse ? (
                                 <Alert variant="destructive">
                                     <AlertCircle className="h-4 w-4" />
-                                    <AlertTitle>                                        
+                                    <AlertTitle>
                                         The course <strong>{existingCourse.code}</strong> has already been added.
                                     </AlertTitle>
                                     <AlertDescription>
@@ -251,28 +306,20 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                                     <AlertTitle>Course {parsedData?.courseCode} has been created with {parsedData?.tasks?.length ?? 0} tasks.</AlertTitle>
                                 </Alert>
                             )}
-                        </div>
-                    )}                    {/* Error Display */}
+                        </div>)}
+
+                    {/* Error Display */}
                     {error && (
                         <Alert variant="destructive">
                             <AlertCircle className="h-4 w-4" />
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>
-                                {error}
-                                {/* Error-specific help text */}
-                                {error.includes('fetch course data') && (
-                                    <div className="mt-2 text-xs">
-                                        This usually means the course code is invalid or the course is not available for the current term.
-                                    </div>
-                                )}
-                                {error.includes('parse course content') && (
-                                    <div className="mt-2 text-xs">
-                                        There was an issue processing the course content. Please try again.
-                                    </div>
-                                )}
+                                {getSafeErrorMessage(error)}
                             </AlertDescription>
                         </Alert>
-                    )}{/* Action Buttons */}
+                    )}
+
+                    {/* Action Buttons */}
                     <div className="flex justify-end gap-2">
                         {currentStep === 'idle' && !existingCourse && (
                             <>
@@ -329,9 +376,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                                 </Button>                                <Button onClick={() => {
                                     setIsOpen(false);
                                     router.push(`/courses/${createdCourseId}`);
-                                    if (onCourseAdded) {
-                                        onCourseAdded();
-                                    }
+                                    // Note: refreshCourses() and onCourseAdded() are already called automatically in useEffect
                                 }}>
                                     Go to Course
                                 </Button>

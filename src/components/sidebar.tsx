@@ -8,16 +8,10 @@ import { Menu, Plus, NotebookText } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
-
-interface Course {
-  id: string;
-  code: string;
-  name: string;
-  inProgressCount: number;
-}
+import type { CourseListItem } from "@/contexts/courses-context";
 
 interface SidebarProps {
-  courses: Course[];
+  courses: CourseListItem[];
   onCourseAdded?: () => void;
 }
 
