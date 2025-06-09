@@ -54,7 +54,8 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {status === "loading" ? (
             <div className="w-8 h-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-          ) : session ? (            <DropdownMenu>
+          ) : session ? (
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   {session.user?.image && (
