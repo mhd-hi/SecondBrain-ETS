@@ -9,7 +9,6 @@ import { handleConfirm } from "@/lib/dialog/util";
 import { api, handleApiSuccess } from "@/lib/api/util";
 import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
 import { useCourses } from "@/contexts/courses-context";
-import { WeeklyRoadmap } from "@/components/Boards/WeeklyRoadmap/WeeklyRoadmap";
 
 export default function Home() {
   const { courses, isLoading, error, deleteCourse, refreshCourses } = useCourses();
@@ -81,10 +80,6 @@ export default function Home() {
               )}
           </div>
         </div>
-      </section>
-
-      <section>
-        <WeeklyRoadmap />
       </section>
     </main>
   );

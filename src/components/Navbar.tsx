@@ -39,6 +39,13 @@ export default function Navbar() {
                 </Link>
               </Button>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Button variant="ghost" asChild>
+                <Link href="/weekly-roadmap" className={navigationMenuTriggerStyle()}>
+                  Weekly Roadmap
+                </Link>
+              </Button>
+            </NavigationMenuItem>
             {session && (
               <NavigationMenuItem>
                 <Button variant="ghost" asChild>

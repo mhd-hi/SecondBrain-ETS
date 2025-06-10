@@ -255,38 +255,38 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
           )}
         </div>
         <div className="space-y-2">
-          {displayTasks.map((task) => (            <TaskCard
-              key={task.id}
-              task={task}
-              onDeleteTask={handleDeleteTask}
-              onUpdateTaskStatus={handleStatusChange}
-              onUpdateSubtaskStatus={handleSubtaskStatusChange}
-              showCourseBadge={true}
-              isSubtasksExpanded={expandedSubtasks.has(task.id)}
-              onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
-              actions={task.course?.id ? [
-                {
-                  label: `Go to ${task.course.code}`,
-                  onClick: () => {
-                    if (task.course?.id) {
-                      window.location.href = `/courses/${task.course.id}#task-${task.id}`;
-                    }
-                  },
-                  destructive: false,
+          {displayTasks.map((task) => (<TaskCard
+            key={task.id}
+            task={task}
+            onDeleteTask={handleDeleteTask}
+            onUpdateTaskStatus={handleStatusChange}
+            onUpdateSubtaskStatus={handleSubtaskStatusChange}
+            showCourseBadge={true}
+            isSubtasksExpanded={expandedSubtasks.has(task.id)}
+            onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
+            actions={task.course?.id ? [
+              {
+                label: `Go to ${task.course.code}`,
+                onClick: () => {
+                  if (task.course?.id) {
+                    window.location.href = `/courses/${task.course.id}#task-${task.id}`;
+                  }
                 },
-                {
-                  label: "Delete",
-                  onClick: () => void handleDeleteTask(task.id),
-                  destructive: true,
-                }
-              ] : [
-                {
-                  label: "Delete",
-                  onClick: () => void handleDeleteTask(task.id),
-                  destructive: true,
-                }
-              ]}
-            />
+                destructive: false,
+              },
+              {
+                label: "Delete",
+                onClick: () => void handleDeleteTask(task.id),
+                destructive: true,
+              }
+            ] : [
+              {
+                label: "Delete",
+                onClick: () => void handleDeleteTask(task.id),
+                destructive: true,
+              }
+            ]}
+          />
           ))}
           {shouldLimit && (
             <Button
@@ -303,7 +303,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
     );
   };
   return (
-    <div className="border rounded-lg bg-muted/30 min-h-[400px] flex flex-col">
+    <div className="border rounded-lg bg-muted/30 min-h-[320px] flex flex-col">
       <div className="p-6 pb-4 flex-1">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Today&apos;s Focus</h2>
