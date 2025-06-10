@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -63,9 +63,14 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         startProcessing,
         retry,
         reset,
-    } = useAddCourse();
+    } = useAddCourse(); const router = useRouter();
 
-    const router = useRouter();
+    const resetDialog = useCallback(() => {
+        setCourseCode('');
+        setExistingCourse(null);
+        setHasCheckedExistence(false);
+        reset();
+    }, [reset]);
 
     // Automatically refresh courses when course creation is completed
     useEffect(() => {
@@ -76,15 +81,9 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             if (onCourseAdded) {
                 onCourseAdded();
             }
-        }
-    }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
+        }    }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
 
-    const resetDialog = () => {
-        setCourseCode('');
-        setExistingCourse(null);
-        setHasCheckedExistence(false);
-        reset();
-    }; const checkCourseExistence = async (courseCode: string) => {
+    const checkCourseExistence = async (courseCode: string) => {
         setIsCheckingExistence(true);
         try {
             const cleanCode = normalizeCourseCode(courseCode);
@@ -110,12 +109,17 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         } finally {
             setIsCheckingExistence(false);
         }
-    }; const handleDialogClose = (open: boolean) => {
+    };    const handleDialogClose = (open: boolean) => {
         setIsOpen(open);
         if (!open) {
-            resetDialog();
+            // Small delay to ensure dialog is properly closed before reset
+            setTimeout(() => {
+                resetDialog();
+            }, 100);
         }
-    }; const handleStartParsing = async () => {
+    };
+
+    const handleStartParsing = async () => {
         if (!courseCode.trim()) {
             toast.error('Please enter a course code');
             return;
@@ -149,10 +153,9 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }; const handleTryDifferentCourse = () => {
         resetDialog();
     };
-
     const handleGoToExistingCourse = () => {
         if (existingCourse) {
-            setIsOpen(false);
+            handleDialogClose(false);
             router.push(`/courses/${existingCourse.id}`);
         }
     }; const getStepIcon = (stepName: 'planets' | 'openai' | 'create-course' | 'create-tasks') => {
@@ -226,8 +229,13 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
 
     const showSteps = currentStep !== 'idle';
 
-    return (
-        <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+    return (        <Dialog open={isOpen} onOpenChange={(open) => {
+            if (open) {
+                // Reset dialog state when opening
+                resetDialog();
+            }
+            handleDialogClose(open);
+        }}>
             <DialogTrigger asChild>
                 {trigger ?? (
                     <Button>
@@ -379,10 +387,13 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                             <>
                                 <Button variant="outline" onClick={() => handleDialogClose(false)}>
                                     Cancel
-                                </Button>
-                                <Button onClick={() => {
-                                    setIsOpen(false);
-                                    router.push(`/courses/${createdCourseId}`);
+                                </Button>                                <Button onClick={() => {
+                                    const courseId = createdCourseId;
+                                    handleDialogClose(false);
+                                    // Use setTimeout to ensure dialog state is reset before navigation
+                                    setTimeout(() => {
+                                        router.push(`/courses/${courseId}`);
+                                    }, 0);
                                     // Note: refreshCourses() and onCourseAdded() are already called automatically in useEffect
                                 }}>
                                     Go to Course

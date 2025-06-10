@@ -12,12 +12,12 @@ Tasks edit :
 - Ask user for its course periods to better determine task due dates.
 AI: 
 - cache openai tasks response in db
-     -Create Dedicated Cache Table: Create a separate table for caching OpenAI responses that can be shared across users for the same course. A course will have the same tasks in all terms:
-     Schema would have, id, courseCode, parsedOpenAIContent, createdAt, updatedAt. 
-     Benefits: 
+    - if course is not in the openai_cache db, add it. 
+    Benefits: 
         - Cross-user sharing: Multiple users can benefit from the same cached response
         - Cost optimization: Significant reduction in OpenAI API calls
         - Performance: Faster response times for cached courses
+- When task is overdue, send a web notification
 
 Better date accuracy of tasks 
 - For new tasks, set default date as today+1week in the dialog.
