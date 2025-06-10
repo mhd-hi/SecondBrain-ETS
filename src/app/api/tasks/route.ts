@@ -50,21 +50,24 @@ export const POST = withAuthSimple(
 
     // Create tasks with secure function
     const tasksToCreate = newTasks.map(task => {
-      const dueDate = new Date(task.dueDate || '');
+      const userProvidedDueDate = task.dueDate ? new Date(task.dueDate) : null;
       
       return {
         ...task,
         courseId,
         // Calculate week from due date if not provided (for manual task creation)
         // Otherwise preserve the original week number from AI parsing
-        week: task.week ?? calculateWeekFromDueDate(dueDate),
+        week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
         status: task.status ?? TaskStatus.DRAFT,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),
           status: subtask.status ?? TaskStatus.TODO,
         })),
-        dueDate: calculateTaskDueDate(task.week || 1)
+        // Use user-provided due date if available, otherwise calculate from week
+        dueDate: userProvidedDueDate && !isNaN(userProvidedDueDate.getTime()) 
+          ? userProvidedDueDate 
+          : calculateTaskDueDate(task.week || 1)
       };
     });
 
