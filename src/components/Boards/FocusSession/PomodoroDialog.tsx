@@ -238,11 +238,13 @@ export const PomodoroDialog = ({
                             {sessionType === 'shortBreak' && 'Short Break'}
                             {sessionType === 'longBreak' && 'Long Break'}
                         </div>
-                    </div>                    {/* Timer Display */}
+                    </div>
+                    {/* Timer Display */}
                     <div className="text-center">
                         <div className="text-6xl font-mono font-bold text-foreground mb-2">
                             {formatTime(timeLeftSec)}
-                        </div>                        {/* Progress bar */}
+                        </div>
+                        {/* Progress bar */}
                         <div className="mx-4">
                             <div className="w-full bg-muted rounded-full h-2 mb-4">
                                 <div
@@ -260,32 +262,32 @@ export const PomodoroDialog = ({
                             </p>
                         </div>
                     )}                {/* Break Activity Suggestions - only show during break sessions */}
-                {sessionType !== 'work' && (
-                    <div className="flex justify-center">
-                        <div className="bg-muted/50 rounded-lg p-4 max-w-xs">
-                            <h3 className="text-sm font-medium text-center mb-3">
-                                {sessionType === 'shortBreak' ? '✨ Quick Break Ideas (5 min)' : '🌟 Long Break Ideas (20 min)'}
-                            </h3>
-                            <div className="space-y-1">
-                                {getBreakActivities(sessionType).map((activity, index) => (
-                                    <div key={index} className="text-sm text-muted-foreground text-left">
-                                        {activity}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="text-xs text-center text-muted-foreground mt-3 italic">
-                                {sessionType === 'shortBreak'
-                                    ? 'Avoid screens - give your mind a real break!'
-                                    : 'Take a deeper reset to recharge for the next cycle'}
+                    {sessionType !== 'work' && (
+                        <div className="flex justify-center">
+                            <div className="bg-muted/50 rounded-lg p-4 max-w-xs">
+                                <h3 className="text-sm font-medium text-center mb-3">
+                                    {sessionType === 'shortBreak' ? '✨ Quick Break Ideas (5 min)' : '🌟 Long Break Ideas (20 min)'}
+                                </h3>
+                                <div className="space-y-1">
+                                    {getBreakActivities(sessionType).map((activity, index) => (
+                                        <div key={index} className="text-sm text-muted-foreground text-left">
+                                            {activity}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="text-xs text-center text-muted-foreground mt-3 italic">
+                                    {sessionType === 'shortBreak'
+                                        ? 'Avoid screens - give your mind a real break!'
+                                        : 'Take a deeper reset to recharge for the next cycle'}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}{/* Controls */}
+                    )}{/* Controls */}
                     <div className="flex items-center justify-center gap-4">
                         <Button
                             onClick={handlePlayPause}
                             size="lg"
-                            className="rounded-full w-16 h-16 shadow-lg"
+                            className="rounded-full w-16 h-16 shadow-lg bg-violet-500 hover:bg-violet-600 text-white flex items-center justify-center"
                         >
                             {isRunning ? (
                                 <Pause className="h-6 w-6" />

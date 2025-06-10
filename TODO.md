@@ -1,8 +1,6 @@
 # Fixes
 - fix middleware signin page
-- For new tasks, set default date as today+1week in the dialog.
-- Drag&drop tasks in today focus
-- Delete task button should be available in the More options inside the Today's FOcus container for each task.
+
 # Enhancement
 - Add Pomodoro on the right of Todays Focus, give 1/3 space to pomodoro.
     - Start pomodoro inside  a task
@@ -20,6 +18,9 @@ Tasks :
 - Ask user for its course periods to better determine task due dates.
 AI: 
 - cache openai responses in db
+
+Better date accuracy of tasks 
+- For new tasks, set default date as today+1week in the dialog.
 
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).

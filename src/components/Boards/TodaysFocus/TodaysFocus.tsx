@@ -73,7 +73,6 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       toast.error("Failed to update task status");
     }
   };
-
   const handleSubtaskStatusChange = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, {
@@ -102,6 +101,25 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
     } catch (error) {
       console.error("Failed to update subtask status:", error);
       toast.error("Failed to update subtask status");
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete task');
+      }
+
+      // Update local state by removing the task
+      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      toast.success('Task deleted successfully');
+    } catch (error) {
+      console.error("Failed to delete task:", error);
+      toast.error("Failed to delete task");
     }
   };
 
@@ -237,25 +255,37 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
           )}
         </div>
         <div className="space-y-2">
-          {displayTasks.map((task) => (
-            <TaskCard
+          {displayTasks.map((task) => (            <TaskCard
               key={task.id}
               task={task}
-              onDeleteTask={() => { /* No delete functionality in TodaysFocus */ }}
+              onDeleteTask={handleDeleteTask}
               onUpdateTaskStatus={handleStatusChange}
               onUpdateSubtaskStatus={handleSubtaskStatusChange}
               showCourseBadge={true}
               isSubtasksExpanded={expandedSubtasks.has(task.id)}
               onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
-              actions={task.course?.id ? [{
-                label: `Go to ${task.course.code}`,
-                onClick: () => {
-                  if (task.course?.id) {
-                    window.location.href = `/courses/${task.course.id}#task-${task.id}`;
-                  }
+              actions={task.course?.id ? [
+                {
+                  label: `Go to ${task.course.code}`,
+                  onClick: () => {
+                    if (task.course?.id) {
+                      window.location.href = `/courses/${task.course.id}#task-${task.id}`;
+                    }
+                  },
+                  destructive: false,
                 },
-                destructive: false,
-              }] : undefined}
+                {
+                  label: "Delete",
+                  onClick: () => void handleDeleteTask(task.id),
+                  destructive: true,
+                }
+              ] : [
+                {
+                  label: "Delete",
+                  onClick: () => void handleDeleteTask(task.id),
+                  destructive: true,
+                }
+              ]}
             />
           ))}
           {shouldLimit && (

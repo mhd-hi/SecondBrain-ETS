@@ -32,7 +32,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     const [existingCourse, setExistingCourse] = useState<{ id: string; code: string; name: string } | null>(null);
     const [isCheckingExistence, setIsCheckingExistence] = useState(false);
     const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
-    
+
     const { refreshCourses } = useCourses();
 
     // Safe error messages to prevent information disclosure
@@ -235,7 +235,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         Add Course
                     </Button>
                 )}
-            </DialogTrigger>            <DialogContent
+            </DialogTrigger>
+            <DialogContent
                 className="sm:max-w-md"
                 aria-describedby="add-course-description"
             >
@@ -244,7 +245,9 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                     <DialogDescription id="add-course-description">
                         Enter a course code to automatically fetch syllabus data and generate tasks.
                     </DialogDescription>
-                </DialogHeader>                <div className="space-y-4">                    {/* Course Code Input */}
+                </DialogHeader>
+                <div className="space-y-4">
+                    {/* Course Code Input */}
                     <form onSubmit={(e) => {
                         e.preventDefault();
                         if (currentStep === 'idle' && courseCode.trim()) {
@@ -252,7 +255,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         }
                     }}>
                         <div className="space-y-2">
-                            <Label htmlFor="courseCode">Course Code</Label>                            <Input
+                            <Label htmlFor="courseCode">Course Code</Label>
+                            <Input
                                 id="courseCode"
                                 value={courseCode}
                                 onChange={(e) => {
@@ -273,7 +277,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                                 }}
                             />
                         </div>
-                    </form>                    {/* Processing Steps */}
+                    </form>
+                    {/* Processing Steps */}
                     {showSteps && (
                         <div className="space-y-3">
                             <div className="text-sm font-medium text-muted-foreground">Processing Steps:</div>
@@ -285,27 +290,28 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                     )}
                     {/* Course Existence Check */}
                     {(currentStep === 'completed' || (currentStep === 'idle' && hasCheckedExistence)) && (
-                        <div className="space-y-3">                            {isCheckingExistence ? (
-                            <Alert>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <AlertDescription>
-                                    Checking if course already exists...
-                                </AlertDescription>
-                            </Alert>) : existingCourse ? (
-                                <Alert variant="destructive">
-                                    <AlertCircle className="h-4 w-4" />
-                                    <AlertTitle>
-                                        The course <strong>{existingCourse.code}</strong> has already been added.
-                                    </AlertTitle>
-                                    <AlertDescription>
-                                    </AlertDescription>
-                                </Alert>
-                            ) : hasCheckedExistence && currentStep === 'idle' ? <></> : currentStep === 'completed' && (
+                        <div className="space-y-3">
+                            {isCheckingExistence ? (
                                 <Alert>
-                                    <CheckCircle className="h-4 w-4" />
-                                    <AlertTitle>Course {parsedData?.courseCode} has been created with {parsedData?.tasks?.length ?? 0} tasks.</AlertTitle>
-                                </Alert>
-                            )}
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <AlertDescription>
+                                        Checking if course already exists...
+                                    </AlertDescription>
+                                </Alert>) : existingCourse ? (
+                                    <Alert variant="destructive">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <AlertTitle>
+                                            The course <strong>{existingCourse.code}</strong> has already been added.
+                                        </AlertTitle>
+                                        <AlertDescription>
+                                        </AlertDescription>
+                                    </Alert>
+                                ) : hasCheckedExistence && currentStep === 'idle' ? <></> : currentStep === 'completed' && (
+                                    <Alert>
+                                        <CheckCircle className="h-4 w-4" />
+                                        <AlertTitle>Course {parsedData?.courseCode} has been created with {parsedData?.tasks?.length ?? 0} tasks.</AlertTitle>
+                                    </Alert>
+                                )}
                         </div>)}
 
                     {/* Error Display */}
@@ -373,7 +379,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                             <>
                                 <Button variant="outline" onClick={() => handleDialogClose(false)}>
                                     Cancel
-                                </Button>                                <Button onClick={() => {
+                                </Button>
+                                <Button onClick={() => {
                                     setIsOpen(false);
                                     router.push(`/courses/${createdCourseId}`);
                                     // Note: refreshCourses() and onCourseAdded() are already called automatically in useEffect

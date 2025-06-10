@@ -302,5 +302,6 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                     </div>
                 </div>
             </div>
-        </div>    );
+        </div>
+    );
 };

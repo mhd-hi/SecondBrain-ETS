@@ -174,7 +174,8 @@ export const AddTaskDialog = ({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="estimatedEffort">Estimated Effort (hours)</Label>              <Input
+              <Label htmlFor="estimatedEffort">Estimated Effort (hours)</Label>
+              <Input
                 id="estimatedEffort"
                 type="number"
                 step="0.25"

@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { SidebarWrapper } from "@/components/sidebar-wrapper";
 import { SessionProvider } from "next-auth/react";
 import { CoursesProvider } from "@/contexts/courses-context";
+import { PomodoroProvider } from "@/contexts/pomodoro-context";
 import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
@@ -34,24 +35,26 @@ export default function RootLayout({
       <body className={cn(inter.className, "min-h-screen bg-background")}>
         <SessionProvider>
           <CoursesProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <div className="flex flex-col min-h-screen">
-                <Navbar />
-                <div className="flex flex-1">
-                  <SidebarWrapper />
-                  <main className="flex-1 container py-6">
-                    {children}
-                    <Analytics />
-                  </main>
+            <PomodoroProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <div className="flex flex-col min-h-screen">
+                  <Navbar />
+                  <div className="flex flex-1">
+                    <SidebarWrapper />
+                    <main className="flex-1 container py-6">
+                      {children}
+                      <Analytics />
+                    </main>
+                  </div>
                 </div>
-              </div>
-              <Toaster />
-            </ThemeProvider>
+                <Toaster />
+              </ThemeProvider>
+            </PomodoroProvider>
           </CoursesProvider>
         </SessionProvider>
       </body>
