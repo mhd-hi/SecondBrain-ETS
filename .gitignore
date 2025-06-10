@@ -53,3 +53,12 @@ bun.lockb
 .idea
 infos.md
 sprints.md
+
+# Guardian (Microsoft Security DevOps) - ignore internal files but keep config
+.gdn/.r/
+.gdn/rc/
+.gdn/.gdnhistory
+.gdn/.gdnsettings
+.gdn/msdo.sarif
+.gdn/internal.gdnhistory
+.gdn/r/
