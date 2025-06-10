@@ -2,19 +2,13 @@
 - fix middleware signin page
 
 # Enhancement
-- Add Pomodoro on the right of Todays Focus, give 1/3 space to pomodoro.
-    - Start pomodoro inside  a task
-    - Select the best task to strat pomodoro. 
-- Add search bar for searching a course in course page
-
 Progress bar:
 - Add semester progress Board and dashboard page (progressbar for all courses) 
 - Add course progress Board inside the course page (progressBar for courses tasks)
 Profile page:
 - Add theme toggle in Profile page.
-Tasks : 
+Tasks edit : 
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
--  We can create a task without a course. 
 - Ask user for its course periods to better determine task due dates.
 AI: 
 - cache openai responses in db

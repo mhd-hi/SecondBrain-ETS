@@ -287,7 +287,7 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                 </Button>
 
                 {/* Stats */}
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex justify-between items-center text-sm mt-5">
                     {streak > 0 ? (
                         <div className="flex items-center gap-1">
                             <span>🔥</span>
@@ -296,10 +296,6 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                     ) : (
                         <div></div>
                     )}
-                    <div className="flex items-center gap-1">
-                        <span>🕓</span>
-                        <span>6h left this week</span> {/* TODO: Make this dynamic later */}
-                    </div>
                 </div>
             </div>
         </div>    );

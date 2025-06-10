@@ -73,7 +73,7 @@ export function TaskCard({
       <MoreActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-      />{/* Course badge at top left inside the card */}
+      />
       {showCourseBadge && task.course?.code && (
         <div className="mb-1">
           <Badge
@@ -103,8 +103,7 @@ export function TaskCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          {/* Start Pomodoro Button - only show for IN_PROGRESS tasks */}
+        <div className="flex flex-col items-end gap-2">          
           {task.status === TaskStatusEnum.IN_PROGRESS && (
             <Button
               onClick={handleStartPomodoro}
@@ -112,7 +111,7 @@ export function TaskCard({
               className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
             >
               <Play className="h-3 w-3 mr-1" />
-              Start
+              Pomodoro
             </Button>
           )}
           <TaskStatusChanger
@@ -120,7 +119,7 @@ export function TaskCard({
             onStatusChange={(newStatus) => onUpdateTaskStatus(task.id, newStatus)}
           />
         </div>
-      </div>{/* Subtasks Display - Collapsed by default */}
+      </div>
       <SubtasksList
         subtasks={task.subtasks ?? []}
         onSubtaskStatusChange={(subtaskId, newStatus) =>

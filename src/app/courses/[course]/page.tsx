@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { use } from 'react';
 import { toast } from 'sonner';
 import { type Task, TaskStatus } from '@/types/task';
@@ -11,6 +11,7 @@ import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
+import { SearchBar } from '@/components/shared/SearchBar';
 import { Plus } from 'lucide-react';
 import { api } from "@/lib/api/util";
 import { ErrorHandlers } from '@/lib/error/util';
@@ -30,6 +31,9 @@ export default function CoursePage({ params }: CoursePageProps) {
   const unwrappedParams = use(params);
   const courseId = unwrappedParams.course;
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses } = useCourses();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
@@ -38,6 +42,41 @@ export default function CoursePage({ params }: CoursePageProps) {
     void fetchCourses();
     void fetchCourse();
   }, [fetchCourses, fetchCourse]);
+
+  // Filter tasks based on search query
+  const filteredTasks = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return tasks;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return tasks.filter(task => {
+      // Search in task title
+      if (task.title.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search in task notes
+      if (task.notes?.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      // Search in subtask titles
+      if (task.subtasks?.some(subtask =>
+        subtask.title.toLowerCase().includes(query) ||
+        subtask.notes?.toLowerCase().includes(query)
+      )) {
+        return true;
+      }
+
+      // Search in course code
+      if (task.course?.code.toLowerCase().includes(query)) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [tasks, searchQuery]);
 
   const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
     try {
@@ -95,14 +134,12 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  // Get only DRAFT tasks for the accept/delete all buttons
-  const draftTasks = tasks.filter(task => task.status === TaskStatus.DRAFT);
+  const draftTasks = filteredTasks.filter(task => task.status === TaskStatus.DRAFT);
 
-  // Get overdue tasks for the complete overdue button
-  const overdueTasks = getOverdueTasks(tasks);
+  const overdueTasks = getOverdueTasks(filteredTasks);
 
   // Debug logging for overdue tasks
-  console.log('🔍 Debug - Total tasks:', tasks.length);
+  console.log('🔍 Debug - Total tasks:', filteredTasks.length);
   console.log('🔍 Debug - Overdue tasks found:', overdueTasks.length);
   if (overdueTasks.length > 0) {
     console.log('🔍 Debug - Overdue tasks:', overdueTasks.map(t => ({
@@ -134,7 +171,6 @@ export default function CoursePage({ params }: CoursePageProps) {
     try {
       const taskIds = draftTasks.map(task => task.id);
 
-      // Use batch API to delete all tasks in a single request
       await api.post('/api/tasks/batch', {
         action: 'delete',
         taskIds
@@ -172,7 +208,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   };
 
   // Group tasks by week
-  const tasksByWeek = tasks.reduce((acc, task) => {
+  const tasksByWeek = filteredTasks.reduce((acc, task) => {
     const week = task.week;
     acc[week] ??= [];
     acc[week]?.push(task);
@@ -240,7 +276,13 @@ export default function CoursePage({ params }: CoursePageProps) {
         )}
       </div>
 
-      {/* Draft Tasks Banner */}
+      <SearchBar
+        placeholder="Search tasks by title, notes, or subtasks..."
+        value={searchQuery}
+        onChange={setSearchQuery}
+        className="mb-6"
+      />
+
       <DraftTasksBanner
         draftTasks={draftTasks}
         onAcceptAll={handleAcceptAllDrafts}
@@ -248,7 +290,6 @@ export default function CoursePage({ params }: CoursePageProps) {
         isLoading={isLoading}
       />
 
-      {/* Overdue Tasks Banner */}
       <OverdueTasksBanner
         overdueTasks={overdueTasks}
         onCompleteAll={handleCompleteOverdueTasks}
@@ -266,26 +307,31 @@ export default function CoursePage({ params }: CoursePageProps) {
             ))}
           </div>
         </div>
-      ) : tasks.length > 0 ? (
-        <div className="space-y-8">
+      ) : filteredTasks.length > 0 ? (
+        <div className="space-y-8 will-change-scroll">
           {Object.entries(tasksByWeek)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([week, weekTasks]) => (
               <div key={week} className="space-y-4">
-                <h3 className="text-lg font-semibold">Week {week}</h3>
-                <div className="grid gap-4">
+                <h3 className="text-lg font-semibold mb-3">Week {week}</h3>
+                <div className="space-y-3">
                   {weekTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onDeleteTask={handleDeleteTask}
-                      onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
-                      onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
-                    />
+                    <div key={task.id} className="transform-gpu">
+                      <TaskCard
+                        task={task}
+                        onDeleteTask={handleDeleteTask}
+                        onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
+                        onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
             ))}
+        </div>
+      ) : searchQuery.trim() ? (
+        <div className="text-center text-muted-foreground">
+          No tasks found matching &quot;{searchQuery}&quot;. Try a different search term.
         </div>
       ) : (
         <div className="text-center text-muted-foreground">
