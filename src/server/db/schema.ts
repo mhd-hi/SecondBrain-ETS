@@ -110,6 +110,14 @@ export const tasks = pgTable("tasks", {
   dueDate: timestamp("due_date").notNull(),
 });
 
+export const openaiCache = pgTable("openai_cache", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  courseCode: text("course_code").notNull().unique(),
+  parsedOpenAIContent: json("parsed_openai_content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),

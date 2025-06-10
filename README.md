@@ -6,15 +6,6 @@ A Next.js application that helps students manage their course workload by intell
 
 SecondBrain uses AI to parse ETS course plans and break them down into manageable tasks, helping students stay organized and on track with their studies.
 
-## Completed Sprints
-
-### Sprint 1: Core Store & Add-Course Flow ✅
-- Implemented Zustand store with IndexedDB persistence
-- Created AddCourseForm component for course imports
-- Built minimal dashboard UI
-- Implemented `/api/parse-course` API route with OpenAI integration
-- Added support for subtasks in course plan parsing
-
 ## Tech Stack
 
 - [Next.js](https://nextjs.org)
@@ -43,12 +34,13 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 
 4. Set up the database:
    ```bash
+   bun run db:generate
    bun run db:push
    ```
 
 5. Run the development server:
    ```bash
-   bun run dev
+   bun dev
    ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

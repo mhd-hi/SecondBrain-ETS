@@ -11,29 +11,21 @@ Tasks edit :
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Ask user for its course periods to better determine task due dates.
 AI: 
-- cache openai responses in db
+- cache openai tasks response in db
+     -Create Dedicated Cache Table: Create a separate table for caching OpenAI responses that can be shared across users for the same course. A course will have the same tasks in all terms:
+     Schema would have, id, courseCode, parsedOpenAIContent, createdAt, updatedAt. 
+     Benefits: 
+        - Cross-user sharing: Multiple users can benefit from the same cached response
+        - Cost optimization: Significant reduction in OpenAI API calls
+        - Performance: Faster response times for cached courses
 
 Better date accuracy of tasks 
 - For new tasks, set default date as today+1week in the dialog.
 
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
-- Fix this: "// Default to winter if between sessions."
+- Smell: Fix this: "// Default to winter if between sessions."
     - It should select the last session, not winter.
-- Fix the issue with dueDate being passed as a string.
+- Smell: Fix the issue with dueDate being passed as a string.
     - Convert dueDate strings as soon as possible to Date objects and handle invalid dates
     - it should never be a string
-- Add a way to store courses tasks to prevent from using openai to reprocess the same data
-- Course save ai data: 
-    - Can you add the parsed content of openai by adding it in a new json column. That way, if we already have  the content, we wont need to do a new request when we already have the data in our database. That would  also reduce the costs of ai. SO basically before adding a course usiong , 
-
-
-
-
-
-
-- Deploy to vercel: 
-    Google: https://console.cloud.google.com/auth/clients/470248852209-kgs2okpd3ai1151ig52j0itom31md8ev.apps.googleusercontent.com?authuser=7&inv=1&invt=AbzmsQ&project=rugged-truck-462322-s5&supportedpurview=project
-    - Add authorized javascript origin : https://your-production-domain.com
-    - Authorized Redirect URIs: https://your-production-domain.com/api/auth/callback/google
-    - Discord: Redirects: https://discord.com/developers/applications/1381408285143597116/oauth2

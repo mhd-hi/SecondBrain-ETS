@@ -24,6 +24,15 @@ CREATE TABLE "courses" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "openai_cache" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"course_code" text NOT NULL,
+	"parsed_openai_content" json NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "openai_cache_course_code_unique" UNIQUE("course_code")
+);
+--> statement-breakpoint
 CREATE TABLE "session" (
 	"sessionToken" text PRIMARY KEY NOT NULL,
 	"userId" text NOT NULL,
