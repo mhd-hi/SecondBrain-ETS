@@ -9,6 +9,7 @@ export const GET = withAuthSimple(
   async (request, user) => {
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
+    const statusParam = searchParams.get('status');
     
     if (!courseId) {
       return NextResponse.json(
@@ -19,7 +20,15 @@ export const GET = withAuthSimple(
 
     // Use secure query function that automatically verifies ownership
     const courseTasks = await getUserCourseTasks(courseId, user.id);
-    return NextResponse.json(courseTasks);
+    
+    // Filter by status if provided
+    let filteredTasks = courseTasks;
+    if (statusParam) {
+      const statusStrings = statusParam.split(',').map(s => s.trim());
+      filteredTasks = courseTasks.filter(task => statusStrings.includes(task.status));
+    }
+    
+    return NextResponse.json(filteredTasks);
   }
 );
 

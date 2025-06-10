@@ -24,6 +24,7 @@ interface CourseResponse {
     type: TaskType;
     status: TaskStatus;
     estimatedEffort: number;
+    actualEffort: number;
     courseId: string;
     createdAt: string;
     updatedAt: string;
@@ -35,13 +36,15 @@ export function useCourse(courseId: string) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const fetchCourse = useCallback(async () => {
     await withLoadingAndErrorHandling(
       async () => {
-        const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);        // Convert dueDate strings to Date objects and handle invalid dates
+        const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);
+        
+        // Convert dueDate strings to Date objects and handle invalid dates
         const tasksWithValidatedDates: Task[] = data.tasks.map(task => ({
           ...task,
+          actualEffort: task.actualEffort ?? 0,
           dueDate: task.dueDate ? new Date(task.dueDate) : new Date(), // Fallback to current date if dueDate is missing
           createdAt: new Date(task.createdAt),
           updatedAt: new Date(task.updatedAt)

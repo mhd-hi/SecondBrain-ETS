@@ -42,7 +42,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
     
     try {
       const mockData = setMockOpenAI(courseCode);
-      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);
+      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);      
       return {
         tasks: mockData.tasks.map(task => ({
           title: task.title,
@@ -51,6 +51,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
           type: task.type,
           status: TaskStatus.TODO,
           estimatedEffort: task.estimatedEffort,
+          actualEffort: 0,
           subtasks: task.subtasks?.map(subtask => ({
             id: crypto.randomUUID(),
             title: subtask.title,

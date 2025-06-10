@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1749417809602,
-      "tag": "0000_panoramic_wither",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1749418052194,
-      "tag": "0001_boring_ego",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1749424301564,
-      "tag": "0002_thankful_morph",
+      "when": 1749506406442,
+      "tag": "0000_mature_patriot",
       "breakpoints": true
     }
   ]

@@ -26,6 +26,7 @@ export interface Task {
   type: TaskType;
   status: TaskStatus;
   estimatedEffort: number;
+  actualEffort: number;
   subtasks?: Subtask[];
   createdAt: Date;
   updatedAt: Date;

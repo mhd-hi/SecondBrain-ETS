@@ -3,12 +3,13 @@
 import { AddCourseDialog } from "@/components/shared/dialogs/AddCourseDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import CourseCard from "@/components/CourseCard";
-import { WeeklyRoadmap } from "../components/WeeklyRoadmapBoard/WeeklyRoadmap";
-import { TodaysFocus } from "@/components/TodaysFocus";
+import { TodaysFocus } from "@/components/Boards/TodaysFocus/TodaysFocus";
+import { PomodoroContainer } from "@/components/Boards/FocusSession/PomodoroContainer";
 import { handleConfirm } from "@/lib/dialog/util";
 import { api, handleApiSuccess } from "@/lib/api/util";
 import { ErrorHandlers, CommonErrorMessages } from "@/lib/error/util";
 import { useCourses } from "@/contexts/courses-context";
+import { WeeklyRoadmap } from "@/components/Boards/WeeklyRoadmap/WeeklyRoadmap";
 
 export default function Home() {
   const { courses, isLoading, error, deleteCourse, refreshCourses } = useCourses();
@@ -38,6 +39,20 @@ export default function Home() {
         Dashboard
       </h1>
 
+      <section>
+        <div className="flex gap-6">
+          {/* Today's Focus - 2/3 width */}
+          <div className="flex-1 w-2/3">
+            <TodaysFocus />
+          </div>
+
+          {/* Pomodoro Container - 1/3 width */}
+          <div className="w-1/3">
+            <PomodoroContainer />
+          </div>
+        </div>
+      </section>
+
       <section className="space-y-6">
         <div className="border rounded-lg bg-muted/30 p-6">
           <div className="flex items-center justify-between mb-6">
@@ -51,25 +66,21 @@ export default function Home() {
                 <Skeleton key={index} className="h-40 w-full rounded-lg" />
               ))
             ) : // Display course cards or a message if no courses
-            (courses ?? []).length > 0 ? (
-              (courses ?? []).map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onDeleteCourse={handleDeleteCourse}
-                />
-              ))
-            ) : (
-              <div className="text-muted-foreground col-span-full text-center">
-                No courses found. Add a new course to get started!
-              </div>
-            )}
+              (courses ?? []).length > 0 ? (
+                (courses ?? []).map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    onDeleteCourse={handleDeleteCourse}
+                  />
+                ))
+              ) : (
+                <div className="text-muted-foreground col-span-full text-center">
+                  No courses found. Add a new course to get started!
+                </div>
+              )}
           </div>
         </div>
-      </section>
-
-      <section>
-        <TodaysFocus />
       </section>
 
       <section>

@@ -28,6 +28,8 @@ export const users = pgTable("user", {
   email: text("email").unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  streakDays: integer("streak_days").notNull().default(0),
+  lastCompletedPomodoroDate: timestamp("last_completed_pomodoro_date", { mode: "date" }),
 });
 
 export const accounts = pgTable(
@@ -101,6 +103,7 @@ export const tasks = pgTable("tasks", {
   type: text("type", { enum: ["theorie", "pratique", "exam", "homework", "lab"] }).notNull().default("theorie"),
   status: text("status", { enum: ["DRAFT", "IN_PROGRESS", "TODO", "COMPLETED"] }).default("DRAFT").notNull(),
   estimatedEffort: real("estimated_effort").notNull().default(1),
+  actualEffort: real("actual_effort").notNull().default(0),
   subtasks: json("subtasks").$type<{ id: string; title: string; status: TaskStatus; notes?: string; estimatedEffort?: number }[]>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

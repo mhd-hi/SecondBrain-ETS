@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DayColumn } from "./DayColumn";
-import { Task } from "../shared/Task";
 import type { Task as TaskType, TaskStatus } from "@/types/task";
 import type { DraggedTask, DropTargetData } from "@/types/drag-drop";
 import { toast } from "sonner";
@@ -23,6 +22,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { Task } from "@/components/shared/Task";
 
 interface WeeklyRoadmapProps {
   initialTasks?: TaskType[];
