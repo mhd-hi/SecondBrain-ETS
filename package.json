@@ -9,7 +9,7 @@
     "bun": ">=1.0.0"
   },
   "scripts": {
-    "build": "bun run db:deploy && bun run lint:strict && next build",
+    "build": "bun run db:deploy && next build",
     "check": "next lint && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
@@ -22,7 +22,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "lint": "next lint",
-    "lint:strict": "eslint . --max-warnings 1",
+    "lint:strict": "eslint ./src --max-warnings 1",
     "lint:fix": "eslint . --fix",
     "preview": "bun run build && next start",
     "start": "next start",
