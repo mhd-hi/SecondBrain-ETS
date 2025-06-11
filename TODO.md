@@ -1,11 +1,9 @@
 # Fixes
 - fix middleware signin page
-- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&
-last_opened=All%20time
+- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&last_opened=All%20time
 - Add total effort in TaskCard
-- CHange favicon to a capibara, add it to logo too
-- add pastille in course sidebar, for the draft tasks as red and add tooltip
-- add tooltip for overdue task
+- in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
+- in course sidebar yellow pastille add tooltip for overdue task
 # Enhancement
 Tasks edit :
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
