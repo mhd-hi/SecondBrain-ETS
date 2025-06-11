@@ -47,7 +47,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   return (
     <div
-      className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-fit"
+      className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]"
       style={{ borderLeft: `4px solid ${courseColor}` }}
     >
       <MoreActionsDropdown
@@ -77,7 +77,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
         </p>
       </div>
 
-      <div className="space-y-1 text-xs mt-auto">
+      <div className="space-y-1 text-xs flex-1">
         {nextTask && (
           <div>
             <div className="flex items-center gap-1">
@@ -126,7 +126,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       </div>
 
-      <div className="flex justify-end mt-2">
+      <div className="flex justify-end mt-auto">
         <Link
           href={`/courses/${course.id}`}
           className="text-xs text-muted-foreground hover:text-accent-foreground transition-colors hover:underline"

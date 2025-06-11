@@ -2,13 +2,9 @@ import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { SessionProvider } from 'next-auth/react';
 import { Geist, Inter } from 'next/font/google';
-import Navbar from '@/components/Navbar';
 import { GlobalConfirmDialogProvider } from '@/components/providers/ConfirmDialogProvider';
-import { SidebarWrapper } from '@/components/sidebar-wrapper';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/ui/theme-provider';
-import { CoursesProvider } from '@/contexts/courses-context';
-import { PomodoroProvider } from '@/contexts/pomodoro-context';
 import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 
@@ -35,28 +31,16 @@ export default function RootLayout({
       <body className={cn(inter.className, 'min-h-screen bg-background')}>
         <SessionProvider>
           <GlobalConfirmDialogProvider>
-            <CoursesProvider>
-              <PomodoroProvider>
-                <ThemeProvider
-                  attribute="class"
-                  defaultTheme="system"
-                  enableSystem
-                  disableTransitionOnChange
-                >
-                  <div className="flex flex-col min-h-screen">
-                    <Navbar />
-                    <div className="flex flex-1">
-                      <SidebarWrapper />
-                      <main className="flex-1 container py-6">
-                        {children}
-                        <Analytics />
-                      </main>
-                    </div>
-                  </div>
-                  <Toaster />
-                </ThemeProvider>
-              </PomodoroProvider>
-            </CoursesProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster />
+              <Analytics />
+            </ThemeProvider>
           </GlobalConfirmDialogProvider>
         </SessionProvider>
       </body>
