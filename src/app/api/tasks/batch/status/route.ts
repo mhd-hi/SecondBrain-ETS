@@ -1,34 +1,35 @@
 import type { NextRequest } from 'next/server';
+import type { AuthenticatedUser } from '@/lib/auth/api';
+import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { successResponse } from '@/lib/api/server-util';
+import { withAuthSimple } from '@/lib/auth/api';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
-import { inArray, and, eq } from 'drizzle-orm';
 import { TaskStatus } from '@/types/task';
-import { successResponse } from '@/lib/api/server-util';
-import { withAuthSimple, type AuthenticatedUser } from '@/lib/auth/api';
 
-export interface BatchStatusUpdateRequest {
+export type BatchStatusUpdateRequest = {
   taskIds: string[];
   status: TaskStatus;
-}
+};
 
 async function handleBatchStatusUpdate(
   request: NextRequest,
-  user: AuthenticatedUser
+  user: AuthenticatedUser,
 ): Promise<NextResponse> {
   const { taskIds, status } = await request.json() as BatchStatusUpdateRequest;
 
   if (!taskIds || taskIds.length === 0) {
     return NextResponse.json(
       { error: 'taskIds are required' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (!status) {
     return NextResponse.json(
       { error: 'status is required' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -36,7 +37,7 @@ async function handleBatchStatusUpdate(
   if (!Object.values(TaskStatus).includes(status)) {
     return NextResponse.json(
       { error: 'Invalid status value' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -45,7 +46,7 @@ async function handleBatchStatusUpdate(
     .update(tasks)
     .set({
       status,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     })
     .where(and(inArray(tasks.id, taskIds), eq(tasks.userId, user.id)))
     .returning();
@@ -53,7 +54,7 @@ async function handleBatchStatusUpdate(
   return successResponse({
     updatedCount: updatedTasks.length,
     status,
-    updatedTasks
+    updatedTasks,
   });
 }
 

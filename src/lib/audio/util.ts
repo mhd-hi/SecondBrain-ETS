@@ -2,12 +2,12 @@
  * Audio utility functions for creating pleasant notification sounds
  */
 
-interface BeepOptions {
+type BeepOptions = {
   frequency: number;
   startTime: number;
   duration?: number;
   volume?: number;
-}
+};
 
 /**
  * Creates a Web Audio API context with fallback for different browsers
@@ -27,7 +27,7 @@ function createAudioContext(): AudioContext | null {
  */
 function createBeep(
   audioContext: AudioContext,
-  { frequency, startTime, duration = 0.3, volume = 0.2 }: BeepOptions
+  { frequency, startTime, duration = 0.3, volume = 0.2 }: BeepOptions,
 ): void {
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
@@ -55,12 +55,14 @@ function createBeep(
 export function playCompletionSound(): void {
   try {
     const audioContext = createAudioContext();
-    if (!audioContext) return;
+    if (!audioContext) {
+      return;
+    }
 
     // Friendly ascending melody with lower, warmer frequencies
-    createBeep(audioContext, { frequency: 330, startTime: 0, duration: 0.4 });      // E4 - warm and friendly
-    createBeep(audioContext, { frequency: 392, startTime: 0.25, duration: 0.4 });   // G4 - pleasant interval
-    createBeep(audioContext, { frequency: 523, startTime: 0.5, duration: 0.6 });    // C5 - satisfying resolution
+    createBeep(audioContext, { frequency: 330, startTime: 0, duration: 0.4 }); // E4 - warm and friendly
+    createBeep(audioContext, { frequency: 392, startTime: 0.25, duration: 0.4 }); // G4 - pleasant interval
+    createBeep(audioContext, { frequency: 523, startTime: 0.5, duration: 0.6 }); // C5 - satisfying resolution
   } catch (error) {
     console.warn('Could not play completion sound:', error);
   }
@@ -73,13 +75,15 @@ export function playCompletionSound(): void {
 export function playNotificationSound(): void {
   try {
     const audioContext = createAudioContext();
-    if (!audioContext) return;
+    if (!audioContext) {
+      return;
+    }
 
-    createBeep(audioContext, { 
+    createBeep(audioContext, {
       frequency: 440, // A4 - standard reference tone
-      startTime: 0, 
-      duration: 0.3, 
-      volume: 0.15 // Quieter for notifications
+      startTime: 0,
+      duration: 0.3,
+      volume: 0.15, // Quieter for notifications
     });
   } catch (error) {
     console.warn('Could not play notification sound:', error);
@@ -93,10 +97,12 @@ export function playNotificationSound(): void {
 export function playAlertSound(): void {
   try {
     const audioContext = createAudioContext();
-    if (!audioContext) return;
+    if (!audioContext) {
+      return;
+    }
 
-    createBeep(audioContext, { frequency: 587, startTime: 0, duration: 0.2 });       // D5
-    createBeep(audioContext, { frequency: 659, startTime: 0.3, duration: 0.2 });     // E5
+    createBeep(audioContext, { frequency: 587, startTime: 0, duration: 0.2 }); // D5
+    createBeep(audioContext, { frequency: 659, startTime: 0.3, duration: 0.2 }); // E5
   } catch (error) {
     console.warn('Could not play alert sound:', error);
   }

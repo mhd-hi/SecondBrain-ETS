@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { Button } from "@/components/ui/button";
-import { Card } from "./ui/card";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuList,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Card } from './ui/card';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -59,39 +59,43 @@ export default function Navbar() {
         </NavigationMenu>
 
         <div className="flex items-center gap-2">
-          {status === "loading" ? (
-            <div className="w-8 h-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-          ) : session ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  {session.user?.image && (
-                    <Image
-                      src={session.user.image}
-                      alt="Profile"
-                      width={24}
-                      height={24}
-                      className="w-6 h-6 rounded-full"
-                    />
-                  )}
-                  <span className="hidden sm:inline">{session.user?.name}</span>
+          {status === 'loading'
+            ? (
+              <div className="w-8 h-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+            )
+            : session
+              ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                      {session.user?.image && (
+                        <Image
+                          src={session.user.image}
+                          alt="Profile"
+                          width={24}
+                          height={24}
+                          className="w-6 h-6 rounded-full"
+                        />
+                      )}
+                      <span className="hidden sm:inline">{session.user?.name}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem disabled>
+                      {session.user?.email}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )
+              : (
+                <Button variant="outline" onClick={() => signIn()}>
+                  Sign In
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled>
-                  {session.user?.email}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button variant="outline" onClick={() => signIn()}>
-              Sign In
-            </Button>
-          )}
+              )}
           <ThemeToggle />
         </div>
       </div>

@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -28,7 +28,7 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
-              onClick={() => signIn("google")}
+              onClick={() => signIn('google')}
               className="w-full flex items-center justify-center gap-2"
               variant="outline"
             >
@@ -41,7 +41,7 @@ export default function ProfilePage() {
               Continue with Google
             </Button>
             <Button
-              onClick={() => signIn("discord")}
+              onClick={() => signIn('discord')}
               className="w-full flex items-center justify-center gap-2"
               variant="outline"
             >
@@ -60,7 +60,11 @@ export default function ProfilePage() {
     <div className="container mx-auto p-6">
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Welcome back, {session.user?.name}!</CardTitle>
+          <CardTitle>
+            Welcome back,
+            {session.user?.name}
+            !
+          </CardTitle>
           <CardDescription>
             You&apos;re successfully authenticated.
           </CardDescription>
@@ -80,11 +84,11 @@ export default function ProfilePage() {
             <p className="font-medium">{session.user?.name}</p>
             <p className="text-sm text-gray-500">{session.user?.email}</p>
           </div>
-        <Button onClick={() => signOut()} variant="outline">
-          Sign Out
-        </Button>
-      </CardContent>
-    </Card>
-    </div >
+          <Button onClick={() => signOut()} variant="outline">
+            Sign Out
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

@@ -5,7 +5,7 @@
 
 import type { CourseAIResponse } from '@/types/api';
 
-export interface ProcessingStep {
+export type ProcessingStep = {
   id: string;
   name: string;
   status: 'pending' | 'loading' | 'success' | 'error';
@@ -13,51 +13,51 @@ export interface ProcessingStep {
   startTime?: Date | string;
   endTime?: Date | string;
   data?: unknown;
-}
+};
 
-export interface PipelineOptions {
+export type PipelineOptions = {
   courseCode: string;
   term?: string;
-}
+};
 
-export interface PipelineResult {
+export type PipelineResult = {
   courseData: CourseAIResponse;
   steps: ProcessingStep[];
   logs: string[];
-}
+};
 
-export interface SourceResult {
+export type SourceResult = {
   data: string;
   logs: string[];
   metadata?: Record<string, unknown>;
-}
+};
 
-export interface DataSource {
+export type DataSource = {
   name: string;
   description: string;
   fetch: (courseCode: string, term?: string) => Promise<SourceResult>;
-}
+};
 
 /**
  * API types for step-by-step processing
  */
-export interface PipelineStepRequest {
+export type PipelineStepRequest = {
   courseCode: string;
   term?: string;
   step: 'planets' | 'openai';
   htmlData?: string;
-}
+};
 
-export interface PipelineStepResult {
+export type PipelineStepResult = {
   step: ProcessingStep;
   logs: string[];
   data?: unknown;
-}
+};
 
 /**
  * Status tracking for independent steps
  */
-export interface StepStatus {
+export type StepStatus = {
   planets: ProcessingStep;
   openai: ProcessingStep;
-}
+};

@@ -1,29 +1,28 @@
 # Fixes
 - fix middleware signin page
-- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&
+- Fix this : https://semgrep.dev/orgs/my_org_   mohamed/findings?tab=open&primary=true&
 last_opened=All%20time
 - Add total effort in TaskCard
-- rEDUCE the Start Pomodoro button width to only take the size of the text, not full size
 - CHange favicon to a capibara, add it to logo too
 # Enhancement
 Progress bar:
-- Add semester progress Board and dashboard page (progressbar for all courses) 
+- Add semester progress Board and dashboard page (progressbar for all courses)
 - Add course progress Board inside the course page (progressBar for courses tasks)
 Profile page:
 - Add theme toggle in Profile page.
-Tasks edit : 
+Tasks edit :
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Ask user for its course periods to better determine task due dates.
-AI: 
+AI:
 - cache openai tasks response in db
-    - if course is not in the openai_cache db, add it. 
-    Benefits: 
+    - if course is not in the openai_cache db, add it.
+    Benefits:
         - Cross-user sharing: Multiple users can benefit from the same cached response
         - Cost optimization: Significant reduction in OpenAI API calls
         - Performance: Faster response times for cached courses
 - When task is overdue, send a web notification
 
-Better date accuracy of tasks 
+Better date accuracy of tasks
 - For new tasks, set default date as today+1week in the dialog.
 
 # Tech debt

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
 import type { Course } from '@/types/course';
-import { getCourseColor } from '@/lib/utils';
-import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
-import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
 import Link from 'next/link';
+import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
+import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import {
-  getNextTask,
-  getUpcomingTask,
   calculateProgress,
   getCompletedTasksCount,
-  getTotalTasksCount
+  getNextTask,
+  getTotalTasksCount,
+  getUpcomingTask,
 } from '@/lib/task/util';
-import { TruncatedTextWithTooltip } from "@/components/shared/atoms/text-with-tooltip";
+import { getCourseColor } from '@/lib/utils';
 
-interface CourseCardProps {
+type CourseCardProps = {
   course: Course;
   onDeleteCourse: (courseId: string) => void;
-}
+};
 
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   // Ensure course.tasks is an array
@@ -39,7 +39,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const dropdownActions = [
     {
-      label: "Delete",
+      label: 'Delete',
       onClick: handleDeleteClick,
       destructive: true,
     },
@@ -50,7 +50,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-fit"
       style={{ borderLeft: `4px solid ${courseColor}` }}
     >
-      <MoreActionsDropdown 
+      <MoreActionsDropdown
         actions={dropdownActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
       />
@@ -65,10 +65,15 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           <div
             className="h-2 rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%`, backgroundColor: courseColor }}
-          ></div>
+          >
+          </div>
         </div>
         <p className="text-right text-xs text-muted-foreground mt-1">
-          {completedTasks} of {totalTasks} tasks
+          {completedTasks}
+          {' of '}
+          {totalTasks}
+          {' '}
+          tasks
         </p>
       </div>
 
@@ -77,7 +82,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           <div>
             <div className="flex items-center gap-1">
               <span className="text-xs font-bold text-foreground">Next:</span>
-              <TruncatedTextWithTooltip 
+              <TruncatedTextWithTooltip
                 text={nextTask.title}
                 className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
                 maxLines={1}
@@ -95,7 +100,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           <div>
             <div className="flex items-center gap-1">
               <span className="text-xs font-bold text-foreground">Upcoming:</span>
-              <TruncatedTextWithTooltip 
+              <TruncatedTextWithTooltip
                 text={upcomingTask.title}
                 className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
                 maxLines={1}
@@ -122,9 +127,9 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       </div>
 
       <div className="flex justify-end mt-2">
-        <Link 
+        <Link
           href={`/courses/${course.id}`}
-          className="text-xs text-muted-foreground hover:text-accent-foreground transition-colors"
+          className="text-xs text-muted-foreground hover:text-accent-foreground transition-colors hover:underline"
           style={{ color: courseColor }}
         >
           View course

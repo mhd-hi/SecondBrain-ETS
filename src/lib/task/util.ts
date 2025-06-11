@@ -1,5 +1,5 @@
-import { TaskStatus } from "@/types/task";
-import type { Task } from "@/types/task";
+import type { Task } from '@/types/task';
+import { TaskStatus } from '@/types/task';
 
 // Standard number of weeks per session
 const STANDARD_WEEKS_PER_SESSION = 15;
@@ -7,7 +7,7 @@ const STANDARD_WEEKS_PER_SESSION = 15;
 // Session date ranges
 const getSessionDates = () => {
   const currentYear = new Date().getFullYear();
-  
+
   return {
     winter: {
       start: new Date(currentYear, 0, 5), // January 5
@@ -29,21 +29,19 @@ const getSessionDates = () => {
 
 const SESSION_DATES = getSessionDates();
 
-
-
 export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
-    switch (currentStatus) {
-      case TaskStatus.DRAFT:
-        return TaskStatus.TODO;
-      case TaskStatus.TODO:
-        return TaskStatus.IN_PROGRESS;
-      case TaskStatus.IN_PROGRESS:
-        return TaskStatus.COMPLETED;
-      default:
-        return currentStatus;
-    }
+  switch (currentStatus) {
+    case TaskStatus.DRAFT:
+      return TaskStatus.TODO;
+    case TaskStatus.TODO:
+      return TaskStatus.IN_PROGRESS;
+    case TaskStatus.IN_PROGRESS:
+      return TaskStatus.COMPLETED;
+    default:
+      return currentStatus;
   }
-  
+}
+
 /**
  * Calculates the due date for a task based on the session, week number, and total course weeks
  * @param session The session (winter, summer, autumn)
@@ -54,28 +52,28 @@ export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
 export function calculateDueDate(
   session: keyof typeof SESSION_DATES,
   week: number,
-  totalCourseWeeks: number
+  totalCourseWeeks: number,
 ): Date {
   const sessionDates = SESSION_DATES[session];
-  
+
   // Calculate the adjusted week based on the course's total weeks
   const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_SESSION;
-  
+
   // Calculate the due date by adding the adjusted weeks to the session start date
   const dueDate = new Date(sessionDates.start);
   dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
-  
+
   // Check if the calculated date is valid
-  if (isNaN(dueDate.getTime())) {
-      console.error(`Invalid date calculated for session: ${session}, week: ${week}, totalCourseWeeks: ${totalCourseWeeks}`);
-      return sessionDates.end; // Return session end date as a fallback
+  if (Number.isNaN(dueDate.getTime())) {
+    console.error(`Invalid date calculated for session: ${session}, week: ${week}, totalCourseWeeks: ${totalCourseWeeks}`);
+    return sessionDates.end; // Return session end date as a fallback
   }
 
   // Ensure the due date doesn't exceed the session end date
   if (dueDate > sessionDates.end) {
     return sessionDates.end;
   }
-  
+
   return dueDate;
 }
 
@@ -85,13 +83,13 @@ export function calculateDueDate(
  */
 export function getCurrentSession(): keyof typeof SESSION_DATES | null {
   const now = new Date();
-  
+
   for (const [session, dates] of Object.entries(SESSION_DATES)) {
     if (now >= dates.start && now <= dates.end) {
       return session as keyof typeof SESSION_DATES;
     }
   }
-  
+
   return null;
 }
 
@@ -101,7 +99,7 @@ export function getCurrentSession(): keyof typeof SESSION_DATES | null {
  */
 export function getNextSession(): keyof typeof SESSION_DATES {
   const now = new Date();
-  
+
   if (now < SESSION_DATES.winter.start) {
     return 'winter';
   } else if (now < SESSION_DATES.summer.start) {
@@ -121,10 +119,10 @@ export function getNextSession(): keyof typeof SESSION_DATES {
  */
 export function calculateTaskDueDate(week: number, totalCourseWeeks = 15): Date {
   const now = new Date();
-  
+
   // Determine which session we're in based on the current date
   let session: keyof typeof SESSION_DATES;
-  
+
   if (now >= SESSION_DATES.winter.start && now <= SESSION_DATES.winter.end) {
     session = 'winter';
   } else if (now >= SESSION_DATES.summer.start && now <= SESSION_DATES.summer.end) {
@@ -143,7 +141,7 @@ export function calculateTaskDueDate(week: number, totalCourseWeeks = 15): Date 
       session = 'winter';
     }
   }
-  
+
   return calculateDueDate(session, week, totalCourseWeeks);
 }
 
@@ -174,7 +172,7 @@ export function getSessionWeeks(session: keyof typeof SESSION_DATES): number {
 export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): number {
   // Determine which session the due date falls into
   let session: keyof typeof SESSION_DATES;
-  
+
   if (dueDate >= SESSION_DATES.winter.start && dueDate <= SESSION_DATES.winter.end) {
     session = 'winter';
   } else if (dueDate >= SESSION_DATES.summer.start && dueDate <= SESSION_DATES.summer.end) {
@@ -194,22 +192,21 @@ export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): 
       session = 'winter';
     }
   }
-  
+
   const sessionDates = SESSION_DATES[session];
-  
+
   // Calculate the number of days from session start to due date
   const daysDiff = Math.max(0, Math.floor((dueDate.getTime() - sessionDates.start.getTime()) / (1000 * 60 * 60 * 24)));
-  
+
   // Convert days to weeks within the session
   const weeksFromStart = daysDiff / 7;
-  
+
   // Convert from session weeks back to course weeks
   const adjustedWeek = (weeksFromStart / STANDARD_WEEKS_PER_SESSION) * totalCourseWeeks;
-  
+
   // Ensure we return at least week 1 and don't exceed total course weeks
   return Math.max(1, Math.min(Math.round(adjustedWeek), totalCourseWeeks));
 }
-
 
 /**
  * Sorts tasks by due date and filters out completed tasks
@@ -222,8 +219,8 @@ export const getSortedTasks = (tasks: Task[]) => {
       const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
       const dateB = b.dueDate instanceof Date ? b.dueDate : new Date(b.dueDate);
 
-      const timeA = isNaN(dateA.getTime()) ? Number.MAX_SAFE_INTEGER : dateA.getTime();
-      const timeB = isNaN(dateB.getTime()) ? Number.MAX_SAFE_INTEGER : dateB.getTime();
+      const timeA = Number.isNaN(dateA.getTime()) ? Number.MAX_SAFE_INTEGER : dateA.getTime();
+      const timeB = Number.isNaN(dateB.getTime()) ? Number.MAX_SAFE_INTEGER : dateB.getTime();
 
       return timeA - timeB;
     });
@@ -255,59 +252,67 @@ export const getCompletedTasksCount = (tasks: Task[]): number => {
   return tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
 };
 
-
 export const getTotalTasksCount = (tasks: Task[]): number => {
   return tasks.length;
 };
 
 export const STATUS_CONFIG = {
   [TaskStatus.DRAFT]: {
-    label: "DRAFT",
-    bgColor: "muted",
-    textColor: "muted-foreground",
+    label: 'DRAFT',
+    bgColor: 'muted',
+    textColor: 'muted-foreground',
   },
   [TaskStatus.TODO]: {
-    label: "TODO",
-    bgColor: "blue-500",
-    textColor: "white",
+    label: 'TODO',
+    bgColor: 'blue-500',
+    textColor: 'white',
   },
   [TaskStatus.IN_PROGRESS]: {
-    label: "IN PROGRESS",
-    bgColor: "yellow-500",
-    textColor: "white",
+    label: 'IN PROGRESS',
+    bgColor: 'yellow-500',
+    textColor: 'white',
   },
   [TaskStatus.COMPLETED]: {
-    label: "COMPLETED",
-    bgColor: "green-600",
-    textColor: "white",
+    label: 'COMPLETED',
+    bgColor: 'green-600',
+    textColor: 'white',
   },
 } as const;
 
 export function getDueDateColor(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
+
   // Check if the date is valid
-  if (!dateObj || isNaN(dateObj.getTime())) {
-    return "text-muted-foreground";
+  if (!dateObj || Number.isNaN(dateObj.getTime())) {
+    return 'text-muted-foreground';
   }
 
   const now = new Date();
-  const diffMs = dateObj.getTime() - now.getTime();  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  
+  const diffMs = dateObj.getTime() - now.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
   // Overdue
-  if (diffMs < 0) return "text-yellow-600";
-  
+  if (diffMs < 0) {
+    return 'text-yellow-600';
+  }
+
   // Due today
-  if (diffDays <= 1) return "text-red-300";
-  
+  if (diffDays <= 1) {
+    return 'text-red-300';
+  }
+
   // Due within 3 days
-  if (diffDays <= 3) return "text-orange-500";
-  
+  if (diffDays <= 3) {
+    return 'text-orange-500';
+  }
+
   // Due within 1 week
-  if (diffDays <= 7) return "text-yellow-600";
-  
+  if (diffDays <= 7) {
+    return 'text-yellow-600';
+  }
+
   // Default
-  return "text-muted-foreground";
+  return 'text-muted-foreground';
 }
 
 export const STATUS_ORDER = [
@@ -367,16 +372,16 @@ export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Pro
   result: unknown;
 }> => {
   const taskIds = tasks.map(task => task.id);
-  
+
   // First, update all task statuses to TODO
   await batchUpdateTaskStatus(taskIds, TaskStatus.TODO);
-  
+
   // Then, update due dates for each task
   const taskUpdates = tasks.map(task => ({
     taskId: task.id,
     updates: {
-      dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString()
-    }
+      dueDate: calculateTaskDueDate(task.week, sessionWeeks).toISOString(),
+    },
   }));
 
   const response = await fetch('/api/tasks/batch', {
@@ -385,7 +390,7 @@ export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Pro
     body: JSON.stringify({
       action: 'update',
       taskIds,
-      taskUpdates
+      taskUpdates,
     }),
   });
 
@@ -407,8 +412,8 @@ export const getOverdueTasks = (tasks: Task[]): Task[] => {
   // Get current date at start of day to ensure consistent overdue detection
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  
-  return tasks.filter(task => {
+
+  return tasks.filter((task) => {
     // Skip completed tasks
     if (task.status === TaskStatus.COMPLETED) {
       return false;
@@ -416,48 +421,13 @@ export const getOverdueTasks = (tasks: Task[]): Task[] => {
 
     // Check if task is overdue
     const dueDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
-    
+
     // Return false if invalid date
-    if (isNaN(dueDate.getTime())) {
+    if (Number.isNaN(dueDate.getTime())) {
       return false;
     }
-    
+
     // Task is overdue if due date is before today (end of day)
     return dueDate < today;
   });
-};
-
-/**
- * Debug function to help diagnose overdue task detection issues
- */
-export const debugOverdueTasks = (tasks: Task[]): void => {
-  console.group('🔍 Overdue Tasks Debug');
-  
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  
-  console.log('Current time:', now.toISOString());
-  console.log('Today end of day:', today.toISOString());
-  console.log('Total tasks:', tasks.length);
-  
-  const overdueTasks = tasks.filter(task => {
-    const isCompleted = task.status === TaskStatus.COMPLETED;
-    const dueDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
-    const isValidDate = !isNaN(dueDate.getTime());
-    const isOverdue = isValidDate && dueDate < today;
-    
-    console.log(`Task: ${task.title}`, {
-      status: task.status,
-      isCompleted,
-      dueDate: dueDate.toISOString(),
-      isValidDate,
-      isOverdue,
-      willBeIncluded: !isCompleted && isOverdue
-    });
-    
-    return !isCompleted && isOverdue;
-  });
-  
-  console.log('Overdue tasks found:', overdueTasks.length);
-  console.groupEnd();
 };

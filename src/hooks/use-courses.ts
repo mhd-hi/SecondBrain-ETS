@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from 'react';
 import type { Course } from '@/types/course';
+import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { CommonErrorMessages } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
@@ -15,7 +15,7 @@ export function useCourses() {
     try {
       const data = await withLoadingState(
         () => api.get<Course[]>('/api/courses', CommonErrorMessages.COURSE_FETCH_FAILED),
-        setIsLoading
+        setIsLoading,
       );
       setCourses(data);
     } catch {

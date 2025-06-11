@@ -5,7 +5,7 @@ import type { ChangeEvent } from 'react';
  */
 export const handleFormChange = <T extends Record<string, string | number | boolean | Date | null | undefined>>(
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  setFormData: React.Dispatch<React.SetStateAction<T>>
+  setFormData: React.Dispatch<React.SetStateAction<T>>,
 ) => {
   const { name, value } = e.target;
   setFormData(prev => ({
@@ -21,7 +21,7 @@ export const handleFormSubmit = async <T extends Record<string, string | number 
   e: React.FormEvent,
   formData: T,
   onSave: (updatedData: T) => Promise<void>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
   e.preventDefault();
   setIsLoading(true);
@@ -36,4 +36,4 @@ export const handleFormSubmit = async <T extends Record<string, string | number 
   } finally {
     setIsLoading(false);
   }
-}; 
+};

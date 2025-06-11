@@ -1,11 +1,11 @@
 import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
-import { getUserCourse, getUserCourseTasks, deleteUserCourse } from '@/lib/auth/db';
+import { deleteUserCourse, getUserCourse, getUserCourseTasks } from '@/lib/auth/db';
 
 export const GET = withAuth<{ courseId: string }>(
   async (request, { params, user }) => {
     const { courseId } = await params;
-    
+
     // Use secure functions with automatic ownership verification
     const course = await getUserCourse(courseId, user.id);
     const courseTasks = await getUserCourseTasks(courseId, user.id);
@@ -14,7 +14,7 @@ export const GET = withAuth<{ courseId: string }>(
       ...course,
       tasks: courseTasks,
     });
-  }
+  },
 );
 
 export const DELETE = withAuth<{ courseId: string }>(
@@ -25,5 +25,5 @@ export const DELETE = withAuth<{ courseId: string }>(
     await deleteUserCourse(courseId, user.id);
 
     return successResponse({ success: true });
-  }
+  },
 );

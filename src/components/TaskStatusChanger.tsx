@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronRight } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { TaskStatus } from "@/types/task";
-import { STATUS_CONFIG, STATUS_ORDER, getNextStatus, isValidStatus } from "@/lib/task/util";
+} from '@/components/ui/dropdown-menu';
+import { getNextStatus, isValidStatus, STATUS_CONFIG, STATUS_ORDER } from '@/lib/task/util';
+import { cn } from '@/lib/utils';
+import { TaskStatus } from '@/types/task';
 
-interface TaskStatusChangerProps {
+type TaskStatusChangerProps = {
   currentStatus: TaskStatus;
   onStatusChange: (newStatus: TaskStatus) => void;
-}
+};
 
 const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerProps) => {
   const handleArrowClick = () => {
@@ -33,15 +33,15 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   const getStatusBgClass = (status: TaskStatus) => {
     switch (status) {
       case TaskStatus.DRAFT:
-        return "bg-muted";
+        return 'bg-muted';
       case TaskStatus.TODO:
-        return "bg-blue-500";
+        return 'bg-blue-500';
       case TaskStatus.IN_PROGRESS:
-        return "bg-yellow-500";
+        return 'bg-yellow-500';
       case TaskStatus.COMPLETED:
-        return "bg-green-600";
+        return 'bg-green-600';
       default:
-        return "bg-muted";
+        return 'bg-muted';
     }
   };
 
@@ -49,22 +49,22 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   const getStatusTextClass = (status: TaskStatus) => {
     switch (status) {
       case TaskStatus.DRAFT:
-        return "text-muted-foreground";
+        return 'text-muted-foreground';
       case TaskStatus.TODO:
       case TaskStatus.IN_PROGRESS:
       case TaskStatus.COMPLETED:
-        return "text-white";
+        return 'text-white';
       default:
-        return "text-muted-foreground";
+        return 'text-muted-foreground';
     }
   };
 
   return (
     <div
       className={cn(
-        "inline-flex items-center h-8 rounded-md overflow-hidden",
+        'inline-flex items-center h-8 rounded-md overflow-hidden',
         getStatusBgClass(validStatus),
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
       )}
       role="group"
       aria-label="Task status changer"
@@ -72,11 +72,12 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            type="button"
             className={cn(
-              "px-3 h-full flex items-center",
+              'px-3 h-full flex items-center',
               getStatusTextClass(validStatus),
-              "font-medium text-xs uppercase",
-              "hover:bg-black/5 focus:outline-none"
+              'font-medium text-xs uppercase',
+              'hover:bg-black/5 focus:outline-none',
             )}
             aria-label="Change task status"
           >
@@ -96,19 +97,20 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                 key={status}
                 onClick={() => handleDropdownSelect(status)}
                 className={cn(
-                  "h-8 px-4 rounded-none flex items-center gap-2",
-                  "font-medium text-xs uppercase",
-                  "hover:bg-accent hover:text-accent-foreground focus:outline-none",
-                  "cursor-pointer",
-                  index !== STATUS_ORDER.length - 1 && "border-b border-border"
+                  'h-8 px-4 rounded-none flex items-center gap-2',
+                  'font-medium text-xs uppercase',
+                  'hover:bg-accent hover:text-accent-foreground focus:outline-none',
+                  'cursor-pointer',
+                  index !== STATUS_ORDER.length - 1 && 'border-b border-border',
                 )}
               >
                 <div className={cn(
-                  "w-3 h-3 rounded-full",
-                  isCompleted 
+                  'w-3 h-3 rounded-full',
+                  isCompleted
                     ? getStatusBgClass(status)
-                    : `${getStatusBgClass(status)} border border-current`
-                )} />
+                    : `${getStatusBgClass(status)} border border-current`,
+                )}
+                />
                 {statusConfig.label}
               </DropdownMenuItem>
             );
@@ -117,11 +119,12 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
       </DropdownMenu>
 
       <button
+        type="button"
         onClick={handleArrowClick}
         className={cn(
-          "h-full flex items-center justify-center px-2",
-          "hover:bg-black/5 focus:outline-none",
-          "transition-colors"
+          'h-full flex items-center justify-center px-2',
+          'hover:bg-black/5 focus:outline-none',
+          'transition-colors',
         )}
         aria-label="Cycle to next status"
       >

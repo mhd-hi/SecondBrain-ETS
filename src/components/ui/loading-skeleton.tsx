@@ -1,23 +1,25 @@
-"use client";
+/* eslint-disable react/no-array-index-key */
+'use client';
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
-interface LoadingSkeletonProps {
-  type?: "card" | "list";
+type LoadingSkeletonProps = {
+  type?: 'card' | 'list';
   count?: number;
   className?: string;
-}
+};
 
-export function LoadingSkeleton({ 
-  type = "card", 
+export function LoadingSkeleton({
+  type = 'card',
   count = 3,
-  className = ""
+  className = '',
 }: LoadingSkeletonProps) {
-  if (type === "card") {
+  if (type === 'card') {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        { }
         {Array.from({ length: count }).map((_, i) => (
-          <Skeleton key={i} className={`h-32 ${className}`} />
+          <Skeleton key={`card-skeleton-${i}`} className={`h-32 ${className}`} />
         ))}
       </div>
     );
@@ -29,10 +31,11 @@ export function LoadingSkeleton({
         Loading...
       </div>
       <div className="grid gap-4">
+        { }
         {Array.from({ length: count }).map((_, i) => (
-          <Skeleton key={i} className={`h-24 ${className}`} />
+          <Skeleton key={`list-skeleton-${i}`} className={`h-24 ${className}`} />
         ))}
       </div>
     </div>
   );
-} 
+}

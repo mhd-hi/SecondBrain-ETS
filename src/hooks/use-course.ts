@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from 'react';
 import type { Course } from '@/types/course';
 import type { Task, TaskStatus, TaskType } from '@/types/task';
+import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
-import { withLoadingAndErrorHandling } from '@/lib/loading/util';
 import { ErrorHandlers } from '@/lib/error/util';
+import { withLoadingAndErrorHandling } from '@/lib/loading/util';
 
-interface CourseResponse {
+type CourseResponse = {
   id: string;
   code: string;
   name: string;
@@ -29,7 +29,7 @@ interface CourseResponse {
     createdAt: string;
     updatedAt: string;
   }>;
-}
+};
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
@@ -40,14 +40,14 @@ export function useCourse(courseId: string) {
     await withLoadingAndErrorHandling(
       async () => {
         const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);
-        
+
         // Convert dueDate strings to Date objects and handle invalid dates
         const tasksWithValidatedDates: Task[] = data.tasks.map(task => ({
           ...task,
           actualEffort: task.actualEffort ?? 0,
           dueDate: task.dueDate ? new Date(task.dueDate) : new Date(), // Fallback to current date if dueDate is missing
           createdAt: new Date(task.createdAt),
-          updatedAt: new Date(task.updatedAt)
+          updatedAt: new Date(task.updatedAt),
         }));
 
         setCourse({
@@ -62,12 +62,14 @@ export function useCourse(courseId: string) {
       (error) => {
         setError('Failed to load course data');
         ErrorHandlers.api(error, 'Failed to load course');
-      }
+      },
     );
   }, [courseId]);
 
   const getFilteredTasks = useCallback((status?: TaskStatus) => {
-    if (!status) return tasks;
+    if (!status) {
+      return tasks;
+    }
     return tasks.filter(task => task.status === status);
   }, [tasks]);
 
@@ -79,6 +81,6 @@ export function useCourse(courseId: string) {
     fetchCourse,
     getFilteredTasks,
     setCourse,
-    setTasks
+    setTasks,
   };
 }

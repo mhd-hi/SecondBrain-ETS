@@ -1,18 +1,18 @@
-import { NextResponse } from "next/server";
-import type { TaskStatus, Subtask } from "@/types/task";
-import { withAuth } from "@/lib/auth/api";
-import { getUserTask, updateUserTask } from "@/lib/auth/db";
+import type { Subtask, TaskStatus } from '@/types/task';
+import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/api';
+import { getUserTask, updateUserTask } from '@/lib/auth/db';
 
 export const PATCH = withAuth<{ taskId: string; subtaskId: string }>(
   async (request, { params, user }) => {
     const { taskId, subtaskId } = await params;
-    const { status } = await request.json() as { status: TaskStatus };    // Get the task with automatic ownership verification
+    const { status } = await request.json() as { status: TaskStatus }; // Get the task with automatic ownership verification
     const task = await getUserTask(taskId, user.id);
-    
+
     if (!task) {
       return NextResponse.json(
-        { error: "Task not found" },
-        { status: 404 }
+        { error: 'Task not found' },
+        { status: 404 },
       );
     }
 
@@ -21,23 +21,23 @@ export const PATCH = withAuth<{ taskId: string; subtaskId: string }>(
     const updatedSubtasks = subtasks.map(subtask =>
       subtask.id === subtaskId
         ? { ...subtask, status }
-        : subtask
+        : subtask,
     );
 
     // Verify subtask exists
     const subtaskExists = subtasks.some(subtask => subtask.id === subtaskId);
     if (!subtaskExists) {
       return NextResponse.json(
-        { error: "Subtask not found" },
-        { status: 404 }
+        { error: 'Subtask not found' },
+        { status: 404 },
       );
     }
 
     // Update the task with the new subtasks array using secure update
-    await updateUserTask(taskId, user.id, { 
+    await updateUserTask(taskId, user.id, {
       subtasks: updatedSubtasks,
     });
 
     return NextResponse.json({ success: true });
-  }
+  },
 );

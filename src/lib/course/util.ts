@@ -1,6 +1,6 @@
 /**
  * Course code validation utilities
- * 
+ *
  * This module provides utilities for validating and normalizing course codes
  * according to the expected format: 2-4 uppercase letters followed by 3 digits
  * and an optional uppercase letter (e.g., MAT145, CSC108A, LOG210).
@@ -16,10 +16,10 @@ const COURSE_CODE_PATTERN = /^[A-Z]{2,4}\d{3}[A-Z]?$/;
 
 /**
  * Validates if a course code matches the expected format
- * 
+ *
  * @param courseCode - The course code to validate
  * @returns True if the course code is valid, false otherwise
- * 
+ *
  * @example
  * ```ts
  * isValidCourseCode('MAT145')  // true
@@ -36,10 +36,10 @@ export function isValidCourseCode(courseCode: string): boolean {
 
 /**
  * Normalizes a course code by trimming whitespace and converting to uppercase
- * 
+ *
  * @param courseCode - The course code to normalize
  * @returns The normalized course code
- * 
+ *
  * @example
  * ```ts
  * normalizeCourseCode('  mat145  ') // 'MAT145'
@@ -52,15 +52,15 @@ export function normalizeCourseCode(courseCode: string): string {
 
 /**
  * Validates and normalizes a course code in one step
- * 
+ *
  * @param courseCode - The course code to validate and normalize
  * @returns An object containing the normalized code and validation status
- * 
+ *
  * @example
  * ```ts
  * validateAndNormalizeCourseCode('  mat145  ')
  * // { isValid: true, normalizedCode: 'MAT145' }
- * 
+ *
  * validateAndNormalizeCourseCode('invalid')
  * // { isValid: false, normalizedCode: 'INVALID' }
  * ```
@@ -80,12 +80,12 @@ export function validateAndNormalizeCourseCode(courseCode: string): {
 
 /**
  * Validates a course code and throws an error if invalid
- * 
+ *
  * @param courseCode - The course code to validate
  * @param customErrorMessage - Optional custom error message
  * @throws Error if the course code is invalid
  * @returns The normalized course code if valid
- * 
+ *
  * @example
  * ```ts
  * const cleanCode = assertValidCourseCode('mat145'); // 'MAT145'
@@ -94,13 +94,13 @@ export function validateAndNormalizeCourseCode(courseCode: string): {
  */
 export function assertValidCourseCode(
   courseCode: string,
-  customErrorMessage?: string
+  customErrorMessage?: string,
 ): string {
   const normalizedCode = normalizeCourseCode(courseCode);
 
   if (!isValidCourseCode(normalizedCode)) {
     throw new Error(
-      customErrorMessage ?? 'Invalid course code format. Expected format: 2-4 letters followed by 3 digits and optional letter (e.g., MAT145)'
+      customErrorMessage ?? 'Invalid course code format. Expected format: 2-4 letters followed by 3 digits and optional letter (e.g., MAT145)',
     );
   }
 

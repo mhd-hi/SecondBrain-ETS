@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react';
 
 export const withLoadingState = async <T>(
   asyncOperation: () => Promise<T>,
-  setLoading: Dispatch<SetStateAction<boolean>>
+  setLoading: Dispatch<SetStateAction<boolean>>,
 ): Promise<T> => {
   setLoading(true);
   try {
@@ -17,7 +17,7 @@ export const withLoadingState = async <T>(
 export const withLoadingAndErrorHandling = async <T>(
   asyncOperation: () => Promise<T>,
   setLoading: Dispatch<SetStateAction<boolean>>,
-  onError?: (error: unknown) => void
+  onError?: (error: unknown) => void,
 ): Promise<T | undefined> => {
   setLoading(true);
   try {
@@ -34,10 +34,10 @@ export const withLoadingAndErrorHandling = async <T>(
 
 export const withMultipleLoadingStates = async <T>(
   asyncOperation: () => Promise<T>,
-  loadingStates: Array<Dispatch<SetStateAction<boolean>>>
+  loadingStates: Array<Dispatch<SetStateAction<boolean>>>,
 ): Promise<T> => {
   loadingStates.forEach(setLoading => setLoading(true));
-  
+
   try {
     return await asyncOperation();
   } finally {

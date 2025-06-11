@@ -1,38 +1,41 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { DayColumn } from "./DayColumn";
-import type { Task as TaskType, TaskStatus } from "@/types/task";
-import type { DraggedTask, DropTargetData } from "@/types/drag-drop";
-import { toast } from "sonner";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { getWeekStart, getWeekDates, formatWeekRange } from "@/lib/date/util";
-import { useCourses } from "@/contexts/courses-context";
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { DraggedTask, DropTargetData } from '@/types/drag-drop';
+import type { TaskStatus, Task as TaskType } from '@/types/task';
 import {
+  closestCenter,
   DndContext,
+
   DragOverlay,
+
+  KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  KeyboardSensor,
   useSensor,
   useSensors,
-  closestCenter,
-  type DragEndEvent,
-  type DragStartEvent,
-} from "@dnd-kit/core";
-import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { Task } from "@/components/shared/Task";
+} from '@dnd-kit/core';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Task } from '@/components/shared/Task';
+import { Button } from '@/components/ui/button';
+import { useCourses } from '@/contexts/use-courses';
+import { formatWeekRange, getWeekDates, getWeekStart } from '@/lib/date/util';
+import { DayColumn } from './DayColumn';
 
-interface WeeklyRoadmapProps {
+type WeeklyRoadmapProps = {
   initialTasks?: TaskType[];
-}
+};
 
-export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
+const DEFAULT_INITIAL_TASKS: TaskType[] = [];
+
+export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRoadmapProps) => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [tasks, setTasks] = useState<TaskType[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Use global courses context
   const { courses } = useCourses();
 
@@ -57,30 +60,25 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
   const keyboardSensor = useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates,
   });
-
   const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
 
-  // Load tasks for the selected week
   useEffect(() => {
     const loadTasks = async () => {
       setIsLoading(true);
       try {
-        console.log('Loading tasks for week offset:', weekOffset);
         const weekStart = getWeekStart(weekOffset);
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 7);
 
-        console.log('Date range:', { weekStart, weekEnd });
         const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch tasks');
         }
         const weekTasks = await response.json() as TaskType[];
-        console.log('Loaded tasks:', weekTasks);
         setTasks(weekTasks);
       } catch (error) {
-        console.error("Failed to load tasks:", error);
-        toast.error("Failed to load tasks");
+        console.error('Failed to load tasks:', error);
+        toast.error('Failed to load tasks');
       } finally {
         setIsLoading(false);
       }
@@ -102,14 +100,14 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
       }
 
       // Update local state
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === taskId ? { ...task, status: newStatus } : task
-        )
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? { ...task, status: newStatus } : task,
+        ),
       );
     } catch (error) {
-      console.error("Failed to update task status:", error);
-      toast.error("Failed to update task status");
+      console.error('Failed to update task status:', error);
+      toast.error('Failed to update task status');
     }
   };
 
@@ -121,7 +119,7 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     if (draggedData) {
       setActiveTask({
         task: draggedData.task,
-        sourceDate: draggedData.sourceDate
+        sourceDate: draggedData.sourceDate,
       });
     }
 
@@ -134,12 +132,16 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
     setIsDragActive(false);
     setActiveTask(null);
 
-    if (!over) return;
+    if (!over) {
+      return;
+    }
 
     const draggedData = active.data.current as DraggedTask;
     const dropData = over.data.current as DropTargetData;
 
-    if (!draggedData || !dropData) return;
+    if (!draggedData || !dropData) {
+      return;
+    }
 
     const { task, sourceDate } = draggedData;
     const { targetDate } = dropData;
@@ -149,10 +151,10 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
       return;
     }
 
-    setTasks((prevTasks) =>
-      prevTasks.map((t) =>
-        t.id === task.id ? { ...t, dueDate: targetDate } : t
-      )
+    setTasks(prevTasks =>
+      prevTasks.map(t =>
+        t.id === task.id ? { ...t, dueDate: targetDate } : t,
+      ),
     );
 
     try {
@@ -169,13 +171,13 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
       }
     } catch (error) {
       // REVERT ON ERROR
-      setTasks((prevTasks) =>
-        prevTasks.map((t) =>
-          t.id === task.id ? { ...t, dueDate: sourceDate } : t
-        )
+      setTasks(prevTasks =>
+        prevTasks.map(t =>
+          t.id === task.id ? { ...t, dueDate: sourceDate } : t,
+        ),
       );
-      console.error("Failed to move task:", error);
-      toast.error("Failed to move task");
+      console.error('Failed to move task:', error);
+      toast.error('Failed to move task');
     }
   };
 
@@ -220,7 +222,8 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
         <div className={`
           border rounded-lg bg-muted/30
           ${isDragActive ? 'bg-muted/50 shadow-lg' : ''}
-        `}>
+        `}
+        >
           <div className="p-6 pb-2">
             <h2 className="text-2xl font-semibold mb-6">Weekly Roadmap</h2>
           </div>
@@ -255,19 +258,24 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
                 </Button>
               </div>
               <span className="text-sm font-medium">
-                {weekOffset === 0 ? 'This Week' :
-                  weekOffset === 1 ? 'Next Week' :
-                    weekOffset === -1 ? 'Last Week' :
-                      `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
+                {weekOffset === 0
+                  ? 'This Week'
+                  : weekOffset === 1
+                    ? 'Next Week'
+                    : weekOffset === -1
+                      ? 'Last Week'
+                      : `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
                 <span className="text-muted-foreground ml-2">
-                  ({formatWeekRange(weekDates)})
+                  (
+                  {formatWeekRange(weekDates)}
+                  )
                 </span>
               </span>
             </div>
           </div>
           <div className="h-[calc(100vh-200px)] overflow-y-auto">
             <div className="grid grid-cols-7 gap-4 p-4 pt-0">
-              {weekDates.map((date) => (
+              {weekDates.map(date => (
                 <DayColumn
                   key={date.toDateString()}
                   date={date}
@@ -285,14 +293,16 @@ export const WeeklyRoadmap = ({ initialTasks = [] }: WeeklyRoadmapProps) => {
         </div>
       </div>
       <DragOverlay dropAnimation={null}>
-        {activeTask ? (
-          <Task
-            task={activeTask.task}
-            sourceDate={activeTask.sourceDate}
-            onStatusChange={() => { /* No-op for overlay */ }}
-            isDragOverlay={true}
-          />
-        ) : null}
+        {activeTask
+          ? (
+            <Task
+              task={activeTask.task}
+              sourceDate={activeTask.sourceDate}
+              onStatusChange={() => { /* No-op for overlay */ }}
+              isDragOverlay={true}
+            />
+          )
+          : null}
       </DragOverlay>
 
     </DndContext>

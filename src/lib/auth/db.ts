@@ -1,7 +1,8 @@
-import { eq, and, type SQL } from "drizzle-orm";
-import { db } from "@/server/db";
-import { tasks, courses } from "@/server/db/schema";
-import { AuthorizationError } from "@/lib/auth/api";
+import type { SQL } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
+import { AuthorizationError } from '@/lib/auth/api';
+import { db } from '@/server/db';
+import { courses, tasks } from '@/server/db/schema';
 
 /**
  * Database query utilities with automatic user filtering for security
@@ -29,11 +30,11 @@ export async function getUserCourse(courseId: string, userId: string) {
       tasks: true,
     },
   });
-  
+
   if (!course) {
     throw new AuthorizationError('Course not found or access denied');
   }
-  
+
   return course;
 }
 
@@ -43,7 +44,7 @@ export async function getUserCourse(courseId: string, userId: string) {
 export async function getUserCourseTasks(courseId: string, userId: string) {
   // First verify course ownership
   await getUserCourse(courseId, userId);
-  
+
   return db
     .select()
     .from(tasks)
@@ -60,11 +61,11 @@ export async function getUserTask(taskId: string, userId: string) {
     .from(tasks)
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
     .limit(1);
-    
+
   if (!task.length) {
     throw new AuthorizationError('Task not found or access denied');
   }
-  
+
   return task[0];
 }
 
@@ -72,10 +73,10 @@ export async function getUserTask(taskId: string, userId: string) {
  * Get tasks with additional filtering (but always include user filter)
  */
 export async function getUserTasksWhere(userId: string, additionalWhere?: SQL) {
-  const whereClause = additionalWhere 
+  const whereClause = additionalWhere
     ? and(eq(tasks.userId, userId), additionalWhere)
     : eq(tasks.userId, userId);
-    
+
   return db
     .select()
     .from(tasks)
@@ -87,9 +88,9 @@ export async function getUserTasksWhere(userId: string, additionalWhere?: SQL) {
  * Update task with ownership verification
  */
 export async function updateUserTask(
-  taskId: string, 
-  userId: string, 
-  updates: Partial<typeof tasks.$inferInsert>
+  taskId: string,
+  userId: string,
+  updates: Partial<typeof tasks.$inferInsert>,
 ) {
   const result = await db
     .update(tasks)
@@ -99,11 +100,11 @@ export async function updateUserTask(
     })
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
     .returning();
-    
+
   if (!result.length) {
     throw new AuthorizationError('Task not found or access denied');
   }
-  
+
   return result[0];
 }
 
@@ -115,11 +116,11 @@ export async function deleteUserTask(taskId: string, userId: string) {
     .delete(tasks)
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
     .returning();
-    
+
   if (!result.length) {
     throw new AuthorizationError('Task not found or access denied');
   }
-  
+
   return result[0];
 }
 
@@ -128,11 +129,11 @@ export async function deleteUserTask(taskId: string, userId: string) {
  */
 export async function createUserTask(
   userId: string,
-  taskData: Omit<typeof tasks.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'>
+  taskData: Omit<typeof tasks.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'>,
 ) {
   // Verify course ownership first
   await getUserCourse(taskData.courseId, userId);
-  
+
   const result = await db
     .insert(tasks)
     .values({
@@ -143,7 +144,7 @@ export async function createUserTask(
       updatedAt: new Date(),
     })
     .returning();
-    
+
   return result[0];
 }
 
@@ -155,11 +156,11 @@ export async function deleteUserCourse(courseId: string, userId: string) {
     .delete(courses)
     .where(and(eq(courses.id, courseId), eq(courses.userId, userId)))
     .returning();
-    
+
   if (!result.length) {
     throw new AuthorizationError('Course not found or access denied');
   }
-  
+
   return result[0];
 }
 
@@ -168,7 +169,7 @@ export async function deleteUserCourse(courseId: string, userId: string) {
  */
 export async function createUserCourse(
   userId: string,
-  courseData: Omit<typeof courses.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'>
+  courseData: Omit<typeof courses.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'>,
 ) {
   const result = await db
     .insert(courses)
@@ -180,7 +181,7 @@ export async function createUserCourse(
       updatedAt: new Date(),
     })
     .returning();
-    
+
   return result[0];
 }
 
@@ -189,15 +190,15 @@ export async function createUserCourse(
  */
 export async function batchUpdateUserTasks(
   userId: string,
-  updates: Array<{ id: string; data: Partial<typeof tasks.$inferInsert> }>
+  updates: Array<{ id: string; data: Partial<typeof tasks.$inferInsert> }>,
 ) {
   const results = [];
-  
+
   for (const update of updates) {
     const result = await updateUserTask(update.id, userId, update.data);
     results.push(result);
   }
-  
+
   return results;
 }
 
@@ -213,7 +214,7 @@ export async function getUserTasksWithCourseInfo(userId: string) {
         name: courses.name,
         code: courses.code,
         color: courses.color,
-      }
+      },
     })
     .from(tasks)
     .innerJoin(courses, eq(tasks.courseId, courses.id))
@@ -228,17 +229,17 @@ export async function getUserTasksInDateRange(
   userId: string,
   startDate: Date,
   endDate: Date,
-  additionalWhere?: SQL
+  additionalWhere?: SQL,
 ) {
   const baseWhere = and(
     eq(tasks.userId, userId),
-    eq(courses.userId, userId) // Double verification via join
+    eq(courses.userId, userId), // Double verification via join
   );
-  
-  const whereClause = additionalWhere 
+
+  const whereClause = additionalWhere
     ? and(baseWhere, additionalWhere)
     : baseWhere;
-    
+
   return db
     .select()
     .from(tasks)

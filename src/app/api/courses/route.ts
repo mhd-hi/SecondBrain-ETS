@@ -1,29 +1,29 @@
-import { withAuthSimple } from '@/lib/auth/api';
-import { getUserCourses, createUserCourse } from '@/lib/auth/db';
-import { generateRandomCourseColor } from '@/lib/utils';
 import { NextResponse } from 'next/server';
+import { withAuthSimple } from '@/lib/auth/api';
+import { createUserCourse, getUserCourses } from '@/lib/auth/db';
+import { generateRandomCourseColor } from '@/lib/utils';
 
 export const GET = withAuthSimple(
   async (request, user) => {
     // Use secure query function that automatically filters by user
     const coursesWithTasks = await getUserCourses(user.id);
     return NextResponse.json(coursesWithTasks);
-  }
+  },
 );
 
 export const POST = withAuthSimple(
   async (request, user) => {
     const data = await request.json() as { code: string; name: string };
-    
+
     if (!data.code || !data.name) {
       return NextResponse.json(
         { error: 'code and name are required', code: 'MISSING_FIELDS' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { code, name } = data;
-    
+
     // Check if course already exists for this user
     const existingCourses = await getUserCourses(user.id);
     const existingCourse = existingCourses.find(course => course.code === code);
@@ -42,5 +42,5 @@ export const POST = withAuthSimple(
     });
 
     return NextResponse.json(course);
-  }
+  },
 );

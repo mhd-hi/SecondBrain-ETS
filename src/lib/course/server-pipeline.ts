@@ -3,15 +3,15 @@
  * Simplified and more flexible pipeline for server-side course processing
  */
 
-import type { 
-  ProcessingStep, 
-  PipelineOptions, 
-  PipelineResult, 
-  DataSource, 
-  SourceResult,
-  StepStatus 
-} from '@/types/pipeline';
 import type { CourseAIResponse } from '@/types/api';
+import type {
+  DataSource,
+  PipelineOptions,
+  PipelineResult,
+  ProcessingStep,
+  SourceResult,
+  StepStatus,
+} from '@/types/pipeline';
 
 // Server-side data source implementations
 export class PlanetsDataSource implements DataSource {
@@ -21,15 +21,15 @@ export class PlanetsDataSource implements DataSource {
   async fetch(courseCode: string, term = '20252'): Promise<SourceResult> {
     const { fetchPlanETSContent } = await import('@/lib/planets');
     const result = await fetchPlanETSContent(courseCode, term);
-    
+
     if (!result.html || result.html.trim().length < 100) {
       throw new Error('Course data appears to be empty or invalid');
     }
-    
+
     return {
       data: result.html,
       logs: result.logs,
-      metadata: { source: 'planets', courseCode, term }
+      metadata: { source: 'planets', courseCode, term },
     };
   }
 }
@@ -38,7 +38,7 @@ export class OpenAIProcessor {
   async process(combinedData: string, courseCode: string): Promise<CourseAIResponse> {
     const { parseContentWithAI } = await import('@/lib/openai');
     const result = await parseContentWithAI(combinedData, courseCode);
-    
+
     return {
       courseCode,
       term: '20252',
@@ -48,8 +48,8 @@ export class OpenAIProcessor {
         title: task.title,
         notes: task.notes,
         estimatedEffort: task.estimatedEffort,
-        subtasks: task.subtasks
-      }))
+        subtasks: task.subtasks,
+      })),
     };
   }
 }
@@ -78,7 +78,7 @@ export class ServerCourseProcessingPipeline {
     return {
       id,
       name,
-      status: 'pending'
+      status: 'pending',
     };
   }
 
@@ -93,7 +93,7 @@ export class ServerCourseProcessingPipeline {
   }
 
   private log(message: string) {
-    console.log(message);
+    console.log(message); // eslint-disable-line no-console
     this.logs.push(`[${new Date().toISOString()}] ${message}`);
   }
 
@@ -107,11 +107,11 @@ export class ServerCourseProcessingPipeline {
     logs: string[];
   }> {
     const { courseCode, term = '20252' } = options;
-    
+
     // Initialize step status
     const stepStatus: StepStatus = {
       planets: { id: 'planets', name: 'PlanETS Data Fetch', status: 'pending' },
-      openai: { id: 'openai', name: 'AI Content Parsing', status: 'pending' }
+      openai: { id: 'openai', name: 'AI Content Parsing', status: 'pending' },
     };
 
     const logs: string[] = [];
@@ -120,49 +120,49 @@ export class ServerCourseProcessingPipeline {
 
     // Step 1: Fetch from planets
     stepStatus.planets = { ...stepStatus.planets, status: 'loading', startTime: new Date() };
-    
+
     try {
       const source = new PlanetsDataSource();
       const result = await source.fetch(courseCode, term);
       htmlData = result.data;
       logs.push(...result.logs);
-      
+
       stepStatus.planets = {
         ...stepStatus.planets,
         status: 'success',
         endTime: new Date(),
-        data: { contentLength: htmlData.length }
+        data: { contentLength: htmlData.length },
       };
     } catch (error) {
       stepStatus.planets = {
         ...stepStatus.planets,
         status: 'error',
         endTime: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
-      
+
       return { stepStatus, logs };
     }
 
     // Step 2: Process with OpenAI (only if planets succeeded)
     if (htmlData) {
       stepStatus.openai = { ...stepStatus.openai, status: 'loading', startTime: new Date() };
-      
+
       try {
         courseData = await this.processor.process(htmlData, courseCode);
-        
+
         stepStatus.openai = {
           ...stepStatus.openai,
           status: 'success',
           endTime: new Date(),
-          data: { tasksCount: courseData.tasks.length }
+          data: { tasksCount: courseData.tasks.length },
         };
       } catch (error) {
         stepStatus.openai = {
           ...stepStatus.openai,
           status: 'error',
           endTime: new Date(),
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         };
       }
     }
@@ -175,7 +175,7 @@ export class ServerCourseProcessingPipeline {
    */
   async process(options: PipelineOptions): Promise<PipelineResult> {
     const { courseCode, term = '20252' } = options;
-    
+
     this.steps = [];
     this.logs = [];
 
@@ -190,33 +190,33 @@ export class ServerCourseProcessingPipeline {
     try {
       // Fetch data from all sources
       const sourceResults: SourceResult[] = [];
-      
+
       for (const source of this.dataSources) {
         const stepId = `source_${source.name}`;
         this.updateStep(stepId, { status: 'loading', startTime: new Date() });
-        
+
         try {
           this.log(`Fetching data from ${source.description}...`);
           const result = await source.fetch(courseCode, term);
-          
+
           sourceResults.push(result);
           this.logs.push(...result.logs);
-          
-          this.updateStep(stepId, { 
-            status: 'success', 
+
+          this.updateStep(stepId, {
+            status: 'success',
             endTime: new Date(),
-            data: { metadata: result.metadata }
+            data: { metadata: result.metadata },
           });
-          
+
           this.log(`Successfully fetched data from ${source.description}`);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          this.updateStep(stepId, { 
-            status: 'error', 
+          this.updateStep(stepId, {
+            status: 'error',
             endTime: new Date(),
-            error: errorMessage 
+            error: errorMessage,
           });
-          
+
           this.log(`Failed to fetch data from ${source.description}: ${errorMessage}`);
           throw error;
         }
@@ -227,36 +227,35 @@ export class ServerCourseProcessingPipeline {
       this.log(`Combined data from ${sourceResults.length} source(s)`);
 
       this.updateStep('ai_processing', { status: 'loading', startTime: new Date() });
-      
+
       try {
         this.log('Starting AI Content Parsing...');
         const aiResult = await this.processor.process(combinedData, courseCode);
-        
-        this.updateStep('ai_processing', { 
-          status: 'success', 
+
+        this.updateStep('ai_processing', {
+          status: 'success',
           endTime: new Date(),
-          data: { tasksCount: aiResult.tasks.length }
+          data: { tasksCount: aiResult.tasks.length },
         });
-        
+
         this.log(`AI processing completed successfully. Generated ${aiResult.tasks.length} tasks`);
-        
+
         return {
           courseData: aiResult,
           steps: this.steps,
-          logs: this.logs
+          logs: this.logs,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        this.updateStep('ai_processing', { 
-          status: 'error', 
+        this.updateStep('ai_processing', {
+          status: 'error',
           endTime: new Date(),
-          error: errorMessage 
+          error: errorMessage,
         });
-        
+
         this.log(`AI processing failed: ${errorMessage}`);
         throw error;
       }
-
     } catch (error) {
       this.log(`Pipeline failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       throw error;

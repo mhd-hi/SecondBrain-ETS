@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
-interface ErrorStateProps {
+type ErrorStateProps = {
   title?: string;
   message: string;
   showBackButton?: boolean;
-}
+};
 
-export function ErrorState({ 
-  title = "Error", 
-  message, 
-  showBackButton = true 
+export function ErrorState({
+  title = 'Error',
+  message,
+  showBackButton = true,
 }: ErrorStateProps) {
   const router = useRouter();
 
@@ -25,7 +25,7 @@ export function ErrorState({
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
           >
             Go Back
           </Button>
@@ -33,4 +33,4 @@ export function ErrorState({
       </div>
     </div>
   );
-} 
+}

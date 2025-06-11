@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
 import type { PipelineStepRequest, PipelineStepResult } from '@/types/pipeline';
-import { PlanetsDataSource, OpenAIProcessor } from '@/lib/course/server-pipeline';
+import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
+import { OpenAIProcessor, PlanetsDataSource } from '@/lib/course/server-pipeline';
 import { assertValidCourseCode } from '@/lib/course/util';
 
 // Endpoint for step-by-step course processing
@@ -13,16 +13,16 @@ export const POST = withAuthSimple(
       if (!courseCode) {
         return NextResponse.json(
           { error: 'Missing required parameter: courseCode' },
-          { status: 400 }
+          { status: 400 },
         );
-      }    // Validate course code format
+      } // Validate course code format
       let cleanCode: string;
       try {
         cleanCode = assertValidCourseCode(courseCode, 'Invalid course code format');
       } catch (error) {
         return NextResponse.json(
           { error: error instanceof Error ? error.message : 'Invalid course code format' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -49,13 +49,12 @@ export const POST = withAuthSimple(
                 contentLength: result.data.length,
                 source: 'planets',
                 courseCode: cleanCode,
-                term
-              }
+                term,
+              },
             },
             logs: result.logs,
-            data: result.data
+            data: result.data,
           } as PipelineStepResult);
-
         } catch (error) {
           const errorMessage = error instanceof Error
             ? `Failed to fetch course data: ${error.message}`
@@ -67,10 +66,10 @@ export const POST = withAuthSimple(
               name: 'PlanETS Data Fetch',
               status: 'error',
               error: errorMessage,
-              endTime: new Date().toISOString()
+              endTime: new Date().toISOString(),
             },
             logs: [errorMessage],
-            data: null
+            data: null,
           } as PipelineStepResult, { status: 500 });
         }
       }
@@ -79,7 +78,7 @@ export const POST = withAuthSimple(
         if (!htmlData) {
           return NextResponse.json(
             { error: 'Missing required parameter: htmlData for OpenAI processing' },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -87,10 +86,11 @@ export const POST = withAuthSimple(
           const startTime = new Date().toISOString();
           const aiProcessor = new OpenAIProcessor();
           const result = await aiProcessor.process(htmlData, cleanCode);
-          const endTime = new Date().toISOString(); const courseData = {
+          const endTime = new Date().toISOString();
+          const courseData = {
             courseCode: cleanCode,
             term,
-            tasks: result.tasks
+            tasks: result.tasks,
           };
 
           return NextResponse.json({
@@ -100,12 +100,11 @@ export const POST = withAuthSimple(
               status: 'success',
               startTime,
               endTime,
-              data: { tasksCount: result.tasks.length }
+              data: { tasksCount: result.tasks.length },
             },
             logs: ['AI processing completed successfully'],
-            data: courseData
+            data: courseData,
           } as PipelineStepResult);
-
         } catch (error) {
           const errorMessage = error instanceof Error
             ? `Failed to parse course content with OpenAI: ${error.message}`
@@ -117,28 +116,27 @@ export const POST = withAuthSimple(
               name: 'AI Content Parsing',
               status: 'error',
               error: errorMessage,
-              endTime: new Date().toISOString()
+              endTime: new Date().toISOString(),
             },
             logs: [errorMessage],
-            data: null
+            data: null,
           } as PipelineStepResult, { status: 500 });
         }
       }
 
       return NextResponse.json(
         { error: 'Invalid step parameter. Must be "planets" or "openai"' },
-        { status: 400 }
+        { status: 400 },
       );
-
     } catch (error) {
       console.error('Error in course pipeline:', error);
       return NextResponse.json(
         {
           error: error instanceof Error ? error.message : 'Unknown error occurred',
-          logs: []
+          logs: [],
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
-  }
+  },
 );

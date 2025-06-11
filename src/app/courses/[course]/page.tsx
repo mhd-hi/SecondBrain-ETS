@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { use } from 'react';
+import type { Task } from '@/types/task';
+import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { type Task, TaskStatus } from '@/types/task';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from "next/navigation";
-import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { DraftTasksBanner } from '@/components/DraftTasksBanner';
 import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
+import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { SearchBar } from '@/components/shared/SearchBar';
-import { Plus } from 'lucide-react';
-import { api } from "@/lib/api/util";
-import { ErrorHandlers } from '@/lib/error/util';
-import { getCurrentSession, getSessionWeeks, batchAcceptTasks, getOverdueTasks, batchUpdateTaskStatus } from '@/lib/task/util';
-import { useCourses } from '@/hooks/use-courses';
-import { useCourse } from '@/hooks/use-course';
 import { TaskCard } from '@/components/shared/TaskCard';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCourse } from '@/hooks/use-course';
+import { useCourses } from '@/hooks/use-courses';
+import { api } from '@/lib/api/util';
+import { ErrorHandlers } from '@/lib/error/util';
+import { batchAcceptTasks, batchUpdateTaskStatus, getCurrentSession, getOverdueTasks, getSessionWeeks } from '@/lib/task/util';
+import { TaskStatus } from '@/types/task';
 
-interface CoursePageProps {
+type CoursePageProps = {
   params: Promise<{
     course: string;
   }>;
-}
+};
 
 export default function CoursePage({ params }: CoursePageProps) {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
 
     const query = searchQuery.toLowerCase();
-    return tasks.filter(task => {
+    return tasks.filter((task) => {
       // Search in task title
       if (task.title.toLowerCase().includes(query)) {
         return true;
@@ -63,8 +63,8 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       // Search in subtask titles
       if (task.subtasks?.some(subtask =>
-        subtask.title.toLowerCase().includes(query) ||
-        subtask.notes?.toLowerCase().includes(query)
+        subtask.title.toLowerCase().includes(query)
+        || subtask.notes?.toLowerCase().includes(query),
       )) {
         return true;
       }
@@ -87,8 +87,8 @@ export default function CoursePage({ params }: CoursePageProps) {
         prevTasks.map(task =>
           task.id === taskId
             ? { ...task, ...updates }
-            : task
-        )
+            : task,
+        ),
       );
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to update task');
@@ -99,13 +99,15 @@ export default function CoursePage({ params }: CoursePageProps) {
     try {
       // Find the current task and its subtasks
       const currentTask = tasks.find(task => task.id === taskId);
-      if (!currentTask?.subtasks) return;
+      if (!currentTask?.subtasks) {
+        return;
+      }
 
       // Update the subtask status
       const updatedSubtasks = currentTask.subtasks.map(subtask =>
         subtask.id === subtaskId
           ? { ...subtask, status: newStatus }
-          : subtask
+          : subtask,
       );
 
       // Update the task with new subtasks
@@ -116,8 +118,8 @@ export default function CoursePage({ params }: CoursePageProps) {
         prevTasks.map(task =>
           task.id === taskId
             ? { ...task, subtasks: updatedSubtasks }
-            : task
-        )
+            : task,
+        ),
       );
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to update subtask status');
@@ -137,17 +139,6 @@ export default function CoursePage({ params }: CoursePageProps) {
   const draftTasks = filteredTasks.filter(task => task.status === TaskStatus.DRAFT);
 
   const overdueTasks = getOverdueTasks(filteredTasks);
-
-  // Debug logging for overdue tasks
-  console.log('🔍 Debug - Total tasks:', filteredTasks.length);
-  console.log('🔍 Debug - Overdue tasks found:', overdueTasks.length);
-  if (overdueTasks.length > 0) {
-    console.log('🔍 Debug - Overdue tasks:', overdueTasks.map(t => ({
-      title: t.title,
-      dueDate: t.dueDate,
-      status: t.status
-    })));
-  }
 
   // Handlers for accept all and delete all DRAFT tasks
   const handleAcceptAllDrafts = async () => {
@@ -173,7 +164,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       await api.post('/api/tasks/batch', {
         action: 'delete',
-        taskIds
+        taskIds,
       });
 
       toast.success('Draft tasks deleted', {
@@ -224,7 +215,7 @@ export default function CoursePage({ params }: CoursePageProps) {
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => router.push("/")}
+            onClick={() => router.push('/')}
           >
             Go Back
           </Button>
@@ -239,7 +230,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/4" />
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-32 w-full" />
             ))}
           </div>
@@ -256,7 +247,7 @@ export default function CoursePage({ params }: CoursePageProps) {
             <CourseSelector
               courses={courses}
               selectedCourse={course}
-              onCourseSelect={(courseId) => router.push(`/courses/${courseId}`)}
+              onCourseSelect={courseId => router.push(`/courses/${courseId}`)}
             />
           )}
         </div>
@@ -266,12 +257,12 @@ export default function CoursePage({ params }: CoursePageProps) {
             courseCode={course.code}
             onTaskAdded={fetchCourse}
             courses={courses}
-            trigger={
+            trigger={(
               <Button>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Task
               </Button>
-            }
+            )}
           />
         )}
       </div>
@@ -296,48 +287,59 @@ export default function CoursePage({ params }: CoursePageProps) {
         isLoading={isLoading}
       />
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <div className="text-center text-muted-foreground mb-4">
-            Loading tasks...
+      {isLoading
+        ? (
+          <div className="space-y-4">
+            <div className="text-center text-muted-foreground mb-4">
+              Loading tasks...
+            </div>
+            <div className="grid gap-4">
+              {[1, 2, 3].map(i => (
+                <Skeleton key={i} className="h-24" />
+              ))}
+            </div>
           </div>
-          <div className="grid gap-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24" />
-            ))}
-          </div>
-        </div>
-      ) : filteredTasks.length > 0 ? (
-        <div className="space-y-8 will-change-scroll">
-          {Object.entries(tasksByWeek)
-            .sort(([a], [b]) => Number(a) - Number(b))
-            .map(([week, weekTasks]) => (
-              <div key={week} className="space-y-4">
-                <h3 className="text-lg font-semibold mb-3">Week {week}</h3>
-                <div className="space-y-3">
-                  {weekTasks.map((task) => (
-                    <div key={task.id} className="transform-gpu">
-                      <TaskCard
-                        task={task}
-                        onDeleteTask={handleDeleteTask}
-                        onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
-                        onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
-                      />
+        )
+        : filteredTasks.length > 0
+          ? (
+            <div className="space-y-8 will-change-scroll">
+              {Object.entries(tasksByWeek)
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([week, weekTasks]) => (
+                  <div key={week} className="space-y-4">
+                    <h3 className="text-lg font-semibold mb-3">
+                      Week
+                      {week}
+                    </h3>
+                    <div className="space-y-3">
+                      {weekTasks.map(task => (
+                        <div key={task.id} className="transform-gpu">
+                          <TaskCard
+                            task={task}
+                            onDeleteTask={handleDeleteTask}
+                            onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
+                            onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
+            </div>
+          )
+          : searchQuery.trim()
+            ? (
+              <div className="text-center text-muted-foreground">
+                No tasks found matching &quot;
+                {searchQuery}
+                &quot;. Try a different search term.
               </div>
-            ))}
-        </div>
-      ) : searchQuery.trim() ? (
-        <div className="text-center text-muted-foreground">
-          No tasks found matching &quot;{searchQuery}&quot;. Try a different search term.
-        </div>
-      ) : (
-        <div className="text-center text-muted-foreground">
-          No tasks found. Add a task to get started.
-        </div>
-      )}
+            )
+            : (
+              <div className="text-center text-muted-foreground">
+                No tasks found. Add a task to get started.
+              </div>
+            )}
     </div>
   );
 }

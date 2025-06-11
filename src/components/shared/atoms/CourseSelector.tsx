@@ -1,33 +1,33 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import type { Course } from "@/types/course";
-import { TaskStatus } from "@/types/task";
+import type { Course } from '@/types/course';
+import { ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { TaskStatus } from '@/types/task';
 
-interface CourseSelectorProps {
+type CourseSelectorProps = {
   courses: Course[];
   selectedCourse?: Course;
   onCourseSelect?: (courseId: string) => void;
   className?: string;
   buttonClassName?: string;
   dropdownWidth?: string;
-}
+};
 
 export function CourseSelector({
   courses,
   selectedCourse,
   onCourseSelect,
-  className = "",
-  buttonClassName = "",
-  dropdownWidth = "300px",
+  className = '',
+  buttonClassName = '',
+  dropdownWidth = '300px',
 }: CourseSelectorProps) {
   const router = useRouter();
 
@@ -43,11 +43,11 @@ export function CourseSelector({
     <div className={className}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className={`h-12 text-lg font-bold justify-between ${buttonClassName}`}
           >
-            {selectedCourse?.code ?? "Select Course"}
+            {selectedCourse?.code ?? 'Select Course'}
             <ChevronDown className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
@@ -63,7 +63,9 @@ export function CourseSelector({
                 <span className="text-lg font-medium">{course.code}</span>
                 {draftTasks > 0 && (
                   <span className="text-sm text-destructive">
-                    {draftTasks} draft
+                    {draftTasks}
+                    {' '}
+                    draft
                   </span>
                 )}
               </DropdownMenuItem>
@@ -73,4 +75,4 @@ export function CourseSelector({
       </DropdownMenu>
     </div>
   );
-} 
+}

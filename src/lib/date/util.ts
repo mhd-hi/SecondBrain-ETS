@@ -1,7 +1,9 @@
 export const formatDateToInput = (date: Date | string | null | undefined): string => {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
   const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) {
+  if (Number.isNaN(dateObj.getTime())) {
     console.error('formatDateToInput: Invalid Date object created from:', date);
     return '';
   }
@@ -15,10 +17,14 @@ export const formatDateToInput = (date: Date | string | null | undefined): strin
  * Formats a date for display in a short format (e.g., "Jan 15")
  */
 export const formatDate = (date: Date | null | undefined): string => {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
   // Explicitly convert to Date object if it's not already
   const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) return ''; // Return empty string if date is invalid
+  if (Number.isNaN(dateObj.getTime())) {
+    return '';
+  } // Return empty string if date is invalid
   const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
   return dateObj.toLocaleDateString(undefined, options);
 };
@@ -31,8 +37,8 @@ export function formatRelativeDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   // Check if the date is valid
-  if (!dateObj || isNaN(dateObj.getTime())) {
-    return "Invalid date";
+  if (!dateObj || Number.isNaN(dateObj.getTime())) {
+    return 'Invalid date';
   }
 
   const now = new Date();
@@ -47,23 +53,29 @@ export function formatRelativeDate(date: Date | string): string {
 
     // Less than 1 day overdue
     if (overdueDays < 1) {
-      return "Overdue";
+      return 'Overdue';
     }
 
     // Less than 7 days overdue
     if (overdueDays < 7) {
-      if (overdueDays === 1) return "Overdue by 1 day";
+      if (overdueDays === 1) {
+        return 'Overdue by 1 day';
+      }
       return `Overdue by ${overdueDays} days`;
     }
 
     // Less than 30 days overdue (show in weeks)
     if (overdueDays < 30) {
-      if (overdueWeeks === 1) return "Overdue by 1 week";
+      if (overdueWeeks === 1) {
+        return 'Overdue by 1 week';
+      }
       return `Overdue by ${overdueWeeks} weeks`;
     }
 
     // 30+ days overdue (show in months)
-    if (overdueMonths === 1) return "Overdue by 1 month";
+    if (overdueMonths === 1) {
+      return 'Overdue by 1 month';
+    }
     return `Overdue by ${overdueMonths} months`;
   }
 
@@ -73,7 +85,7 @@ export function formatRelativeDate(date: Date | string): string {
 
   // Less than 1 day (today)
   if (diffDays < 1) {
-    return "Due today";
+    return 'Due today';
   }
 
   // Tomorrow (next day)
@@ -84,23 +96,29 @@ export function formatRelativeDate(date: Date | string): string {
   dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
 
   if (dateObj >= tomorrow && dateObj < dayAfterTomorrow) {
-    return "Due tomorrow";
+    return 'Due tomorrow';
   }
 
   // Less than 7 days
   if (diffDays < 7) {
-    if (diffDays === 1) return "Due in 1 day";
+    if (diffDays === 1) {
+      return 'Due in 1 day';
+    }
     return `Due in ${diffDays} days`;
   }
 
   // Less than 30 days (show in weeks)
   if (diffDays < 30) {
-    if (diffWeeks === 1) return "Due in 1 week";
+    if (diffWeeks === 1) {
+      return 'Due in 1 week';
+    }
     return `Due in ${diffWeeks} weeks`;
   }
 
   // 30+ days (show in months)
-  if (diffMonths === 1) return "Due in 1 month";
+  if (diffMonths === 1) {
+    return 'Due in 1 month';
+  }
   return `Due in ${diffMonths} months`;
 }
 
@@ -112,8 +130,8 @@ export function formatTooltipDate(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
 
   // Check if the date is valid
-  if (!dateObj || isNaN(dateObj.getTime())) {
-    return "Invalid date";
+  if (!dateObj || Number.isNaN(dateObj.getTime())) {
+    return 'Invalid date';
   }
 
   return dateObj.toLocaleDateString('en-US', {
@@ -123,7 +141,7 @@ export function formatTooltipDate(date: Date | string): string {
     day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 }
 
@@ -153,7 +171,9 @@ export const getWeekDates = (weekOffset: number) => {
 
 // Format week range for display
 export const formatWeekRange = (dates: Date[]) => {
-  if (dates.length === 0) return '';
+  if (dates.length === 0) {
+    return '';
+  }
   const start = dates[0]!;
   const end = dates[dates.length - 1]!;
   const formatDate = (date: Date) => {
@@ -165,30 +185,30 @@ export const formatWeekRange = (dates: Date[]) => {
 export const formatDueDate = (date: Date | string) => {
   // Ensure we have a proper Date object
   const dateObj = date instanceof Date ? date : new Date(date);
-  
-  if (isNaN(dateObj.getTime())) {
+
+  if (Number.isNaN(dateObj.getTime())) {
     console.error('formatDueDate: Invalid Date object created from:', date);
-    return "Invalid date";
+    return 'Invalid date';
   }
 
-    const now = new Date();
-    const diffInMs = dateObj.getTime() - now.getTime();
-    const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+  const now = new Date();
+  const diffInMs = dateObj.getTime() - now.getTime();
+  const diffInDays = Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
 
-    if (diffInDays < 0) {
-      const overdueDays = Math.abs(diffInDays);
-      if (overdueDays === 1) {
-        return "Overdue by 1 day";
-      } else if (overdueDays < 1) {
-        return "Overdue";
-      } else {
-        return `Overdue by ${overdueDays} days`;
-      }
-    } else if (diffInDays === 0) {
-      return "Due today";
-    } else if (diffInDays === 1) {
-      return "Due tomorrow";
+  if (diffInDays < 0) {
+    const overdueDays = Math.abs(diffInDays);
+    if (overdueDays === 1) {
+      return 'Overdue by 1 day';
+    } else if (overdueDays < 1) {
+      return 'Overdue';
     } else {
-      return `Due in ${diffInDays} days`;
+      return `Overdue by ${overdueDays} days`;
     }
+  } else if (diffInDays === 0) {
+    return 'Due today';
+  } else if (diffInDays === 1) {
+    return 'Due tomorrow';
+  } else {
+    return `Due in ${diffInDays} days`;
+  }
 };

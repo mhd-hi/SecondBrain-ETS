@@ -1,27 +1,18 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { PomodoroDialog } from '@/components/Boards/FocusSession/PomodoroDialog';
+import type { PomodoroContextType } from './pomodoro-types';
 import type { Task } from '@/types/task';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { PomodoroDialog } from '@/components/Boards/FocusSession/PomodoroDialog';
+import { PomodoroContext } from './pomodoro-types';
 
 const PREFFERED_POMODORO_DURATION = 25;
 
-interface PomodoroContextType {
-  startPomodoro: (task: Task | null, duration?: number) => void;
-  isDialogOpen: boolean;
-  currentTask: Task | null;
-  streak: number;
-  duration: number;
-  setDuration: (duration: number) => void;
-}
-
-const PomodoroContext = createContext<PomodoroContextType | undefined>(undefined);
-
-interface PomodoroProviderProps {
+type PomodoroProviderProps = {
   children: ReactNode;
-}
+};
 
 export function PomodoroProvider({ children }: PomodoroProviderProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -45,14 +36,16 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
 
     void fetchStreak();
   }, []);
-  const startPomodoro = (task: Task | null, sessionDuration?: number) => {
+
+  const startPomodoro = useCallback((task: Task | null, sessionDuration?: number) => {
     setCurrentTask(task);
     if (sessionDuration) {
       setDuration(sessionDuration);
     }
     setIsDialogOpen(true);
-  };
-  const handlePomodoroComplete = async (durationHours: number) => {
+  }, []);
+
+  const handlePomodoroComplete = useCallback(async (durationHours: number) => {
     try {
       if (currentTask) {
         // If there's a task, update it
@@ -105,42 +98,34 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
       console.error('Failed to complete Pomodoro:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to complete Pomodoro');
     }
-  };
+  }, [currentTask]);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setIsDialogOpen(false);
     setCurrentTask(null);
-  };
+  }, []);
 
-  const value: PomodoroContextType = {
+  const value: PomodoroContextType = useMemo(() => ({
     startPomodoro,
     isDialogOpen,
     currentTask,
     streak,
     duration,
     setDuration,
-  };
+  }), [startPomodoro, isDialogOpen, currentTask, streak, duration, setDuration]);
 
   return (
-    <PomodoroContext.Provider value={value}>
+    <PomodoroContext value={value}>
       {children}
       <PomodoroDialog
         isOpen={isDialogOpen}
         onClose={handleDialogClose}
-        taskTitle={currentTask?.title ?? ""}
+        taskTitle={currentTask?.title ?? ''}
         streak={streak}
         duration={duration}
         setDuration={setDuration}
         onComplete={handlePomodoroComplete}
       />
-    </PomodoroContext.Provider>
+    </PomodoroContext>
   );
-}
-
-export function usePomodoro() {
-  const context = useContext(PomodoroContext);
-  if (context === undefined) {
-    throw new Error('usePomodoro must be used within a PomodoroProvider');
-  }
-  return context;
 }

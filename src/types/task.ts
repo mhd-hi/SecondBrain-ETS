@@ -1,23 +1,23 @@
-import type { Course } from "./course";
+import type { Course } from './course';
 
 export enum TaskStatus {
-  DRAFT = "DRAFT",
-  TODO = "TODO",
-  IN_PROGRESS = "IN_PROGRESS",
-  COMPLETED = "COMPLETED"
+  DRAFT = 'DRAFT',
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
 }
 
-export type TaskType = "theorie" | "pratique" | "exam" | "homework" | "lab";
+export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
 
-export interface Subtask {
+export type Subtask = {
   id: string;
   title: string;
   status: TaskStatus;
   notes?: string;
   estimatedEffort?: number;
-}
+};
 
-export interface Task {
+export type Task = {
   id: string;
   courseId: string;
   title: string;
@@ -32,4 +32,4 @@ export interface Task {
   updatedAt: Date;
   dueDate: Date;
   course?: Course;
-}
+};
