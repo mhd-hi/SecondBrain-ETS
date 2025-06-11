@@ -1,6 +1,6 @@
 # Fixes
 - fix middleware signin page
-- Fix this : https://semgrep.dev/orgs/my_org_   mohamed/findings?tab=open&primary=true&
+- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&
 last_opened=All%20time
 - Add total effort in TaskCard
 - CHange favicon to a capibara, add it to logo too
