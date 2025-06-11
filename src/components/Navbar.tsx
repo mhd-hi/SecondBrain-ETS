@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Card } from './ui/card';
+import { Skeleton } from './ui/skeleton';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -27,7 +28,17 @@ export default function Navbar() {
     <Card className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
         <Button variant="ghost" asChild className="font-bold text-xl">
-          <Link href="/">Second Brain</Link>
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/assets/pochita-bread.png"
+              alt="Favicon"
+              width={39}
+              height={39}
+              priority={true}
+              className="object-contain"
+            />
+            Second Brain
+          </Link>
         </Button>
 
         <NavigationMenu>
@@ -61,7 +72,7 @@ export default function Navbar() {
         <div className="flex items-center gap-2">
           {status === 'loading'
             ? (
-              <div className="w-8 h-8 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+              <Skeleton className="w-8 h-8 rounded-full" />
             )
             : session
               ? (
