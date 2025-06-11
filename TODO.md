@@ -1,6 +1,10 @@
 # Fixes
 - fix middleware signin page
-
+- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&
+last_opened=All%20time
+- Add total effort in TaskCard
+- rEDUCE the Start Pomodoro button width to only take the size of the text, not full size
+- CHange favicon to a capibara, add it to logo too
 # Enhancement
 Progress bar:
 - Add semester progress Board and dashboard page (progressbar for all courses) 

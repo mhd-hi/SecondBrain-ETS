@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Square, Plus, Coffee, Briefcase } from "lucide-react";
+import { DurationSelector } from "@/components/shared/atoms/DurationSelector";
 
 type SessionType = 'work' | 'shortBreak' | 'longBreak';
 
@@ -13,6 +14,7 @@ interface PomodoroDialogProps {
     taskTitle: string;
     streak: number;
     duration: number; // Duration in minutes
+    setDuration: (duration: number) => void;
     onComplete: (durationHours: number) => void;
 }
 
@@ -22,6 +24,7 @@ export const PomodoroDialog = ({
     taskTitle,
     streak,
     duration,
+    setDuration,
     onComplete
 }: PomodoroDialogProps) => {
     const [timeLeftSec, setTimeLeftSec] = useState(duration * 60);
@@ -156,11 +159,6 @@ export const PomodoroDialog = ({
             return () => clearTimeout(timer);
         }
     }, [timeLeftSec, isRunning, totalTimeSec, sessionType, onComplete, playCompletionSound, switchToNextSession]);
-    const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
 
     const handlePlayPause = () => {
         setIsRunning(!isRunning);
@@ -178,11 +176,19 @@ export const PomodoroDialog = ({
             onComplete(durationHours);
             onClose();
         }
-    };
-
-    const handleAddFiveMinutes = () => {
+    }; const handleAddFiveMinutes = () => {
         setTimeLeftSec((prev) => prev + (5 * 60));
         setTotalTimeSec((prev) => prev + (5 * 60));
+    };
+
+    const handleDurationChange = (newDuration: number) => {
+        setDuration(newDuration);
+        // If we're in a work session and not running, update the timer
+        if (sessionType === 'work' && !isRunning) {
+            const newDurationInSeconds = newDuration * 60;
+            setTimeLeftSec(newDurationInSeconds);
+            setTotalTimeSec(newDurationInSeconds);
+        }
     }; const getElapsedMinutes = () => {
         return Math.floor((totalTimeSec - timeLeftSec) / 60);
     };
@@ -217,14 +223,13 @@ export const PomodoroDialog = ({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        {sessionType === 'work' && <Briefcase className="h-5 w-5" />}
-                        {sessionType !== 'work' && <Coffee className="h-5 w-5" />}
-                        {sessionType === 'work' && 'Focus Session'}
-                        {sessionType === 'shortBreak' && 'Short Break'}
-                        {sessionType === 'longBreak' && 'Long Break'}
-                    </DialogTitle>
+                <DialogHeader>                    <DialogTitle className="flex items-center gap-2">
+                    {sessionType === 'work' && <Briefcase className="h-5 w-5" />}
+                    {sessionType !== 'work' && <Coffee className="h-5 w-5" />}
+                    {sessionType === 'work' && 'Focus Session'}
+                    {sessionType === 'shortBreak' && 'Short Break'}
+                    {sessionType === 'longBreak' && 'Long Break'}
+                </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6 py-4">
@@ -239,11 +244,27 @@ export const PomodoroDialog = ({
                             {sessionType === 'longBreak' && 'Long Break'}
                         </div>
                     </div>
-                    {/* Timer Display */}
                     <div className="text-center">
-                        <div className="text-6xl font-mono font-bold text-foreground mb-2">
-                            {formatTime(timeLeftSec)}
+                        <div className="mb-4">
+                            {sessionType === 'work' && (isRunning || timeLeftSec < totalTimeSec) ? (
+                                <div className="text-4xl font-mono font-bold text-foreground h-16 flex items-center justify-center">
+                                    {Math.floor(timeLeftSec / 60).toString().padStart(2, '0')}:
+                                    {(timeLeftSec % 60).toString().padStart(2, '0')}
+                                </div>
+                            ) : sessionType === 'work' && !isRunning && timeLeftSec === totalTimeSec ? (
+                                <DurationSelector
+                                    duration={duration}
+                                    onDurationChange={handleDurationChange}
+                                    variant="large"
+                                />
+                            ) : sessionType !== 'work' ? (
+                                <div className="text-4xl font-mono font-bold text-foreground h-16 flex items-center justify-center">
+                                    {Math.floor(timeLeftSec / 60).toString().padStart(2, '0')}:
+                                    {(timeLeftSec % 60).toString().padStart(2, '0')}
+                                </div>
+                            ) : null}
                         </div>
+
                         {/* Progress bar */}
                         <div className="mx-4">
                             <div className="w-full bg-muted rounded-full h-2 mb-4">
@@ -254,14 +275,14 @@ export const PomodoroDialog = ({
                                 />
                             </div>
                         </div>
-                    </div>{/* Task Title - only show during work sessions */}
-                    {sessionType === 'work' && (
+                    </div>{/* Task Title - only show during work sessions and when there's a task */}
+                    {sessionType === 'work' && taskTitle && (
                         <div className="text-center">
                             <p className="text-lg font-medium text-foreground">
                                 {taskTitle}
                             </p>
                         </div>
-                    )}                {/* Break Activity Suggestions - only show during break sessions */}
+                    )}{/* Break Activity Suggestions - only show during break sessions */}
                     {sessionType !== 'work' && (
                         <div className="flex justify-center">
                             <div className="bg-muted/50 rounded-lg p-4 max-w-xs">

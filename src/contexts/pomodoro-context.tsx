@@ -6,10 +6,10 @@ import { PomodoroDialog } from '@/components/Boards/FocusSession/PomodoroDialog'
 import type { Task } from '@/types/task';
 import { toast } from 'sonner';
 
-const PREFFERED_POMODORO_DURATION = 52;
+const PREFFERED_POMODORO_DURATION = 25;
 
 interface PomodoroContextType {
-  startPomodoro: (task: Task, duration?: number) => void;
+  startPomodoro: (task: Task | null, duration?: number) => void;
   isDialogOpen: boolean;
   currentTask: Task | null;
   streak: number;
@@ -45,44 +45,62 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
 
     void fetchStreak();
   }, []);
-
-  const startPomodoro = (task: Task, sessionDuration?: number) => {
+  const startPomodoro = (task: Task | null, sessionDuration?: number) => {
     setCurrentTask(task);
     if (sessionDuration) {
       setDuration(sessionDuration);
     }
     setIsDialogOpen(true);
   };
-
   const handlePomodoroComplete = async (durationHours: number) => {
-    if (!currentTask) {
-      toast.error("No task selected");
-      return;
-    }
-
     try {
-      const response = await fetch('/api/pomodoro/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskId: currentTask.id,
-          durationHours,
-        }),
-      });
+      if (currentTask) {
+        // If there's a task, update it
+        const response = await fetch('/api/pomodoro/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            taskId: currentTask.id,
+            durationHours,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json() as { message?: string };
-        throw new Error(errorData.message ?? 'Failed to complete Pomodoro');
+        if (!response.ok) {
+          const errorData = await response.json() as { message?: string };
+          throw new Error(errorData.message ?? 'Failed to complete Pomodoro');
+        }
+
+        const result = await response.json() as {
+          success: boolean;
+          newStreakDays: number;
+          taskUpdated: { id: string; actualEffort: number };
+        };
+
+        setStreak(result.newStreakDays);
+        toast.success(`Pomodoro completed! ${(durationHours * 60).toFixed(0)} minutes added to task.`);
+      } else {
+        // Free focus session - just update streak
+        const response = await fetch('/api/pomodoro/complete-free', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            durationHours,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json() as { message?: string };
+          throw new Error(errorData.message ?? 'Failed to complete Pomodoro');
+        }
+
+        const result = await response.json() as {
+          success: boolean;
+          newStreakDays: number;
+        };
+
+        setStreak(result.newStreakDays);
+        toast.success(`Focus session completed! ${(durationHours * 60).toFixed(0)} minutes of focused work.`);
       }
-
-      const result = await response.json() as {
-        success: boolean;
-        newStreakDays: number;
-        taskUpdated: { id: string; actualEffort: number };
-      };
-      
-      setStreak(result.newStreakDays);
-      toast.success(`Pomodoro completed! ${(durationHours * 60).toFixed(0)} minutes added to task.`);
     } catch (error) {
       console.error('Failed to complete Pomodoro:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to complete Pomodoro');
@@ -112,6 +130,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
         taskTitle={currentTask?.title ?? ""}
         streak={streak}
         duration={duration}
+        setDuration={setDuration}
         onComplete={handlePomodoroComplete}
       />
     </PomodoroContext.Provider>

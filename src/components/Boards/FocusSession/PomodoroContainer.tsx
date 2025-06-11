@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Play } from "lucide-react";
 import { getCourseColor } from "@/lib/utils";
-import { toast } from "sonner";
 import { TaskStatus } from "@/types/task";
+import { DurationSelector } from "@/components/shared/atoms/DurationSelector";
 
 interface Course {
     id: string;
@@ -39,21 +39,7 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
     const { startPomodoro, duration, setDuration, streak } = usePomodoro();
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [selectedTask, setSelectedTask] = useState<TaskForPomodoro | null>(null);
-    const [courses, setCourses] = useState<Course[]>([]);
-    const [tasks, setTasks] = useState<TaskForPomodoro[]>([]);
-
-    // Predefined duration options - includes classic and alternative Pomodoro variants
-    const durationOptions = [
-        { label: "0.15 min", value: 0.15 }, // For testing
-        { label: "15 min", value: 15 },   // Short focused session
-        { label: "20 min", value: 20 },   // Alternative short session
-        { label: "25 min", value: 25 },   // Classic Pomodoro
-        { label: "30 min", value: 30 },   // Extended focus
-        { label: "45 min", value: 45 },   // Deep work session
-        { label: "52 min", value: 52 },   // 52/17 variant (popular alternative)
-        { label: "60 min", value: 60 },   // Full hour session
-        { label: "90 min", value: 90 },   // Ultradian rhythm session
-    ];
+    const [courses, setCourses] = useState<Course[]>([]); const [tasks, setTasks] = useState<TaskForPomodoro[]>([]);
 
     // Fetch courses on mount
     useEffect(() => {
@@ -67,7 +53,7 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
             } catch (error) {
                 console.error('Failed to fetch courses:', error);
             }
-        }; 
+        };
         void fetchCourses();
     }, []);
 
@@ -80,7 +66,7 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                     if (response.ok) {
                         const tasksData = await response.json() as TaskForPomodoro[];
                         setTasks(tasksData);
-                        
+
                         // Auto-select the most urgent task (most overdue IN_PROGRESS task)
                         if (tasksData.length > 0) {
                             // Sort tasks by urgency: overdue IN_PROGRESS first, then by due date
@@ -120,35 +106,27 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
             setTasks([]);
             setSelectedTask(null);
         }
-    }, [selectedCourse]);
-
-    const handleStartPomodoro = () => {
-        if (!selectedTask) {
-            toast.error("Please select a task to focus on");
-            return;
-        }        // Convert TaskForPomodoro to Task type expected by context
-        const task = {
-            ...selectedTask,
-            courseId: selectedTask.courseId,
-            week: 0, // default value
-            type: 'theorie' as const,
-            status: TaskStatus[selectedTask.status as keyof typeof TaskStatus],
-            actualEffort: 0,
-            subtasks: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            dueDate: new Date(selectedTask.dueDate),
-        };
-        startPomodoro(task, duration);
-    };
-
-    const formatTime = (minutes: number) => {
-        const mins = Math.floor(minutes);
-        const secs = Math.round((minutes - mins) * 60);
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    const getCourseBadgeProps = (course: Course) => {
+    }, [selectedCourse]); const handleStartPomodoro = () => {
+        if (selectedTask) {
+            // Convert TaskForPomodoro to Task type expected by context
+            const task = {
+                ...selectedTask,
+                courseId: selectedTask.courseId,
+                week: 0, // default value
+                type: 'theorie' as const,
+                status: TaskStatus[selectedTask.status as keyof typeof TaskStatus],
+                actualEffort: 0,
+                subtasks: [],
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                dueDate: new Date(selectedTask.dueDate),
+            };
+            startPomodoro(task, duration);
+        } else {
+            // Start pomodoro without a task (free focus session)
+            startPomodoro(null, duration);
+        }
+    }; const getCourseBadgeProps = (course: Course) => {
         const courseColor = getCourseColor(course);
         return {
             style: {
@@ -161,36 +139,17 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
 
     return (
         <div className="border rounded-lg bg-muted/30 p-4 min-h-[320px] flex flex-col">
-            <h2 className="text-xl font-semibold mb-3">Focus Session</h2>
+            <h2 className="text-xl font-semibold mb-3">Deep Work</h2>
             <div className="space-y-3 flex-1">
-                {/* Duration Selector */}
                 <div className="text-center space-y-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                className="text-3xl font-mono font-bold h-16 px-6 min-w-[120px] bg-transparent hover:bg-muted/20"
-                            >
-                                {formatTime(duration)}
-                                <ChevronDown className="h-5 w-5 ml-2" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            {durationOptions.map((option) => (
-                                <DropdownMenuItem
-                                    key={option.value}
-                                    onClick={() => setDuration(option.value)}
-                                    className={duration === option.value ? "bg-accent" : ""}
-                                >
-                                    {option.label}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-
-                {/* Course Dropdown */}
+                    <DurationSelector 
+                        duration={duration}
+                        onDurationChange={setDuration}
+                        variant="large"
+                    />
+                </div>{/* Course Dropdown */}
                 <div className="space-y-1">
+                    <label className="text-sm text-muted-foreground">Course</label>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -209,12 +168,20 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                                         <span className="truncate">{selectedCourse.name}</span>
                                     </div>
                                 ) : (
-                                    "Select a course"
+                                    "No course selected"
                                 )}
                                 <ChevronDown className="h-4 w-4 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full">
+                            <DropdownMenuItem
+                                onClick={() => {
+                                    setSelectedCourse(null);
+                                    setSelectedTask(null);
+                                }}
+                            >
+                                <span className="text-muted-foreground">No course</span>
+                            </DropdownMenuItem>
                             {courses.map((course) => (
                                 <DropdownMenuItem
                                     key={course.id}
@@ -234,9 +201,8 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-
-                {/* Task Dropdown */}
                 <div className="space-y-1">
+                    <label className="text-sm text-muted-foreground">Task</label>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -248,14 +214,23 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                                     <span className="truncate">
                                         {selectedTask.title} ({selectedTask.estimatedEffort}h)
                                     </span>
+                                ) : selectedCourse ? (
+                                    "No task selected"
                                 ) : (
-                                    selectedCourse ? "Select a task" : "Select a course first"
+                                    "Select a course first"
                                 )}
                                 <ChevronDown className="h-4 w-4 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-full">
-                            {tasks.length === 0 ? (
+                            {selectedCourse && (
+                                <DropdownMenuItem
+                                    onClick={() => setSelectedTask(null)}
+                                >
+                                    <span className="text-muted-foreground">No task</span>
+                                </DropdownMenuItem>
+                            )}
+                            {tasks.length === 0 && selectedCourse ? (
                                 <DropdownMenuItem disabled>
                                     No tasks available
                                 </DropdownMenuItem>
@@ -273,17 +248,14 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                             )}
                         </DropdownMenuContent>
                     </DropdownMenu>
-                </div>
-
-                {/* Start Button */}
+                </div>                {/* Start Button */}
                 <Button
                     onClick={handleStartPomodoro}
                     className="w-full mb-2 bg-violet-500 hover:bg-violet-600 text-violet-100"
                     size="lg"
-                    disabled={!selectedTask}
                 >
                     <Play className="h-5 w-5 mr-2" />
-                    Start Pomodoro
+                    {selectedTask ? "Start Pomodoro" : "Start Focus Session"}
                 </Button>
 
                 {/* Stats */}
@@ -298,5 +270,5 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
                     )}
                 </div>
             </div>
-        </div>    );
+        </div>);
 };
