@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
  * Standard error response handler for API routes
  */
 export const handleApiError = (error: unknown, context: string, statusCode = 500) => {
-  console.error(`${context}:`, error);
+  console.error(context, ':', error);
 
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   const responseMessage = statusCode === 500 ? 'Internal server error' : errorMessage;

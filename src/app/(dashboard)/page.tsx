@@ -59,8 +59,9 @@ export default function Home() {
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {isLoading
               ? (
-                Array.from({ length: 6 }).map(() => (
-                  <Skeleton key={crypto.randomUUID()} className="h-40 w-full rounded-lg" />
+                Array.from({ length: 6 }).map((_, index) => (
+                  // eslint-disable-next-line react/no-array-index-key
+                  <Skeleton key={index} className="h-40 w-full rounded-lg" />
                 ))
               )
               : (courses ?? []).length > 0

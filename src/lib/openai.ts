@@ -26,8 +26,9 @@ export type ParseAIResult = {
 
 export async function parseContentWithAI(html: string, courseCode?: string): Promise<ParseAIResult> {
   const logs: string[] = [];
-  const log = (message: string) => {
-    console.log(message);
+  const log = (...args: unknown[]) => {
+    const message = args.join(' ');
+    console.log(...args);
     logs.push(message);
   };
 
@@ -43,7 +44,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
 
     try {
       const mockData = setMockOpenAI(courseCode);
-      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);
+      log('Mock data returned successfully for', courseCode, '. Generated', mockData.tasks.length, 'tasks');
       return {
         tasks: mockData.tasks.map(task => ({
           title: task.title,
@@ -75,7 +76,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
   // Real OpenAI processing
   // 1) Build the AI prompt
   const prompt = buildCoursePlanParsePrompt(html);
-  log(`Built prompt. Length: ${prompt.length} characters`);
+  log('Built prompt. Length:', prompt.length, 'characters');
 
   // 2) Call OpenAI
   try {
@@ -94,11 +95,11 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
     });
 
     log('OpenAI API call completed');
-    log(`Response status: ${completion.choices[0]?.finish_reason}`);
-    log(`Model used: ${completion.model}`);
-    log(`Total tokens: ${completion.usage?.total_tokens}`);
-    log(`Prompt tokens: ${completion.usage?.prompt_tokens}`);
-    log(`Completion tokens: ${completion.usage?.completion_tokens}`);
+    log('Response status:', completion.choices[0]?.finish_reason);
+    log('Model used:', completion.model);
+    log('Total tokens:', completion.usage?.total_tokens);
+    log('Prompt tokens:', completion.usage?.prompt_tokens);
+    log('Completion tokens:', completion.usage?.completion_tokens);
 
     const aiText = completion.choices[0]?.message?.content;
     if (!aiText) {
@@ -106,10 +107,10 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
       throw new Error('No response from OpenAI');
     }
 
-    log(`AI response length: ${aiText.length} characters`);
-    log(`Full AI response: ${aiText}`);
-    log(`Response type: ${typeof aiText}`);
-    log(`Is response valid JSON? ${(() => {
+    log('AI response length:', aiText.length, 'characters');
+    log('Full AI response:', aiText);
+    log('Response type:', typeof aiText);
+    log('Is response valid JSON?', (() => {
       try {
         JSON.parse(aiText);
         return true;
@@ -117,17 +118,17 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
         console.log('JSON parse error:', e);
         return false;
       }
-    })()}`);
+    })());
 
     // 3) Parse the JSON array
     log('Attempting to parse JSON response...');
     const tasks = JSON.parse(aiText) as Array<Omit<Task, 'id' | 'courseId'>>;
-    log(`Successfully parsed JSON. Number of tasks: ${tasks.length}`);
+    log('Successfully parsed JSON. Number of tasks:', tasks.length);
     console.log('OpenAI response:', JSON.stringify(tasks, null, 2));
 
     return { tasks, logs };
   } catch (error) {
-    log(`Error in parseContentWithAI: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    log('Error in parseContentWithAI:', error instanceof Error ? error.message : 'Unknown error');
     throw error;
   }
 }

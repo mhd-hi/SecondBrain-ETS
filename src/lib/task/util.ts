@@ -62,10 +62,9 @@ export function calculateDueDate(
   // Calculate the due date by adding the adjusted weeks to the session start date
   const dueDate = new Date(sessionDates.start);
   dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
-
   // Check if the calculated date is valid
   if (Number.isNaN(dueDate.getTime())) {
-    console.error(`Invalid date calculated for session: ${session}, week: ${week}, totalCourseWeeks: ${totalCourseWeeks}`);
+    console.error('Invalid date calculated for session:', session, 'week:', week, 'totalCourseWeeks:', totalCourseWeeks);
     return sessionDates.end; // Return session end date as a fallback
   }
 

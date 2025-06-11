@@ -9,13 +9,14 @@ const protectedApiRoutes = [
   '/api/upload',
   '/api/cron/cleanup-courses', // Protect cron jobs
   '/api/pomodoro',
+  '/api/course-pipeline',
+  '/api/parse-course',
+
 ];
 
 // Define public API routes that should not be protected
 const publicApiRoutes = [
   '/api/auth',
-  '/api/course-pipeline', // May need authentication later, but currently public
-  '/api/parse-course',
 ];
 
 // Define public pages that don't require authentication
@@ -72,7 +73,7 @@ export default auth((req) => {
 
     // Block unauthenticated users from protected API routes
     if (shouldBeProtected && !isLoggedIn) {
-      console.warn(`Unauthorized API access attempt to: ${nextUrl.pathname}`);
+      console.warn('Unauthorized API access attempt to:', nextUrl.pathname);
       return NextResponse.json(
         {
           error: 'Authentication required',
@@ -92,7 +93,7 @@ export default auth((req) => {
       requestHeaders.set('x-auth-timestamp', new Date().toISOString());
 
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Authenticated API request to ${nextUrl.pathname} by user ${req.auth.user.id}`);
+        console.warn('Authenticated API request to', nextUrl.pathname, 'by user', req.auth.user.id);
       }
 
       return NextResponse.next({
@@ -107,7 +108,7 @@ export default auth((req) => {
   }
   // Handle page routes - redirect unauthenticated users to signin
   if (!isLoggedIn) {
-    console.warn(`Unauthenticated page access attempt to: ${nextUrl.pathname}`);
+    console.warn('Unauthenticated page access attempt to:', nextUrl.pathname);
     const signInUrl = new URL('/auth/signin', nextUrl.origin);
     signInUrl.searchParams.set('callbackUrl', nextUrl.href);
     return NextResponse.redirect(signInUrl);
@@ -122,7 +123,7 @@ export default auth((req) => {
     requestHeaders.set('x-auth-timestamp', new Date().toISOString());
 
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`Authenticated page request to ${nextUrl.pathname} by user ${req.auth.user.id}`);
+      console.warn('Authenticated page request to', nextUrl.pathname, 'by user', req.auth.user.id);
     }
 
     return NextResponse.next({

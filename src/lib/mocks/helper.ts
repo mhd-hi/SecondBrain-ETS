@@ -3,7 +3,7 @@ import { TaskStatus } from '@/types/task';
 import { MOCK_COURSES } from './openai-data';
 
 export function setMockOpenAI(courseCode: string): CourseAIResponse {
-  console.warn(`Using mock data for course ${courseCode}`);
+  console.warn('Using mock data for course', courseCode);
   const course = MOCK_COURSES[courseCode];
   if (!course) {
     throw new Error(`Course code "${courseCode}" not found in mock data. Available courses: ${Object.keys(MOCK_COURSES).join(', ')}`);

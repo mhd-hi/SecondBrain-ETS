@@ -52,7 +52,7 @@ export const apiRequest = async <T>(
     const response = await fetch(url, options);
     return await validateApiResponse<T>(response);
   } catch (error) {
-    console.error(`API request to ${url} failed:`, error);
+    console.error('API request to', url, 'failed:', error);
     // Use the consolidated error handler instead of direct toast
     const { handleApiError } = await import('@/lib/error/util');
     handleApiError(error, errorMessage);

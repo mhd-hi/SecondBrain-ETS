@@ -4,7 +4,7 @@
       "tool": {
         "name": "eslint"
       },
-      "isEnabled": false
+      "isEnabled": true
     }
   ]
 }

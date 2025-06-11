@@ -14,7 +14,7 @@ export const ErrorHandlers = {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const logContext = context ? `[${context}]` : '';
 
-    console.error(`${logContext} API Error:`, error);
+    console.error(logContext, 'API Error:', error);
     toast.error(userMessage);
 
     return errorMessage;
@@ -46,13 +46,12 @@ export const ErrorHandlers = {
     console.error('Error:', error);
     toast.error(userMessage);
   },
-
   /**
    * Silent error handler (logs but doesn't show toast)
    */
   silent: (error: unknown, context?: string) => {
     const logContext = context ? `[${context}]` : '';
-    console.error(`${logContext} Silent Error:`, error);
+    console.error(logContext, 'Silent Error:', error);
   },
 };
 

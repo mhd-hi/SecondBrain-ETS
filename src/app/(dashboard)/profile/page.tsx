@@ -61,9 +61,7 @@ export default function ProfilePage() {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>
-            Welcome back,
-            {session.user?.name}
-            !
+            {`Welcome back, ${session.user?.name}!`}
           </CardTitle>
           <CardDescription>
             You&apos;re successfully authenticated.

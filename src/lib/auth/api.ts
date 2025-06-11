@@ -164,7 +164,7 @@ export function withAuthAndErrorHandling<TParams = Record<string, string>>(
       const user = await requireAuth();
       return await handler(request, { ...context, user });
     } catch (error) {
-      console.error(`Error in ${contextName}:`, error);
+      console.error('Error in', contextName, ':', error);
 
       if (error instanceof AuthenticationError || error instanceof AuthorizationError) {
         return createAuthErrorResponse(error);
