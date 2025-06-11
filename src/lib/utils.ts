@@ -1,5 +1,6 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import type { ClassValue } from 'clsx';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 const COURSE_COLORS = [
   '#3b82f6', // Blue
@@ -40,12 +41,12 @@ export function getCourseColor(course: { id: string; color?: string } | string):
     const index = course.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return COURSE_COLORS[Math.abs(index) % COURSE_COLORS.length] as string;
   }
-  
+
   // If the course has a color field, use it
   if (course.color) {
     return course.color;
   }
-  
+
   // Fallback to the old method for courses without a color field
   const index = course.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return COURSE_COLORS[Math.abs(index) % COURSE_COLORS.length] as string;

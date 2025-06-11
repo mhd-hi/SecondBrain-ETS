@@ -1,10 +1,11 @@
+/* eslint-disable no-console */
+import type { Task } from '@/types/task';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { COURSE_PLAN_PARSER_SYSTEM_PROMPT, buildCoursePlanParsePrompt } from './prompts';
-import type { Task } from '@/types/task';
 import { TaskStatus } from '@/types/task';
 import { USE_MOCK_DATA } from './config';
 import { setMockOpenAI } from './mocks/helper';
+import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';
 
 // Custom error class for mock data issues
 export class MockDataError extends Error {
@@ -18,10 +19,10 @@ const openai = new OpenAI({
   apiKey: env.OPENAI_API_KEY,
 });
 
-export interface ParseAIResult {
+export type ParseAIResult = {
   tasks: Array<Omit<Task, 'id' | 'courseId'>>;
   logs: string[];
-}
+};
 
 export async function parseContentWithAI(html: string, courseCode?: string): Promise<ParseAIResult> {
   const logs: string[] = [];
@@ -33,16 +34,16 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
   // Check if we should use mock data
   if (USE_MOCK_DATA) {
     log('Mock mode enabled - returning mock data');
-    
+
     if (!courseCode) {
       throw new MockDataError('Course code is required when using mock data');
     }
-      // Simulate API delay
+    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     try {
       const mockData = setMockOpenAI(courseCode);
-      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);      
+      log(`Mock data returned successfully for ${courseCode}. Generated ${mockData.tasks.length} tasks`);
       return {
         tasks: mockData.tasks.map(task => ({
           title: task.title,
@@ -57,13 +58,13 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
             title: subtask.title,
             status: TaskStatus.TODO,
             notes: subtask.notes,
-            estimatedEffort: subtask.estimatedEffort
+            estimatedEffort: subtask.estimatedEffort,
           })),
           createdAt: new Date(),
           updatedAt: new Date(),
-          dueDate: new Date() // This will be calculated properly later
+          dueDate: new Date(), // This will be calculated properly later
         })),
-        logs
+        logs,
       };
     } catch (error) {
       // Re-throw mock data errors with the MockDataError type
@@ -79,7 +80,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
   // 2) Call OpenAI
   try {
     log('Starting OpenAI API call...');
-    
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -98,7 +99,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
     log(`Total tokens: ${completion.usage?.total_tokens}`);
     log(`Prompt tokens: ${completion.usage?.prompt_tokens}`);
     log(`Completion tokens: ${completion.usage?.completion_tokens}`);
-    
+
     const aiText = completion.choices[0]?.message?.content;
     if (!aiText) {
       log('OpenAI response is empty');

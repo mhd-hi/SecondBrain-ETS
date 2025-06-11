@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { useDraggable } from "@dnd-kit/core";
-import { Badge } from "@/components/ui/badge";
-import { TaskStatusChanger } from "@/components/TaskStatusChanger";
-import { TruncatedTextWithTooltip } from "@/components/shared/atoms/text-with-tooltip";
-import type { Task as TaskType, TaskStatus } from "@/types/task";
-import type { DraggedTask } from "@/types/drag-drop";
+import type { DraggedTask } from '@/types/drag-drop';
+import type { TaskStatus, Task as TaskType } from '@/types/task';
+import { useDraggable } from '@dnd-kit/core';
+import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
+import { TaskStatusChanger } from '@/components/TaskStatusChanger';
+import { Badge } from '@/components/ui/badge';
 
-interface TaskProps {
+type TaskProps = {
   task: TaskType;
   sourceDate: Date;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   isDragOverlay?: boolean;
-}
+};
 
 export const Task = ({
   task,
   sourceDate,
   onStatusChange,
-  isDragOverlay = false
+  isDragOverlay = false,
 }: TaskProps) => {
   const dragData: DraggedTask = {
     id: task.id,
@@ -29,20 +29,15 @@ export const Task = ({
     attributes,
     listeners,
     setNodeRef,
-    transform,
     isDragging,
   } = useDraggable({
     id: task.id,
     data: dragData,
-  });  // Only apply transform when actively dragging and not in overlay mode
-  const style = (transform && isDragging && !isDragOverlay) ? {
-    // transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-  } : undefined;
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={style}
       className={`
         group relative p-3 rounded-lg border bg-card text-card-foreground shadow-sm cursor-grab active:cursor-grabbing
         ${isDragging && !isDragOverlay ? 'opacity-0' : ''}
@@ -54,14 +49,16 @@ export const Task = ({
       {...(!isDragOverlay ? attributes : {})}
       {...(!isDragOverlay ? listeners : {})}
     >
-      {/* Task Content */}
       <div>
         <div className="flex items-center justify-between gap-2">
           {task.course?.code && (
             <p className="text-sm text-muted-foreground truncate">{task.course.code}</p>
           )}
           <Badge variant="secondary" className="text-xs flex-shrink-0">
-            {task.estimatedEffort} hr{task.estimatedEffort !== 1 ? 's' : ''}
+            {task.estimatedEffort}
+            {' '}
+            hr
+            {task.estimatedEffort !== 1 ? 's' : ''}
           </Badge>
         </div>
 

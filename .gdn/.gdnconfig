@@ -1,0 +1,10 @@
+{
+  "tools": [
+    {
+      "tool": {
+        "name": "eslint"
+      },
+      "isEnabled": false
+    }
+  ]
+}

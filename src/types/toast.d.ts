@@ -1,17 +1,17 @@
 declare module 'sonner' {
   import type React from 'react';
 
-  interface ToastOptions {
+  type ToastOptions = {
     description?: string;
     className?: string;
-  }
+  };
 
-  interface Toast {
+  type Toast = {
     success: (message: string, options?: ToastOptions) => void;
     error: (message: string, options?: ToastOptions) => void;
-  }
+  };
 
-  interface ToasterProps {
+  type ToasterProps = {
     theme?: 'light' | 'dark' | 'system';
     className?: string;
     toastOptions?: {
@@ -22,7 +22,7 @@ declare module 'sonner' {
         cancelButton?: string;
       };
     };
-  }
+  };
 
   export const toast: Toast;
   export const Toaster: React.ComponentType<ToasterProps>;

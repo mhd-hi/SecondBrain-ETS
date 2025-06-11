@@ -1,51 +1,52 @@
-"use client";
+'use client';
 
+import { MoreHorizontal } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
-interface DropdownAction {
+type DropdownAction = {
   label: string;
   onClick: () => void;
   className?: string;
   destructive?: boolean;
-}
+};
 
-interface MoreActionsDropdownProps {
+type MoreActionsDropdownProps = {
   actions: DropdownAction[];
   triggerClassName?: string;
-  contentAlign?: "start" | "center" | "end";
+  contentAlign?: 'start' | 'center' | 'end';
   className?: string;
-}
+};
 
 export function MoreActionsDropdown({
   actions,
   triggerClassName,
-  contentAlign = "end",
+  contentAlign = 'end',
   className,
 }: MoreActionsDropdownProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger        className={cn(
-          "rounded-full bg-accent p-[6px] hover:bg-muted hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity",
-          triggerClassName
-        )}
+      <DropdownMenuTrigger className={cn(
+        'rounded-full bg-accent p-[6px] hover:bg-muted hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity',
+        triggerClassName,
+      )}
       >
         <MoreHorizontal className="h-5 w-5 text-muted-foreground" aria-label="More actions" />
       </DropdownMenuTrigger>
+      {' '}
       <DropdownMenuContent align={contentAlign} className={className}>
-        {actions.map((action, index) => (
+        {actions.map(action => (
           <DropdownMenuItem
-            key={index}
+            key={action.label}
             onClick={action.onClick}
             className={cn(
-              action.destructive && "text-destructive focus:text-destructive",
-              action.className
+              action.destructive && 'text-destructive focus:text-destructive',
+              action.className,
             )}
           >
             {action.label}

@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
+import type { Task, TaskStatus } from '@/types/task';
+import { Play } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { MoreActionsDropdown } from "@/components/shared/atoms/more-actions-dropdown";
-import { DueDateDisplay } from "@/components/shared/atoms/due-date-display";
-import { SubtaskProgress } from "@/components/SubtaskProgress";
-import { SubtasksList } from "@/components/SubtasksList";
-import { TaskStatusChanger } from "@/components/TaskStatusChanger";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { getCourseColor } from "@/lib/utils";
-import { usePomodoro } from "@/contexts/pomodoro-context";
-import { Play } from "lucide-react";
-import type { Task, TaskStatus } from "@/types/task";
-import { TaskStatus as TaskStatusEnum } from "@/types/task";
+import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
+import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import { SubtaskProgress } from '@/components/SubtaskProgress';
+import { SubtasksList } from '@/components/SubtasksList';
+import { TaskStatusChanger } from '@/components/TaskStatusChanger';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { usePomodoro } from '@/contexts/use-pomodoro';
+import { getCourseColor } from '@/lib/utils';
+import { TaskStatus as TaskStatusEnum } from '@/types/task';
 
-interface TaskCardProps {
+type TaskCardProps = {
   task: Task;
   onDeleteTask: (taskId: string) => void;
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
@@ -28,7 +28,7 @@ interface TaskCardProps {
     onClick: () => void;
     destructive?: boolean;
   }>;
-}
+};
 
 export function TaskCard({
   task,
@@ -38,7 +38,7 @@ export function TaskCard({
   showCourseBadge = false,
   isSubtasksExpanded: controlledSubtasksExpanded,
   onToggleSubtasksExpanded,
-  actions
+  actions,
 }: TaskCardProps) {
   const router = useRouter();
   const { startPomodoro } = usePomodoro();
@@ -60,13 +60,14 @@ export function TaskCard({
 
   const defaultActions = [
     {
-      label: "Delete",
+      label: 'Delete',
       onClick: () => onDeleteTask(task.id),
       destructive: true,
     },
   ];
 
-  const cardActions = actions ?? defaultActions; return (
+  const cardActions = actions ?? defaultActions;
+  return (
     <div
       className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
     >
@@ -82,14 +83,16 @@ export function TaskCard({
             style={{
               borderColor: courseColor,
               color: courseColor,
-              backgroundColor: courseColor ? `${courseColor}15` : undefined
+              backgroundColor: courseColor ? `${courseColor}15` : undefined,
             }}
             onClick={handleNavigateToTask}
           >
             {task.course.code}
           </Badge>
         </div>
-      )}      <div className="flex items-start justify-between gap-4">
+      )}
+      {' '}
+      <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 flex-grow">
           <h4 className="font-medium">{task.title}</h4>
           {task.notes && (
@@ -103,7 +106,7 @@ export function TaskCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">          
+        <div className="flex flex-col items-end gap-2">
           {task.status === TaskStatusEnum.IN_PROGRESS && (
             <Button
               onClick={handleStartPomodoro}
@@ -116,15 +119,14 @@ export function TaskCard({
           )}
           <TaskStatusChanger
             currentStatus={task.status}
-            onStatusChange={(newStatus) => onUpdateTaskStatus(task.id, newStatus)}
+            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
           />
         </div>
       </div>
       <SubtasksList
         subtasks={task.subtasks ?? []}
         onSubtaskStatusChange={(subtaskId, newStatus) =>
-          onUpdateSubtaskStatus(task.id, subtaskId, newStatus)
-        }
+          onUpdateSubtaskStatus(task.id, subtaskId, newStatus)}
         collapsible={true}
         defaultExpanded={false}
         isExpanded={isSubtasksExpanded}

@@ -11,32 +11,34 @@ export const GET = withAuthSimple(
     if (!courseCode) {
       return NextResponse.json(
         { error: 'code parameter is required', code: 'MISSING_PARAMETER' },
-        { status: 400 }
+        { status: 400 },
       );
-    }    // Validate course code format
+    } // Validate course code format
     let cleanCode: string;
     try {
       cleanCode = assertValidCourseCode(courseCode, 'Invalid course code format');
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : 'Invalid course code format', code: 'INVALID_FORMAT' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Check if course exists for this user only
     const userCourses = await getUserCourses(user.id);
     const existingCourse = userCourses.find(course =>
-      course.code.toLowerCase() === cleanCode.toLowerCase()
+      course.code.toLowerCase() === cleanCode.toLowerCase(),
     );
 
     return NextResponse.json({
       exists: !!existingCourse,
-      course: existingCourse ? {
-        id: existingCourse.id,
-        code: existingCourse.code,
-        name: existingCourse.name
-      } : null
+      course: existingCourse
+        ? {
+          id: existingCourse.id,
+          code: existingCourse.code,
+          name: existingCourse.name,
+        }
+        : null,
     });
-  }
+  },
 );

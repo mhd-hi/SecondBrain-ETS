@@ -1,22 +1,22 @@
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/server/auth";
+import type { NextRequest } from 'next/server';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { auth } from '@/server/auth';
 
 /**
  * Enhanced authentication utilities for API routes
  */
 
-export interface AuthenticatedUser {
+export type AuthenticatedUser = {
   id: string;
   email?: string;
   name?: string;
-}
+};
 
-export interface AuthError {
+export type AuthError = {
   error: string;
   code: string;
-}
+};
 
 /**
  * Get authenticated user from middleware headers (fast path) or session (fallback)
@@ -26,7 +26,7 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
     // Try to get user from middleware headers first (faster)
     const headersList = await headers();
     const userId = headersList.get('x-user-id');
-      if (userId) {
+    if (userId) {
       return {
         id: userId,
         email: headersList.get('x-user-email') ?? undefined,
@@ -56,11 +56,11 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
  */
 export async function requireAuth(): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser();
-  
+
   if (!user) {
     throw new AuthenticationError('Authentication required');
   }
-  
+
   return user;
 }
 
@@ -88,21 +88,21 @@ export function createAuthErrorResponse(error: Error): NextResponse {
   if (error instanceof AuthenticationError) {
     return NextResponse.json(
       { error: error.message, code: 'UNAUTHENTICATED' },
-      { status: 401 }
+      { status: 401 },
     );
   }
-  
+
   if (error instanceof AuthorizationError) {
     return NextResponse.json(
       { error: error.message, code: 'UNAUTHORIZED' },
-      { status: 403 }
+      { status: 403 },
     );
   }
-  
+
   // Generic error
   return NextResponse.json(
     { error: 'Internal server error', code: 'INTERNAL_ERROR' },
-    { status: 500 }
+    { status: 500 },
   );
 }
 
@@ -113,11 +113,11 @@ export function withAuth<TParams = Record<string, string>>(
   handler: (
     request: NextRequest,
     context: { params: Promise<TParams>; user: AuthenticatedUser }
-  ) => Promise<NextResponse>
+  ) => Promise<NextResponse>,
 ) {
   return async (
     request: NextRequest,
-    context: { params: Promise<TParams> }
+    context: { params: Promise<TParams> },
   ): Promise<NextResponse> => {
     try {
       const user = await requireAuth();
@@ -133,7 +133,7 @@ export function withAuth<TParams = Record<string, string>>(
  * Higher-order function for simple authenticated API routes (no params)
  */
 export function withAuthSimple(
-  handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>
+  handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>,
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
     try {
@@ -154,29 +154,29 @@ export function withAuthAndErrorHandling<TParams = Record<string, string>>(
     request: NextRequest,
     context: { params: Promise<TParams>; user: AuthenticatedUser }
   ) => Promise<NextResponse>,
-  contextName = 'API route'
+  contextName = 'API route',
 ) {
   return async (
     request: NextRequest,
-    context: { params: Promise<TParams> }
+    context: { params: Promise<TParams> },
   ): Promise<NextResponse> => {
     try {
       const user = await requireAuth();
       return await handler(request, { ...context, user });
     } catch (error) {
       console.error(`Error in ${contextName}:`, error);
-      
+
       if (error instanceof AuthenticationError || error instanceof AuthorizationError) {
         return createAuthErrorResponse(error);
       }
-      
+
       // Generic error
       return NextResponse.json(
-        { 
+        {
           error: error instanceof Error ? error.message : 'Unknown error occurred',
-          code: 'INTERNAL_ERROR'
+          code: 'INTERNAL_ERROR',
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
   };
@@ -186,12 +186,12 @@ export function withAuthAndErrorHandling<TParams = Record<string, string>>(
  * Type-safe parameter extraction with authentication
  */
 export async function getAuthenticatedParams<T>(
-  context: { params: Promise<T> }
+  context: { params: Promise<T> },
 ): Promise<{ params: T; user: AuthenticatedUser }> {
   const [params, user] = await Promise.all([
     context.params,
-    requireAuth()
+    requireAuth(),
   ]);
-  
+
   return { params, user };
 }

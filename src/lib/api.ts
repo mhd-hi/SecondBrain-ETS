@@ -1,10 +1,10 @@
+import type { CourseAIResponse } from '@/types/api';
 // Re-export from the proper location
-export { api } from '@/lib/api/util';
-
 // Legacy exports - these are now handled by the course processing pipeline
 // For backwards compatibility, we re-export the parseCourse function
 import { ServerCourseProcessingPipeline } from '@/lib/course/server-pipeline';
-import type { CourseAIResponse } from '@/types/api';
+
+export { api } from '@/lib/api/util';
 
 export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseAIResponse> {
   const pipeline = new ServerCourseProcessingPipeline();

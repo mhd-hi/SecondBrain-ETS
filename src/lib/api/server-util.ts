@@ -9,13 +9,13 @@ import { NextResponse } from 'next/server';
  */
 export const handleApiError = (error: unknown, context: string, statusCode = 500) => {
   console.error(`${context}:`, error);
-  
+
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   const responseMessage = statusCode === 500 ? 'Internal server error' : errorMessage;
-  
+
   return NextResponse.json(
     { error: responseMessage },
-    { status: statusCode }
+    { status: statusCode },
   );
 };
 
@@ -25,7 +25,7 @@ export const handleApiError = (error: unknown, context: string, statusCode = 500
 export const validationError = (message: string) => {
   return NextResponse.json(
     { error: message },
-    { status: 400 }
+    { status: 400 },
   );
 };
 
@@ -41,7 +41,7 @@ export const successResponse = <T>(data: T, statusCode = 200) => {
  */
 export const validateRequiredQuery = (
   searchParams: URLSearchParams,
-  requiredParams: string[]
+  requiredParams: string[],
 ): string | null => {
   for (const param of requiredParams) {
     if (!searchParams.get(param)) {

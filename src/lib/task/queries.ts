@@ -1,30 +1,28 @@
-import { and, eq, gte, lt } from "drizzle-orm";
-import { db } from "@/server/db";
-import { tasks, courses } from "@/server/db/schema";
-import type { TaskStatus, Task, Subtask } from "@/types/task";
+import type { Subtask, Task, TaskStatus } from '@/types/task';
+import { and, eq, gte, lt } from 'drizzle-orm';
+import { db } from '@/server/db';
+import { courses, tasks } from '@/server/db/schema';
 
 export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: string): Promise<Task[]> => {
   try {
     if (!userId) {
-      throw new Error("User authentication required");
+      throw new Error('User authentication required');
     }
-    
+
     const conditions = [
       gte(tasks.dueDate, startDate),
       lt(tasks.dueDate, endDate),
-      eq(tasks.userId, userId)
+      eq(tasks.userId, userId),
     ];
-    
-    const results = await db.select().from(tasks)
-      .where(and(...conditions))
-      .leftJoin(courses, eq(tasks.courseId, courses.id));
+
+    const results = await db.select().from(tasks).where(and(...conditions)).leftJoin(courses, eq(tasks.courseId, courses.id));
 
     return results.map(row => ({
       ...row.tasks,
       course: row.courses ?? undefined,
       status: row.tasks.status as TaskStatus,
       subtasks: row.tasks.subtasks as Subtask[] | undefined,
-      notes: row.tasks.notes ?? undefined
+      notes: row.tasks.notes ?? undefined,
     }));
   } catch (error) {
     console.error('Error fetching tasks:', error);
@@ -34,14 +32,14 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
 
 export const updateTaskStatus = async (taskId: string, status: TaskStatus, userId: string) => {
   if (!userId) {
-    throw new Error("User authentication required");
+    throw new Error('User authentication required');
   }
-  
+
   const conditions = [
     eq(tasks.id, taskId),
-    eq(tasks.userId, userId)
+    eq(tasks.userId, userId),
   ];
-  
+
   return db
     .update(tasks)
     .set({ status, updatedAt: new Date() })
@@ -71,7 +69,7 @@ export const createTask = async (data: {
   return db.insert(tasks).values({
     ...data,
     week,
-    type: "theorie",
-    status: "DRAFT",
+    type: 'theorie',
+    status: 'DRAFT',
   }).returning();
 };

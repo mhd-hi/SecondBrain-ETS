@@ -1,20 +1,20 @@
-import type { Task } from "./task";
 import type {
   DragEndEvent as DndKitDragEndEvent,
+  DragOverEvent as DndKitDragOverEvent,
   DragStartEvent as DndKitDragStartEvent,
-  DragOverEvent as DndKitDragOverEvent
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
+import type { Task } from './task';
 
-export interface DraggedTask {
+export type DraggedTask = {
   id: string;
   task: Task;
   sourceDate: Date;
-}
+};
 
-export interface DropTargetData {
+export type DropTargetData = {
   targetDate: Date;
   dayKey: string;
-}
+};
 
 export type DragEndEvent = DndKitDragEndEvent;
 export type DragStartEvent = DndKitDragStartEvent;

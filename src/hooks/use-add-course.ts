@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
 import type { CourseAIResponse } from '@/types/api';
 import type { PipelineStepResult } from '@/types/pipeline';
-import { calculateTaskDueDate } from '@/lib/task/util';
+import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 import { assertValidCourseCode } from '@/lib/course/util';
+import { calculateTaskDueDate } from '@/lib/task/util';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
-export interface StepStatus {
-  planets: 'pending' | 'loading' | 'success' | 'error';
-  openai: 'pending' | 'loading' | 'success' | 'error';
+export type StepStatus = {
+  'planets': 'pending' | 'loading' | 'success' | 'error';
+  'openai': 'pending' | 'loading' | 'success' | 'error';
   'create-course': 'pending' | 'loading' | 'success' | 'error';
   'create-tasks': 'pending' | 'loading' | 'success' | 'error';
-}
+};
 
-export interface UseAddCourseReturn {
+export type UseAddCourseReturn = {
   currentStep: ProcessingStep;
   stepStatus: StepStatus;
   parsedData: CourseAIResponse | null;
@@ -26,7 +26,7 @@ export interface UseAddCourseReturn {
   startProcessing: (courseCode: string) => Promise<void>;
   retry: () => void;
   reset: () => void;
-}
+};
 
 async function fetchCourseFromPlanets(courseCode: string, term = '20252') {
   // Validate course code format before making API call
@@ -40,8 +40,8 @@ async function fetchCourseFromPlanets(courseCode: string, term = '20252') {
     body: JSON.stringify({
       courseCode: cleanCode,
       term,
-      step: 'planets'
-    })
+      step: 'planets',
+    }),
   });
 
   if (!response.ok) {
@@ -57,7 +57,7 @@ async function fetchCourseFromPlanets(courseCode: string, term = '20252') {
 
   return {
     html: result.data as string,
-    logs: result.logs
+    logs: result.logs,
   };
 }
 
@@ -74,8 +74,8 @@ async function parseCourseWithAI(html: string, courseCode: string, term = '20252
       courseCode: cleanCode,
       term,
       step: 'openai',
-      htmlData: html
-    })
+      htmlData: html,
+    }),
   });
 
   if (!response.ok) {
@@ -126,7 +126,7 @@ async function createTasks(courseId: string, parsedData: CourseAIResponse): Prom
       courseId,
       tasks: parsedData.tasks.map(task => ({
         ...task,
-        dueDate: calculateTaskDueDate(task.week).toISOString()
+        dueDate: calculateTaskDueDate(task.week).toISOString(),
       })),
     }),
   });
@@ -138,22 +138,26 @@ async function createTasks(courseId: string, parsedData: CourseAIResponse): Prom
 }
 
 export function useAddCourse(): UseAddCourseReturn {
-  const [currentStep, setCurrentStep] = useState<ProcessingStep>('idle'); const [stepStatus, setStepStatus] = useState<StepStatus>({
-    planets: 'pending',
-    openai: 'pending',
+  const [currentStep, setCurrentStep] = useState<ProcessingStep>('idle');
+  const [stepStatus, setStepStatus] = useState<StepStatus>({
+    'planets': 'pending',
+    'openai': 'pending',
     'create-course': 'pending',
-    'create-tasks': 'pending'
-  }); const [parsedData, setParsedData] = useState<CourseAIResponse | null>(null);
+    'create-tasks': 'pending',
+  });
+  const [parsedData, setParsedData] = useState<CourseAIResponse | null>(null);
   const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const isProcessing = currentStep === 'planets' || currentStep === 'openai' || currentStep === 'create-course' || currentStep === 'create-tasks'; const reset = useCallback(() => {
+  const isProcessing = currentStep === 'planets' || currentStep === 'openai' || currentStep === 'create-course' || currentStep === 'create-tasks';
+
+  const reset = useCallback(() => {
     setCurrentStep('idle');
     setStepStatus({
-      planets: 'pending',
-      openai: 'pending',
+      'planets': 'pending',
+      'openai': 'pending',
       'create-course': 'pending',
-      'create-tasks': 'pending'
+      'create-tasks': 'pending',
     });
     setParsedData(null);
     setCreatedCourseId(null);
@@ -163,10 +167,10 @@ export function useAddCourse(): UseAddCourseReturn {
   const retry = useCallback(() => {
     setCurrentStep('idle');
     setStepStatus({
-      planets: 'pending',
-      openai: 'pending',
+      'planets': 'pending',
+      'openai': 'pending',
       'create-course': 'pending',
-      'create-tasks': 'pending'
+      'create-tasks': 'pending',
     });
     setError(null);
   }, []);
@@ -175,13 +179,14 @@ export function useAddCourse(): UseAddCourseReturn {
     if (!courseCode.trim()) {
       toast.error('Please enter a course code');
       return;
-    } setError(null);
+    }
+    setError(null);
     setCurrentStep('planets');
     setStepStatus({
-      planets: 'loading',
-      openai: 'pending',
+      'planets': 'loading',
+      'openai': 'pending',
       'create-course': 'pending',
-      'create-tasks': 'pending'
+      'create-tasks': 'pending',
     });
 
     try {
@@ -215,19 +220,20 @@ export function useAddCourse(): UseAddCourseReturn {
       setCurrentStep('completed');
 
       toast.success('Course and tasks created successfully!');
-
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
       setCurrentStep('error');
       // Update step status based on current step
-      const failedStep = currentStep === 'planets' ? 'planets' :
-        currentStep === 'openai' ? 'openai' :
-          currentStep === 'create-course' ? 'create-course' : 'create-tasks';
+      const failedStep = currentStep === 'planets'
+        ? 'planets'
+        : currentStep === 'openai'
+          ? 'openai'
+          : currentStep === 'create-course' ? 'create-course' : 'create-tasks';
 
       setStepStatus(prev => ({
         ...prev,
-        [failedStep]: 'error'
+        [failedStep]: 'error',
       }));
 
       toast.error(errorMessage);

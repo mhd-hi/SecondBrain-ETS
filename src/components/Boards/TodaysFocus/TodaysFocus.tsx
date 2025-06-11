@@ -1,33 +1,137 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { TaskCard } from "@/components/shared/TaskCard";
-import type { Task as TaskType } from "@/types/task";
-import { TaskStatus } from "@/types/task";
-import { toast } from "sonner";
+import type { Task as TaskType } from '@/types/task';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { TaskCard } from '@/components/shared/TaskCard';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { TaskStatus } from '@/types/task';
 
-type FilterType = "week" | "month" | "quarter";
+type FilterType = 'week' | 'month' | 'quarter';
 
-interface GroupedTasks {
+type GroupedTasks = {
   overdue: TaskType[];
   today: TaskType[];
   tomorrow: TaskType[];
   thisWeek: TaskType[];
   later: TaskType[];
-}
+};
 
-interface TodaysFocusProps {
+type TodaysFocusProps = {
   _onStartPomodoro?: (taskId: string, taskTitle: string) => void;
-}
+};
+
+const GroupSection = ({
+  title,
+  tasks,
+  count,
+  sectionKey,
+  expandedSections,
+  toggleSectionExpanded,
+  expandedSubtasks,
+  toggleSubtasksExpanded,
+  handleDeleteTask,
+  handleStatusChange,
+  handleSubtaskStatusChange,
+}: {
+  title: string;
+  tasks: TaskType[];
+  count?: number;
+  sectionKey: string;
+  expandedSections: Set<string>;
+  toggleSectionExpanded: (sectionKey: string) => void;
+  expandedSubtasks: Set<string>;
+  toggleSubtasksExpanded: (taskId: string) => void;
+  handleDeleteTask: (taskId: string) => Promise<void>;
+  handleStatusChange: (taskId: string, newStatus: TaskStatus) => Promise<void>;
+  handleSubtaskStatusChange: (taskId: string, subtaskId: string, newStatus: TaskStatus) => Promise<void>;
+}) => {
+  if (tasks.length === 0) {
+    return null;
+  }
+
+  const isExpanded = expandedSections.has(sectionKey);
+  const maxDisplayTasks = 5;
+  const shouldLimit = tasks.length > maxDisplayTasks;
+  const displayTasks = shouldLimit && !isExpanded ? tasks.slice(0, maxDisplayTasks) : tasks;
+  const totalCount = count ?? tasks.length;
+  const hiddenCount = shouldLimit && !isExpanded ? tasks.length - maxDisplayTasks : 0;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <h4 className="text-base font-semibold text-foreground">{title}</h4>
+        <Badge variant="secondary" className="text-xs">
+          {totalCount}
+        </Badge>
+        {hiddenCount > 0 && (
+          <span className="text-xs text-muted-foreground">
+            ( +
+            {hiddenCount}
+            {' '}
+            more)
+          </span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {displayTasks.map(task => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onDeleteTask={handleDeleteTask}
+            onUpdateTaskStatus={handleStatusChange}
+            onUpdateSubtaskStatus={handleSubtaskStatusChange}
+            showCourseBadge={true}
+            isSubtasksExpanded={expandedSubtasks.has(task.id)}
+            onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
+            actions={task.course?.id
+              ? [
+                {
+                  label: `Go to ${task.course.code}`,
+                  onClick: () => {
+                    if (task.course?.id) {
+                      window.location.href = `/courses/${task.course.id}#task-${task.id}`;
+                    }
+                  },
+                  destructive: false,
+                },
+                {
+                  label: 'Delete',
+                  onClick: () => void handleDeleteTask(task.id),
+                  destructive: true,
+                },
+              ]
+              : [
+                {
+                  label: 'Delete',
+                  onClick: () => void handleDeleteTask(task.id),
+                  destructive: true,
+                },
+              ]}
+          />
+        ))}
+        {shouldLimit && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => toggleSectionExpanded(sectionKey)}
+            className="text-xs text-muted-foreground hover:text-foreground w-full justify-center"
+          >
+            {isExpanded ? 'See less' : `See ${hiddenCount} more`}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [filter, setFilter] = useState<FilterType>("week");
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(new Set());
+  const [filter, setFilter] = useState<FilterType>('week');
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => new Set());
+  const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(() => new Set());
 
   const fetchFocusTasks = useCallback(async () => {
     setIsLoading(true);
@@ -39,8 +143,8 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       const focusTasks = await response.json() as TaskType[];
       setTasks(focusTasks);
     } catch (error) {
-      console.error("Failed to load focus tasks:", error);
-      toast.error("Failed to load focus tasks");
+      console.error('Failed to load focus tasks:', error);
+      toast.error('Failed to load focus tasks');
     } finally {
       setIsLoading(false);
     }
@@ -63,16 +167,17 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       }
 
       // Update local state
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === taskId ? { ...task, status: newStatus } : task
-        )
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? { ...task, status: newStatus } : task,
+        ),
       );
     } catch (error) {
-      console.error("Failed to update task status:", error);
-      toast.error("Failed to update task status");
+      console.error('Failed to update task status:', error);
+      toast.error('Failed to update task status');
     }
   };
+
   const handleSubtaskStatusChange = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
     try {
       const response = await fetch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, {
@@ -86,21 +191,21 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       }
 
       // Update local state
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
           task.id === taskId
             ? {
               ...task,
-              subtasks: task.subtasks?.map((subtask) =>
-                subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
-              )
+              subtasks: task.subtasks?.map(subtask =>
+                subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask,
+              ),
             }
-            : task
-        )
+            : task,
+        ),
       );
     } catch (error) {
-      console.error("Failed to update subtask status:", error);
-      toast.error("Failed to update subtask status");
+      console.error('Failed to update subtask status:', error);
+      toast.error('Failed to update subtask status');
     }
   };
 
@@ -115,16 +220,16 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       }
 
       // Update local state by removing the task
-      setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
       toast.success('Task deleted successfully');
     } catch (error) {
-      console.error("Failed to delete task:", error);
-      toast.error("Failed to delete task");
+      console.error('Failed to delete task:', error);
+      toast.error('Failed to delete task');
     }
   };
 
   const toggleSectionExpanded = (sectionKey: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(sectionKey)) {
         newSet.delete(sectionKey);
@@ -136,7 +241,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
   };
 
   const toggleSubtasksExpanded = (taskId: string) => {
-    setExpandedSubtasks(prev => {
+    setExpandedSubtasks((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(taskId)) {
         newSet.delete(taskId);
@@ -154,7 +259,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
         [TaskStatus.IN_PROGRESS]: 1,
         [TaskStatus.TODO]: 2,
         [TaskStatus.DRAFT]: 3,
-        [TaskStatus.COMPLETED]: 4
+        [TaskStatus.COMPLETED]: 4,
       };
 
       return priorityOrder[a.status] - priorityOrder[b.status];
@@ -197,7 +302,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       today: [],
       tomorrow: [],
       thisWeek: [],
-      later: []
+      later: [],
     });
   };
 
@@ -208,7 +313,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
     today: sortTasksByPriority(groupedTasksRaw.today),
     tomorrow: sortTasksByPriority(groupedTasksRaw.tomorrow),
     thisWeek: sortTasksByPriority(groupedTasksRaw.thisWeek),
-    later: sortTasksByPriority(groupedTasksRaw.later)
+    later: sortTasksByPriority(groupedTasksRaw.later),
   };
 
   const hasAnyTasks = tasks.length > 0;
@@ -216,92 +321,16 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
   // Determine which groups to show based on filter
   const getVisibleGroups = () => {
     switch (filter) {
-      case "month":
-      case "quarter":
-        return ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
+      case 'month':
+      case 'quarter':
+        return ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'] as const;
       default: // week
-        return ["overdue", "today", "tomorrow", "thisWeek", "later"] as const;
+        return ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'] as const;
     }
   };
 
   const visibleGroups = getVisibleGroups();
 
-  const GroupSection = ({ title, tasks, count, sectionKey }: {
-    title: string;
-    tasks: TaskType[];
-    count?: number;
-    sectionKey: string;
-  }) => {
-    if (tasks.length === 0) return null;
-
-    const isExpanded = expandedSections.has(sectionKey);
-    const maxDisplayTasks = 5;
-    const shouldLimit = tasks.length > maxDisplayTasks;
-    const displayTasks = shouldLimit && !isExpanded ? tasks.slice(0, maxDisplayTasks) : tasks;
-    const totalCount = count ?? tasks.length;
-    const hiddenCount = shouldLimit && !isExpanded ? tasks.length - maxDisplayTasks : 0;
-
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h4 className="text-base font-semibold text-foreground">{title}</h4>
-          <Badge variant="secondary" className="text-xs">
-            {totalCount}
-          </Badge>
-          {hiddenCount > 0 && (
-            <span className="text-xs text-muted-foreground">
-              (+{hiddenCount} more)
-            </span>
-          )}
-        </div>
-        <div className="space-y-2">
-          {displayTasks.map((task) => (<TaskCard
-            key={task.id}
-            task={task}
-            onDeleteTask={handleDeleteTask}
-            onUpdateTaskStatus={handleStatusChange}
-            onUpdateSubtaskStatus={handleSubtaskStatusChange}
-            showCourseBadge={true}
-            isSubtasksExpanded={expandedSubtasks.has(task.id)}
-            onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
-            actions={task.course?.id ? [
-              {
-                label: `Go to ${task.course.code}`,
-                onClick: () => {
-                  if (task.course?.id) {
-                    window.location.href = `/courses/${task.course.id}#task-${task.id}`;
-                  }
-                },
-                destructive: false,
-              },
-              {
-                label: "Delete",
-                onClick: () => void handleDeleteTask(task.id),
-                destructive: true,
-              }
-            ] : [
-              {
-                label: "Delete",
-                onClick: () => void handleDeleteTask(task.id),
-                destructive: true,
-              }
-            ]}
-          />
-          ))}
-          {shouldLimit && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleSectionExpanded(sectionKey)}
-              className="text-xs text-muted-foreground hover:text-foreground w-full justify-center"
-            >
-              {isExpanded ? 'See less' : `See ${hiddenCount} more`}
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  };
   return (
     <div className="border rounded-lg bg-muted/30 min-h-[320px] flex flex-col">
       <div className="p-6 pb-4 flex-1">
@@ -309,68 +338,81 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
           <h2 className="text-2xl font-semibold">Today&apos;s Focus</h2>
           <div className="flex items-center gap-2">
             <Button
-              variant={filter === "week" ? "default" : "outline"}
+              variant={filter === 'week' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilter("week")}
+              onClick={() => setFilter('week')}
               className="text-xs"
             >
               This Week
             </Button>
             <Button
-              variant={filter === "month" ? "default" : "outline"}
+              variant={filter === 'month' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilter("month")}
+              onClick={() => setFilter('month')}
               className="text-xs"
             >
               This Month
             </Button>
             <Button
-              variant={filter === "quarter" ? "default" : "outline"}
+              variant={filter === 'quarter' ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setFilter("quarter")}
+              onClick={() => setFilter('quarter')}
               className="text-xs"
             >
               Next Quarter
             </Button>
           </div>
         </div>
+        {' '}
+        {isLoading
+          ? (
+            <div className="space-y-4">
+              {Array.from({ length: 3 }, (_, i) => (
+                <div key={`loading-skeleton-${i}`} className="h-20 bg-muted animate-pulse rounded-lg" />
+              ))}
+            </div>
+          )
+          : !hasAnyTasks
+            ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No tasks require your focus right now! 🎉</p>
+                <p className="text-sm mt-1">
+                  {filter === 'week' ? 'This week' : filter === 'month' ? 'This month' : 'Next quarter'}
+                  {' '}
+                  is looking clear.
+                </p>
+              </div>
+            )
+            : (
+              <div className="space-y-6">
+                {visibleGroups.map((groupKey) => {
+                  const groupConfig = {
+                    overdue: { title: 'Overdue', tasks: groupedTasks.overdue },
+                    today: { title: 'Due Today', tasks: groupedTasks.today },
+                    tomorrow: { title: 'Due Tomorrow', tasks: groupedTasks.tomorrow },
+                    thisWeek: { title: 'Due This Week', tasks: groupedTasks.thisWeek },
+                    later: { title: 'Due Later', tasks: groupedTasks.later },
+                  };
 
-        {isLoading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        ) : !hasAnyTasks ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>No tasks require your focus right now! 🎉</p>
-            <p className="text-sm mt-1">
-              {filter === "week" ? "This week" : filter === "month" ? "This month" : "Next quarter"} is looking clear.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {visibleGroups.map(groupKey => {
-              const groupConfig = {
-                overdue: { title: "Overdue", tasks: groupedTasks.overdue },
-                today: { title: "Due Today", tasks: groupedTasks.today },
-                tomorrow: { title: "Due Tomorrow", tasks: groupedTasks.tomorrow },
-                thisWeek: { title: "Due This Week", tasks: groupedTasks.thisWeek },
-                later: { title: "Due Later", tasks: groupedTasks.later }
-              };
-
-              const config = groupConfig[groupKey];
-              return (
-                <GroupSection
-                  key={groupKey}
-                  title={config.title}
-                  tasks={config.tasks}
-                  sectionKey={groupKey}
-                />
-              );
-            })}
-          </div>
-        )}
+                  const config = groupConfig[groupKey];
+                  return (
+                    <GroupSection
+                      key={groupKey}
+                      title={config.title}
+                      tasks={config.tasks}
+                      sectionKey={groupKey}
+                      expandedSections={expandedSections}
+                      toggleSectionExpanded={toggleSectionExpanded}
+                      expandedSubtasks={expandedSubtasks}
+                      toggleSubtasksExpanded={toggleSubtasksExpanded}
+                      handleDeleteTask={handleDeleteTask}
+                      handleStatusChange={handleStatusChange}
+                      handleSubtaskStatusChange={handleSubtaskStatusChange}
+                    />
+                  );
+                })}
+              </div>
+            )}
       </div>
     </div>
   );

@@ -1,21 +1,14 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import type { CourseListItem } from './courses-types';
+import type { Course } from '@/types/course';
+import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
-import type { Course } from '@/types/course';
 import { getOverdueTasks } from '@/lib/task/util';
 
-// Simple interface for courses list view (used by sidebar)
-export interface CourseListItem {
-  id: string;
-  code: string;
-  name: string;
-  overdueCount: number;
-}
-
-interface CoursesContextType {
+type CoursesContextType = {
   courses: Course[];
   coursesListItems: CourseListItem[];
   isLoading: boolean;
@@ -25,32 +18,34 @@ interface CoursesContextType {
   addCourse: (course: Course) => void;
   deleteCourse: (courseId: string) => void;
   updateCourse: (courseId: string, updates: Partial<Course>) => void;
-}
+};
 
 const CoursesContext = createContext<CoursesContextType | undefined>(undefined);
 
-interface CoursesProviderProps {
+export { CoursesContext };
+
+type CoursesProviderProps = {
   children: ReactNode;
-}
+};
 
 export function CoursesProvider({ children }: CoursesProviderProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);  // Convert full courses to simplified list items for sidebar
+  const [error, setError] = useState<string | null>(null); // Convert full courses to simplified list items for sidebar
   const coursesListItems: CourseListItem[] = useMemo(
     () => courses.map(course => ({
       id: course.id,
       code: course.code,
       name: course.name,
-      overdueCount: getOverdueTasks(course.tasks ?? []).length
+      overdueCount: getOverdueTasks(course.tasks ?? []).length,
     })),
-    [courses]
+    [courses],
   );
   const fetchCourses = useCallback(async () => {
     try {
       setError(null);
       setIsLoading(true);
-      const data = await api.get<Course[]>("/api/courses");
+      const data = await api.get<Course[]>('/api/courses');
       setCourses(data ?? []);
     } catch (error) {
       setError('Failed to load courses');
@@ -63,7 +58,7 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
   const refreshCourses = useCallback(async () => {
     try {
       setError(null);
-      const data = await api.get<Course[]>("/api/courses");
+      const data = await api.get<Course[]>('/api/courses');
       setCourses(data ?? []);
     } catch (error) {
       setError('Failed to refresh courses');
@@ -72,7 +67,7 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
   }, []);
 
   const addCourse = useCallback((course: Course) => {
-    setCourses(prev => {
+    setCourses((prev) => {
       // Check if course already exists to avoid duplicates
       if (prev.some(c => c.id === course.id)) {
         return prev;
@@ -84,17 +79,17 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
   const deleteCourse = useCallback((courseId: string) => {
     setCourses(prev => prev.filter(course => course.id !== courseId));
   }, []);
-
   const updateCourse = useCallback((courseId: string, updates: Partial<Course>) => {
-    setCourses(prev => prev.map(course => 
-      course.id === courseId ? { ...course, ...updates } : course
+    setCourses(prev => prev.map(course =>
+      course.id === courseId ? { ...course, ...updates } : course,
     ));
   }, []);
 
   useEffect(() => {
     void fetchCourses();
   }, [fetchCourses]);
-  const value: CoursesContextType = {
+
+  const value: CoursesContextType = useMemo(() => ({
     courses,
     coursesListItems,
     isLoading,
@@ -104,19 +99,11 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
     addCourse,
     deleteCourse,
     updateCourse,
-  };
+  }), [courses, coursesListItems, isLoading, error, fetchCourses, refreshCourses, addCourse, deleteCourse, updateCourse]);
 
   return (
-    <CoursesContext.Provider value={value}>
+    <CoursesContext value={value}>
       {children}
-    </CoursesContext.Provider>
+    </CoursesContext>
   );
-}
-
-export function useCourses() {
-  const context = useContext(CoursesContext);
-  if (context === undefined) {
-    throw new Error('useCourses must be used within a CoursesProvider');
-  }
-  return context;
 }

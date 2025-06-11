@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Sidebar } from "./sidebar";
-import { useCourses } from "@/contexts/courses-context";
+import { useCourses } from '@/contexts/use-courses';
+import { Sidebar } from './sidebar';
 
 export function SidebarWrapper() {
   const { coursesListItems, refreshCourses } = useCourses();

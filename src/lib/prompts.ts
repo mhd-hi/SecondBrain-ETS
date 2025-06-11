@@ -80,4 +80,4 @@ Here is the **RAW_HTML** of the course plan to parse:
 
 **The AI must respond ONLY** with this **JSON array** printed (strict), without any other explanation or tag.
 `;
-} 
+}

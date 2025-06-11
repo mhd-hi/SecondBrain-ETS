@@ -31,7 +31,6 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 3. Set up environment variables :
 - By copying `.env.example` to `.env`
 
-
 4. Set up the database:
    ```bash
    bun run db:generate

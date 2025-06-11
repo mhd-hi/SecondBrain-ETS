@@ -1,9 +1,10 @@
+/* eslint-disable no-console */
 import * as cheerio from 'cheerio';
 
-export interface PlanETSContent {
+export type PlanETSContent = {
   html: string;
   logs: string[];
-}
+};
 
 export async function fetchPlanETSContent(courseCode: string, term: string): Promise<PlanETSContent> {
   const logs: string[] = [];
@@ -58,4 +59,4 @@ export async function fetchPlanETSContent(courseCode: string, term: string): Pro
     html: relevantHtml,
     logs,
   };
-} 
+}

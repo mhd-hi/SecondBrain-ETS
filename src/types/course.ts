@@ -1,6 +1,6 @@
-import type { Task } from "./task";
+import type { Task } from './task';
 
-export interface Course {
+export type Course = {
   id: string;
   code: string;
   name: string;
@@ -9,38 +9,38 @@ export interface Course {
   createdAt: Date;
   updatedAt: Date;
   tasks?: Task[];
-}
+};
 
-export interface CourseCreateRequest {
+export type CourseCreateRequest = {
   code: string;
   name: string;
   description: string;
-}
+};
 
-export interface CourseCreateResponse {
+export type CourseCreateResponse = {
   id: string;
   code: string;
   name: string;
   description: string;
-}
+};
 
 // API Response Types
-export interface CourseResponse {
+export type CourseResponse = {
   data: Course;
   error?: string;
-}
+};
 
-export interface TaskResponse {
+export type TaskResponse = {
   data: Task;
   error?: string;
-}
+};
 
-export interface TasksResponse {
+export type TasksResponse = {
   data: Task[];
   error?: string;
-}
+};
 
 // Error Types
-export interface ApiError {
+export type ApiError = {
   error: string;
-} 
+};

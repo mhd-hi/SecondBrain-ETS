@@ -1,7 +1,8 @@
-import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { env } from "@/env";
-import * as schema from "@/server/db/schema";
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { env } from '@/env';
+import * as schema from '@/server/db/schema';
 
 // For migrations
 const migrationClient = postgres(env.DATABASE_URL, { max: 1 });

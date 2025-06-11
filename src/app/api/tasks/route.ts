@@ -1,35 +1,35 @@
-import { TaskStatus } from '@/types/task';
-import type { Task, Subtask } from '@/types/task'
-import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
-import { withAuthSimple } from '@/lib/auth/api';
-import { getUserCourseTasks, createUserTask, updateUserTask, deleteUserTask, getUserCourse } from '@/lib/auth/db';
+import type { Subtask, Task } from '@/types/task';
 import { NextResponse } from 'next/server';
+import { withAuthSimple } from '@/lib/auth/api';
+import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
+import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
+import { TaskStatus } from '@/types/task';
 
 export const GET = withAuthSimple(
   async (request, user) => {
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
     const statusParam = searchParams.get('status');
-    
+
     if (!courseId) {
       return NextResponse.json(
         { error: 'courseId parameter is required', code: 'MISSING_PARAMETER' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Use secure query function that automatically verifies ownership
     const courseTasks = await getUserCourseTasks(courseId, user.id);
-    
+
     // Filter by status if provided
     let filteredTasks = courseTasks;
     if (statusParam) {
       const statusStrings = statusParam.split(',').map(s => s.trim());
       filteredTasks = courseTasks.filter(task => statusStrings.includes(task.status));
     }
-    
+
     return NextResponse.json(filteredTasks);
-  }
+  },
 );
 
 export const POST = withAuthSimple(
@@ -40,7 +40,7 @@ export const POST = withAuthSimple(
         subtasks?: Subtask[];
         notes?: string;
         dueDate?: string;
-      }>
+      }>;
     };
 
     const { courseId, tasks: newTasks } = data;
@@ -49,9 +49,9 @@ export const POST = withAuthSimple(
     await getUserCourse(courseId, user.id);
 
     // Create tasks with secure function
-    const tasksToCreate = newTasks.map(task => {
+    const tasksToCreate = newTasks.map((task) => {
       const userProvidedDueDate = task.dueDate ? new Date(task.dueDate) : null;
-      
+
       return {
         ...task,
         courseId,
@@ -65,9 +65,9 @@ export const POST = withAuthSimple(
           status: subtask.status ?? TaskStatus.TODO,
         })),
         // Use user-provided due date if available, otherwise calculate from week
-        dueDate: userProvidedDueDate && !isNaN(userProvidedDueDate.getTime()) 
-          ? userProvidedDueDate 
-          : calculateTaskDueDate(task.week || 1)
+        dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
+          ? userProvidedDueDate
+          : calculateTaskDueDate(task.week || 1),
       };
     });
 
@@ -79,18 +79,18 @@ export const POST = withAuthSimple(
     }
 
     return NextResponse.json(createdTasks);
-  }
+  },
 );
 
 export const PATCH = withAuthSimple(
   async (request, user) => {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -108,26 +108,26 @@ export const PATCH = withAuthSimple(
         status: subtask.status ?? TaskStatus.TODO,
       })),
       notes: updates.notes,
-      dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined
+      dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,
     });
 
     return NextResponse.json(updatedTask);
-  }
+  },
 );
 
 export const DELETE = withAuthSimple(
   async (request, user) => {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'id parameter is required', code: 'MISSING_PARAMETER' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     await deleteUserTask(id, user.id);
     return NextResponse.json({ success: true });
-  }
+  },
 );

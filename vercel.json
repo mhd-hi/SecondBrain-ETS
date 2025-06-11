@@ -7,16 +7,5 @@
   ],
   "buildCommand": "bun run build",
   "devCommand": "bun run dev",
-  "installCommand": "bun install",
-  "functions": {
-    "src/app/api/health/route.ts": {
-      "maxDuration": 10
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/health",
-      "destination": "/api/health"
-    }
-  ]
+  "installCommand": "bun install"
 }

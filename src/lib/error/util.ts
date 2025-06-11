@@ -13,10 +13,10 @@ export const ErrorHandlers = {
   api: (error: unknown, userMessage: string, context?: string) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const logContext = context ? `[${context}]` : '';
-    
+
     console.error(`${logContext} API Error:`, error);
     toast.error(userMessage);
-    
+
     return errorMessage;
   },
 
@@ -24,10 +24,10 @@ export const ErrorHandlers = {
    * Form validation error handler
    */
   validation: (error: unknown, fieldName?: string) => {
-    const message = fieldName 
+    const message = fieldName
       ? `Invalid ${fieldName}. Please check your input.`
       : 'Please check your input and try again.';
-    
+
     console.error('Validation Error:', error);
     toast.error(message);
   },
@@ -65,13 +65,13 @@ export const CommonErrorMessages = {
   CREATE_FAILED: 'Failed to create. Please try again.',
   UPDATE_FAILED: 'Failed to update. Please try again.',
   DELETE_FAILED: 'Failed to delete. Please try again.',
-  
+
   // Course-specific
   COURSE_FETCH_FAILED: 'Failed to load courses. Please try again.',
   COURSE_CREATE_FAILED: 'Failed to create course. Please try again.',
   COURSE_UPDATE_FAILED: 'Failed to update course. Please try again.',
   COURSE_DELETE_FAILED: 'Failed to delete course. Please try again.',
-  
+
   // Task-specific
   TASK_FETCH_FAILED: 'Failed to load tasks. Please try again.',
   TASK_CREATE_FAILED: 'Failed to create task. Please try again.',
@@ -82,7 +82,7 @@ export const CommonErrorMessages = {
   DRAFT_CREATE_FAILED: 'Failed to create draft. Please try again.',
   DRAFT_UPDATE_FAILED: 'Failed to update draft. Please try again.',
   DRAFT_DELETE_FAILED: 'Failed to delete draft. Please try again.',
-  
+
   // General
   NETWORK_ERROR: 'Network error. Please check your connection.',
   VALIDATION_ERROR: 'Please check your input and try again.',
@@ -92,13 +92,28 @@ export const CommonErrorMessages = {
 } as const;
 
 /**
+ * Determine if an error is retryable (network errors, timeouts, 5xx errors)
+ */
+const isRetryableError = (error: unknown): boolean => {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+
+    return message.includes('network')
+      || message.includes('timeout')
+      || message.includes('fetch')
+      || (message.includes('5') && message.includes('0')); // 500, 502, 503, etc.
+  }
+  return false;
+};
+
+/**
  * Enhanced async operation handler with retry capability
  */
 export const handleAsyncOperation = async <T>(
   operation: () => Promise<T>,
   errorMessage: string,
   context?: string,
-  retries = 0
+  retries = 0,
 ): Promise<T | null> => {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -106,31 +121,17 @@ export const handleAsyncOperation = async <T>(
     } catch (error) {
       // If this isn't the last attempt and it's a network error, retry
       if (attempt < retries && isRetryableError(error)) {
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000)); // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 2 ** attempt * 1000)); // Exponential backoff
         continue;
       }
-      
+
       // If it's the final attempt or non-retryable error, handle it
       ErrorHandlers.api(error, errorMessage, context);
       return null;
     }
   }
-  
-  return null;
-};
 
-/**
- * Determine if an error is retryable (network errors, timeouts, 5xx errors)
- */
-const isRetryableError = (error: unknown): boolean => {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
-    return message.includes('network') || 
-           message.includes('timeout') || 
-           message.includes('fetch') ||
-           message.includes('5') && message.includes('0'); // 500, 502, 503, etc.
-  }
-  return false;
+  return null;
 };
 
 /**

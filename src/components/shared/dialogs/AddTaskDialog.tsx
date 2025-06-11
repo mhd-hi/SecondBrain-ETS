@@ -1,11 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import type { Course } from '@/types/course';
+import type { TaskType } from '@/types/task';
+import { Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
   DialogContent,
@@ -14,23 +15,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
-import { TaskStatus, type TaskType } from "@/types/task";
-import type { Course } from "@/types/course";
-import { DatePicker } from "@/components/ui/date-picker";
-import { api } from "@/lib/api/util";
-import { withLoadingState } from "@/lib/loading/util";
-import { ErrorHandlers } from "@/lib/error/util";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/lib/api/util';
+import { ErrorHandlers } from '@/lib/error/util';
+import { withLoadingState } from '@/lib/loading/util';
+import { TaskStatus } from '@/types/task';
 
-interface AddTaskDialogProps {
+type AddTaskDialogProps = {
   courseId?: string;
   courseCode?: string;
   selectedDate?: Date;
   onTaskAdded: () => void;
   trigger?: React.ReactNode;
   courses?: Course[];
-}
+};
 
 export const AddTaskDialog = ({
   courseId,
@@ -42,24 +43,25 @@ export const AddTaskDialog = ({
 }: AddTaskDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [newTask, setNewTask] = useState({
+  const [newTask, setNewTask] = useState(() => ({
     title: '',
     notes: '',
     estimatedEffort: 1,
     dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
     type: 'theorie' as TaskType,
     status: TaskStatus.TODO,
-  });
+  }));
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     setSelectedCourseId(courseId ?? null);
   }, [courseId]);
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!courseId && !selectedCourseId) {
-      toast.error("Please select a course.");
+      toast.error('Please select a course.');
       return;
     }
 
@@ -72,8 +74,8 @@ export const AddTaskDialog = ({
               ...newTask,
               status: TaskStatus.TODO,
               dueDate: newTask.dueDate.toISOString(),
-            }
-          ]
+            },
+          ],
         });
 
         toast.success('Task added successfully');
@@ -119,11 +121,11 @@ export const AddTaskDialog = ({
                   id="course"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={selectedCourseId ?? ''}
-                  onChange={(e) => setSelectedCourseId(e.target.value)}
+                  onChange={e => setSelectedCourseId(e.target.value)}
                   required={!courseId}
                 >
                   <option value="" disabled>Select a course</option>
-                  {courses.map((course) => (
+                  {courses.map(course => (
                     <option key={course.id} value={course.id}>
                       {course.code}
                     </option>
@@ -137,7 +139,7 @@ export const AddTaskDialog = ({
               <Input
                 id="title"
                 value={newTask.title}
-                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                onChange={e => setNewTask({ ...newTask, title: e.target.value })}
                 required
               />
             </div>
@@ -146,7 +148,7 @@ export const AddTaskDialog = ({
               <Textarea
                 id="notes"
                 value={newTask.notes}
-                onChange={(e) => setNewTask({ ...newTask, notes: e.target.value })}
+                onChange={e => setNewTask({ ...newTask, notes: e.target.value })}
                 placeholder="Add any additional notes or details about the task"
               />
             </div>
@@ -156,7 +158,7 @@ export const AddTaskDialog = ({
                 id="type"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={newTask.type}
-                onChange={(e) => setNewTask({ ...newTask, type: e.target.value as TaskType })}
+                onChange={e => setNewTask({ ...newTask, type: e.target.value as TaskType })}
                 required
               >
                 <option value="theorie">Theory</option>
@@ -170,7 +172,7 @@ export const AddTaskDialog = ({
               <Label>Due Date</Label>
               <DatePicker
                 date={newTask.dueDate}
-                onDateChange={(date) => date && setNewTask({ ...newTask, dueDate: date })}
+                onDateChange={date => date && setNewTask({ ...newTask, dueDate: date })}
               />
             </div>
             <div className="grid gap-2">
@@ -180,7 +182,7 @@ export const AddTaskDialog = ({
                 type="number"
                 step="0.25"
                 value={newTask.estimatedEffort}
-                onChange={(e) => setNewTask({ ...newTask, estimatedEffort: parseFloat(e.target.value) || 1 })}
+                onChange={e => setNewTask({ ...newTask, estimatedEffort: Number.parseFloat(e.target.value) || 1 })}
                 min="0.25"
                 required
               />
@@ -188,7 +190,7 @@ export const AddTaskDialog = ({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Task"}
+              {isLoading ? 'Adding...' : 'Add Task'}
             </Button>
           </DialogFooter>
         </form>

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { Suspense } from "react";
+import { AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const errorMessages: Record<string, string> = {
-  configuration: "There is a problem with the server configuration.",
-  accessdenied: "You do not have permission to sign in.",
-  verification: "The verification token has expired or has already been used.",
-  default: "An error occurred during authentication.",
+  configuration: 'There is a problem with the server configuration.',
+  accessdenied: 'You do not have permission to sign in.',
+  verification: 'The verification token has expired or has already been used.',
+  default: 'An error occurred during authentication.',
 };
 
 function AuthErrorContent() {
   const searchParams = useSearchParams();
-  const error = searchParams.get("error");
-  
+  const error = searchParams.get('error');
+
   const errorMessage = error ? errorMessages[error] ?? errorMessages.default : errorMessages.default;
 
   return (
@@ -31,7 +31,7 @@ function AuthErrorContent() {
           <CardDescription>{errorMessage}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {error === "OAuthAccountNotLinked" && (
+          {error === 'OAuthAccountNotLinked' && (
             <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
               <p className="text-sm text-yellow-800">
                 This email is already associated with another account. Please sign in with the original provider you used.
@@ -54,7 +54,7 @@ function AuthErrorContent() {
 
 export default function AuthError() {
   return (
-    <Suspense fallback={
+    <Suspense fallback={(
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
@@ -65,7 +65,8 @@ export default function AuthError() {
           </CardHeader>
         </Card>
       </div>
-    }>
+    )}
+    >
       <AuthErrorContent />
     </Suspense>
   );

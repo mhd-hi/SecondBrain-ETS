@@ -1,25 +1,26 @@
 import type { NextRequest, NextResponse } from 'next/server';
+import type { AuthenticatedUser } from '@/lib/auth/api';
 import type { Task } from '@/types/task';
-import { TaskStatus } from '@/types/task';
-import { calculateTaskDueDate } from '@/lib/task/util';
 import { successResponse } from '@/lib/api/server-util';
-import { withAuth, type AuthenticatedUser } from '@/lib/auth/api';
-import { updateUserTask, deleteUserTask } from '@/lib/auth/db';
+import { withAuth } from '@/lib/auth/api';
+import { deleteUserTask, updateUserTask } from '@/lib/auth/db';
+import { calculateTaskDueDate } from '@/lib/task/util';
+import { TaskStatus } from '@/types/task';
 
 async function handlePatchTask(
   request: NextRequest,
-  context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser }
+  context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser },
 ): Promise<NextResponse> {
   const { taskId } = await context.params;
   const updates = await request.json() as Partial<Task>;
 
   // Handle date fields properly
   const processedUpdates: Partial<Task> = { ...updates };
-  
+
   if (updates.dueDate) {
     // Ensure dueDate is a proper Date object
-    processedUpdates.dueDate = updates.dueDate instanceof Date 
-      ? updates.dueDate 
+    processedUpdates.dueDate = updates.dueDate instanceof Date
+      ? updates.dueDate
       : new Date(updates.dueDate as string | number | Date);
   }
 
@@ -45,7 +46,7 @@ async function handlePatchTask(
 
 async function handleDeleteTask(
   request: NextRequest,
-  context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser }
+  context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser },
 ): Promise<NextResponse> {
   const { taskId } = await context.params;
 

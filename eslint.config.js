@@ -1,61 +1,57 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import tseslint from "typescript-eslint";
-// @ts-ignore -- no types for this plugin
-import drizzle from "eslint-plugin-drizzle";
+import antfu from '@antfu/eslint-config';
+import nextPlugin from '@next/eslint-plugin-next';
+import jestDom from 'eslint-plugin-jest-dom';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import testingLibrary from 'eslint-plugin-testing-library';
 
-const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
-});
-
-export default tseslint.config(
+export default antfu(
   {
-    ignores: [".next"],
+    react: true,
+    typescript: true,
+
+    lessOpinionated: true,
+    isInEditor: false,
+
+    stylistic: {
+      semi: true,
+    },
+
+    formatters: {
+      css: true,
+    },
+
+    ignores: ['migrations/**/*', 'next-env.d.ts', 'node_modules/**/*', 'public/**/*'],
   },
-  ...compat.extends("next/core-web-vitals"),
+  jsxA11y.flatConfigs.recommended,
   {
-    files: ["**/*.ts", "**/*.tsx"],
     plugins: {
-      drizzle,
+      '@next/next': nextPlugin,
     },
-    extends: [
-      ...tseslint.configs.recommended,
-      ...tseslint.configs.recommendedTypeChecked,
-      ...tseslint.configs.stylisticTypeChecked,
-    ],
     rules: {
-      "@typescript-eslint/array-type": "off",
-      "@typescript-eslint/consistent-type-definitions": "off",
-      "@typescript-eslint/consistent-type-imports": [
-        "warn",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" },
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        { argsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/require-await": "off",
-      "@typescript-eslint/no-misused-promises": [
-        "error",
-        { checksVoidReturn: { attributes: false } },
-      ],
-      "drizzle/enforce-delete-with-where": [
-        "error",
-        { drizzleObjectName: ["db", "ctx.db"] },
-      ],
-      "drizzle/enforce-update-with-where": [
-        "error",
-        { drizzleObjectName: ["db", "ctx.db"] },
-      ],
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+      '@stylistic/indent': ['error', 2],
+    },
+    settings: {
+      // Configure ESLint to fail on 2+ warnings during build
+      'import/max-dependencies': [1, { max: 2 }],
     },
   },
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
+    files: ['**/*.test.ts?(x)'],
+    ...testingLibrary.configs['flat/react'],
+    ...jestDom.configs['flat/recommended'],
+  },
+  {
+    rules: {
+      'antfu/no-top-level-await': 'off', // Allow top-level await
+      'style/brace-style': ['error', '1tbs'], // Use the default brace style
+      'ts/consistent-type-definitions': ['error', 'type'], // Use `type` instead of `interface`
+      'react/prefer-destructuring-assignment': 'off', // Vscode doesn't support automatically destructuring, it's a pain to add a new variable
+      'node/prefer-global/process': 'off', // Allow using `process.env`
+      'test/padding-around-all': 'error', // Add padding in test files
+      'test/prefer-lowercase-title': 'off', // Allow using uppercase titles in test titles
+      'react/no-context-provider': 'off', // Disable to prevent false positives with Radix UI components
     },
   },
 );

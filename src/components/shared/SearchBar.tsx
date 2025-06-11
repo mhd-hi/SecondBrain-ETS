@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
-interface SearchBarProps {
+type SearchBarProps = {
   placeholder?: string;
   value: string;
   onChange: (value: string) => void;
   className?: string;
-}
+};
 
-export function SearchBar({ 
-  placeholder = "Search...", 
-  value, 
-  onChange, 
-  className = "" 
+export function SearchBar({
+  placeholder = 'Search...',
+  value,
+  onChange,
+  className = '',
 }: SearchBarProps) {
   return (
     <div className={`relative ${className}`}>
@@ -22,7 +22,7 @@ export function SearchBar({
       <Input
         placeholder={placeholder}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
         className="pl-10"
       />
     </div>
