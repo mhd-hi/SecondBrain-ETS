@@ -6,7 +6,7 @@ type CourseListSkeletonProps = {
   count?: number;
 };
 
-export function CourseListSkeleton({ count = 3 }: CourseListSkeletonProps) {
+export function CourseListSkeleton({ count = 4 }: CourseListSkeletonProps) {
   return (
     <div className="space-y-1">
       {Array.from({ length: count }).map((_, index) => (
