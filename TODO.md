@@ -4,6 +4,8 @@
 last_opened=All%20time
 - Add total effort in TaskCard
 - CHange favicon to a capibara, add it to logo too
+- add pastille in course sidebar, for the draft tasks as red and add tooltip
+- add tooltip for overdue tasks
 # Enhancement
 Progress bar:
 - Add semester progress Board and dashboard page (progressbar for all courses)

@@ -60,21 +60,23 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       </div>
 
       <div>
-        <p className="text-xs font-medium mb-1">Progress</p>
-        <div className="w-full bg-muted rounded-full h-2">
+        <div className="flex justify-between items-center mb-1">
+          <p className="text-xs font-medium">Progress</p>
+          <p className="text-right text-xs text-muted-foreground">
+            {completedTasks}
+            {' of '}
+            {totalTasks}
+            {' '}
+            tasks
+          </p>
+        </div>
+        <div className="w-full bg-muted rounded-full h-2 mb-2">
           <div
             className="h-2 rounded-full transition-all duration-300"
             style={{ width: `${progressPercentage}%`, backgroundColor: courseColor }}
           >
           </div>
         </div>
-        <p className="text-right text-xs text-muted-foreground mt-1">
-          {completedTasks}
-          {' of '}
-          {totalTasks}
-          {' '}
-          tasks
-        </p>
       </div>
 
       <div className="space-y-1 text-xs flex-1">
