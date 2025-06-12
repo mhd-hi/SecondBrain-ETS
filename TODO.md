@@ -3,7 +3,11 @@
 Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
 - in course sidebar yellow pastille add tooltip for overdue task
+- Make pomodoro persistent when i start a session and close the dialog, it should appear on the bottom right as a cutie timer. When clicking on that timer, it re-opens the dialog.
 # Enhancement
+Todays Focus:
+- Add course code filter
+    - Add a filter icon (entenoir) besides the button This week (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
 Tasks edit :
 - Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Ask user for its course periods to better determine task due dates.

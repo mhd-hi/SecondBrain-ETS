@@ -308,7 +308,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 .map(([week, weekTasks]) => (
                   <div key={week} className="space-y-4">
                     <h3 className="text-lg font-semibold mb-3">
-                      Week
+                      {'Week '}
                       {week}
                     </h3>
                     <div className="space-y-3">
