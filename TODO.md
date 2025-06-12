@@ -1,7 +1,6 @@
 # Fixes
-- fix middleware signin page
-- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&last_opened=All%20time
-- Add total effort in TaskCard
+- Add totalEffort/estimatedEffort in TaskCard
+Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
 - in course sidebar yellow pastille add tooltip for overdue task
 # Enhancement
@@ -23,7 +22,17 @@ Progress bar:
 Profile page:
 - Add theme toggle in Profile page.
 - When task is overdue, send a web notification
-
+Task PlanETS better error handling:
+    - Add an input dropdown for selecting session when fetching data from planets (e.g., current session, last sessions).
+    - Sometimes PlanETS doesn't have the data in the current session or some sessions.
+    - Pass the session parameter to the user so they can choose their session.
+    - Add better error handling when PlanETS data is not found.
+    - Check the response when the session is not valid.
+Kanban:
+    - Github-like kanban (with DRAFT, TODO, IN PROGRESS, COMPLETED)
+Google Calendar:
+    - Add google calendar in new Integrations page.
+    - Add a quick actions container in dashboard (add course, add task)
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
 - Smell: Fix this: "// Default to winter if between sessions."
