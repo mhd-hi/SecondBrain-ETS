@@ -23,7 +23,13 @@ Progress bar:
 Profile page:
 - Add theme toggle in Profile page.
 - When task is overdue, send a web notification
-
+Task PlanETS better error handling:
+    - add input dropdown (current session - last sessions) because sometimes PlanETS doesnt have the data in the current sesison or some session, so we pass in the parameter to user so that he could choose his session. Add better error handling when planets data is not found. (need to check its response when session not valid).
+Kanban:
+    - Github-like kanban (with DRAFT, TODO, IN PROGRESS, COMPLETED)
+Google Calendar:
+    - Add google calendar in new Integrations page.
+    - Add a quick actions container in dashboard (add course, add task)
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
 - Smell: Fix this: "// Default to winter if between sessions."
