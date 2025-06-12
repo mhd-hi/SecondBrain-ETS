@@ -3,8 +3,8 @@ import type { Task } from '@/types/task';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
 import { TaskStatus } from '@/types/task';
-import { USE_MOCK_DATA } from './config';
-import { setMockOpenAI } from './mocks/helper';
+import { USE_MOCK_DATA } from '../../../../lib/config';
+import { setMockOpenAI } from '../../../../lib/mocks/helper';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';
 
 // Custom error class for mock data issues

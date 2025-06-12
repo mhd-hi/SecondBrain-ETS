@@ -19,7 +19,7 @@ export class PlanetsDataSource implements DataSource {
   description = 'PlanETS Course Content';
 
   async fetch(courseCode: string, term = '20252'): Promise<SourceResult> {
-    const { fetchPlanETSContent } = await import('@/lib/planets');
+    const { fetchPlanETSContent } = await import('@/pipelines/add-course-data/steps/planets');
     const result = await fetchPlanETSContent(courseCode, term);
 
     if (!result.html || result.html.trim().length < 100) {
@@ -36,7 +36,7 @@ export class PlanetsDataSource implements DataSource {
 
 export class OpenAIProcessor {
   async process(combinedData: string, courseCode: string): Promise<CourseAIResponse> {
-    const { parseContentWithAI } = await import('@/lib/openai');
+    const { parseContentWithAI } = await import('@/pipelines/add-course-data/steps/ai/openai');
     const result = await parseContentWithAI(combinedData, courseCode);
 
     return {

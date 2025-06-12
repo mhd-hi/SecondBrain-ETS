@@ -44,3 +44,13 @@ Load tasks, plan tasks based off a period (1week intra)
 - Smell: Fix the issue with dueDate being passed as a string.
     - Convert dueDate strings as soon as possible to Date objects and handle invalid dates
     - avoid as much as possible changing from string to date and back and forth.
+
+# TESTS
+- Test the cron api, double-check the cron-secret route to delete courses is working correctly.
+- Test middleware
+- Test add course (with openai_cache)
+- Test add task output
+- Test remove course
+- Test remove task
+- Test pomodoro (test the effort has worked in both user and task tables)
+- Test edit task (change date, change title)

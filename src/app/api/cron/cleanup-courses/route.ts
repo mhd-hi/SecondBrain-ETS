@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { env } from '@/env';
 import { cleanupOldCourses } from '@/server/db/queries';
 
 export const runtime = 'nodejs';
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   try {
     // Basic API key authentication for cron jobs
     const authHeader = request.headers.get('authorization');
-    const cronSecret = process.env.CRON_SECRET;
+    const cronSecret = env.CRON_SECRET;
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json(

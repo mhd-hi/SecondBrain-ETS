@@ -14,6 +14,7 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: z.string(),
     OPENAI_API_KEY: z.string(),
     DATABASE_URL: z.string().url(),
+    CRON_SECRET: z.string(),
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
@@ -40,6 +41,7 @@ export const env = createEnv({
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
+    CRON_SECRET: process.env.CRON_SECRET,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**
