@@ -23,7 +23,11 @@ Profile page:
 - Add theme toggle in Profile page.
 - When task is overdue, send a web notification
 Task PlanETS better error handling:
-    - add input dropdown (current session - last sessions) because sometimes PlanETS doesnt have the data in the current sesison or some session, so we pass in the parameter to user so that he could choose his session. Add better error handling when planets data is not found. (need to check its response when session not valid).
+    - Add an input dropdown for selecting session when fetching data from planets (e.g., current session, last sessions).
+    - Sometimes PlanETS doesn't have the data in the current session or some sessions.
+    - Pass the session parameter to the user so they can choose their session.
+    - Add better error handling when PlanETS data is not found.
+    - Check the response when the session is not valid.
 Kanban:
     - Github-like kanban (with DRAFT, TODO, IN PROGRESS, COMPLETED)
 Google Calendar:
