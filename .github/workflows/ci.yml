@@ -61,8 +61,5 @@ jobs:
 
       - name: Audit dependencies for vulnerabilities
         run: bun audit
-
-      - name: Scan for leaked secrets
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2.3.9
