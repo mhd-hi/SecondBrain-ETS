@@ -9,21 +9,25 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:15
+        ports:
+          - 5432:5432
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: second_brain_test
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     env:
       NODE_ENV: production
-      DATABASE_URL: postgres://postgres:postgres@localhost:5432/second_brain_test
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/second_brain_test
       SKIP_ENV_VALIDATION: "1"
 
     steps:
@@ -37,6 +41,14 @@ jobs:
 
       - name: Install dependencies
         run: bun install
+
+      - name: Wait for Postgres
+        # loop until service is ready
+        run: |
+          echo "⏳ Waiting for Postgres to be ready..."
+          until pg_isready -h postgres -U postgres; do
+            sleep 1
+          done
 
       - name: Run lint
         run: bun run lint

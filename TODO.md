@@ -1,7 +1,6 @@
 # Fixes
-- fix middleware signin page
-- Fix this : https://semgrep.dev/orgs/my_org_mohamed/findings?tab=open&primary=true&last_opened=All%20time
-- Add total effort in TaskCard
+- Add totalEffort/estimatedEffort in TaskCard
+Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
 - in course sidebar yellow pastille add tooltip for overdue task
 # Enhancement
