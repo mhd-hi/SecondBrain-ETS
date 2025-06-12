@@ -226,7 +226,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   if (!course) {
     return (
-      <div className="container mx-auto px-8">
+      <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/4" />
           <div className="space-y-3">
@@ -235,12 +235,12 @@ export default function CoursePage({ params }: CoursePageProps) {
             ))}
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto px-8">
+    <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (
@@ -251,6 +251,15 @@ export default function CoursePage({ params }: CoursePageProps) {
             />
           )}
         </div>
+      </div>
+
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar
+          placeholder="Search tasks by title, notes, or subtasks..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          className="flex-1"
+        />
         {course && (
           <AddTaskDialog
             courseId={course.id}
@@ -266,13 +275,6 @@ export default function CoursePage({ params }: CoursePageProps) {
           />
         )}
       </div>
-
-      <SearchBar
-        placeholder="Search tasks by title, notes, or subtasks..."
-        value={searchQuery}
-        onChange={setSearchQuery}
-        className="mb-6"
-      />
 
       <DraftTasksBanner
         draftTasks={draftTasks}
@@ -340,6 +342,6 @@ export default function CoursePage({ params }: CoursePageProps) {
                 No tasks found. Add a task to get started.
               </div>
             )}
-    </div>
+    </main>
   );
 }

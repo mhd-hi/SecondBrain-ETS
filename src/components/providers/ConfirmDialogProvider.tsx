@@ -1,7 +1,7 @@
 'use client';
 
-import type { ConfirmDialogContextType, ConfirmFunction } from '@/lib/dialog/types';
 import type { ConfirmOptions } from '@/lib/dialog/util';
+import type { ConfirmDialogContextType, ConfirmFunction } from '@/types/dialog';
 
 import { AlertTriangle } from 'lucide-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';

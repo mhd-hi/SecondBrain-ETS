@@ -1,0 +1,25 @@
+{
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.nodePath": "./node_modules/eslint",
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact",
+    "html",
+    "markdown",
+    "json",
+    "yaml",
+    "css",
+    "pcss",
+    "postcss",
+    "github-actions-workflow"
+  ],
+  "search.exclude": {
+    "yarn.lock": true
+  }
+}
