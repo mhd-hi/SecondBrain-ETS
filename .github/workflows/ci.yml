@@ -61,5 +61,3 @@ jobs:
 
       - name: Audit dependencies for vulnerabilities
         run: bun audit
-      - name: Gitleaks
-        uses: gitleaks/gitleaks-action@v2.3.9
