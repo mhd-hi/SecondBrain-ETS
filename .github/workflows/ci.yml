@@ -30,7 +30,7 @@ jobs:
       NODE_ENV: production
       # point at localhost now that we've mapped the port
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/second_brain_test
-      SKIP_ENV_VALIDATION: "1"
+      SKIP_ENV_VALIDATION: '1'
 
     steps:
       - name: Checkout code

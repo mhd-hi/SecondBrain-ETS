@@ -106,7 +106,7 @@
     "initVersion": "7.39.3"
   },
   "overrides": {
-    "brace-expansion": "4.0.1",
+    "brace-expansion": "1.1.12",
     "esbuild": "0.25.5"
   }
 }
