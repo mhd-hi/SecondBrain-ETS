@@ -3,7 +3,6 @@
 Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
 - in course sidebar yellow pastille add tooltip for overdue task
-- Make pomodoro persistent when i start a session and close the dialog, it should appear on the bottom right as a cutie timer. When clicking on that timer, it re-opens the dialog.
 # Enhancement
 Todays Focus:
 - Add course code filter
@@ -37,6 +36,7 @@ Kanban:
 Google Calendar:
     - Add google calendar in new Integrations page.
     - Add a quick actions container in dashboard (add course, add task)
+Load tasks, plan tasks based off a period (1week intra)
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
 - Smell: Fix this: "// Default to winter if between sessions."
