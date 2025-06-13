@@ -1,18 +1,18 @@
 'use client';
 
 import type { Task, TaskStatus } from '@/types/task';
-import { Play } from 'lucide-react';
+import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
-import { SubtaskProgress } from '@/components/SubtaskProgress';
+import { SubtasksPill } from '@/components/shared/atoms/SubtasksPill';
 import { SubtasksList } from '@/components/SubtasksList';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePomodoro } from '@/contexts/use-pomodoro';
-import { getCourseColor } from '@/lib/utils';
+import { formatEffortTime, getCourseColor } from '@/lib/utils';
 import { TaskStatus as TaskStatusEnum } from '@/types/task';
 
 type TaskCardProps = {
@@ -67,10 +67,9 @@ export function TaskCard({
   ];
 
   const cardActions = actions ?? defaultActions;
+
   return (
-    <div
-      className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm"
-    >
+    <div className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
       <MoreActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -89,20 +88,48 @@ export function TaskCard({
           >
             {task.course.code}
           </Badge>
+          {' '}
+
         </div>
       )}
-      {' '}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 flex-grow">
           <h4 className="font-medium">{task.title}</h4>
           {task.notes && (
-            <p className="text-sm text-muted-foreground">{task.notes}</p>
-          )}
+            <p className="text-sm text-muted-foreground">{task.notes}</p>)}
           <div className="flex items-center gap-3">
+            <SubtasksPill
+              subtasks={task.subtasks ?? []}
+              isExpanded={isSubtasksExpanded}
+              onToggle={() => {
+                if (onToggleSubtasksExpanded) {
+                  onToggleSubtasksExpanded();
+                } else {
+                  setInternalSubtasksExpanded(!internalSubtasksExpanded);
+                }
+              }}
+            />
+
+            {/* Effort Time */}
+            {task.estimatedEffort > 0 && (
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                <Clock className="h-3 w-3 flex-shrink-0" />
+                {formatEffortTime(task.estimatedEffort)}
+              </span>
+            )}
+
+            {/* Effort Progress */}
+            {task.estimatedEffort > 0 && task.actualEffort > 0 && (
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
+                % complete
+              </span>
+            )}
+
             {task.dueDate && (
               <DueDateDisplay date={task.dueDate} />
             )}
-            <SubtaskProgress subtasks={task.subtasks} />
           </div>
         </div>
 
@@ -121,16 +148,18 @@ export function TaskCard({
             currentStatus={task.status}
             onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
           />
+          {' '}
+
         </div>
+
       </div>
       <SubtasksList
         subtasks={task.subtasks ?? []}
         onSubtaskStatusChange={(subtaskId, newStatus) =>
           onUpdateSubtaskStatus(task.id, subtaskId, newStatus)}
-        collapsible={true}
+        collapsible={false}
         defaultExpanded={false}
         isExpanded={isSubtasksExpanded}
-        onToggleExpanded={onToggleSubtasksExpanded ?? (() => setInternalSubtasksExpanded(!internalSubtasksExpanded))}
       />
     </div>
   );

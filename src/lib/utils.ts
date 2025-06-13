@@ -51,3 +51,32 @@ export function getCourseColor(course: { id: string; color?: string } | string):
   const index = course.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return COURSE_COLORS[Math.abs(index) % COURSE_COLORS.length] as string;
 }
+
+/**
+ * Formats effort hours to "1h 30min" format
+ * @param hours - The number of hours (can be decimal)
+ * @returns Formatted string like "1h 30min" or "30min" for less than 1 hour
+ */
+export function formatEffortTime(hours: number): string {
+  if (hours === 0) {
+    return '0min';
+  }
+
+  const wholeHours = Math.floor(hours);
+  const minutes = Math.round((hours - wholeHours) * 60);
+
+  // For very small values, show at least 1min
+  if (wholeHours === 0 && minutes === 0 && hours > 0) {
+    return '1min';
+  }
+
+  if (wholeHours === 0) {
+    return `${minutes}min`;
+  }
+
+  if (minutes === 0) {
+    return `${wholeHours}h`;
+  }
+
+  return `${wholeHours}h ${minutes}min`;
+}

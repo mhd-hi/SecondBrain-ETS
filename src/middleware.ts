@@ -6,12 +6,10 @@ const protectedApiRoutes = [
   '/api/courses',
   '/api/tasks',
   '/api/drafts',
-  '/api/upload',
   '/api/cron/cleanup-courses', // Protect cron jobs
   '/api/pomodoro',
   '/api/course-pipeline',
   '/api/parse-course',
-
 ];
 
 // Define public API routes that should not be protected

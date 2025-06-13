@@ -1,7 +1,6 @@
 'use client';
 
 import { Briefcase, Coffee, Pause, Play, Plus, Square } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { DurationSelector } from '@/components/shared/atoms/DurationSelector';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-
-type SessionType = 'work' | 'shortBreak' | 'longBreak';
+import { usePomodoro } from '@/contexts/use-pomodoro';
 
 type PomodoroDialogProps = {
   isOpen: boolean;
@@ -32,204 +30,28 @@ export const PomodoroDialog = ({
   setDuration,
   onComplete,
 }: PomodoroDialogProps) => {
-  const [timeLeftSec, setTimeLeftSec] = useState(duration * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [totalTimeSec, setTotalTimeSec] = useState(duration * 60);
-  const [sessionType, setSessionType] = useState<SessionType>('work');
-  const [completedPomodoros, setCompletedPomodoros] = useState(0);
-  const breakDurationsMinRef = useRef<NodeJS.Timeout | null>(null);
-  const SHORT_BREAK_DURATION = 5;
-  const LONG_BREAK_DURATION = 20;
-  const POMODOROS_BEFORE_LONG_BREAK = 4;
-
-  // Play completion sound
-  const playCompletionSound = useCallback(() => {
-    try {
-      const AudioContextClass
-        = window.AudioContext
-          || (window as unknown as { webkitAudioContext: typeof AudioContext })
-            .webkitAudioContext;
-      const audioContext = new AudioContextClass();
-
-      // Create a more friendly and gentle sound pattern
-      const createBeep = (
-        startTime: number,
-        frequency: number,
-        duration = 0.3,
-      ) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.frequency.setValueAtTime(
-          frequency,
-          audioContext.currentTime + startTime,
-        );
-        oscillator.type = 'sine'; // Sine wave is softer than square or sawtooth
-
-        // Gentle volume curve for a softer sound
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime + startTime);
-        gainNode.gain.linearRampToValueAtTime(
-          0.2,
-          audioContext.currentTime + startTime + 0.05,
-        ); // Lower volume
-        gainNode.gain.linearRampToValueAtTime(
-          0.15,
-          audioContext.currentTime + startTime + duration * 0.7,
-        );
-        gainNode.gain.linearRampToValueAtTime(
-          0,
-          audioContext.currentTime + startTime + duration,
-        );
-
-        oscillator.start(audioContext.currentTime + startTime);
-        oscillator.stop(audioContext.currentTime + startTime + duration);
-      };
-
-      // Friendly ascending melody with lower, warmer frequencies
-      createBeep(0, 330, 0.4); // E4 - warm and friendly
-      createBeep(0.25, 392, 0.4); // G4 - pleasant interval
-      createBeep(0.5, 523, 0.6); // C5 - satisfying resolution
-    } catch (error) {
-      console.warn('Could not play sound:', error);
-    }
-  }, []);
-
-  // Get session duration in minutes
-  const getSessionDuration = useCallback(
-    (type: SessionType) => {
-      switch (type) {
-        case 'work':
-          return duration;
-        case 'shortBreak':
-          return SHORT_BREAK_DURATION;
-        case 'longBreak':
-          return LONG_BREAK_DURATION;
-      }
-    },
-    [duration, SHORT_BREAK_DURATION, LONG_BREAK_DURATION],
-  );
-
-  // Switch to next session type
-  const switchToNextSession = useCallback(() => {
-    if (sessionType === 'work') {
-      const newCompletedPomodoros = completedPomodoros + 1;
-      setCompletedPomodoros(newCompletedPomodoros);
-
-      // After 4 pomodoros, take a long break
-      const nextSessionType
-        = newCompletedPomodoros % POMODOROS_BEFORE_LONG_BREAK === 0
-          ? 'longBreak'
-          : 'shortBreak';
-
-      setSessionType(nextSessionType);
-      const newDuration = getSessionDuration(nextSessionType) * 60;
-      setTimeLeftSec(newDuration);
-      setTotalTimeSec(newDuration);
-    } else {
-      // Break ended, back to work
-      setSessionType('work');
-      const newDuration = duration * 60;
-      setTimeLeftSec(newDuration);
-      setTotalTimeSec(newDuration);
-    }
-    setIsRunning(false);
-  }, [
-    sessionType,
-    completedPomodoros,
-    POMODOROS_BEFORE_LONG_BREAK,
-    getSessionDuration,
-    duration,
-  ]);
-
-  // Reset timer when dialog opens or duration changes
-  useEffect(() => {
-    if (isOpen) {
-      const durationInSeconds = duration * 60;
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setTimeLeftSec(durationInSeconds);
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setTotalTimeSec(durationInSeconds);
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setIsRunning(false);
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setSessionType('work');
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setCompletedPomodoros(0);
-    }
-  }, [isOpen, duration]);
-
-  // Timer logic
-  useEffect(() => {
-    if (isRunning && timeLeftSec > 0) {
-      breakDurationsMinRef.current = setInterval(() => {
-        setTimeLeftSec((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (breakDurationsMinRef.current) {
-        clearInterval(breakDurationsMinRef.current);
-        breakDurationsMinRef.current = null;
-      }
-    }
-
-    return () => {
-      if (breakDurationsMinRef.current) {
-        clearInterval(breakDurationsMinRef.current);
-        breakDurationsMinRef.current = null;
-      }
-    };
-  }, [isRunning, timeLeftSec]);
-
-  // Handle auto-completion when timer reaches 0
-  useEffect(() => {
-    if (timeLeftSec === 0 && !isRunning && totalTimeSec > 0) {
-      const timer = setTimeout(() => {
-        playCompletionSound();
-
-        // If it was a work session, call the backend API
-        if (sessionType === 'work') {
-          const completedMinutes = totalTimeSec / 60;
-          const durationHours = completedMinutes / 60;
-          onComplete(durationHours);
-        }
-
-        // Switch to next session (work -> break or break -> work)
-        switchToNextSession();
-      }, 0);
-
-      return () => clearTimeout(timer);
-    }
-  }, [
-    timeLeftSec,
+  const {
     isRunning,
+    timeLeftSec,
     totalTimeSec,
     sessionType,
-    onComplete,
-    playCompletionSound,
+    completedPomodoros,
+    toggleTimer,
+    stopSession,
+    addFiveMinutes,
     switchToNextSession,
-  ]);
+  } = usePomodoro();
 
   const handlePlayPause = () => {
-    setIsRunning(!isRunning);
+    toggleTimer();
   };
 
   const handleStop = () => {
-    setIsRunning(false);
-    setTimeLeftSec(totalTimeSec);
-    onClose();
+    stopSession();
   };
 
   const handleComplete = () => {
     if (sessionType === 'work') {
-      setIsRunning(false);
       const completedMinutes = (totalTimeSec - timeLeftSec) / 60;
       const durationHours = completedMinutes / 60;
       onComplete(durationHours);
@@ -238,18 +60,12 @@ export const PomodoroDialog = ({
   };
 
   const handleAddFiveMinutes = () => {
-    setTimeLeftSec(prev => prev + 5 * 60);
-    setTotalTimeSec(prev => prev + 5 * 60);
-    setDuration(duration + 5);
+    addFiveMinutes();
   };
 
   const handleDurationChange = (newDuration: number) => {
     setDuration(newDuration);
-    if (sessionType === 'work' && !isRunning) {
-      const newDurationInSeconds = newDuration * 60;
-      setTimeLeftSec(newDurationInSeconds);
-      setTotalTimeSec(newDurationInSeconds);
-    }
+    // Note: Duration changes are handled by the context when not running
   };
 
   const getElapsedMinutes = () => {
@@ -261,7 +77,7 @@ export const PomodoroDialog = ({
   };
 
   // Break activity suggestions
-  const getBreakActivities = (type: SessionType) => {
+  const getBreakActivities = (type: string) => {
     if (type === 'shortBreak') {
       return [
         '🚶 Take a short walk',
@@ -367,7 +183,6 @@ export const PomodoroDialog = ({
           {sessionType !== 'work' && (
             <div className="flex justify-center">
               <div className="bg-muted/50 max-w-xs rounded-lg p-4">
-                {' '}
                 <h3 className="mb-3 text-center text-sm font-medium">
                   {sessionType === 'shortBreak'
                     ? '✨ Quick Break Ideas (5 min)'

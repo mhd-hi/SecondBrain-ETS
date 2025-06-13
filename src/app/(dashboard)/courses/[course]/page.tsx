@@ -5,11 +5,10 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { DraftTasksBanner } from '@/components/DraftTasksBanner';
-import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { SearchBar } from '@/components/shared/SearchBar';
+import { TaskBanner } from '@/components/shared/TaskBanner';
 import { TaskCard } from '@/components/shared/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -226,7 +225,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   if (!course) {
     return (
-      <div className="container mx-auto px-8">
+      <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
         <div className="space-y-4">
           <Skeleton className="h-8 w-1/4" />
           <div className="space-y-3">
@@ -235,12 +234,12 @@ export default function CoursePage({ params }: CoursePageProps) {
             ))}
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto px-8">
+    <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (
@@ -251,6 +250,15 @@ export default function CoursePage({ params }: CoursePageProps) {
             />
           )}
         </div>
+      </div>
+
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar
+          placeholder="Search tasks by title, notes, or subtasks..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          className="flex-1"
+        />
         {course && (
           <AddTaskDialog
             courseId={course.id}
@@ -267,24 +275,35 @@ export default function CoursePage({ params }: CoursePageProps) {
         )}
       </div>
 
-      <SearchBar
-        placeholder="Search tasks by title, notes, or subtasks..."
-        value={searchQuery}
-        onChange={setSearchQuery}
-        className="mb-6"
+      <TaskBanner
+        tasks={draftTasks}
+        variant="draft"
+        isLoading={isLoading}
+        actions={[
+          {
+            label: 'Accept All',
+            onClick: handleAcceptAllDrafts,
+            className: 'text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950 dark:border-green-800',
+          },
+          {
+            label: 'Delete All',
+            onClick: handleDeleteAllDrafts,
+            className: 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950 dark:border-red-800',
+          },
+        ]}
       />
 
-      <DraftTasksBanner
-        draftTasks={draftTasks}
-        onAcceptAll={handleAcceptAllDrafts}
-        onDeleteAll={handleDeleteAllDrafts}
+      <TaskBanner
+        tasks={overdueTasks}
+        variant="overdue"
         isLoading={isLoading}
-      />
-
-      <OverdueTasksBanner
-        overdueTasks={overdueTasks}
-        onCompleteAll={handleCompleteOverdueTasks}
-        isLoading={isLoading}
+        actions={[
+          {
+            label: 'Complete All',
+            onClick: handleCompleteOverdueTasks,
+            className: 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:hover:text-yellow-300 dark:hover:bg-yellow-900 dark:border-yellow-700',
+          },
+        ]}
       />
 
       {isLoading
@@ -308,7 +327,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 .map(([week, weekTasks]) => (
                   <div key={week} className="space-y-4">
                     <h3 className="text-lg font-semibold mb-3">
-                      Week
+                      {'Week '}
                       {week}
                     </h3>
                     <div className="space-y-3">
@@ -340,6 +359,6 @@ export default function CoursePage({ params }: CoursePageProps) {
                 No tasks found. Add a task to get started.
               </div>
             )}
-    </div>
+    </main>
   );
 }

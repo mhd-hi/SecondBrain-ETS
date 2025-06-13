@@ -1,14 +1,19 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { PomodoroContextType } from './pomodoro-types';
+import type { PomodoroContextType, SessionType } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PomodoroDialog } from '@/components/Boards/FocusSession/PomodoroDialog';
-import { PomodoroContext } from './pomodoro-types';
+import { PomodoroMiniTimer } from '@/components/PomodoroMiniTimer';
+import { playCompletionSound } from '@/lib/audio/util';
+import { PomodoroContext } from '@/types/pomodoro';
 
 const PREFFERED_POMODORO_DURATION = 25;
+const SHORT_BREAK_DURATION = 5;
+const LONG_BREAK_DURATION = 20;
+const POMODOROS_BEFORE_LONG_BREAK = 4;
 
 type PomodoroProviderProps = {
   children: ReactNode;
@@ -20,30 +25,25 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   const [streak, setStreak] = useState(0);
   const [duration, setDuration] = useState(PREFFERED_POMODORO_DURATION);
 
-  // Fetch user streak on mount
-  useEffect(() => {
-    const fetchStreak = async () => {
-      try {
-        const streakResponse = await fetch('/api/pomodoro/streak');
-        if (streakResponse.ok) {
-          const streakData = await streakResponse.json() as { streakDays: number };
-          setStreak(streakData.streakDays ?? 0);
-        }
-      } catch (error) {
-        console.error('Failed to fetch streak:', error);
-      }
-    };
+  // Persistent timer state
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [timeLeftSec, setTimeLeftSec] = useState(0);
+  const [totalTimeSec, setTotalTimeSec] = useState(0);
+  const [sessionType, setSessionType] = useState<SessionType>('work');
+  const [completedPomodoros, setCompletedPomodoros] = useState(0);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    void fetchStreak();
-  }, []);
-
-  const startPomodoro = useCallback((task: Task | null, sessionDuration?: number) => {
-    setCurrentTask(task);
-    if (sessionDuration) {
-      setDuration(sessionDuration);
+  const getSessionDuration = useCallback((type: SessionType) => {
+    switch (type) {
+      case 'work':
+        return duration;
+      case 'shortBreak':
+        return SHORT_BREAK_DURATION;
+      case 'longBreak':
+        return LONG_BREAK_DURATION;
     }
-    setIsDialogOpen(true);
-  }, []);
+  }, [duration]);
 
   const handlePomodoroComplete = useCallback(async (durationHours: number) => {
     try {
@@ -100,10 +100,136 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     }
   }, [currentTask]);
 
+  const switchToNextSession = useCallback(() => {
+    if (sessionType === 'work') {
+      const newCompletedPomodoros = completedPomodoros + 1;
+      setCompletedPomodoros(newCompletedPomodoros);
+
+      const nextSessionType
+        = newCompletedPomodoros % POMODOROS_BEFORE_LONG_BREAK === 0
+          ? 'longBreak'
+          : 'shortBreak';
+
+      setSessionType(nextSessionType);
+      const newDuration = getSessionDuration(nextSessionType) * 60;
+      setTimeLeftSec(newDuration);
+      setTotalTimeSec(newDuration);
+    } else {
+      setSessionType('work');
+      const newDuration = duration * 60;
+      setTimeLeftSec(newDuration);
+      setTotalTimeSec(newDuration);
+    }
+    setIsRunning(false);
+  }, [sessionType, completedPomodoros, getSessionDuration, duration]);
+  // Timer logic
+  useEffect(() => {
+    if (isRunning && isSessionActive && timeLeftSec > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeftSec((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isRunning, isSessionActive, timeLeftSec]);
+
+  // Fetch user streak on mount
+  useEffect(() => {
+    const fetchStreak = async () => {
+      try {
+        const streakResponse = await fetch('/api/pomodoro/streak');
+        if (streakResponse.ok) {
+          const streakData = await streakResponse.json() as { streakDays: number };
+          setStreak(streakData.streakDays ?? 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch streak:', error);
+      }
+    };
+
+    void fetchStreak();
+  }, []);
+
+  const startPomodoro = useCallback((task: Task | null, sessionDuration?: number, autoStart = false) => {
+    setCurrentTask(task);
+    if (sessionDuration) {
+      setDuration(sessionDuration);
+    }
+
+    // Initialize session
+    const durationInSeconds = (sessionDuration || duration) * 60;
+    setTimeLeftSec(durationInSeconds);
+    setTotalTimeSec(durationInSeconds);
+    setSessionType('work');
+    setCompletedPomodoros(0);
+    setIsSessionActive(true);
+    setIsRunning(autoStart);
+    setIsDialogOpen(true);
+  }, [duration]);
+
+  const toggleTimer = useCallback(() => {
+    setIsRunning(!isRunning);
+  }, [isRunning]);
+
+  const stopSession = useCallback(() => {
+    setIsRunning(false);
+    setIsSessionActive(false);
+    setCurrentTask(null);
+    setIsDialogOpen(false);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const addFiveMinutes = useCallback(() => {
+    setTimeLeftSec(prev => prev + 5 * 60);
+    setTotalTimeSec(prev => prev + 5 * 60);
+    setDuration(duration + 5);
+  }, [duration]);
+
+  const openDialog = useCallback(() => {
+    setIsDialogOpen(true);
+  }, []);
   const handleDialogClose = useCallback(() => {
     setIsDialogOpen(false);
-    setCurrentTask(null);
+    // Don't reset session if it's active - this allows persistence
   }, []);
+
+  // Handle auto-completion when timer reaches 0
+  useEffect(() => {
+    if (timeLeftSec === 0 && isSessionActive && totalTimeSec > 0) {
+      const timer = setTimeout(() => {
+        playCompletionSound();
+
+        if (sessionType === 'work') {
+          const completedMinutes = totalTimeSec / 60;
+          const durationHours = completedMinutes / 60;
+          handlePomodoroComplete(durationHours);
+        }
+
+        switchToNextSession();
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeftSec, isSessionActive, totalTimeSec, sessionType, handlePomodoroComplete, switchToNextSession]);
 
   const value: PomodoroContextType = useMemo(() => ({
     startPomodoro,
@@ -112,8 +238,36 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     streak,
     duration,
     setDuration,
-  }), [startPomodoro, isDialogOpen, currentTask, streak, duration, setDuration]);
-
+    isSessionActive,
+    isRunning,
+    timeLeftSec,
+    totalTimeSec,
+    sessionType,
+    completedPomodoros,
+    toggleTimer,
+    stopSession,
+    addFiveMinutes,
+    switchToNextSession,
+    openDialog,
+  }), [
+    startPomodoro,
+    isDialogOpen,
+    currentTask,
+    streak,
+    duration,
+    setDuration,
+    isSessionActive,
+    isRunning,
+    timeLeftSec,
+    totalTimeSec,
+    sessionType,
+    completedPomodoros,
+    toggleTimer,
+    stopSession,
+    addFiveMinutes,
+    switchToNextSession,
+    openDialog,
+  ]);
   return (
     <PomodoroContext value={value}>
       {children}
@@ -126,6 +280,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
         setDuration={setDuration}
         onComplete={handlePomodoroComplete}
       />
+      <PomodoroMiniTimer />
     </PomodoroContext>
   );
 }
