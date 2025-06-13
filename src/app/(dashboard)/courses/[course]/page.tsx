@@ -239,7 +239,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
+    <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           {!isLoading && courses.length > 0 && (

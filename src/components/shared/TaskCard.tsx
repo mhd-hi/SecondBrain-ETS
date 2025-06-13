@@ -1,11 +1,12 @@
 'use client';
 
 import type { Task, TaskStatus } from '@/types/task';
-import { BarChart3, ChevronDown, ChevronRight, Clock, Play } from 'lucide-react';
+import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import { SubtasksPill } from '@/components/shared/atoms/SubtasksPill';
 import { SubtasksList } from '@/components/SubtasksList';
 import { TaskStatusChanger } from '@/components/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
@@ -97,50 +98,32 @@ export function TaskCard({
           {task.notes && (
             <p className="text-sm text-muted-foreground">{task.notes}</p>)}
           <div className="flex items-center gap-3">
-            {/* Subtasks Pill - moved to first position */}
-            {task.subtasks && task.subtasks.length > 0 && (
-              <button
-                type="button"
-                className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 px-2 py-0.5 rounded-full border border-muted transition-colors cursor-pointer"
-                onClick={() => {
-                  if (onToggleSubtasksExpanded) {
-                    onToggleSubtasksExpanded();
-                  } else {
-                    setInternalSubtasksExpanded(!internalSubtasksExpanded);
-                  }
-                }}
-                aria-expanded={isSubtasksExpanded}
-                aria-controls="subtasks-list"
-              >
-                {task.subtasks.length}
-                {' '}
-                Subtask
-                {task.subtasks.length !== 1 ? 's' : ''}
-                {' '}
-                {isSubtasksExpanded
-                  ? (
-                    <ChevronDown className="h-3 w-3 transition-transform duration-150" />
-                  )
-                  : (
-                    <ChevronRight className="h-3 w-3 transition-transform duration-150" />
-                  )}
-              </button>
-            )}
-
-            {/* Effort Progress */}
-            {task.estimatedEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <BarChart3 className="h-3 w-3" />
-                {Math.max(1, Math.round((task.actualEffort / task.estimatedEffort) * 100))}
-                % complete
-              </span>
-            )}
+            <SubtasksPill
+              subtasks={task.subtasks ?? []}
+              isExpanded={isSubtasksExpanded}
+              onToggle={() => {
+                if (onToggleSubtasksExpanded) {
+                  onToggleSubtasksExpanded();
+                } else {
+                  setInternalSubtasksExpanded(!internalSubtasksExpanded);
+                }
+              }}
+            />
 
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
               <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {formatEffortTime(task.estimatedEffort)}
+              </span>
+            )}
+
+            {/* Effort Progress */}
+            {task.estimatedEffort > 0 && task.actualEffort > 0 && (
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                <BarChart3 className="h-3 w-3" />
+                {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
+                % complete
               </span>
             )}
 
