@@ -5,7 +5,7 @@ Course sidebar:
 - in course sidebar yellow pastille add tooltip for overdue task
 # Enhancement
 Tasks edit :
-- Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
+- Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it).
 
 - Ask user for its course periods to better determine task due dates.
 AI:
