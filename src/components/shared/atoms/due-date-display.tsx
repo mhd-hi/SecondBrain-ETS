@@ -39,7 +39,7 @@ export const DueDateDisplay = ({
         className,
       )}
     >
-      <Calendar className="h-3 w-3" />
+      <Calendar className="h-3 w-3 flex-shrink-0" />
       {dueDateText}
     </span>
   );

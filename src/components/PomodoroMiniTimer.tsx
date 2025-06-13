@@ -10,7 +10,6 @@ export const PomodoroMiniTimer = () => {
     isRunning,
     timeLeftSec,
     sessionType,
-    currentTask,
     toggleTimer,
     openDialog,
   } = usePomodoro();
@@ -86,13 +85,6 @@ export const PomodoroMiniTimer = () => {
             )}
         </Button>
       </div>
-      {currentTask && (
-        <div className="mt-1 text-right">
-          <div className="text-xs text-gray-600 bg-white px-2 py-1 rounded shadow-sm max-w-[200px] truncate">
-            {currentTask.title}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

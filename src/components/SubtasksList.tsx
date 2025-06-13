@@ -53,9 +53,8 @@ const SubtasksList = ({
       toggleExpanded();
     }
   };
-
   return (
-    <div className={cn(isExpanded && 'mt-4 space-y-2')}>
+    <div id="subtasks-list" className={cn(isExpanded && 'mt-4 space-y-2')}>
       {collapsible && (
         <div
           className={cn(

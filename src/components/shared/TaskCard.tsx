@@ -113,7 +113,7 @@ export function TaskCard({
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
               <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3" />
+                <Clock className="h-3 w-3 flex-shrink-0" />
                 {formatEffortTime(task.estimatedEffort)}
               </span>
             )}
@@ -121,7 +121,7 @@ export function TaskCard({
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
               <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <BarChart3 className="h-3 w-3" />
+                <BarChart3 className="h-3 w-3 flex-shrink-0" />
                 {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
                 % complete
               </span>
