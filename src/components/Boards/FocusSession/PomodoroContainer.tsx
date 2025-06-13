@@ -140,10 +140,10 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
         updatedAt: new Date(),
         dueDate: new Date(selectedTask.dueDate),
       };
-      startPomodoro(task, duration);
+
+      startPomodoro(task, duration, true);
     } else {
-      // Start pomodoro without a task (free focus session)
-      startPomodoro(null, duration);
+      startPomodoro(null, duration, true);
     }
   };
   const getCourseBadgeProps = (course: Course) => {

@@ -46,18 +46,21 @@ const SubtasksList = ({
       }
     }
   };
+
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       toggleExpanded();
     }
   };
+
   return (
-    <div className="mt-4 space-y-2">
+    <div className={cn(isExpanded && 'mt-4 space-y-2')}>
       {collapsible && (
         <div
           className={cn(
             'flex items-center gap-2',
+            !isExpanded && 'mt-4',
             'cursor-pointer hover:text-foreground',
           )}
           onClick={toggleExpanded}

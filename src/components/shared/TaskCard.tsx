@@ -101,7 +101,7 @@ export function TaskCard({
             {task.subtasks && task.subtasks.length > 0 && (
               <button
                 type="button"
-                className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 px-2 py-1 rounded-full border border-muted transition-colors cursor-pointer"
+                className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 px-2 py-0.5 rounded-full border border-muted transition-colors cursor-pointer"
                 onClick={() => {
                   if (onToggleSubtasksExpanded) {
                     onToggleSubtasksExpanded();
@@ -116,6 +116,7 @@ export function TaskCard({
                 {' '}
                 Subtask
                 {task.subtasks.length !== 1 ? 's' : ''}
+                {' '}
                 {isSubtasksExpanded
                   ? (
                     <ChevronDown className="h-3 w-3 transition-transform duration-150" />
@@ -130,16 +131,16 @@ export function TaskCard({
             {task.estimatedEffort > 0 && (
               <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <BarChart3 className="h-3 w-3" />
-                {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
+                {Math.max(1, Math.round((task.actualEffort / task.estimatedEffort) * 100))}
                 % complete
               </span>
             )}
 
             {/* Effort Time */}
-            {task.actualEffort > 0 && (
+            {task.estimatedEffort > 0 && (
               <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                {formatEffortTime(task.actualEffort)}
+                {formatEffortTime(task.estimatedEffort)}
               </span>
             )}
 

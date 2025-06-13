@@ -64,7 +64,6 @@ export function TaskBanner({
   const taskCount = tasks.length;
   const config = VARIANT_CONFIG[variant];
   const IconComponent = config.icon;
-
   return (
     <div className={cn('space-y-4', className)}>
       {/* Banner */}
@@ -72,10 +71,10 @@ export function TaskBanner({
         variant={config.alertVariant}
         className={cn('mb-6', config.alertClassName)}
       >
-        <IconComponent className={config.iconClassName} />
         <AlertDescription className="flex items-center justify-between">
           {/* Left side: icon + message */}
           <div className="flex items-center gap-2">
+            <IconComponent className={config.iconClassName} />
             <span className={config.textClassName}>
               <strong>{taskCount}</strong>
               {' '}

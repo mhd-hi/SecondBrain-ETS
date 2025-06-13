@@ -4,7 +4,7 @@ import { createContext } from 'react';
 type SessionType = 'work' | 'shortBreak' | 'longBreak';
 
 type PomodoroContextType = {
-  startPomodoro: (task: Task | null, duration?: number) => void;
+  startPomodoro: (task: Task | null, duration?: number, autoStart?: boolean) => void;
   isDialogOpen: boolean;
   currentTask: Task | null;
   streak: number;

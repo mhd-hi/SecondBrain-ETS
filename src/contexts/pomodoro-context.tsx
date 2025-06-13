@@ -166,7 +166,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     void fetchStreak();
   }, []);
 
-  const startPomodoro = useCallback((task: Task | null, sessionDuration?: number) => {
+  const startPomodoro = useCallback((task: Task | null, sessionDuration?: number, autoStart = false) => {
     setCurrentTask(task);
     if (sessionDuration) {
       setDuration(sessionDuration);
@@ -179,7 +179,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     setSessionType('work');
     setCompletedPomodoros(0);
     setIsSessionActive(true);
-    setIsRunning(false);
+    setIsRunning(autoStart);
     setIsDialogOpen(true);
   }, [duration]);
 

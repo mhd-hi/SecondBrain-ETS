@@ -65,6 +65,11 @@ export function formatEffortTime(hours: number): string {
   const wholeHours = Math.floor(hours);
   const minutes = Math.round((hours - wholeHours) * 60);
 
+  // For very small values, show at least 1min
+  if (wholeHours === 0 && minutes === 0 && hours > 0) {
+    return '1min';
+  }
+
   if (wholeHours === 0) {
     return `${minutes}min`;
   }
