@@ -1,14 +1,17 @@
 # Fixes
 - Add totalEffort/estimatedEffort in TaskCard
+    Remove 0/2 subtasks badge, add ("graphIcon 0% complete"). This calculate the number of actualEffort/EstimatedEffort of the task. Also before the overdue text, add a clock icon with the hours effort (like "clockIcon 2h 30min")
+- Start the pomodoro the moment i click on "start pomodoro" in the pomodoro container, i dont want to click a second time in the dialog to actually start the pomodoro.
 Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
 - in course sidebar yellow pastille add tooltip for overdue task
+
 # Enhancement
 Todays Focus:
 - Add course code filter
     - Add a filter icon (entenoir) besides the button This week (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
 Tasks edit :
-- Fix tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
+- Add tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
 - Ask user for its course periods to better determine task due dates.
 AI:
 - cache openai tasks response in db
@@ -36,7 +39,12 @@ Kanban:
 Google Calendar:
     - Add google calendar in new Integrations page.
     - Add a quick actions container in dashboard (add course, add task)
-Load tasks, plan tasks based off a period (1week intra)
+Weekly Roadmap:
+    - Monthly roadmap to have a better view of tasks and easily move around tasks?
+Integrate SoundCloud
+    - Add it to pomodoro
+    - Add link to Quick actions in dashboard
+    - Or if user not connected, maybe ask him to
 # Tech debt
 - Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
 - Smell: Fix this: "// Default to winter if between sessions."

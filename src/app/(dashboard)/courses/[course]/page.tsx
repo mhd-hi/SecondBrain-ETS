@@ -5,11 +5,10 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { DraftTasksBanner } from '@/components/DraftTasksBanner';
-import { OverdueTasksBanner } from '@/components/OverdueTasksBanner';
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { SearchBar } from '@/components/shared/SearchBar';
+import { TaskBanner } from '@/components/shared/TaskBanner';
 import { TaskCard } from '@/components/shared/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -276,17 +275,35 @@ export default function CoursePage({ params }: CoursePageProps) {
         )}
       </div>
 
-      <DraftTasksBanner
-        draftTasks={draftTasks}
-        onAcceptAll={handleAcceptAllDrafts}
-        onDeleteAll={handleDeleteAllDrafts}
+      <TaskBanner
+        tasks={draftTasks}
+        variant="draft"
         isLoading={isLoading}
+        actions={[
+          {
+            label: 'Accept All',
+            onClick: handleAcceptAllDrafts,
+            className: 'text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950 dark:border-green-800',
+          },
+          {
+            label: 'Delete All',
+            onClick: handleDeleteAllDrafts,
+            className: 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950 dark:border-red-800',
+          },
+        ]}
       />
 
-      <OverdueTasksBanner
-        overdueTasks={overdueTasks}
-        onCompleteAll={handleCompleteOverdueTasks}
+      <TaskBanner
+        tasks={overdueTasks}
+        variant="overdue"
         isLoading={isLoading}
+        actions={[
+          {
+            label: 'Complete All',
+            onClick: handleCompleteOverdueTasks,
+            className: 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:hover:text-yellow-300 dark:hover:bg-yellow-900 dark:border-yellow-700',
+          },
+        ]}
       />
 
       {isLoading
