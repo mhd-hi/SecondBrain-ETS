@@ -60,6 +60,9 @@ export function TaskBanner({
   if (tasks.length === 0) {
     return null;
   }
+  if (!Object.prototype.hasOwnProperty.call(VARIANT_CONFIG, variant)) {
+    return null;
+  }
 
   const taskCount = tasks.length;
   const config = VARIANT_CONFIG[variant];
