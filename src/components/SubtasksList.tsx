@@ -52,38 +52,37 @@ const SubtasksList = ({
       toggleExpanded();
     }
   };
-
   return (
     <div className="mt-4 space-y-2">
-      <div
-        className={cn(
-          'flex items-center gap-2',
-          collapsible && 'cursor-pointer hover:text-foreground',
-        )}
-        onClick={toggleExpanded}
-        onKeyDown={collapsible ? handleKeyDown : undefined}
-        role={collapsible ? 'button' : undefined}
-        tabIndex={collapsible ? 0 : undefined}
-        aria-expanded={collapsible ? isExpanded : undefined}
-        aria-label={collapsible ? `Toggle subtasks section (${subtasks.length} subtasks)` : undefined}
-      >
-        {collapsible && (
-          isExpanded
+      {collapsible && (
+        <div
+          className={cn(
+            'flex items-center gap-2',
+            'cursor-pointer hover:text-foreground',
+          )}
+          onClick={toggleExpanded}
+          onKeyDown={handleKeyDown}
+          role="button"
+          tabIndex={0}
+          aria-expanded={isExpanded}
+          aria-label={`Toggle subtasks section (${subtasks.length} subtasks)`}
+        >
+          {isExpanded
             ? (
               <ChevronDown className="h-3 w-3 text-muted-foreground" />
             )
             : (
               <ChevronRight className="h-3 w-3 text-muted-foreground" />
+            )}
+          <h5 className="text-sm font-medium text-muted-foreground">
+            Subtasks (
+            {subtasks.length}
             )
-        )}
-        <h5 className="text-sm font-medium text-muted-foreground">
-          Subtasks (
-          {subtasks.length}
-          )
-        </h5>
-      </div>
+          </h5>
+        </div>
+      )}
 
-      {(!collapsible || isExpanded) && (
+      {isExpanded && (
         <div className="space-y-2 pl-4 border-l-2 border-muted">
           {subtasks.map(subtask => (
             <div

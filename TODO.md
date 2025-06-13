@@ -1,6 +1,6 @@
 # Fixes
 - Add totalEffort/estimatedEffort in TaskCard
-    Remove 0/2 subtasks badge, add ("graphIcon 0% complete"). This calculate the number of actualEffort/EstimatedEffort of the task. Also before the overdue text, add a clock icon with the hours effort (like "clockIcon 2h 30min")
+    Remove 0/2 subtasks badge, add ("graphIcon 0% complete"). This calculate the number of actualEffort/EstimatedEffort of the task. Also before the overdue text, add a clock icon with the hours effort (like "clockIcon 2h 30min"). They all should be in the same line.
 - Start the pomodoro the moment i click on "start pomodoro" in the pomodoro container, i dont want to click a second time in the dialog to actually start the pomodoro.
 Course sidebar:
 - in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip

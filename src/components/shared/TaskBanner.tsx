@@ -87,7 +87,7 @@ export function TaskBanner({
           <div className="flex gap-2 ml-4">
             {actions.map(action => (
               <Button
-                key={`action-${action.label}-${variant}`}
+                key={`action-${action.label}-${action.variant}`}
                 variant={action.variant || 'outline'}
                 size="sm"
                 onClick={action.onClick}
@@ -100,6 +100,7 @@ export function TaskBanner({
           </div>
         </AlertDescription>
       </Alert>
+
       {showTasks && (
         <div className="space-y-2">
           <h4 className={cn('text-sm font-medium', config.textClassName)}>
