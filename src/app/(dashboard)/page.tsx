@@ -1,8 +1,8 @@
 'use client';
 
+import CourseCard from '@/components/Boards/Course/CourseCard';
 import { PomodoroContainer } from '@/components/Boards/FocusSession/PomodoroContainer';
 import { TodaysFocus } from '@/components/Boards/TodaysFocus/TodaysFocus';
-import CourseCard from '@/components/CourseCard';
 import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourses } from '@/contexts/use-courses';

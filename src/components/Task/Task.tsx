@@ -4,7 +4,7 @@ import type { DraggedTask } from '@/types/drag-drop';
 import type { TaskStatus, Task as TaskType } from '@/types/task';
 import { useDraggable } from '@dnd-kit/core';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
-import { TaskStatusChanger } from '@/components/TaskStatusChanger';
+import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 
 type TaskProps = {

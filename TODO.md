@@ -1,64 +1,77 @@
-# Fixes
-- Add totalEffort/estimatedEffort in TaskCard
-    Remove 0/2 subtasks badge, add ("graphIcon 0% complete"). This calculate the number of actualEffort/EstimatedEffort of the task. Also before the overdue text, add a clock icon with the hours effort (like "clockIcon 2h 30min"). They all should be in the same line.
-- For complete all overdue, make it so that it only clears the draft, todo overdue tasks, but not the in progress tasks.
-Course sidebar:
-- in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
-- in course sidebar yellow pastille add tooltip for overdue task
+## Story: Today's Focus Enhancements
+1.  Add course code filter (3 points)
+    -   Add a filter icon (entenoir) besides the button "This week" (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
+    -   Add the filters in the url so that its easier to pass/change the link
+2.  Add tasks edit functionality (5 points)
+    -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
+3.  Ask user for course periods to better determine task due dates (2 points)
 
-# Enhancement
-Todays Focus:
-- Add course code filter
-    - Add a filter icon (entenoir) besides the button This week (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
-Tasks edit :
-- Add tasks edit (follow github issues - sidebar opens on the right, we can modify tasks and subtasks in it)
-- Ask user for its course periods to better determine task due dates.
-AI:
-- cache openai tasks response in db
-    - if course is not in the openai_cache db, add it.
-    Benefits:
-        - Cross-user sharing: Multiple users can benefit from the same cached response
-        - Cost optimization: Significant reduction in OpenAI API calls
-        - Performance: Faster response times for cached courses
-Better date accuracy of tasks
-- For new tasks, set default date as today+1week in the dialog.
-Progress bar:
-- Add semester progress Board and dashboard page (progressbar for all courses)
-- Add course progress Board inside the course page (progressBar for courses tasks)
-Profile page:
-- Add theme toggle in Profile page.
-- When task is overdue, send a web notification
-Task PlanETS better error handling:
-    - Add an input dropdown for selecting session when fetching data from planets (e.g., current session, last sessions).
-    - Sometimes PlanETS doesn't have the data in the current session or some sessions.
-    - Pass the session parameter to the user so they can choose their session.
-    - Add better error handling when PlanETS data is not found.
-    - Check the response when the session is not valid.
-Kanban:
-    - Github-like kanban (with DRAFT, TODO, IN PROGRESS, COMPLETED)
-Google Calendar:
-    - Add google calendar in new Integrations page.
-    - Add a quick actions container in dashboard (add course, add task)
-Weekly Roadmap:
-    - Monthly roadmap to have a better view of tasks and easily move around tasks?
-Integrate SoundCloud
-    - Add it to pomodoro
-    - Add link to Quick actions in dashboard
-    - Or if user not connected, maybe ask him to
-# Tech debt
-- Fix the sidebar, use shadcn components (currently duplicate code for mobile - desktop).
-- Smell: Fix this: "// Default to winter if between sessions."
-    - It should select the last session, not winter.
-- Smell: Fix the issue with dueDate being passed as a string.
-    - Convert dueDate strings as soon as possible to Date objects and handle invalid dates
-    - avoid as much as possible changing from string to date and back and forth.
+## Story: AI Enhancements
+4.  Cache OpenAI tasks response in DB (5 points)
+    -   If course is not in the `openai_cache` db, add it.
+    -   Benefits:
+        -   Cross-user sharing: Multiple users can benefit from the same cached response
+        -   Cost optimization: Significant reduction in OpenAI API calls
+        -   Performance: Faster response times for cached courses
+5.  Improve date accuracy of tasks (2 points)
+    -   For new tasks, set default date as today+1week in the dialog.
 
-# TESTS
-- Test the cron api, double-check the cron-secret route to delete courses is working correctly.
-- Test middleware
-- Test add course (with openai_cache)
-- Test add task output
-- Test remove course
-- Test remove task
-- Test pomodoro (test the effort has worked in both user and task tables)
-- Test edit task (change date, change title)
+## Story: Progress Tracking
+6.  Add semester progress Board and dashboard page (progressbar for all courses) (3 points)
+7.  Add course progress Board inside the course page (progressBar for courses tasks) (2 points)
+
+## Story: Profile and Notifications
+8.  Add theme toggle in Profile page (1 point)
+9.  Send web notification when task is overdue (3 points)
+
+## Story: PlanETS Integration Improvements
+10. Enhance PlanETS error handling and session selection (5 points)
+    -   Add an input dropdown for selecting session when fetching data from planets (e.g., current session, last sessions).
+    -   Handle cases where PlanETS doesn't have data in the current session or some sessions.
+    -   Pass the session parameter to the user so they can choose their session.
+    -   Add better error handling when PlanETS data is not found.
+    -   Check the response when the session is not valid.
+
+## Story: Kanban Board
+11. Implement GitHub-like Kanban board (DRAFT, TODO, IN PROGRESS, COMPLETED) (5 points)
+
+## Story: Integrations
+12. Add Google Calendar integration (5 points)
+    -   Add Google Calendar in new Integrations page.
+13. Integrate SoundCloud (3 points)
+    -   Add it to pomodoro.
+    -   Add link to Quick actions in dashboard.
+    -   Or if user not connected, maybe ask him to.
+
+## Story: Dashboard Enhancements
+14. Add quick actions container in dashboard (add course, add task) (2 points)
+
+## Story: Roadmap Features
+15. Implement Monthly roadmap for better task visualization and movement (3 points)
+
+## Story: Technical Debt Refact
+17. Fix "Default to winter if between sessions" smell (should select the last session) (2 points)
+18. Fix `dueDate` being passed as a string (3 points)
+    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates.
+    -   Avoid excessive conversion between string and Date types.
+
+## Story: API and Middleware Testing
+19. Test cron API and `cron-secret` route for deleting courses (3 points)
+20. Test middleware using sensitive API endpoints (2 points)
+
+## Story: Course Management Testing
+21. Test add course (with `openai_cache`) (2 points)
+22. Test remove course (1 point)
+23. Test task creation upon course addition (2 points)
+
+## Story: Task Management Testing
+24. Test add task (1 point)
+25. Test remove task (1 point)
+26. Test edit task (change date, title, subtasks) (3 points)
+27. Test change task status (2 points)
+28. Test "Accept all" DRAFT tasks (should change all DRAFT tasks to TODO) (2 points)
+29. Test "Remove all" DRAFT tasks (will remove all DRAFT tasks) (1 point)
+30. Test Pomodoro effort tracking (user and task tables) (3 points)
+31. Test add subtasks (1 point)
+32. Test remove subtasks (1 point)
+33. Test edit subtasks (2 points)

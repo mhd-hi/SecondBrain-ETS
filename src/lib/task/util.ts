@@ -404,17 +404,14 @@ export const batchAcceptTasks = async (tasks: Task[], sessionWeeks: number): Pro
   }>;
 };
 
-/**
- * Filters tasks to get only overdue tasks (tasks with due date in the past and not completed)
- */
-export const getOverdueTasks = (tasks: Task[]): Task[] => {
+export const getOverdueTasks = (tasks: Task[], excludeStatuses: TaskStatus[] = [TaskStatus.COMPLETED]): Task[] => {
   // Get current date at start of day to ensure consistent overdue detection
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
   return tasks.filter((task) => {
-    // Skip completed tasks
-    if (task.status === TaskStatus.COMPLETED) {
+    // Skip tasks that are in the excluded statuses
+    if (excludeStatuses.includes(task.status)) {
       return false;
     }
 

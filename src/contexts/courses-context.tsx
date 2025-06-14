@@ -1,12 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { CourseListItem } from './courses-types';
-import type { Course } from '@/types/course';
+import type { Course, CourseListItem } from '@/types/course';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
+import { TaskStatus } from '@/types/task';
 
 type CoursesContextType = {
   courses: Course[];
@@ -31,13 +31,14 @@ type CoursesProviderProps = {
 export function CoursesProvider({ children }: CoursesProviderProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Convert full courses to simplified list items for sidebar
+  const [error, setError] = useState<string | null>(null);
   const coursesListItems: CourseListItem[] = useMemo(
     () => courses.map(course => ({
       id: course.id,
       code: course.code,
       name: course.name,
       overdueCount: getOverdueTasks(course.tasks ?? []).length,
+      draftCount: course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0,
     })),
     [courses],
   );

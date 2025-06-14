@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import { SidebarWrapper } from '@/components/sidebar-wrapper';
+import Navbar from '@/components/Navbar/Navbar';
+import { SidebarWrapper } from '@/components/Sidebar/sidebar-wrapper';
 import { CoursesProvider } from '@/contexts/courses-context';
 import { PomodoroProvider } from '@/contexts/pomodoro-context';
 
@@ -16,7 +16,7 @@ export default function DashboardLayout({
           <Navbar />
           <div className="flex flex-1">
             <SidebarWrapper />
-            <main className="flex-1 container py-6">
+            <main className="flex-1 container py-6 md:ml-[300px]">
               {children}
             </main>
           </div>

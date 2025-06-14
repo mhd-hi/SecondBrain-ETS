@@ -3,7 +3,7 @@
 import type { Task as TaskType } from '@/types/task';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { TaskCard } from '@/components/shared/TaskCard';
+import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TaskStatus } from '@/types/task';

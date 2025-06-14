@@ -8,8 +8,8 @@ import { toast } from 'sonner';
 import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { SearchBar } from '@/components/shared/SearchBar';
-import { TaskBanner } from '@/components/shared/TaskBanner';
-import { TaskCard } from '@/components/shared/TaskCard';
+import { TaskBanner } from '@/components/Task/TaskBanner';
+import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourse } from '@/hooks/use-course';
@@ -137,7 +137,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const draftTasks = filteredTasks.filter(task => task.status === TaskStatus.DRAFT);
 
-  const overdueTasks = getOverdueTasks(filteredTasks);
+  const overdueTasks = getOverdueTasks(filteredTasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
 
   // Handlers for accept all and delete all DRAFT tasks
   const handleAcceptAllDrafts = async () => {
@@ -177,7 +177,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const handleCompleteOverdueTasks = async () => {
     try {
-      const currentOverdueTasks = getOverdueTasks(tasks);
+      const currentOverdueTasks = getOverdueTasks(tasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
 
       if (currentOverdueTasks.length === 0) {
         toast.success('No overdue tasks found');

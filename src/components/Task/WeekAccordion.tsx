@@ -3,7 +3,7 @@
 import type { Task } from '@/types/task';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import { SubtasksList } from '@/components/SubtasksList';
+import { SubtasksList } from '@/components/Task/SubtasksList';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/error/util';
 import { withLoadingAndErrorHandling } from '@/lib/loading/util';
 import { cn } from '@/lib/utils';
