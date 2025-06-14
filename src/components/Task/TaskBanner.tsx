@@ -36,6 +36,8 @@ const VARIANT_CONFIG = {
     textClassName: 'text-red-800 dark:text-red-200',
     getMessage: (count: number) =>
       `You have ${count} draft task${count !== 1 ? 's' : ''} awaiting your review.`,
+    getExplanation: () =>
+      'These are automatically generated tasks that need your approval.\nAccept to add them to your course with proper due dates, or delete to remove them permanently.',
   },
   overdue: {
     icon: AlertTriangleIcon,
@@ -45,6 +47,8 @@ const VARIANT_CONFIG = {
     textClassName: 'text-yellow-800 dark:text-yellow-200',
     getMessage: (count: number) =>
       `${count} overdue task${count !== 1 ? 's' : ''} need${count === 1 ? 's' : ''} attention.`,
+    getExplanation: () =>
+      'These tasks are past their due dates.\nComplete All will mark draft and todo tasks as done, while preserving any in-progress work.',
   },
 } as const;
 
@@ -68,38 +72,45 @@ export function TaskBanner({
   const config = VARIANT_CONFIG[variant];
   const IconComponent = config.icon;
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={className}>
       {/* Banner */}
       <Alert
         variant={config.alertVariant}
         className={cn('mb-6', config.alertClassName)}
       >
-        <AlertDescription className="flex items-center justify-between">
-          {/* Left side: icon + message */}
-          <div className="flex items-center gap-2">
-            <IconComponent className={config.iconClassName} />
-            <span className={config.textClassName}>
-              <strong>{taskCount}</strong>
-              {' '}
-              {config.getMessage(taskCount).split(`${taskCount} `)[1]}
-            </span>
-          </div>
+        <AlertDescription>
+          <div className="flex items-center justify-between">
+            {/* Left side: icon + message */}
+            <div className="flex items-center gap-2">
+              <IconComponent className={config.iconClassName} />
+              <span className={config.textClassName}>
+                <strong>{taskCount}</strong>
+                {' '}
+                {config.getMessage(taskCount).split(`${taskCount} `)[1]}
+              </span>
+            </div>
 
-          {/* Right side: actions */}
-          <div className="flex gap-2 ml-4">
-            {actions.map(action => (
-              <Button
-                key={`action-${action.label}-${action.variant}`}
-                variant={action.variant || 'outline'}
-                size="sm"
-                onClick={action.onClick}
-                disabled={isLoading}
-                className={action.className}
-              >
-                {action.label}
-              </Button>
-            ))}
+            {/* Right side: actions */}
+            <div className="flex gap-2 ml-4">
+              {actions.map(action => (
+                <Button
+                  key={`action-${action.label}-${action.variant}`}
+                  variant={action.variant || 'outline'}
+                  size="sm"
+                  onClick={action.onClick}
+                  disabled={isLoading}
+                  className={action.className}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
           </div>
+          {' '}
+          {/* Explanation text */}
+          <p className={cn('text-xs mt-2 opacity-80 whitespace-pre-line', config.textClassName)}>
+            {config.getExplanation()}
+          </p>
         </AlertDescription>
       </Alert>
 

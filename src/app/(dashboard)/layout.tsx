@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from '@/components/Navbar';
-import { SidebarWrapper } from '@/components/sidebar-wrapper';
+import Navbar from '@/components/Navbar/Navbar';
+import { SidebarWrapper } from '@/components/Sidebar/sidebar-wrapper';
 import { CoursesProvider } from '@/contexts/courses-context';
 import { PomodoroProvider } from '@/contexts/pomodoro-context';
 

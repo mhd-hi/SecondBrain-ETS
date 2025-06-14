@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/next';
 import { SessionProvider } from 'next-auth/react';
 import { Geist, Inter } from 'next/font/google';
-import { GlobalConfirmDialogProvider } from '@/components/providers/ConfirmDialogProvider';
+import { GlobalConfirmDialogProvider } from '@/components/shared/dialogs/ConfirmDialogProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { cn } from '@/lib/utils';

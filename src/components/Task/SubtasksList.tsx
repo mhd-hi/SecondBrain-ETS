@@ -3,7 +3,7 @@
 import type { Subtask, TaskStatus } from '@/types/task';
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
-import { TaskStatusChanger } from '@/components/TaskStatusChanger';
+import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { TaskStatus as TaskStatusEnum } from '@/types/task';

@@ -6,7 +6,7 @@ import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { PomodoroDialog } from '@/components/Boards/FocusSession/PomodoroDialog';
-import { PomodoroMiniTimer } from '@/components/PomodoroMiniTimer';
+import { PomodoroMiniTimer } from '@/components/Pomodoro/PomodoroMiniTimer';
 import { playCompletionSound } from '@/lib/audio/util';
 import { PomodoroContext } from '@/types/pomodoro';
 

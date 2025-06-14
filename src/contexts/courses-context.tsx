@@ -31,7 +31,7 @@ type CoursesProviderProps = {
 export function CoursesProvider({ children }: CoursesProviderProps) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null); // Convert full courses to simplified list items for sidebar
+  const [error, setError] = useState<string | null>(null);
   const coursesListItems: CourseListItem[] = useMemo(
     () => courses.map(course => ({
       id: course.id,

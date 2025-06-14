@@ -1,7 +1,7 @@
 'use client';
 
 import { Briefcase, Coffee, Pause, Play, Plus, Square } from 'lucide-react';
-import { DurationSelector } from '@/components/shared/atoms/DurationSelector';
+import { DurationSelector } from '@/components/Task/DurationSelector';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

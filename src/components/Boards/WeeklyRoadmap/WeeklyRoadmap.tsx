@@ -19,7 +19,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Task } from '@/components/shared/Task';
+import { Task } from '@/components/Task/Task';
 import { Button } from '@/components/ui/button';
 import { useCourses } from '@/contexts/use-courses';
 import { formatWeekRange, getWeekDates, getWeekStart } from '@/lib/date/util';

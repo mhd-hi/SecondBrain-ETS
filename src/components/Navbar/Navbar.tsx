@@ -18,8 +18,8 @@ import {
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { Card } from './ui/card';
-import { Skeleton } from './ui/skeleton';
+import { Card } from '../ui/card';
+import { Skeleton } from '../ui/skeleton';
 
 export default function Navbar() {
   const { data: session, status } = useSession();

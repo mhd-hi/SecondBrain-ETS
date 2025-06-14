@@ -2,7 +2,7 @@
 
 import { ChevronDown, Play } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { DurationSelector } from '@/components/shared/atoms/DurationSelector';
+import { DurationSelector } from '@/components/Task/DurationSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

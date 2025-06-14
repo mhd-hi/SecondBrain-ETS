@@ -361,9 +361,11 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         <CheckCircle className="h-4 w-4" />
                         <AlertTitle>
                           Course
+                          {' '}
                           {parsedData?.courseCode}
                           {' '}
                           has been created with
+                          {' '}
                           {parsedData?.tasks?.length ?? 0}
                           {' '}
                           tasks.

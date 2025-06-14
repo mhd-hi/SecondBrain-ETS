@@ -6,7 +6,7 @@ import type { TaskStatus, Task as TaskType } from '@/types/task';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-import { Task } from '@/components/shared/Task';
+import { Task } from '@/components/Task/Task';
 
 type DayColumnProps = {
   date: Date;
