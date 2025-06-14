@@ -1,7 +1,8 @@
 # Fixes
-Course sidebar, add tooltip to say the number of tasks of that count:
-- in course sidebar, add pastille in course sidebar, for the draft tasks as red and add tooltip
+Course sidebar, add tooltip to say the number of tasks of that count when hovering over the pastille in the right of the course code:
+- Remove duplicate course sidebar code by using shadcn sidebar
 - in course sidebar yellow pastille add tooltip for overdue task
+- in course sidebar, add pastille, for the draft tasks as red and add tooltip to describe the count that is in the pastille (8 draft tasks or something like that)
 
 # Enhancement
 Todays Focus:
@@ -52,10 +53,19 @@ Integrate SoundCloud
 
 # TESTS
 - Test the cron api, double-check the cron-secret route to delete courses is working correctly.
-- Test middleware
+- Test middleware using sensitive api endpoints
+Course:
 - Test add course (with openai_cache)
-- Test add task output
 - Test remove course
+- Test Did create the tasks
+Task:
+- Test add task
 - Test remove task
+- Test edit task (change date, change title, change subtasks)
+- Test change status
+- Test Accept all (DRAFT tasks (should change all DRAFT tasks to TODO))
+- Test Remove all (will remove all DRAFT tasks)
 - Test pomodoro (test the effort has worked in both user and task tables)
-- Test edit task (change date, change title)
+- Add subtasks
+- Remove subtasks
+- Edit subtasks

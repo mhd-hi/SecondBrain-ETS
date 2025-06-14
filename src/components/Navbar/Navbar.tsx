@@ -57,15 +57,6 @@ export default function Navbar() {
                 </Link>
               </Button>
             </NavigationMenuItem>
-            {session && (
-              <NavigationMenuItem>
-                <Button variant="ghost" asChild>
-                  <Link href="/profile" className={navigationMenuTriggerStyle()}>
-                    Profile
-                  </Link>
-                </Button>
-              </NavigationMenuItem>
-            )}
           </NavigationMenuList>
         </NavigationMenu>
 
@@ -92,8 +83,8 @@ export default function Navbar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem disabled>
-                      {session.user?.email}
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile">Profile</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut()}>

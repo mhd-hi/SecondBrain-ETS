@@ -16,7 +16,7 @@ export default function DashboardLayout({
           <Navbar />
           <div className="flex flex-1">
             <SidebarWrapper />
-            <main className="flex-1 container py-6">
+            <main className="flex-1 container py-6 md:ml-[300px]">
               {children}
             </main>
           </div>

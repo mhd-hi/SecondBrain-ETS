@@ -1,12 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import type { CourseListItem } from './courses-types';
-import type { Course } from '@/types/course';
+import type { Course, CourseListItem } from '@/types/course';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
+import { TaskStatus } from '@/types/task';
 
 type CoursesContextType = {
   courses: Course[];
@@ -38,6 +38,7 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
       code: course.code,
       name: course.name,
       overdueCount: getOverdueTasks(course.tasks ?? []).length,
+      draftCount: course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0,
     })),
     [courses],
   );

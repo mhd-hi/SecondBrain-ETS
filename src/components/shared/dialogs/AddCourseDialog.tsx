@@ -279,9 +279,9 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         aria-describedby="add-course-description"
       >
         <DialogHeader>
-          <DialogTitle>Add Course</DialogTitle>
+          <DialogTitle>Add New Course</DialogTitle>
           <DialogDescription id="add-course-description">
-            Enter a course code to automatically fetch syllabus data and generate tasks.
+            Enter a course code (e.g., MAT145, LOG210) to automatically fetch its syllabus data and generate a structured learning plan with tasks.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

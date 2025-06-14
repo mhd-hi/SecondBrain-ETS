@@ -79,7 +79,8 @@ export function TaskBanner({
         className={cn('mb-6', config.alertClassName)}
       >
         <AlertDescription>
-          <div className="flex items-center justify-between">
+          <div className="flex w-full flex-wrap items-center justify-between">
+            {/* Added w-full and flex-wrap here */}
             {/* Left side: icon + message */}
             <div className="flex items-center gap-2">
               <IconComponent className={config.iconClassName} />
@@ -91,7 +92,7 @@ export function TaskBanner({
             </div>
 
             {/* Right side: actions */}
-            <div className="flex gap-2 ml-4">
+            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
               {actions.map(action => (
                 <Button
                   key={`action-${action.label}-${action.variant}`}
