@@ -64,7 +64,7 @@ export function SidebarContent({ courses, isLoading = false, onCourseAdded }: Si
                       <div className="flex items-center justify-between">
                         <span className="py-0.5">{course.code}</span>
                         <div className="flex items-center">
-                          {course.draftCount && course.draftCount > 0 && (
+                          {course.draftCount > 0 && (
                             <StatusBadge
                               content={course.draftCount}
                               variant="red"

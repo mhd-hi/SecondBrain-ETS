@@ -49,5 +49,5 @@ export type CourseListItem = {
   id: string;
   code: string;
   overdueCount: number;
-  draftCount?: number;
+  draftCount: number;
 };

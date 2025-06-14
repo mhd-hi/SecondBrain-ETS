@@ -22,8 +22,8 @@ type TaskBannerProps = {
   variant: TaskBannerVariant;
   isLoading?: boolean;
   actions: TaskBannerAction[];
-  showTasks?: boolean; // Whether to show individual tasks or just the banner
-  onCompleteTask?: (taskId: string) => Promise<void>; // For individual task completion
+  showTasks?: boolean;
+  onCompleteTask?: (taskId: string) => Promise<void>;
   className?: string;
 };
 
@@ -36,7 +36,7 @@ const VARIANT_CONFIG = {
     textClassName: 'text-red-800 dark:text-red-200',
     getMessage: (count: number) =>
       `You have ${count} draft task${count !== 1 ? 's' : ''} awaiting your review.`,
-    getExplanation: () =>
+    getDescription: () =>
       'These are automatically generated tasks that need your approval.\nAccept to add them to your course with proper due dates, or delete to remove them permanently.',
   },
   overdue: {
@@ -47,7 +47,7 @@ const VARIANT_CONFIG = {
     textClassName: 'text-yellow-800 dark:text-yellow-200',
     getMessage: (count: number) =>
       `${count} overdue task${count !== 1 ? 's' : ''} need${count === 1 ? 's' : ''} attention.`,
-    getExplanation: () =>
+    getDescription: () =>
       'These tasks are past their due dates.\nComplete All will mark draft and todo tasks as done, while preserving any in-progress work.',
   },
 } as const;
@@ -64,6 +64,7 @@ export function TaskBanner({
   if (tasks.length === 0) {
     return null;
   }
+
   if (!Object.prototype.hasOwnProperty.call(VARIANT_CONFIG, variant)) {
     return null;
   }
@@ -80,8 +81,6 @@ export function TaskBanner({
       >
         <AlertDescription>
           <div className="flex w-full flex-wrap items-center justify-between">
-            {/* Added w-full and flex-wrap here */}
-            {/* Left side: icon + message */}
             <div className="flex items-center gap-2">
               <IconComponent className={config.iconClassName} />
               <span className={config.textClassName}>
@@ -90,8 +89,6 @@ export function TaskBanner({
                 {config.getMessage(taskCount).split(`${taskCount} `)[1]}
               </span>
             </div>
-
-            {/* Right side: actions */}
             <div className="flex items-center gap-2 ml-auto flex-shrink-0">
               {actions.map(action => (
                 <Button
@@ -107,10 +104,8 @@ export function TaskBanner({
               ))}
             </div>
           </div>
-          {' '}
-          {/* Explanation text */}
-          <p className={cn('text-xs mt-2 opacity-80 whitespace-pre-line', config.textClassName)}>
-            {config.getExplanation()}
+          <p className={cn('opacity-80 whitespace-pre-line', config.textClassName)}>
+            {config.getDescription()}
           </p>
         </AlertDescription>
       </Alert>
@@ -153,7 +148,7 @@ export function TaskBanner({
                     <Badge
                       variant="outline"
                       className={cn(
-                        'text-xs',
+                        'text-sm',
                         variant === 'draft'
                           ? 'border-red-300 text-red-700 dark:border-red-700 dark:text-red-300'
                           : 'border-yellow-300 text-yellow-700 dark:border-yellow-700 dark:text-yellow-300',
