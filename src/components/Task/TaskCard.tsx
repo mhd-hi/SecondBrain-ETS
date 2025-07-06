@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, TaskStatus } from '@/types/task';
+import type { Task } from '@/types/task';
 import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePomodoro } from '@/contexts/use-pomodoro';
 import { formatEffortTime, getCourseColor } from '@/lib/utils';
-import { TaskStatus as TaskStatusEnum } from '@/types/task';
+import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
 
 type TaskCardProps = {
   task: Task;
@@ -127,7 +127,7 @@ export function TaskCard({
               </span>
             )}
 
-            {task.dueDate && (
+            {task.dueDate && task.status !== TaskStatus.COMPLETED && (
               <DueDateDisplay date={task.dueDate} />
             )}
           </div>

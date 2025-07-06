@@ -1,10 +1,17 @@
 ## Story: Today's Focus Enhancements
+- remove status from subtasks
+- In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
+- Dont show overdue by x ... when task is completed.
+-1. in PomodoroDialog pomodooro not taking the right input, always defaults to 25min, for whatever input i have
+0. Ajouter small pause, long pause in pomodoro dialog, after pomodoro 1, default to "Pomodoro", theres no need for tracking number of pomodoros (remove that unecessary logic).
 1.  Add course code filter (3 points)
     -   Add a filter icon (entenoir) besides the button "This week" (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
     -   Add the filters in the url so that its easier to pass/change the link
 2.  Add tasks edit functionality (5 points)
     -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
 3.  Ask user for course periods to better determine task due dates (2 points)
+    - Whats ur first and second course date, on a normal week (for better date accuracy)
+4. Instead of "complete all" buttons, change to "Review tasks", that will open a modal where we can either complete the task or just leave as is (if student didnt complete the task).
 
 ## Story: AI Enhancements
 4.  Cache OpenAI tasks response in DB (5 points)
@@ -13,7 +20,9 @@
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
         -   Performance: Faster response times for cached courses
-5.  Improve date accuracy of tasks (2 points)
+5.  Add intra date information in description of intra task.
+
+6.  (not sure if already completed) Improve date accuracy of tasks (2 points)
     -   For new tasks, set default date as today+1week in the dialog.
 
 ## Story: Progress Tracking
@@ -52,7 +61,7 @@
 ## Story: Technical Debt Refact
 17. Fix "Default to winter if between sessions" smell (should select the last session) (2 points)
 18. Fix `dueDate` being passed as a string (3 points)
-    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates.
+    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates (in edit task, add task, in the pipeline when trying to convert tasks from weeks to dates).
     -   Avoid excessive conversion between string and Date types.
 
 ## Story: API and Middleware Testing

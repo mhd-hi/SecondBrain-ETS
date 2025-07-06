@@ -13,6 +13,7 @@ import {
   getUpcomingTask,
 } from '@/lib/task/util';
 import { getCourseColor } from '@/lib/utils';
+import { TaskStatus } from '@/types/task';
 
 type CourseCardProps = {
   course: Course;
@@ -90,9 +91,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 maxLines={1}
               />
             </div>
-            {nextTask.dueDate && (
+            {nextTask.dueDate && nextTask.status !== TaskStatus.COMPLETED && (
               <div className="flex items-center">
-                <DueDateDisplay date={nextTask.dueDate} className="text-xs" />
+                <DueDateDisplay
+                  date={nextTask.dueDate}
+                  className="text-xs"
+                />
               </div>
             )}
           </div>
@@ -108,9 +112,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 maxLines={1}
               />
             </div>
-            {upcomingTask.dueDate && (
+            {upcomingTask.dueDate && upcomingTask.status !== TaskStatus.COMPLETED && (
               <div className="flex items-center">
-                <DueDateDisplay date={upcomingTask.dueDate} className="text-xs" />
+                <DueDateDisplay
+                  date={upcomingTask.dueDate}
+                  className="text-xs"
+                />
               </div>
             )}
           </div>
