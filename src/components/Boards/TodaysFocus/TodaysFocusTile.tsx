@@ -290,7 +290,11 @@ export const TodaysFocusTile = () => {
       [TaskStatus.COMPLETED]: 4,
     };
 
-    return tasks.sort((a, b) => priorityOrder[a.status] - priorityOrder[b.status]);
+    return tasks.sort((a, b) => {
+      const aPriority = priorityOrder[a.status as keyof typeof priorityOrder] ?? 999;
+      const bPriority = priorityOrder[b.status as keyof typeof priorityOrder] ?? 999;
+      return aPriority - bPriority;
+    });
   };
 
   const groupTasksByDate = (tasks: TaskType[]): GroupedTasks => {

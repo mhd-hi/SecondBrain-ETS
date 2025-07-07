@@ -88,3 +88,6 @@
 
 (Optimisation)
 -  courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)
+
+(Features)
+- Add a Must-do tile in dashboard to let users now that you need to review some tasks (will bring them to the specific page and open the "review tasks" dialog).
