@@ -9,8 +9,7 @@ import { playCompletionSound } from '@/lib/audio/util';
 import { PomodoroContext } from './pomodoro-context';
 
 const DEFAULT_WORK_DURTION = 25;
-const DEFAULT_SHORT_BREAK_DURATION = DEFAULT_WORK_DURTION * 0.2;
-const DEFAULT_LONG_BREAK_DURATION = DEFAULT_WORK_DURTION * 0.6;
+const LONG_BREAK_THRESHOLD = 45;
 
 type SessionDurations = {
   work: number;
@@ -34,8 +33,8 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   // Track durations for each session type
   const [sessionDurations, setSessionDurations] = useState<SessionDurations>({
     work: DEFAULT_WORK_DURTION,
-    shortBreak: DEFAULT_SHORT_BREAK_DURATION,
-    longBreak: DEFAULT_LONG_BREAK_DURATION,
+    shortBreak: DEFAULT_WORK_DURTION * 0.2,
+    longBreak: DEFAULT_WORK_DURTION * 0.6,
   });
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -154,7 +153,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     setTotalTimeSec(prev => prev + 5 * 60);
   }, []);
 
-  // Timer logic - Key Fix: Removed isPomodoroActive requirement
+  // Timer logic
   useEffect(() => {
     if (isRunning && timeLeftSec > 0) {
       timerRef.current = setInterval(() => {
@@ -219,7 +218,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
         // Auto-progress to next session
         if (pomodoroType === 'work') {
           const workMinutes = totalTimeSec / 60;
-          const nextBreakType = workMinutes >= 45 ? 'longBreak' : 'shortBreak';
+          const nextBreakType = workMinutes >= LONG_BREAK_THRESHOLD ? 'longBreak' : 'shortBreak';
           switchToPomodoroType(nextBreakType);
         } else {
           switchToPomodoroType('work');
