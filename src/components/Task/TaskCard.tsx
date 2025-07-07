@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task, TaskStatus } from '@/types/task';
+import type { Task } from '@/types/task';
 import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
@@ -11,9 +11,8 @@ import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePomodoro } from '@/contexts/use-pomodoro';
-import { formatEffortTime, getCourseColor } from '@/lib/utils';
-import { TaskStatus as TaskStatusEnum } from '@/types/task';
+import { cn, formatEffortTime, getCourseColor } from '@/lib/utils';
+import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
 
 type TaskCardProps = {
   task: Task;
@@ -41,12 +40,13 @@ export function TaskCard({
   actions,
 }: TaskCardProps) {
   const router = useRouter();
-  const { startPomodoro } = usePomodoro();
   const courseColor = task.course ? getCourseColor(task.course) : undefined;
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
 
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
+
+  const isCompleted = task.status === TaskStatus.COMPLETED;
 
   const handleNavigateToTask = () => {
     if (task.course?.id) {
@@ -55,7 +55,7 @@ export function TaskCard({
   };
 
   const handleStartPomodoro = () => {
-    startPomodoro(task);
+    router.push(`/pomodoro?taskId=${task.id}`);
   };
 
   const defaultActions = [
@@ -69,7 +69,11 @@ export function TaskCard({
   const cardActions = actions ?? defaultActions;
 
   return (
-    <div className="relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
+    <div className={cn(
+      'relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm transition-colors',
+      isCompleted && 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
+    )}
+    >
       <MoreActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -94,9 +98,22 @@ export function TaskCard({
       )}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 flex-grow">
-          <h4 className="font-medium">{task.title}</h4>
+          <h4 className={cn(
+            'font-medium',
+            isCompleted && 'text-muted-foreground',
+          )}
+          >
+            {task.title}
+          </h4>
           {task.notes && (
-            <p className="text-sm text-muted-foreground">{task.notes}</p>)}
+            <p className={cn(
+              'text-sm text-muted-foreground',
+              isCompleted && 'opacity-70',
+            )}
+            >
+              {task.notes}
+            </p>
+          )}
           <div className="flex items-center gap-3">
             <SubtasksPill
               subtasks={task.subtasks ?? []}
@@ -112,7 +129,11 @@ export function TaskCard({
 
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+              <span className={cn(
+                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
+                isCompleted && 'line-through',
+              )}
+              >
                 <Clock className="h-3 w-3 flex-shrink-0" />
                 {formatEffortTime(task.estimatedEffort)}
               </span>
@@ -120,36 +141,39 @@ export function TaskCard({
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+              <span className={cn(
+                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
+                isCompleted && 'line-through',
+              )}
+              >
                 <BarChart3 className="h-3 w-3 flex-shrink-0" />
                 {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
                 % complete
               </span>
             )}
 
-            {task.dueDate && (
+            {task.dueDate && task.status !== TaskStatus.COMPLETED && (
               <DueDateDisplay date={task.dueDate} />
             )}
           </div>
         </div>
 
         <div className="flex flex-col items-end gap-2">
+          <TaskStatusChanger
+            currentStatus={task.status}
+            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
+          />
+
           {task.status === TaskStatusEnum.IN_PROGRESS && (
             <Button
               onClick={handleStartPomodoro}
               size="sm"
               className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
             >
-              <Play className="h-3 w-3 mr-1" />
+              <Play className="h-4 w-4" />
               Pomodoro
             </Button>
           )}
-          <TaskStatusChanger
-            currentStatus={task.status}
-            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
-          />
-          {' '}
-
         </div>
 
       </div>

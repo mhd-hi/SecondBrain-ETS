@@ -5,7 +5,7 @@ import { db } from '@/server/db';
 import { users } from '@/server/db/schema';
 
 export const GET = withAuthSimple(
-  async (request, user) => {
+  async (_, user) => {
     try {
       // Get user's streak information
       const result = await db

@@ -1,8 +1,11 @@
 'use client';
 
+import type { Course } from '@/types/course';
+import type { Task } from '@/types/task';
 import { ChevronDown, Play } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { DurationSelector } from '@/components/Task/DurationSelector';
+import { DurationSelector } from '@/components/Pomodoro/DurationSelector';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,141 +14,62 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCourses } from '@/contexts/use-courses';
 import { usePomodoro } from '@/contexts/use-pomodoro';
 import { getCourseColor } from '@/lib/utils';
-import { TaskStatus } from '@/types/task';
 
-type Course = {
-  id: string;
-  code: string;
-  name: string;
-  color: string;
-};
-
-type TaskForPomodoro = {
-  id: string;
-  title: string;
-  estimatedEffort: number;
-  courseId: string;
-  status: string;
-  dueDate: string;
-};
-
-type PomodoroContainerProps = {
-  _onStartPomodoroWithTask?: (taskId: string, taskTitle: string) => void;
-};
-
-export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContainerProps) => {
-  const { startPomodoro, duration, setDuration, streak } = usePomodoro();
+export function PomodoroTile() {
+  const router = useRouter();
+  const { courses } = useCourses();
+  const { streak } = usePomodoro();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [selectedTask, setSelectedTask] = useState<TaskForPomodoro | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [tasks, setTasks] = useState<TaskForPomodoro[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [duration, setDuration] = useState(25);
 
-  // Wrapped state setters to avoid ESLint warnings
-  const resetTasksAndSelection = useCallback(() => {
-    setTasks([]);
-    setSelectedTask(null);
-  }, []);
-
-  // Fetch courses on mount
+  // Fetch tasks when course changes
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('/api/courses');
-        if (response.ok) {
-          const coursesData = await response.json() as Course[];
-          setCourses(coursesData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch courses:', error);
-      }
-    };
-
-    void fetchCourses();
-  }, []);
-
-  // Fetch tasks when course is selected
-  useEffect(() => {
-    const handleCourseChange = () => {
-      if (selectedCourse) {
-        const fetchTasks = async () => {
-          try {
-            const response = await fetch(`/api/tasks?courseId=${selectedCourse.id}&status=IN_PROGRESS,TODO`);
-            if (response.ok) {
-              const tasksData = await response.json() as TaskForPomodoro[];
-              setTasks(tasksData);
-
-              // Auto-select the most urgent task (most overdue IN_PROGRESS task)
-              if (tasksData.length > 0) {
-                // Sort tasks by urgency: overdue IN_PROGRESS first, then by due date
-                const sortedTasks = tasksData.sort((a, b) => {
-                  const now = new Date();
-                  const aIsOverdue = new Date(a.dueDate) < now;
-                  const bIsOverdue = new Date(b.dueDate) < now;
-                  const aIsInProgress = a.status === 'IN_PROGRESS';
-                  const bIsInProgress = b.status === 'IN_PROGRESS';
-
-                  // Prioritize overdue IN_PROGRESS tasks
-                  if (aIsOverdue && aIsInProgress && !(bIsOverdue && bIsInProgress)) {
-                    return -1;
-                  }
-                  if (bIsOverdue && bIsInProgress && !(aIsOverdue && aIsInProgress)) {
-                    return 1;
-                  }
-
-                  // Then prioritize IN_PROGRESS tasks
-                  if (aIsInProgress && !bIsInProgress) {
-                    return -1;
-                  }
-                  if (bIsInProgress && !aIsInProgress) {
-                    return 1;
-                  }
-
-                  // Finally sort by due date (earliest first)
-                  return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-                });
-
-                setSelectedTask(sortedTasks[0]!);
-              } else {
-                setSelectedTask(null);
-              }
-            }
-          } catch (error) {
-            console.error('Failed to fetch tasks:', error);
-            resetTasksAndSelection();
+    if (selectedCourse) {
+      const fetchTasks = async () => {
+        try {
+          const response = await fetch(`/api/tasks?courseId=${selectedCourse.id}&status=TODO,IN_PROGRESS`);
+          if (response.ok) {
+            const courseTasks = await response.json();
+            setTasks(courseTasks);
           }
-        };
-
-        void fetchTasks();
-      } else {
-        resetTasksAndSelection();
-      }
-    };
-
-    handleCourseChange();
-  }, [selectedCourse, resetTasksAndSelection]);
-  const handleStartPomodoro = () => {
-    if (selectedTask) {
-      // Convert TaskForPomodoro to Task type expected by context
-      const task = {
-        ...selectedTask,
-        courseId: selectedTask.courseId,
-        week: 0, // default value
-        type: 'theorie' as const,
-        status: TaskStatus[selectedTask.status as keyof typeof TaskStatus],
-        actualEffort: 0,
-        subtasks: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        dueDate: new Date(selectedTask.dueDate),
+        } catch (error) {
+          console.error('Failed to fetch tasks:', error);
+          setTasks([]);
+        }
       };
-
-      startPomodoro(task, duration, true);
+      void fetchTasks();
     } else {
-      startPomodoro(null, duration, true);
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setTasks([]);
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setSelectedTask(null);
     }
-  };
+  }, [selectedCourse]);
+
+  const handleStartPomodoro = useCallback(() => {
+    const params = new URLSearchParams();
+
+    // Add duration
+    params.set('duration', duration.toString());
+
+    // Add course if selected
+    if (selectedCourse) {
+      params.set('courseId', selectedCourse.id);
+    }
+
+    // Add specific task if selected
+    if (selectedTask) {
+      params.set('taskId', selectedTask.id);
+    }
+
+    router.push(`/pomodoro?${params.toString()}`);
+  }, [duration, selectedCourse, selectedTask, router]);
+
   const getCourseBadgeProps = (course: Course) => {
     const courseColor = getCourseColor(course);
     return {
@@ -165,9 +89,10 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
           <DurationSelector
             duration={duration}
             onDurationChange={setDuration}
-            variant="large"
+            className="text-3xl"
           />
         </div>
+
         {/* Course Dropdown */}
         <div className="space-y-1">
           <label htmlFor="course" className="text-sm text-muted-foreground">Course</label>
@@ -224,6 +149,8 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Task Dropdown */}
         <div className="space-y-1">
           <label htmlFor="task" className="text-sm text-muted-foreground">Task</label>
           <DropdownMenu>
@@ -305,7 +232,7 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
             ? (
               <div className="flex items-center gap-1">
                 <span>
-                  {'🔥Streak: '}
+                  🔥 Streak:
                   {' '}
                   {streak}
                   {' '}
@@ -321,4 +248,4 @@ export const PomodoroContainer = ({ _onStartPomodoroWithTask }: PomodoroContaine
       </div>
     </div>
   );
-};
+}

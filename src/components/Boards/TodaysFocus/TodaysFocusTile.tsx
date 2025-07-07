@@ -1,6 +1,7 @@
 'use client';
 
 import type { Task as TaskType } from '@/types/task';
+import type { FilterType, GroupConfig, GroupedTasks, TodaysFocusGroup } from '@/types/todays-focus';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
@@ -8,24 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TaskStatus } from '@/types/task';
 
-type FilterType = 'week' | 'month' | 'quarter';
-
-type GroupedTasks = {
-  overdue: TaskType[];
-  today: TaskType[];
-  tomorrow: TaskType[];
-  thisWeek: TaskType[];
-  later: TaskType[];
-};
-
-type TodaysFocusProps = {
-  _onStartPomodoro?: (taskId: string, taskTitle: string) => void;
-};
-
 const GroupSection = ({
   title,
   tasks,
-  count,
   sectionKey,
   expandedSections,
   toggleSectionExpanded,
@@ -34,18 +20,19 @@ const GroupSection = ({
   handleDeleteTask,
   handleStatusChange,
   handleSubtaskStatusChange,
+  removingTaskIds,
 }: {
   title: string;
   tasks: TaskType[];
-  count?: number;
-  sectionKey: string;
-  expandedSections: Set<string>;
-  toggleSectionExpanded: (sectionKey: string) => void;
+  sectionKey: TodaysFocusGroup;
+  expandedSections: Set<TodaysFocusGroup>;
+  toggleSectionExpanded: (sectionKey: TodaysFocusGroup) => void;
   expandedSubtasks: Set<string>;
   toggleSubtasksExpanded: (taskId: string) => void;
   handleDeleteTask: (taskId: string) => Promise<void>;
   handleStatusChange: (taskId: string, newStatus: TaskStatus) => Promise<void>;
   handleSubtaskStatusChange: (taskId: string, subtaskId: string, newStatus: TaskStatus) => Promise<void>;
+  removingTaskIds: Set<string>;
 }) => {
   if (tasks.length === 0) {
     return null;
@@ -55,7 +42,6 @@ const GroupSection = ({
   const maxDisplayTasks = 5;
   const shouldLimit = tasks.length > maxDisplayTasks;
   const displayTasks = shouldLimit && !isExpanded ? tasks.slice(0, maxDisplayTasks) : tasks;
-  const totalCount = count ?? tasks.length;
   const hiddenCount = shouldLimit && !isExpanded ? tasks.length - maxDisplayTasks : 0;
 
   return (
@@ -63,75 +49,88 @@ const GroupSection = ({
       <div className="flex items-center gap-2">
         <h4 className="text-base font-semibold text-foreground">{title}</h4>
         <Badge variant="secondary" className="text-xs">
-          {totalCount}
+          {displayTasks.length}
         </Badge>
         {hiddenCount > 0 && (
           <span className="text-xs text-muted-foreground">
-            ( +
+            (+
             {hiddenCount}
             {' '}
             more)
           </span>
         )}
       </div>
+
       <div className="space-y-2">
         {displayTasks.map(task => (
-          <TaskCard
+          <div
             key={task.id}
-            task={task}
-            onDeleteTask={handleDeleteTask}
-            onUpdateTaskStatus={handleStatusChange}
-            onUpdateSubtaskStatus={handleSubtaskStatusChange}
-            showCourseBadge={true}
-            isSubtasksExpanded={expandedSubtasks.has(task.id)}
-            onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
-            actions={task.course?.id
-              ? [
-                {
-                  label: `Go to ${task.course.code}`,
-                  onClick: () => {
-                    if (task.course?.id) {
-                      window.location.href = `/courses/${task.course.id}#task-${task.id}`;
-                    }
-                  },
-                  destructive: false,
-                },
-                {
-                  label: 'Delete',
-                  onClick: () => void handleDeleteTask(task.id),
-                  destructive: true,
-                },
-              ]
-              : [
-                {
-                  label: 'Delete',
-                  onClick: () => void handleDeleteTask(task.id),
-                  destructive: true,
-                },
-              ]}
-          />
-        ))}
-        {shouldLimit && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => toggleSectionExpanded(sectionKey)}
-            className="text-xs text-muted-foreground hover:text-foreground w-full justify-center"
+            className={`transition-all duration-300 ease-in-out ${
+              removingTaskIds.has(task.id)
+                ? 'opacity-0 scale-95 transform -translate-y-2'
+                : 'opacity-100 scale-100 transform translate-y-0'
+            }`}
           >
-            {isExpanded ? 'See less' : `See ${hiddenCount} more`}
-          </Button>
+            <TaskCard
+              task={task}
+              onDeleteTask={handleDeleteTask}
+              onUpdateTaskStatus={handleStatusChange}
+              onUpdateSubtaskStatus={handleSubtaskStatusChange}
+              showCourseBadge={true}
+              isSubtasksExpanded={expandedSubtasks.has(task.id)}
+              onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
+              actions={task.course?.id
+                ? [
+                  {
+                    label: `Go to ${task.course.code}`,
+                    onClick: () => {
+                      if (task.course?.id) {
+                        window.location.href = `/courses/${task.course.id}#task-${task.id}`;
+                      }
+                    },
+                    destructive: false,
+                  },
+                  {
+                    label: 'Delete',
+                    onClick: () => void handleDeleteTask(task.id),
+                    destructive: true,
+                  },
+                ]
+                : [
+                  {
+                    label: 'Delete',
+                    onClick: () => void handleDeleteTask(task.id),
+                    destructive: true,
+                  },
+                ]}
+            />
+          </div>
+        ))}
+
+        {shouldLimit && (
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleSectionExpanded(sectionKey)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              {isExpanded ? 'See less' : `See ${hiddenCount} more tasks`}
+            </Button>
+          </div>
         )}
       </div>
     </div>
   );
 };
 
-export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
+export const TodaysFocusTile = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>('week');
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<TodaysFocusGroup>>(() => new Set());
   const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(() => new Set());
+  const [removingTaskIds, setRemovingTaskIds] = useState<Set<string>>(() => new Set());
 
   const fetchFocusTasks = useCallback(async () => {
     setIsLoading(true);
@@ -142,6 +141,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       }
       const focusTasks = await response.json() as TaskType[];
       setTasks(focusTasks);
+      setRemovingTaskIds(new Set());
     } catch (error) {
       console.error('Failed to load focus tasks:', error);
       toast.error('Failed to load focus tasks');
@@ -153,6 +153,10 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
   useEffect(() => {
     void fetchFocusTasks();
   }, [fetchFocusTasks]);
+
+  const shouldRemoveTask = (newStatus: TaskStatus): boolean => {
+    return newStatus === TaskStatus.COMPLETED || newStatus === TaskStatus.DRAFT;
+  };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
@@ -166,12 +170,24 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
         throw new Error('Failed to update task status');
       }
 
-      // Update local state
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId ? { ...task, status: newStatus } : task,
-        ),
-      );
+      if (shouldRemoveTask(newStatus)) {
+        setRemovingTaskIds(prev => new Set(prev).add(taskId));
+
+        setTimeout(() => {
+          setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+          setRemovingTaskIds((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(taskId);
+            return newSet;
+          });
+        }, 300);
+      } else {
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId ? { ...task, status: newStatus } : task,
+          ),
+        );
+      }
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
@@ -190,7 +206,6 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
         throw new Error('Failed to update subtask status');
       }
 
-      // Update local state
       setTasks(prevTasks =>
         prevTasks.map(task =>
           task.id === taskId
@@ -211,6 +226,8 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
+      setRemovingTaskIds(prev => new Set(prev).add(taskId));
+
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'DELETE',
       });
@@ -219,16 +236,29 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
         throw new Error('Failed to delete task');
       }
 
-      // Update local state by removing the task
-      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+      setTimeout(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+        setRemovingTaskIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(taskId);
+          return newSet;
+        });
+      }, 300);
+
       toast.success('Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
       toast.error('Failed to delete task');
+
+      setRemovingTaskIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(taskId);
+        return newSet;
+      });
     }
   };
 
-  const toggleSectionExpanded = (sectionKey: string) => {
+  const toggleSectionExpanded = (sectionKey: TodaysFocusGroup) => {
     setExpandedSections((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(sectionKey)) {
@@ -252,21 +282,21 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
     });
   };
 
-  // Sort tasks by priority: IN_PROGRESS > TODO > DRAFT > COMPLETED
   const sortTasksByPriority = (tasks: TaskType[]): TaskType[] => {
-    return tasks.sort((a, b) => {
-      const priorityOrder = {
-        [TaskStatus.IN_PROGRESS]: 1,
-        [TaskStatus.TODO]: 2,
-        [TaskStatus.DRAFT]: 3,
-        [TaskStatus.COMPLETED]: 4,
-      };
+    const priorityOrder = {
+      [TaskStatus.IN_PROGRESS]: 1,
+      [TaskStatus.TODO]: 2,
+      [TaskStatus.DRAFT]: 3,
+      [TaskStatus.COMPLETED]: 4,
+    };
 
-      return priorityOrder[a.status] - priorityOrder[b.status];
+    return tasks.sort((a, b) => {
+      const aPriority = priorityOrder[a.status as keyof typeof priorityOrder] ?? 999;
+      const bPriority = priorityOrder[b.status as keyof typeof priorityOrder] ?? 999;
+      return aPriority - bPriority;
     });
   };
 
-  // Group tasks by due date
   const groupTasksByDate = (tasks: TaskType[]): GroupedTasks => {
     const now = new Date();
     const today = new Date(now);
@@ -281,11 +311,8 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
       const taskDate = new Date(task.dueDate);
       taskDate.setHours(0, 0, 0, 0);
 
-      if (taskDate < today) {
-        // Only include in overdue if the task is not completed
-        if (task.status !== TaskStatus.COMPLETED) {
-          groups.overdue.push(task);
-        }
+      if (taskDate < today && task.status !== TaskStatus.COMPLETED) {
+        groups.overdue.push(task);
       } else if (taskDate.getTime() === today.getTime()) {
         groups.today.push(task);
       } else if (taskDate.getTime() === tomorrow.getTime()) {
@@ -307,7 +334,6 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
   };
 
   const groupedTasksRaw = groupTasksByDate(tasks);
-  // Sort tasks within each group by priority
   const groupedTasks = {
     overdue: sortTasksByPriority(groupedTasksRaw.overdue),
     today: sortTasksByPriority(groupedTasksRaw.today),
@@ -316,20 +342,15 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
     later: sortTasksByPriority(groupedTasksRaw.later),
   };
 
-  const hasAnyTasks = tasks.length > 0;
-
-  // Determine which groups to show based on filter
-  const getVisibleGroups = () => {
-    switch (filter) {
-      case 'month':
-      case 'quarter':
-        return ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'] as const;
-      default: // week
-        return ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'] as const;
-    }
+  const GROUP_CONFIGS: Record<TodaysFocusGroup, GroupConfig> = {
+    overdue: { title: 'Overdue', tasks: groupedTasks.overdue },
+    today: { title: 'Due Today', tasks: groupedTasks.today },
+    tomorrow: { title: 'Due Tomorrow', tasks: groupedTasks.tomorrow },
+    thisWeek: { title: 'Due This Week', tasks: groupedTasks.thisWeek },
+    later: { title: 'Due Later', tasks: groupedTasks.later },
   };
 
-  const visibleGroups = getVisibleGroups();
+  const visibleGroups: TodaysFocusGroup[] = ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'];
 
   return (
     <div className="border rounded-lg bg-muted/30 min-h-[320px] flex flex-col">
@@ -337,33 +358,33 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Today&apos;s Focus</h2>
           <div className="flex items-center gap-2">
-            <Button
-              variant={filter === 'week' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('week')}
-              className="text-xs"
-            >
-              This Week
-            </Button>
-            <Button
-              variant={filter === 'month' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('month')}
-              className="text-xs"
-            >
-              This Month
-            </Button>
-            <Button
-              variant={filter === 'quarter' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setFilter('quarter')}
-              className="text-xs"
-            >
-              Next Quarter
-            </Button>
+            {[
+              {
+                key: 'week',
+                label: 'This Week',
+              },
+              {
+                key: 'month',
+                label: 'This Month',
+              },
+              {
+                key: 'quarter',
+                label: 'Next Quarter',
+              },
+            ].map(({ key, label }) => (
+              <Button
+                key={key}
+                variant={filter === key ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilter(key as FilterType)}
+                className="text-xs"
+              >
+                {label}
+              </Button>
+            ))}
           </div>
         </div>
-        {' '}
+
         {isLoading
           ? (
             <div className="space-y-4">
@@ -372,7 +393,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
               ))}
             </div>
           )
-          : !hasAnyTasks
+          : tasks.length === 0
             ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No tasks require your focus right now! 🎉</p>
@@ -386,15 +407,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
             : (
               <div className="space-y-6">
                 {visibleGroups.map((groupKey) => {
-                  const groupConfig = {
-                    overdue: { title: 'Overdue', tasks: groupedTasks.overdue },
-                    today: { title: 'Due Today', tasks: groupedTasks.today },
-                    tomorrow: { title: 'Due Tomorrow', tasks: groupedTasks.tomorrow },
-                    thisWeek: { title: 'Due This Week', tasks: groupedTasks.thisWeek },
-                    later: { title: 'Due Later', tasks: groupedTasks.later },
-                  };
-
-                  const config = groupConfig[groupKey];
+                  const config = GROUP_CONFIGS[groupKey];
                   return (
                     <GroupSection
                       key={groupKey}
@@ -408,6 +421,7 @@ export const TodaysFocus = ({ _onStartPomodoro }: TodaysFocusProps) => {
                       handleDeleteTask={handleDeleteTask}
                       handleStatusChange={handleStatusChange}
                       handleSubtaskStatusChange={handleSubtaskStatusChange}
+                      removingTaskIds={removingTaskIds}
                     />
                   );
                 })}

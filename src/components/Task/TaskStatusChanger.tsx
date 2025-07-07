@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextStatus, isValidStatus, STATUS_CONFIG, STATUS_ORDER } from '@/lib/task/util';
+import { getNextStatus, isValidStatus, STATUS_CONFIG } from '@/lib/task/util';
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/types/task';
 
@@ -15,6 +15,12 @@ type TaskStatusChangerProps = {
   currentStatus: TaskStatus;
   onStatusChange: (newStatus: TaskStatus) => void;
 };
+
+const USER_STATUS_ORDER = [
+  TaskStatus.TODO,
+  TaskStatus.IN_PROGRESS,
+  TaskStatus.COMPLETED,
+] as const;
 
 const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerProps) => {
   const handleArrowClick = () => {
@@ -88,7 +94,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           align="start"
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0 rounded-md overflow-hidden"
         >
-          {STATUS_ORDER.map((status, index) => {
+          {USER_STATUS_ORDER.map((status, index) => {
             const statusConfig = STATUS_CONFIG[status];
             const isCompleted = status === TaskStatus.COMPLETED;
 
@@ -101,7 +107,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                   'font-medium text-xs uppercase',
                   'hover:bg-accent hover:text-accent-foreground focus:outline-none',
                   'cursor-pointer',
-                  index !== STATUS_ORDER.length - 1 && 'border-b border-border',
+                  index !== USER_STATUS_ORDER.length - 1 && 'border-b border-border',
                 )}
               >
                 <div className={cn(

@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { TaskStatus } from '@/types/task';
 
 type TaskBannerVariant = 'draft' | 'overdue';
 
@@ -137,7 +138,7 @@ export function TaskBanner({
                     {task.title}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    {task.dueDate && (
+                    {task.dueDate && task.status !== TaskStatus.COMPLETED && (
                       <DueDateDisplay
                         date={task.dueDate}
                         className={variant === 'draft'

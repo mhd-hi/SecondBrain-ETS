@@ -1,9 +1,10 @@
-import type { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import type { AuthenticatedUser } from '@/lib/auth/api';
 import type { Task } from '@/types/task';
+import { NextResponse } from 'next/server';
 import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
-import { deleteUserTask, updateUserTask } from '@/lib/auth/db';
+import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task';
 
@@ -59,3 +60,12 @@ async function handleDeleteTask(
 // Export the wrapped handlers
 export const PATCH = withAuth(handlePatchTask);
 export const DELETE = withAuth(handleDeleteTask);
+export const GET = withAuth<{ taskId: string }>(
+  async (request, { params, user }) => {
+    const { taskId } = await params;
+
+    const task = await getUserTask(taskId, user.id);
+
+    return NextResponse.json(task);
+  },
+);

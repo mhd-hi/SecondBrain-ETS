@@ -2,7 +2,7 @@ import React from 'react';
 import Navbar from '@/components/Navbar/Navbar';
 import { SidebarWrapper } from '@/components/Sidebar/sidebar-wrapper';
 import { CoursesProvider } from '@/contexts/courses-context';
-import { PomodoroProvider } from '@/contexts/pomodoro-context';
+import { PomodoroProvider } from '@/contexts/pomodoro-provider';
 
 export default function DashboardLayout({
   children,

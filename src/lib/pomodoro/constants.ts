@@ -1,6 +1,6 @@
 // Predefined duration options - includes classic and alternative Pomodoro variants
 export const POMODORO_DURATION_OPTIONS = [
-  { label: '0.15 min', value: 0.15 }, // For testing
+  { label: '0.03 min', value: 0.05 },
   { label: '15 min', value: 15 }, // Short focused session
   { label: '20 min', value: 20 }, // Alternative short session
   { label: '25 min', value: 25 }, // Classic Pomodoro

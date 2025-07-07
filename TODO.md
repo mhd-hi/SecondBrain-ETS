@@ -1,10 +1,19 @@
+- Fix codescan and copilot: https://github.com/mhd-hi/second-brain/pull/10
+- pomodoro page should be able to receive duration and task id in params. Add task title in the UI on top of pomodoroSession. We should be able to change task from there and uncheck task to not count in the pomodoro.
+- add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
+
 ## Story: Today's Focus Enhancements
+- remove status from subtasks
+- In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
+- Dont show overdue by x ... when task is completed.
+
 1.  Add course code filter (3 points)
-    -   Add a filter icon (entenoir) besides the button "This week" (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
-    -   Add the filters in the url so that its easier to pass/change the link
+    -   Add a filter icon (entenoir) besides the button "This week" (on its left or in second line and when selecting a course (lets say LOG320), it creates a badge where it has a X icon on its left, we can clear the filter that way by clicking on the course LOG320) and when clicking on it, add a dropdown for selecting the course. The default behaviour of that filter is that all courses are selected.
 2.  Add tasks edit functionality (5 points)
     -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
 3.  Ask user for course periods to better determine task due dates (2 points)
+    - Whats ur first and second course date, on a normal week (for better date accuracy)
+4. Instead of "complete all" buttons, change to "Review tasks", that will open a modal where we can either complete the task or just leave as is (if student didnt complete the task).
 
 ## Story: AI Enhancements
 4.  Cache OpenAI tasks response in DB (5 points)
@@ -13,7 +22,9 @@
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
         -   Performance: Faster response times for cached courses
-5.  Improve date accuracy of tasks (2 points)
+5.  Add intra date information in description of intra task.
+
+6.  (not sure if already completed) Improve date accuracy of tasks (2 points)
     -   For new tasks, set default date as today+1week in the dialog.
 
 ## Story: Progress Tracking
@@ -38,10 +49,9 @@
 ## Story: Integrations
 12. Add Google Calendar integration (5 points)
     -   Add Google Calendar in new Integrations page.
-13. Integrate SoundCloud (3 points)
-    -   Add it to pomodoro.
-    -   Add link to Quick actions in dashboard.
-    -   Or if user not connected, maybe ask him to.
+
+-   Add link to Quick actions in dashboard.
+-   Or if user not connected, maybe ask him to.
 
 ## Story: Dashboard Enhancements
 14. Add quick actions container in dashboard (add course, add task) (2 points)
@@ -52,7 +62,7 @@
 ## Story: Technical Debt Refact
 17. Fix "Default to winter if between sessions" smell (should select the last session) (2 points)
 18. Fix `dueDate` being passed as a string (3 points)
-    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates.
+    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates (in edit task, add task, in the pipeline when trying to convert tasks from weeks to dates).
     -   Avoid excessive conversion between string and Date types.
 
 ## Story: API and Middleware Testing
@@ -75,3 +85,9 @@
 31. Test add subtasks (1 point)
 32. Test remove subtasks (1 point)
 33. Test edit subtasks (2 points)
+
+(Optimisation)
+-  courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)
+
+(Features)
+- Add a Must-do tile in dashboard to let users now that you need to review some tasks (will bring them to the specific page and open the "review tasks" dialog).
