@@ -8,11 +8,9 @@ import { toast } from 'sonner';
 import { playCompletionSound } from '@/lib/audio/util';
 import { PomodoroContext } from './pomodoro-context';
 
-const DEFAULT_DURATIONS = {
-  work: 25,
-  shortBreak: 5,
-  longBreak: 20,
-} as const;
+const DEFAULT_WORK_DURTION = 25;
+const DEFAULT_SHORT_BREAK_DURATION = DEFAULT_WORK_DURTION * 0.2;
+const DEFAULT_LONG_BREAK_DURATION = DEFAULT_WORK_DURTION * 0.6;
 
 type SessionDurations = {
   work: number;
@@ -30,14 +28,14 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   const [pomodoroType, setPomodoroType] = useState<PomodoroType>('work');
   const [isPomodoroActive, setIsPomodoroActive] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [timeLeftSec, setTimeLeftSec] = useState(DEFAULT_DURATIONS.work * 60);
-  const [totalTimeSec, setTotalTimeSec] = useState(DEFAULT_DURATIONS.work * 60);
+  const [timeLeftSec, setTimeLeftSec] = useState(DEFAULT_WORK_DURTION * 60);
+  const [totalTimeSec, setTotalTimeSec] = useState(DEFAULT_WORK_DURTION * 60);
 
   // Track durations for each session type
   const [sessionDurations, setSessionDurations] = useState<SessionDurations>({
-    work: DEFAULT_DURATIONS.work,
-    shortBreak: DEFAULT_DURATIONS.shortBreak,
-    longBreak: DEFAULT_DURATIONS.longBreak,
+    work: DEFAULT_WORK_DURTION,
+    shortBreak: DEFAULT_SHORT_BREAK_DURATION,
+    longBreak: DEFAULT_LONG_BREAK_DURATION,
   });
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
