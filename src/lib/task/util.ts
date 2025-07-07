@@ -315,14 +315,24 @@ export function getDueDateColor(date: Date | string): string {
 }
 
 export const STATUS_ORDER = [
-  TaskStatus.DRAFT,
   TaskStatus.TODO,
   TaskStatus.IN_PROGRESS,
   TaskStatus.COMPLETED,
 ] as const;
 
 export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
-  const currentIndex = STATUS_ORDER.indexOf(currentStatus);
+  // If current status is DRAFT, move to TODO (can't go back to DRAFT)
+  if (currentStatus === TaskStatus.DRAFT) {
+    return TaskStatus.TODO;
+  }
+
+  const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);
+
+  // If status is not found in STATUS_ORDER, default to TODO
+  if (currentIndex === -1) {
+    return TaskStatus.TODO;
+  }
+
   const nextIndex = (currentIndex + 1) % STATUS_ORDER.length;
   return STATUS_ORDER[nextIndex]!;
 };
