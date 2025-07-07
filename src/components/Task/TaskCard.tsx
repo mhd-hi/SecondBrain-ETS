@@ -1,7 +1,7 @@
 'use client';
 
 import type { Task } from '@/types/task';
-import { BarChart3, Clock, Play } from 'lucide-react';
+import { BarChart3, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
@@ -11,7 +11,6 @@ import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePomodoro } from '@/contexts/use-pomodoro';
 import { cn, formatEffortTime, getCourseColor } from '@/lib/utils';
 import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
 
@@ -41,7 +40,6 @@ export function TaskCard({
   actions,
 }: TaskCardProps) {
   const router = useRouter();
-  const { startPomodoro } = usePomodoro();
   const courseColor = task.course ? getCourseColor(task.course) : undefined;
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
 
@@ -57,7 +55,7 @@ export function TaskCard({
   };
 
   const handleStartPomodoro = () => {
-    startPomodoro(task);
+    router.push(`/pomodoro?taskId=${task.id}`);
   };
 
   const defaultActions = [
@@ -172,7 +170,6 @@ export function TaskCard({
               size="sm"
               className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
             >
-              <Play className="h-3 w-3 mr-1" />
               Pomodoro
             </Button>
           )}

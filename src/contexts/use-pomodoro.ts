@@ -1,7 +1,7 @@
 'use client';
 
 import { use } from 'react';
-import { PomodoroContext } from '@/types/pomodoro';
+import { PomodoroContext } from './pomodoro-context';
 
 export function usePomodoro() {
   const context = use(PomodoroContext);

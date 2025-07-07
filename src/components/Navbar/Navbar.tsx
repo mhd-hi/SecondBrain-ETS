@@ -57,6 +57,13 @@ export default function Navbar() {
                 </Link>
               </Button>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Button variant="ghost" asChild>
+                <Link href="/pomodoro" className={navigationMenuTriggerStyle()}>
+                  Pomodoro
+                </Link>
+              </Button>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
 

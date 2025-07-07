@@ -124,7 +124,7 @@ const GroupSection = ({
   );
 };
 
-export const TodaysFocus = () => {
+export const TodaysFocusTile = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>('week');

@@ -1,9 +1,11 @@
+0. add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
+1. courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)
+2. pomodoro page should be able to receive duration and task id in params.
 ## Story: Today's Focus Enhancements
 - remove status from subtasks
 - In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
 - Dont show overdue by x ... when task is completed.
--1. in PomodoroDialog pomodooro not taking the right input, always defaults to 25min, for whatever input i have
-0. Ajouter small pause, long pause in pomodoro dialog, after pomodoro 1, default to "Pomodoro", theres no need for tracking number of pomodoros (remove that unecessary logic).
+
 1.  Add course code filter (3 points)
     -   Add a filter icon (entenoir) besides the button "This week" (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
     -   Add the filters in the url so that its easier to pass/change the link
@@ -47,10 +49,9 @@
 ## Story: Integrations
 12. Add Google Calendar integration (5 points)
     -   Add Google Calendar in new Integrations page.
-13. Integrate SoundCloud (3 points)
-    -   Add it to pomodoro.
-    -   Add link to Quick actions in dashboard.
-    -   Or if user not connected, maybe ask him to.
+
+-   Add link to Quick actions in dashboard.
+-   Or if user not connected, maybe ask him to.
 
 ## Story: Dashboard Enhancements
 14. Add quick actions container in dashboard (add course, add task) (2 points)

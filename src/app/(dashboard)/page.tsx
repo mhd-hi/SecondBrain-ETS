@@ -1,8 +1,8 @@
 'use client';
 
 import { CoursesTile } from '@/components/Boards/Course/CoursesTile';
-import { PomodoroContainer } from '@/components/Boards/FocusSession/PomodoroTile';
-import { TodaysFocus } from '@/components/Boards/TodaysFocus/TodaysFocusTile';
+import { PomodoroTile } from '@/components/Boards/FocusSession/PomodoroTile';
+import { TodaysFocusTile } from '@/components/Boards/TodaysFocus/TodaysFocusTile';
 
 export default function Home() {
   return (
@@ -17,10 +17,10 @@ export default function Home() {
       <section>
         <div className="flex gap-6">
           <div className="flex-1 w-2/3">
-            <TodaysFocus />
+            <TodaysFocusTile />
           </div>
           <div className="w-1/3">
-            <PomodoroContainer />
+            <PomodoroTile />
           </div>
         </div>
       </section>

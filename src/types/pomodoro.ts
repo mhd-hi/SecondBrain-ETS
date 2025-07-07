@@ -1,27 +1,20 @@
-import type { Task } from '@/types/task';
-import { createContext } from 'react';
+import type { Task } from './task';
 
-type SessionType = 'work' | 'shortBreak' | 'longBreak';
+export type PomodoroType = 'work' | 'shortBreak' | 'longBreak';
 
-type PomodoroContextType = {
+export type PomodoroContextType = {
   startPomodoro: (task: Task | null, duration?: number, autoStart?: boolean) => void;
-  isDialogOpen: boolean;
   currentTask: Task | null;
   streak: number;
-  duration: number;
-  setDuration: (duration: number) => void;
-  isSessionActive: boolean;
+  isPomodoroActive: boolean;
   isRunning: boolean;
   timeLeftSec: number;
   totalTimeSec: number;
-  sessionType: SessionType;
-  completedPomodoros: number;
+  pomodoroType: PomodoroType;
+  currentDuration: number;
   toggleTimer: () => void;
-  stopSession: () => void;
+  stopPomodoro: () => void;
   addFiveMinutes: () => void;
-  switchToNextSession: () => void;
-  openDialog: () => void;
+  switchToPomodoroType: (pomodoroType: PomodoroType) => void;
+  updateDuration: (duration: number) => void;
 };
-
-export const PomodoroContext = createContext<PomodoroContextType | undefined>(undefined);
-export type { PomodoroContextType, SessionType };
