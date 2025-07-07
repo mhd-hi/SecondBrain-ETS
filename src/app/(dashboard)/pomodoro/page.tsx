@@ -11,7 +11,7 @@ export default function PomodoroPage() {
             🍅 Pomodoro
           </h1>
           <p className="text-muted-foreground mt-2">
-            Focus on your tasks with the Pomodoro Technique
+            Focus Session with the Pomodoro Technique
           </p>
         </div>
       </div>

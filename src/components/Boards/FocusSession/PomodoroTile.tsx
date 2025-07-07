@@ -89,7 +89,7 @@ export function PomodoroTile() {
           <DurationSelector
             duration={duration}
             onDurationChange={setDuration}
-            variant="large"
+            className="text-3xl"
           />
         </div>
 

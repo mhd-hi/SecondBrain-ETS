@@ -68,7 +68,7 @@ export function SidebarContent({ courses, isLoading = false, onCourseAdded }: Si
                             <StatusBadge
                               content={course.draftCount}
                               variant="red"
-                              tooltipText={`${course.draftCount} drafts`}
+                              tooltipText={`${course.draftCount} tasks to review`}
                               className="mr-1"
                             />
                           )}

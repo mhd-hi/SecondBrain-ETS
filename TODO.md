@@ -1,14 +1,12 @@
-0. add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
-1. courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)
-2. pomodoro page should be able to receive duration and task id in params.
+- pomodoro page should be able to receive duration and task id in params. Add task title in the UI on top of pomodoroSession. We should be able to change task from there and uncheck task to not count in the pomodoro.
+- add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
 ## Story: Today's Focus Enhancements
 - remove status from subtasks
 - In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
 - Dont show overdue by x ... when task is completed.
 
 1.  Add course code filter (3 points)
-    -   Add a filter icon (entenoir) besides the button "This week" (on its left) and when clicking on it, add a multi dropdown for selecting the course. The default is that all courses are selected.
-    -   Add the filters in the url so that its easier to pass/change the link
+    -   Add a filter icon (entenoir) besides the button "This week" (on its left or in second line and when selecting a course (lets say LOG320), it creates a badge where it has a X icon on its left, we can clear the filter that way by clicking on the course LOG320) and when clicking on it, add a dropdown for selecting the course. The default behaviour of that filter is that all courses are selected.
 2.  Add tasks edit functionality (5 points)
     -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
 3.  Ask user for course periods to better determine task due dates (2 points)
@@ -85,3 +83,6 @@
 31. Test add subtasks (1 point)
 32. Test remove subtasks (1 point)
 33. Test edit subtasks (2 points)
+
+(Optimisation)
+-  courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)

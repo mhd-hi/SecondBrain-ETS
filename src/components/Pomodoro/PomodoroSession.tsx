@@ -120,7 +120,6 @@ export function PomodoroSession() {
                 <DurationSelector
                   duration={currentDuration}
                   onDurationChange={updateDuration}
-                  variant="large"
                 />
               )
               : (
@@ -171,8 +170,9 @@ export function PomodoroSession() {
             <div className="flex items-center justify-center gap-4">
               <Button
                 onClick={handlePlayClick}
+                variant="outline"
                 size="lg"
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-500 text-white shadow-lg hover:bg-violet-600"
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-500 text-white shadow-md hover:bg-violet-600"
               >
                 {isRunning ? <Pause className="h-6 w-6" /> : <Play className="ml-1 h-6 w-6" />}
               </Button>
@@ -181,7 +181,7 @@ export function PomodoroSession() {
                 onClick={stopPomodoro}
                 variant="outline"
                 size="lg"
-                className="h-16 w-16 rounded-full shadow-md"
+                className="flex h-16 w-16 items-center justify-center rounded-full shadow-lg"
               >
                 <Square className="h-6 w-6" />
               </Button>
@@ -190,11 +190,13 @@ export function PomodoroSession() {
                 onClick={handleAddFiveMinutes}
                 variant="outline"
                 size="lg"
-                className="flex h-16 w-16 flex-col gap-1 rounded-full shadow-md"
+                className="flex h-16 w-16 items-center justify-center rounded-full shadow-lg"
                 title="Add 5 minutes"
               >
-                <Plus className="h-4 w-4" />
-                <span className="text-xs leading-none">5min</span>
+                <div className="flex flex-col items-center gap-1">
+                  <Plus className="h-4 w-4" />
+                  <span className="text-xs leading-none">5min</span>
+                </div>
               </Button>
             </div>
           </div>

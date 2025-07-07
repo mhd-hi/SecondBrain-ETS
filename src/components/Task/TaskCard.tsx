@@ -1,7 +1,7 @@
 'use client';
 
 import type { Task } from '@/types/task';
-import { BarChart3, Clock } from 'lucide-react';
+import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
@@ -170,6 +170,7 @@ export function TaskCard({
               size="sm"
               className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
             >
+              <Play className="h-4 w-4" />
               Pomodoro
             </Button>
           )}
