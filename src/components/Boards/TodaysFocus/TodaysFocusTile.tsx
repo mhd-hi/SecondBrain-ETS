@@ -49,7 +49,7 @@ const GroupSection = ({
       <div className="flex items-center gap-2">
         <h4 className="text-base font-semibold text-foreground">{title}</h4>
         <Badge variant="secondary" className="text-xs">
-          {tasks.length}
+          {displayTasks.length}
         </Badge>
         {hiddenCount > 0 && (
           <span className="text-xs text-muted-foreground">
