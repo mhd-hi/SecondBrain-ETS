@@ -85,11 +85,16 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           <div>
             <div className="flex items-center gap-1">
               <span className="text-xs font-bold text-foreground">Next:</span>
-              <TruncatedTextWithTooltip
-                text={nextTask.title}
-                className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
-                maxLines={1}
-              />
+              <Link
+                href={`/courses/${course.id}#task-${nextTask.id}`}
+                className="flex-1 hover:underline transition-colors"
+              >
+                <TruncatedTextWithTooltip
+                  text={nextTask.title}
+                  className="text-xs text-muted-foreground line-clamp-1 leading-tight hover:text-foreground"
+                  maxLines={1}
+                />
+              </Link>
             </div>
             {nextTask.dueDate && nextTask.status !== TaskStatus.COMPLETED && (
               <div className="flex items-center">
@@ -106,11 +111,16 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           <div>
             <div className="flex items-center gap-1">
               <span className="text-xs font-bold text-foreground">Upcoming:</span>
-              <TruncatedTextWithTooltip
-                text={upcomingTask.title}
-                className="text-xs text-muted-foreground line-clamp-1 leading-tight flex-1"
-                maxLines={1}
-              />
+              <Link
+                href={`/courses/${course.id}#task-${upcomingTask.id}`}
+                className="flex-1 hover:underline transition-colors"
+              >
+                <TruncatedTextWithTooltip
+                  text={upcomingTask.title}
+                  className="text-xs text-muted-foreground line-clamp-1 leading-tight hover:text-foreground"
+                  maxLines={1}
+                />
+              </Link>
             </div>
             {upcomingTask.dueDate && upcomingTask.status !== TaskStatus.COMPLETED && (
               <div className="flex items-center">

@@ -123,6 +123,13 @@
 
   html {
     scroll-behavior: smooth;
+    scroll-padding-top: 4rem; /* 64px - accounts for navbar height */
+  }
+
+  @media (max-width: 768px) {
+    html {
+      scroll-padding-top: 3.5rem; /* 56px for mobile navbar */
+    }
   }
 
   body {

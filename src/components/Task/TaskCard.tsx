@@ -161,6 +161,11 @@ export function TaskCard({
         </div>
 
         <div className="flex flex-col items-end gap-2">
+          <TaskStatusChanger
+            currentStatus={task.status}
+            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
+          />
+
           {task.status === TaskStatusEnum.IN_PROGRESS && (
             <Button
               onClick={handleStartPomodoro}
@@ -171,12 +176,6 @@ export function TaskCard({
               Pomodoro
             </Button>
           )}
-          <TaskStatusChanger
-            currentStatus={task.status}
-            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
-          />
-          {' '}
-
         </div>
 
       </div>

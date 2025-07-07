@@ -42,6 +42,14 @@ export default function CoursePage({ params }: CoursePageProps) {
     void fetchCourse();
   }, [fetchCourses, fetchCourse]);
 
+  // Simple anchor scrolling
+  useEffect(() => {
+    if (!isLoading && window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      element?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isLoading, tasks]);
+
   // Filter tasks based on search query
   const filteredTasks = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -332,7 +340,11 @@ export default function CoursePage({ params }: CoursePageProps) {
                     </h3>
                     <div className="space-y-3">
                       {weekTasks.map(task => (
-                        <div key={task.id} className="transform-gpu">
+                        <div
+                          id={`task-${task.id}`}
+                          key={task.id}
+                          className="transform-gpu transition-all duration-200 rounded-lg"
+                        >
                           <TaskCard
                             task={task}
                             onDeleteTask={handleDeleteTask}
