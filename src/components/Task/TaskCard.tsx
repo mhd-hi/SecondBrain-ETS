@@ -9,10 +9,10 @@ import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-drop
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn, formatEffortTime, getCourseColor } from '@/lib/utils';
+import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
+import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 
 type TaskCardProps = {
   task: Task;
@@ -40,7 +40,6 @@ export function TaskCard({
   actions,
 }: TaskCardProps) {
   const router = useRouter();
-  const courseColor = task.course ? getCourseColor(task.course) : undefined;
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
 
   // Use controlled state if provided, otherwise use internal state
@@ -78,22 +77,12 @@ export function TaskCard({
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
       />
-      {showCourseBadge && task.course?.code && (
+      {showCourseBadge && task.course && (
         <div className="mb-1">
-          <Badge
-            variant="outline"
-            className="text-xs cursor-pointer hover:bg-muted/80 transition-colors"
-            style={{
-              borderColor: courseColor,
-              color: courseColor,
-              backgroundColor: courseColor ? `${courseColor}15` : undefined,
-            }}
+          <CourseCodeBadge
+            course={task.course}
             onClick={handleNavigateToTask}
-          >
-            {task.course.code}
-          </Badge>
-          {' '}
-
+          />
         </div>
       )}
       <div className="flex items-start justify-between gap-4">

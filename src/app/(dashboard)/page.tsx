@@ -1,7 +1,7 @@
 'use client';
 
 import { CoursesTile } from '@/components/Boards/Course/CoursesTile';
-import { PomodoroTile } from '@/components/Boards/FocusSession/PomodoroTile';
+import { PomodoroTile } from '@/components/Boards/DeepWork/PomodoroTile';
 import { TodaysFocusTile } from '@/components/Boards/TodaysFocus/TodaysFocusTile';
 
 export default function Home() {

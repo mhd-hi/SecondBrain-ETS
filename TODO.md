@@ -1,5 +1,6 @@
-- Fix codescan and copilot: https://github.com/mhd-hi/second-brain/pull/10
-- pomodoro page should be able to receive duration and task id in params. Add task title in the UI on top of pomodoroSession. We should be able to change task from there and uncheck task to not count in the pomodoro.
+- we should be able to select a task in pomdoro page, it should be on top of pomodoroContainer, having a sort of select where its searchable to find our task. We should show the CourseCodeBadge on the left, then show the title of the task. We can either select the course code, then the task, OR the task directly.
+Once we selected a task, and completed a pomdoro, we can call the pomodoro complete endpoint and passing the task id.
+- pomodoro page should be able to receive duration and task id in params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
 - add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
 
 ## Story: Today's Focus Enhancements

@@ -39,7 +39,7 @@ export function SidebarContent({ courses, isLoading = false, onCourseAdded }: Si
         <div className="space-y-1">
           {isLoading
             ? (
-              <CourseListSkeleton count={3} />
+              <CourseListSkeleton />
             )
             : courses.length === 0
               ? (
