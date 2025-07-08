@@ -1,6 +1,6 @@
 'use client';
 
-import { WeeklyRoadmap } from '@/components/Boards/WeeklyRoadmap/WeeklyRoadmap';
+import { WeeklyRoadmap } from '@/components/WeeklyRoadmap/WeeklyRoadmap';
 
 export default function WeeklyRoadmapPage() {
   return (

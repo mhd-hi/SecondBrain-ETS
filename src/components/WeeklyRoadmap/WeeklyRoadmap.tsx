@@ -1,27 +1,32 @@
 'use client';
 
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import type { TransitionState } from '@/lib/ui-transitions/util';
 import type { DraggedTask, DropTargetData } from '@/types/drag-drop';
 import type { TaskStatus, Task as TaskType } from '@/types/task';
 import {
   closestCenter,
   DndContext,
   DragOverlay,
-  KeyboardSensor,
   MouseSensor,
   TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
-import { Button } from '@/components/ui/button';
 import { useCourses } from '@/contexts/use-courses';
-import { formatWeekRange, getWeekDates, getWeekStart } from '@/lib/date/util';
+import { getWeekDates, getWeekStart } from '@/lib/date/util';
+import {
+  createTransitionState,
+  getTransitionClasses,
+  getTransitionDirection,
+  getTransitionDirectionFromOffset,
+  resetTransitionState,
+} from '@/lib/ui-transitions/util';
 import { DayColumn } from './DayColumn';
+import { NavigationControls } from './NavigationControls';
 
 type WeeklyRoadmapProps = {
   initialTasks?: TaskType[];
@@ -33,6 +38,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
   const [weekOffset, setWeekOffset] = useState(0);
   const [tasks, setTasks] = useState<TaskType[]>(initialTasks);
   const [isLoading, setIsLoading] = useState(false);
+  const [transitionState, setTransitionState] = useState<TransitionState>(() => createTransitionState());
 
   // Use global courses context
   const { courses } = useCourses();
@@ -55,14 +61,13 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     },
   });
 
-  const keyboardSensor = useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates,
-  });
-  const sensors = useSensors(mouseSensor, touchSensor, keyboardSensor);
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   useEffect(() => {
     const loadTasks = async () => {
       setIsLoading(true);
+      setTransitionState(prev => ({ ...prev, isTransitioning: true }));
+
       try {
         const weekStart = getWeekStart(weekOffset);
         const weekEnd = new Date(weekStart);
@@ -73,17 +78,42 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
           throw new Error('Failed to fetch tasks');
         }
         const weekTasks = await response.json() as TaskType[];
-        setTasks(weekTasks);
+
+        // Shorter delay for more responsive feel
+        const timeoutId = setTimeout(() => {
+          setTasks(weekTasks);
+          setIsLoading(false);
+          setTransitionState(resetTransitionState());
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
       } catch (error) {
         console.error('Failed to load tasks:', error);
         toast.error('Failed to load tasks');
-      } finally {
         setIsLoading(false);
+        setTransitionState(resetTransitionState());
       }
     };
 
     void loadTasks();
   }, [weekOffset]);
+
+  const handleWeekChange = (direction: 'prev' | 'next') => {
+    const transitionDirection = getTransitionDirection(direction);
+    setTransitionState({ isTransitioning: true, direction: transitionDirection });
+    setWeekOffset(prev => direction === 'prev' ? prev - 1 : prev + 1);
+  };
+
+  const handleTodayClick = () => {
+    const currentOffset = weekOffset;
+    if (currentOffset === 0) {
+      return;
+    }
+
+    const transitionDirection = getTransitionDirectionFromOffset(currentOffset, 0);
+    setTransitionState({ isTransitioning: true, direction: transitionDirection });
+    setWeekOffset(0);
+  };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
@@ -216,62 +246,21 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       onDragEnd={handleDragEnd}
     >
       <div className="w-full">
-        {/* Container with background and title */}
+        {/* Navigation Controls */}
+        <NavigationControls
+          weekDates={weekDates}
+          isLoading={isLoading}
+          onWeekChange={handleWeekChange}
+          onTodayClick={handleTodayClick}
+        />
+
+        {/* Calendar Container */}
         <div className={`
-          border rounded-lg bg-muted/30
+          bg-card rounded-lg transition-all duration-300 py-5
           ${isDragActive ? 'bg-muted/50 shadow-lg' : ''}
         `}
         >
-          <div className="p-6 pb-2">
-            <h2 className="text-2xl font-semibold mb-6">Weekly Roadmap</h2>
-          </div>
-          <div className="flex items-center justify-between w-full px-4 pb-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-md px-3 py-1 text-xs"
-                onClick={() => setWeekOffset(0)}
-              >
-                Today
-              </Button>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full h-8 w-8"
-                  onClick={() => setWeekOffset(prev => prev - 1)}
-                  disabled={isLoading}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full h-8 w-8"
-                  onClick={() => setWeekOffset(prev => prev + 1)}
-                  disabled={isLoading}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-              <span className="text-sm font-medium">
-                {weekOffset === 0
-                  ? 'This Week'
-                  : weekOffset === 1
-                    ? 'Next Week'
-                    : weekOffset === -1
-                      ? 'Last Week'
-                      : `${weekOffset > 0 ? '+' : ''}${weekOffset} Weeks`}
-                <span className="text-muted-foreground ml-2">
-                  (
-                  {formatWeekRange(weekDates)}
-                  )
-                </span>
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-7 gap-4 p-4 pt-0">
+          <div className={`grid grid-cols-7 gap-4 px-4 transition-all duration-200 ease-out ${getTransitionClasses(transitionState)}`}>
             {weekDates.map(date => (
               <DayColumn
                 key={date.toDateString()}

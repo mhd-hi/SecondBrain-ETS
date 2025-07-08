@@ -60,7 +60,7 @@ export const DayColumn = ({
         rounded-lg p-3 text-center border mb-2
         ${isToday
       ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-      : 'bg-card text-muted-foreground border-border'
+      : 'bg-card text-card-foreground border-border'
     }
       `}
       >

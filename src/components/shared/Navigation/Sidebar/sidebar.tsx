@@ -1,15 +1,26 @@
 'use client';
 
 import type { CourseListItem } from '@/types/course';
-import { Calendar, Home, NotebookText, Plus, Timer } from 'lucide-react';
+import { NotebookText, Plus, Settings } from 'lucide-react';
+import { signIn, signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { AppLogo } from '@/components/shared/AppLogo';
+import { AppLogo } from '@/components/shared/atoms/AppLogo';
+import { StatusBadge } from '@/components/shared/atoms/StatusBadge';
 import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { NavigationItems } from '@/components/shared/Navigation/NavigationItems';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,
@@ -22,6 +33,7 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type SidebarProps = {
   courses: CourseListItem[];
@@ -29,27 +41,9 @@ type SidebarProps = {
   onCourseAdded?: () => void;
 };
 
-// Navigation items for mobile sidebar
-const navigationItems = [
-  {
-    title: 'Dashboard',
-    url: '/',
-    icon: Home,
-  },
-  {
-    title: 'Weekly Roadmap',
-    url: '/weekly-roadmap',
-    icon: Calendar,
-  },
-  {
-    title: 'Pomodoro',
-    url: '/pomodoro',
-    icon: Timer,
-  },
-];
-
 export function AppSidebar({ courses, isLoading = false, onCourseAdded }: SidebarProps) {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   return (
     <Sidebar collapsible="icon" className="h-screen">
@@ -62,18 +56,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
         <SidebarGroup className="md:hidden">
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationItems.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
-                      <item.icon className="size-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <NavigationItems variant="vertical" />
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -142,6 +125,64 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          {/* Preferences Button */}
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === '/preferences'}>
+              <Link href="/preferences">
+                <Settings className="size-4" />
+                <span>Preferences</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          {/* User Authentication */}
+          <SidebarMenuItem>
+            {status === 'loading'
+              ? (
+                <SidebarMenuButton disabled>
+                  <Skeleton className="w-6 h-6 rounded-full" />
+                  <span>Loading...</span>
+                </SidebarMenuButton>
+              )
+              : session
+                ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton className="w-full">
+                        {session.user?.image && (
+                          <Image
+                            src={session.user.image}
+                            alt="Profile"
+                            width={24}
+                            height={24}
+                            className="w-6 h-6 rounded-full"
+                          />
+                        )}
+                        <span className="truncate">{session.user?.name}</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile">Profile</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => signOut()}>
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )
+                : (
+                  <SidebarMenuButton onClick={() => signIn()}>
+                    Sign In
+                  </SidebarMenuButton>
+                )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
