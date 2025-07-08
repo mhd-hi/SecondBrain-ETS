@@ -1,7 +1,7 @@
 'use client';
 
 import type { CourseListItem } from '@/types/course';
-import { NotebookText, Plus, Settings } from 'lucide-react';
+import { ChevronsUpDown, LogOut, NotebookText, Plus, Settings } from 'lucide-react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -126,23 +126,13 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="py-6">
         <SidebarMenu>
-          {/* Preferences Button */}
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === '/preferences'}>
-              <Link href="/preferences">
-                <Settings className="size-4" />
-                <span>Preferences</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
           {/* User Authentication */}
           <SidebarMenuItem>
             {status === 'loading'
               ? (
-                <SidebarMenuButton disabled>
+                <SidebarMenuButton disabled className="h-12">
                   <Skeleton className="w-6 h-6 rounded-full" />
                   <span>Loading...</span>
                 </SidebarMenuButton>
@@ -151,32 +141,45 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton className="w-full">
+                      <SidebarMenuButton className="w-full group/user-menu h-12">
                         {session.user?.image && (
                           <Image
                             src={session.user.image}
                             alt="Profile"
                             width={24}
                             height={24}
-                            className="w-6 h-6 rounded-full"
+                            className="w-8 h-8 rounded-full"
                           />
                         )}
                         <span className="truncate">{session.user?.name}</span>
+                        <ChevronsUpDown className="size-4 ml-auto" />
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuContent
+                      align="end"
+                      side="right"
+                      sideOffset={8}
+                      className="w-56"
+                    >
                       <DropdownMenuItem asChild>
-                        <Link href="/profile">Profile</Link>
+                        <Link href="/preferences">
+                          <Settings className="size-4 mr-2" />
+                          Preferences
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => signOut()}>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
+                        onClick={() => signOut()}
+                      >
+                        <LogOut className="size-4 mr-2" />
                         Sign Out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )
                 : (
-                  <SidebarMenuButton onClick={() => signIn()}>
+                  <SidebarMenuButton onClick={() => signIn()} className="h-12">
                     Sign In
                   </SidebarMenuButton>
                 )}

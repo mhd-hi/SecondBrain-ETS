@@ -3,12 +3,11 @@
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePomodoro } from '@/contexts/use-pomodoro';
-import { getBreakActivities } from '@/lib/pomodoro/util';
+import { StreakBadge } from '../shared/atoms/StreakBadge';
 import { DurationSelector } from './DurationSelector';
 
 export function PomodoroContainer() {
@@ -63,19 +62,6 @@ export function PomodoroContainer() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        {streak > 0 && (
-          <Badge variant="secondary" className="text-sm">
-            🔥
-            {' '}
-            {streak}
-            {' '}
-            day streak
-          </Badge>
-        )}
-      </div>
-
       {/* Main Pomodoro Session Card */}
       <Card className="border-2">
 
@@ -149,31 +135,6 @@ export function PomodoroContainer() {
             </div>
           </div>
 
-          {/* Break Activity Suggestions */}
-          {pomodoroType !== 'work' && (
-            <div className="flex justify-center">
-              <div className="bg-muted/50 w-full max-w-sm mx-auto rounded-lg p-4">
-                <h3 className="mb-3 text-center text-sm font-medium">
-                  {pomodoroType === 'shortBreak'
-                    ? '✨ Quick Break Ideas'
-                    : '✨ Long Break Ideas'}
-                </h3>
-                <div className="space-y-1">
-                  {getBreakActivities(pomodoroType).map(activity => (
-                    <div key={activity} className="text-muted-foreground text-left text-sm">
-                      {activity}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-muted-foreground mt-3 text-center text-xs italic">
-                  {pomodoroType === 'shortBreak'
-                    ? 'Avoid screens - give your mind a real break!'
-                    : 'Take a deeper reset to recharge for the next cycle'}
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Session Controls */}
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-4">
@@ -209,8 +170,11 @@ export function PomodoroContainer() {
               </Button>
             </div>
           </div>
+
+          <StreakBadge streak={streak} />
         </CardContent>
       </Card>
+
     </div>
   );
 }
