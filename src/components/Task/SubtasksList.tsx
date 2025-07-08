@@ -108,7 +108,7 @@ const SubtasksList = ({
                     )}
                   <h6 className={cn(
                     'text-sm font-medium',
-                    subtask.status === TaskStatusEnum.COMPLETED && 'line-through text-muted-foreground',
+                    subtask.status === TaskStatusEnum.COMPLETED && 'text-muted-foreground',
                   )}
                   >
                     {subtask.title}

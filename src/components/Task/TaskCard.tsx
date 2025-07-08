@@ -85,8 +85,8 @@ export function TaskCard({
           />
         </div>
       )}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1 flex-grow">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1 flex-grow min-w-0">
           <h4 className={cn(
             'font-medium',
             isCompleted && 'text-muted-foreground',
@@ -118,11 +118,7 @@ export function TaskCard({
 
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
-              <span className={cn(
-                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
-                isCompleted && 'line-through',
-              )}
-              >
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3 flex-shrink-0" />
                 {formatEffortTime(task.estimatedEffort)}
               </span>
@@ -130,11 +126,7 @@ export function TaskCard({
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <span className={cn(
-                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
-                isCompleted && 'line-through',
-              )}
-              >
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <BarChart3 className="h-3 w-3 flex-shrink-0" />
                 {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
                 % complete
@@ -147,7 +139,12 @@ export function TaskCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
+        <div
+          className={cn(
+            'flex flex-row flex-wrap gap-2 w-full mt-3 items-start',
+            'md:flex-col md:items-end md:w-auto md:mt-0',
+          )}
+        >
           <TaskStatusChanger
             currentStatus={task.status}
             onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
@@ -164,7 +161,6 @@ export function TaskCard({
             </Button>
           )}
         </div>
-
       </div>
       <SubtasksList
         subtasks={task.subtasks ?? []}

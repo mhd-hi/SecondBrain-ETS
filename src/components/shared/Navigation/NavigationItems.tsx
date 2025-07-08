@@ -26,7 +26,7 @@ export function NavigationItems({ variant, className }: NavigationItemsProps) {
         {navigationItems.map(item => (
           <Button key={item.title} variant="ghost" asChild>
             <Link href={item.url} className={navigationMenuTriggerStyle()}>
-              <span className="text-base mr-2">{item.icon}</span>
+              <span className="text-base">{item.icon}</span>
               {item.title}
             </Link>
           </Button>

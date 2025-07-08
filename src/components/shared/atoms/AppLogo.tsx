@@ -21,8 +21,8 @@ export function AppLogo({ className }: AppLogoProps) {
         <Image
           src="/assets/pochita-bread.png"
           alt="Favicon"
-          width={isCollapsed ? 24 : 39}
-          height={isCollapsed ? 24 : 39}
+          width={isCollapsed ? 24 : 35}
+          height={isCollapsed ? 24 : 35}
           priority={true}
           className="object-contain flex-shrink-0"
         />
