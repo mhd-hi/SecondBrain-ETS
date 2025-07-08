@@ -8,21 +8,19 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 - change UI in course page to reduce week pb mb
 - fix pomodoro settings
     - fix indexing, cant switch over tabs using "tab" key, should be the first 3 to index over.
+
 ## Story Complete All -> Review
 - Instead of "complete all" buttons, change to "Review tasks", that will open a modal where we can either complete the task or just leave as is (if student didnt complete the task).
 - Add a Must-do tile in dashboard to let users now that you need to review some tasks (will bring them to the specific page and open the "review tasks" dialog).
 
 ## Story: Today's Focus Enhancements
-- remove status from subtasks
 - In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
 - Dont show overdue by x ... when task is completed.
 
-1.  Add course code filter (3 points)
-    -   Add a filter icon (entenoir) besides the button "This week" (on its left or in second line and when selecting a course (lets say LOG320), it creates a badge where it has a X icon on its left, we can clear the filter that way by clicking on the course LOG320) and when clicking on it, add a dropdown for selecting the course. The default behaviour of that filter is that all courses are selected.
-2.  Add tasks edit functionality (5 points)
+-  Add tasks edit functionality (5 points)
     -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
-3.  Ask user for course periods to better determine task due dates (2 points)
-    - Whats ur first and second course date, on a normal week (for better date accuracy)
+-  Ask user for course periods (session periods) to better determine task due dates (2 points)
+    - Ex: whats ur first and second course date, on a normal week (for better date accuracy)
 
 ## Story: AI Enhancements
 4.  Cache OpenAI tasks response in DB (5 points)
@@ -63,7 +61,7 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 -   Or if user not connected, maybe ask him to.
 
 ## Story: Dashboard Enhancements
-14. Add quick actions container in dashboard (add course, add task) (2 points)
+14. Add quick actions container in dashboard (add course, add task, start pomodoro) (2 points)
 
 ## Story: Roadmap Features
 15. Implement Monthly roadmap for better task visualization and movement (3 points)
@@ -97,3 +95,7 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 
 (Optimisation)
 -  courses list sidebar receives a heavy amount of data when it only needs specific data (course code and count of statuses)
+
+(Features)
+- Add github-like calendar to track pomdoro activity
+    - might need to refactor db to create new pomodoro table
