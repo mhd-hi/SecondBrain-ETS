@@ -271,22 +271,20 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
               </span>
             </div>
           </div>
-          <div className="h-[calc(100vh-200px)] overflow-y-auto">
-            <div className="grid grid-cols-7 gap-4 p-4 pt-0">
-              {weekDates.map(date => (
-                <DayColumn
-                  key={date.toDateString()}
-                  date={date}
-                  tasks={tasksByDate[date.toDateString()] ?? []}
-                  onStatusChange={handleStatusChange}
-                  onTaskAdded={handleTaskAdded}
-                  courses={courses}
-                  isToday={isToday(date)}
-                  isSticky={true}
-                  isDragActive={isDragActive}
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-7 gap-4 p-4 pt-0">
+            {weekDates.map(date => (
+              <DayColumn
+                key={date.toDateString()}
+                date={date}
+                tasks={tasksByDate[date.toDateString()] ?? []}
+                onStatusChange={handleStatusChange}
+                onTaskAdded={handleTaskAdded}
+                courses={courses}
+                isToday={isToday(date)}
+                isSticky={true}
+                isDragActive={isDragActive}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -160,6 +160,6 @@
 
   /* Pomodoro button styling */
   .pomodoro-button {
-    @apply bg-violet-500 text-white border-violet-500 hover:bg-violet-600 hover:text-white hover:border-violet-600 focus:ring-violet-500/20;
+    @apply bg-violet-500 text-foreground border-violet-500 hover:bg-violet-600 hover:border-violet-600 focus:ring-violet-500/20;
   }
 }
