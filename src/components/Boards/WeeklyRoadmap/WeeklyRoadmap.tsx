@@ -6,9 +6,7 @@ import type { TaskStatus, Task as TaskType } from '@/types/task';
 import {
   closestCenter,
   DndContext,
-
   DragOverlay,
-
   KeyboardSensor,
   MouseSensor,
   TouchSensor,

@@ -8,7 +8,7 @@ export default function WeeklyRoadmapPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Weekly Roadmap
+            🗺️ Weekly Roadmap
           </h1>
           <p className="text-muted-foreground mt-2">
             Plan and organize your tasks across the week with drag-and-drop functionality.

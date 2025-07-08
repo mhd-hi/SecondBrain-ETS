@@ -62,7 +62,7 @@ export function PomodoroContainer() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         {streak > 0 && (
@@ -94,7 +94,7 @@ export function PomodoroContainer() {
               <TabsList className="relative grid w-fit grid-cols-3 h-10 bg-muted/50 p-1 rounded-xl">
                 {/* Sliding background indicator */}
                 <div
-                  className="absolute top-1 bottom-1 bg-white rounded-lg shadow-sm transition-all duration-300 ease-out"
+                  className="absolute top-1 bottom-1 bg-background text-foreground rounded-lg shadow-sm transition-all duration-300 ease-out border"
                   style={{
                     left: `${pomodoroType === 'work' ? '4px' : pomodoroType === 'shortBreak' ? 'calc(33.333% + 1px)' : 'calc(66.666% - 2px)'}`,
                     width: 'calc(33.333% - 2px)',
@@ -102,19 +102,19 @@ export function PomodoroContainer() {
                 />
                 <TabsTrigger
                   value="work"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-gray-900 data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Pomodoro
                 </TabsTrigger>
                 <TabsTrigger
                   value="shortBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-gray-900 data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Short Break
                 </TabsTrigger>
                 <TabsTrigger
                   value="longBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-gray-900 data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Long Break
                 </TabsTrigger>
@@ -138,10 +138,10 @@ export function PomodoroContainer() {
               )}
 
             {/* Progress bar */}
-            <div className="mx-4">
-              <div className="bg-muted mb-4 h-2 w-full rounded-full">
+            <div className="mx-8 sm:mx-12 md:mx-16 lg:mx-20">
+              <div className="bg-muted mb-4 h-1.5 w-full rounded-full">
                 <div
-                  className={`h-2 rounded-full transition-all duration-1000 
+                  className={`h-1.5 rounded-full transition-all duration-1000 
                     ${pomodoroType === 'work' ? 'bg-blue-500' : 'bg-green-500'}`}
                   style={{ width: `${getProgress()}%` }}
                 />
@@ -152,11 +152,11 @@ export function PomodoroContainer() {
           {/* Break Activity Suggestions */}
           {pomodoroType !== 'work' && (
             <div className="flex justify-center">
-              <div className="bg-muted/50 max-w-xs rounded-lg p-4">
+              <div className="bg-muted/50 w-full max-w-sm mx-auto rounded-lg p-4">
                 <h3 className="mb-3 text-center text-sm font-medium">
                   {pomodoroType === 'shortBreak'
                     ? '✨ Quick Break Ideas'
-                    : '🌟 Long Break Ideas'}
+                    : '✨ Long Break Ideas'}
                 </h3>
                 <div className="space-y-1">
                   {getBreakActivities(pomodoroType).map(activity => (
@@ -181,7 +181,7 @@ export function PomodoroContainer() {
                 onClick={handlePlayClick}
                 variant="outline"
                 size="lg"
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-500 text-white shadow-md hover:bg-violet-600"
+                className="pomodoro-button flex h-16 w-16 items-center justify-center rounded-full shadow-md"
               >
                 {isRunning ? <Pause className="h-6 w-6" /> : <Play className="ml-1 h-6 w-6" />}
               </Button>

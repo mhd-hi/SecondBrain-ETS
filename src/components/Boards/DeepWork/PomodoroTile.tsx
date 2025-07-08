@@ -218,7 +218,7 @@ export function PomodoroTile() {
         <div className="flex justify-center">
           <Button
             onClick={handleStartPomodoro}
-            className="mb-2 bg-violet-500 hover:bg-violet-600 text-violet-100"
+            className="pomodoro-button mb-2"
             size="lg"
           >
             <Play className="h-5 w-5 mr-2" />

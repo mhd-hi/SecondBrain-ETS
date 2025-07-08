@@ -1,10 +1,27 @@
 'use client';
 
 import type { CourseListItem } from '@/types/course';
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { SidebarContent } from './sidebar-content';
+import { Calendar, Home, NotebookText, Plus, Timer } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { AppLogo } from '@/components/shared/AppLogo';
+import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarRail,
+  SidebarSeparator,
+} from '@/components/ui/sidebar';
 
 type SidebarProps = {
   courses: CourseListItem[];
@@ -12,29 +29,121 @@ type SidebarProps = {
   onCourseAdded?: () => void;
 };
 
-export function Sidebar({ courses, isLoading = false, onCourseAdded }: SidebarProps) {
-  return (
-    <>
-      {/* Mobile Sidebar */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar Menu</SheetTitle>
-          </SheetHeader>
-          <SidebarContent courses={courses} isLoading={isLoading} onCourseAdded={onCourseAdded} />
-        </SheetContent>
-      </Sheet>
+// Navigation items for mobile sidebar
+const navigationItems = [
+  {
+    title: 'Dashboard',
+    url: '/',
+    icon: Home,
+  },
+  {
+    title: 'Weekly Roadmap',
+    url: '/weekly-roadmap',
+    icon: Calendar,
+  },
+  {
+    title: 'Pomodoro',
+    url: '/pomodoro',
+    icon: Timer,
+  },
+];
 
-      {/* Desktop Sidebar */}
-      <div className="hidden md:flex w-[300px] flex-col border-r border-border bg-background  fixed h-full">
-        <SidebarContent courses={courses} isLoading={isLoading} onCourseAdded={onCourseAdded} />
-      </div>
-    </>
+export function AppSidebar({ courses, isLoading = false, onCourseAdded }: SidebarProps) {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar collapsible="icon" className="h-screen">
+      <SidebarHeader>
+        <AppLogo />
+      </SidebarHeader>
+
+      <SidebarContent>
+        {/* Navigation Group - Mobile only */}
+        <SidebarGroup className="md:hidden">
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map(item => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <Link href={item.url}>
+                      <item.icon className="size-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator className="md:hidden" />
+
+        {/* My Courses Group */}
+        <SidebarGroup>
+          <SidebarGroupLabel>My Courses</SidebarGroupLabel>
+          <AddCourseDialog
+            onCourseAdded={onCourseAdded}
+            trigger={(
+              <SidebarGroupAction>
+                <Plus className="size-4" />
+              </SidebarGroupAction>
+            )}
+          />
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {isLoading
+                ? (
+                  Array.from({ length: 5 }, (_, i) => (
+                    <SidebarMenuItem key={i}>
+                      <SidebarMenuSkeleton showIcon index={i} />
+                    </SidebarMenuItem>
+                  ))
+                )
+                : courses.length === 0
+                  ? (
+                    <div className="px-2 py-4 text-center text-muted-foreground">
+                      <p className="text-sm">No courses yet</p>
+                      <p className="text-xs mt-1">Add your first course to get started!</p>
+                    </div>
+                  )
+                  : (
+                    courses.map((course) => {
+                      const isActive = pathname === `/courses/${course.id}`;
+                      return (
+                        <SidebarMenuItem key={course.id}>
+                          <SidebarMenuButton asChild isActive={isActive}>
+                            <Link href={`/courses/${course.id}`}>
+                              <NotebookText className="size-4" />
+                              <span>{course.code}</span>
+                              <div className="ml-auto flex items-center gap-1">
+                                {course.draftCount > 0 && (
+                                  <StatusBadge
+                                    content={course.draftCount}
+                                    variant="red"
+                                    tooltipText={`${course.draftCount} tasks to review`}
+                                  />
+                                )}
+                                {course.overdueCount > 0 && (
+                                  <StatusBadge
+                                    content={course.overdueCount}
+                                    variant="yellow"
+                                    tooltipText={`${course.overdueCount} overdue tasks`}
+                                  />
+                                )}
+                              </div>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })
+                  )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarRail />
+    </Sidebar>
   );
 }

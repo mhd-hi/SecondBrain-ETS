@@ -3,6 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { AppLogo } from '@/components/shared/AppLogo';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Card } from '../ui/card';
 import { Skeleton } from '../ui/skeleton';
@@ -27,21 +29,13 @@ export default function Navbar() {
   return (
     <Card className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center justify-between px-4">
-        <Button variant="ghost" asChild className="font-bold text-xl">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/assets/pochita-bread.png"
-              alt="Favicon"
-              width={39}
-              height={39}
-              priority={true}
-              className="object-contain"
-            />
-            Second Brain
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+          {/* Logo and app name - only visible on mobile */}
+          <AppLogo className="md:hidden" />
+        </div>
 
-        <NavigationMenu>
+        <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
               <Button variant="ghost" asChild>

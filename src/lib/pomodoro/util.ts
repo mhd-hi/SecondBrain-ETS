@@ -14,9 +14,8 @@ export const getBreakActivities = (type: PomodoroType) => {
       '🌳 Go for a walk outside',
       '💪 Do a quick workout',
       '😴 Take a 20-minute power nap',
-      '🧘‍♀️ Meditate or do NSDR',
+      '🧘‍♀️ Meditate or pray',
       '🥙 Have a healthy snack',
-      '📞 Call a friend or family',
     ];
   }
   return [];

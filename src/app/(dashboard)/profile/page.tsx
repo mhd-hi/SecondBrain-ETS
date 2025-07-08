@@ -30,7 +30,6 @@ export default function ProfilePage() {
       </div>
       <Card className="mb-6">
         <CardHeader>
-          {' '}
           <CardTitle>
             Welcome back,
             {' '}

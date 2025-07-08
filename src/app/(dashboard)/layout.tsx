@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from '@/components/Navbar/Navbar';
 import { SidebarWrapper } from '@/components/Sidebar/sidebar-wrapper';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { CoursesProvider } from '@/contexts/courses-context';
 import { PomodoroProvider } from '@/contexts/pomodoro-provider';
 
@@ -12,15 +13,17 @@ export default function DashboardLayout({
   return (
     <CoursesProvider>
       <PomodoroProvider>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <div className="flex flex-1">
+        <SidebarProvider>
+          <div className="flex w-full">
             <SidebarWrapper />
-            <main className="flex-1 container py-6 md:ml-[300px]">
-              {children}
-            </main>
+            <SidebarInset className="flex flex-col flex-1">
+              <Navbar />
+              <main className="flex-1 container max-w-full py-6">
+                {children}
+              </main>
+            </SidebarInset>
           </div>
-        </div>
+        </SidebarProvider>
       </PomodoroProvider>
     </CoursesProvider>
   );

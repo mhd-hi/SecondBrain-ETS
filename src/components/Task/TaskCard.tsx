@@ -157,7 +157,7 @@ export function TaskCard({
             <Button
               onClick={handleStartPomodoro}
               size="sm"
-              className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
+              className="pomodoro-button h-8 px-3"
             >
               <Play className="h-4 w-4" />
               Pomodoro

@@ -135,6 +135,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* https://github.com/shadcn-ui/ui/issues/6843 */
+  button:not([disabled]),
+  [role='button']:not([disabled]) {
+    cursor: pointer;
+  }
 }
 
 /* Performance optimizations for smooth scrolling */
@@ -150,5 +156,10 @@
 
   .will-change-scroll {
     will-change: scroll-position;
+  }
+
+  /* Pomodoro button styling */
+  .pomodoro-button {
+    @apply bg-violet-500 text-white border-violet-500 hover:bg-violet-600 hover:text-white hover:border-violet-600 focus:ring-violet-500/20;
   }
 }
