@@ -146,7 +146,7 @@ export function TaskCard({
             'md:flex-col md:items-end md:w-auto md:mt-0',
           )}
         >
-          <div className="flex flex-row flex-wrap gap-2 w-full md:flex-col md:w-auto">
+          <div className="flex flex-row flex-wrap gap-2 w-full lg:flex-col lg:w-auto">
             <div className="flex-shrink min-w-0">
               <TaskStatusChanger
                 currentStatus={task.status}
