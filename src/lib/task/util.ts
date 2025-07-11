@@ -255,6 +255,7 @@ export const getTotalTasksCount = (tasks: Task[]): number => {
   return tasks.length;
 };
 
+// TODO: these bgColor and  textColor not used anywhere, remove them if not needed
 export const STATUS_CONFIG = {
   [TaskStatus.DRAFT]: {
     label: 'DRAFT',

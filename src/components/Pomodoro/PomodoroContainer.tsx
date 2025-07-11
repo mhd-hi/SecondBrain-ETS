@@ -1,15 +1,16 @@
 'use client';
 
+import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePomodoro } from '@/contexts/use-pomodoro';
-import { getBreakActivities } from '@/lib/pomodoro/util';
+import { StreakBadge } from '../shared/atoms/StreakBadge';
 import { DurationSelector } from './DurationSelector';
 
-export function PomodoroSession() {
+export function PomodoroContainer() {
   const {
     isRunning,
     timeLeftSec,
@@ -36,20 +37,20 @@ export function PomodoroSession() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Show duration selector when not running and at the start of any session
+  // Show duration selector when not running and at the start of any pomodoro session
   const showDurationSelector = !isRunning && timeLeftSec === totalTimeSec;
 
   const handlePlayClick = () => {
-    // If session is not active, we need to start it first
+    // If pomodoro session is not active, we need to start it first
     if (!isPomodoroActive) {
-      // This will activate the session with current duration
+      // This will activate the pomodoro session with current duration
       switchToPomodoroType(pomodoroType);
     }
     toggleTimer();
   };
 
   const handleAddFiveMinutes = () => {
-    // If timer is not running and we're at the start of a session, add to duration selector
+    // If timer is not running and we're at the start of a pomodoro session, add to duration selector
     if (!isRunning && timeLeftSec === totalTimeSec && pomodoroType === 'work') {
       const newDuration = currentDuration + 5;
       updateDuration(newDuration);
@@ -60,21 +61,8 @@ export function PomodoroSession() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        {streak > 0 && (
-          <Badge variant="secondary" className="text-sm">
-            🔥
-            {' '}
-            {streak}
-            {' '}
-            day streak
-          </Badge>
-        )}
-      </div>
-
-      {/* Main Session Card */}
+    <div className="max-w-3xl mx-auto space-y-6">
+      {/* Main Pomodoro Session Card */}
       <Card className="border-2">
 
         <CardContent className="space-y-6 mt-7">
@@ -86,31 +74,38 @@ export function PomodoroSession() {
             </div>
           )}
 
-          {/* Session Type Buttons */}
+          {/* Pomodoro Type Tabs */}
           <div className="flex justify-center">
-            <div className="flex gap-2">
-              <Button
-                variant={pomodoroType === 'work' ? 'default' : 'outline'}
-                onClick={() => switchToPomodoroType('work')}
-                className="px-4 py-2"
-              >
-                Pomodoro
-              </Button>
-              <Button
-                variant={pomodoroType === 'shortBreak' ? 'default' : 'outline'}
-                onClick={() => switchToPomodoroType('shortBreak')}
-                className="px-4 py-2"
-              >
-                Short Break
-              </Button>
-              <Button
-                variant={pomodoroType === 'longBreak' ? 'default' : 'outline'}
-                onClick={() => switchToPomodoroType('longBreak')}
-                className="px-4 py-2"
-              >
-                Long Break
-              </Button>
-            </div>
+            <Tabs value={pomodoroType} onValueChange={value => switchToPomodoroType(value as PomodoroType)}>
+              <TabsList className="relative grid w-fit grid-cols-3 h-10 bg-muted/50 p-1 rounded-xl">
+                {/* Sliding background indicator */}
+                <div
+                  className="absolute top-1 bottom-1 bg-background text-foreground rounded-lg shadow-sm transition-all duration-300 ease-out border"
+                  style={{
+                    left: `${pomodoroType === 'work' ? '4px' : pomodoroType === 'shortBreak' ? 'calc(33.333% + 1px)' : 'calc(66.666% - 2px)'}`,
+                    width: 'calc(33.333% - 2px)',
+                  }}
+                />
+                <TabsTrigger
+                  value="work"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                >
+                  Pomodoro
+                </TabsTrigger>
+                <TabsTrigger
+                  value="shortBreak"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                >
+                  Short Break
+                </TabsTrigger>
+                <TabsTrigger
+                  value="longBreak"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                >
+                  Long Break
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
 
           {/* Timer Display */}
@@ -129,41 +124,16 @@ export function PomodoroSession() {
               )}
 
             {/* Progress bar */}
-            <div className="mx-4">
-              <div className="bg-muted mb-4 h-2 w-full rounded-full">
+            <div className="mx-8 sm:mx-12 md:mx-16 lg:mx-20">
+              <div className="bg-muted mb-4 h-1.5 w-full rounded-full">
                 <div
-                  className={`h-2 rounded-full transition-all duration-1000 
+                  className={`h-1.5 rounded-full transition-all duration-1000 
                     ${pomodoroType === 'work' ? 'bg-blue-500' : 'bg-green-500'}`}
                   style={{ width: `${getProgress()}%` }}
                 />
               </div>
             </div>
           </div>
-
-          {/* Break Activity Suggestions */}
-          {pomodoroType !== 'work' && (
-            <div className="flex justify-center">
-              <div className="bg-muted/50 max-w-xs rounded-lg p-4">
-                <h3 className="mb-3 text-center text-sm font-medium">
-                  {pomodoroType === 'shortBreak'
-                    ? '✨ Quick Break Ideas'
-                    : '🌟 Long Break Ideas'}
-                </h3>
-                <div className="space-y-1">
-                  {getBreakActivities(pomodoroType).map(activity => (
-                    <div key={activity} className="text-muted-foreground text-left text-sm">
-                      {activity}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-muted-foreground mt-3 text-center text-xs italic">
-                  {pomodoroType === 'shortBreak'
-                    ? 'Avoid screens - give your mind a real break!'
-                    : 'Take a deeper reset to recharge for the next cycle'}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Session Controls */}
           <div className="space-y-4">
@@ -172,7 +142,7 @@ export function PomodoroSession() {
                 onClick={handlePlayClick}
                 variant="outline"
                 size="lg"
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-500 text-white shadow-md hover:bg-violet-600"
+                className="pomodoro-button flex h-16 w-16 items-center justify-center rounded-full shadow-md"
               >
                 {isRunning ? <Pause className="h-6 w-6" /> : <Play className="ml-1 h-6 w-6" />}
               </Button>
@@ -200,8 +170,11 @@ export function PomodoroSession() {
               </Button>
             </div>
           </div>
+
+          <StreakBadge streak={streak} />
         </CardContent>
       </Card>
+
     </div>
   );
 }

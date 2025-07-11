@@ -1,8 +1,34 @@
+'use client';
+
 import React from 'react';
-import Navbar from '@/components/Navbar/Navbar';
-import { SidebarWrapper } from '@/components/Sidebar/sidebar-wrapper';
+import Navbar from '@/components/shared/Navigation/Navbar/Navbar';
+import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { CoursesProvider } from '@/contexts/courses-context';
 import { PomodoroProvider } from '@/contexts/pomodoro-provider';
+import { useCourses } from '@/contexts/use-courses';
+
+function DashboardLayoutContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { coursesListItems, isLoading, refreshCourses } = useCourses();
+
+  return (
+    <SidebarProvider>
+      <div className="flex w-full">
+        <AppSidebar courses={coursesListItems} isLoading={isLoading} onCourseAdded={refreshCourses} />
+        <SidebarInset className="flex flex-col flex-1">
+          <Navbar />
+          <main className="flex-1 container max-w-full py-6">
+            {children}
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  );
+}
 
 export default function DashboardLayout({
   children,
@@ -12,15 +38,9 @@ export default function DashboardLayout({
   return (
     <CoursesProvider>
       <PomodoroProvider>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <div className="flex flex-1">
-            <SidebarWrapper />
-            <main className="flex-1 container py-6 md:ml-[300px]">
-              {children}
-            </main>
-          </div>
-        </div>
+        <DashboardLayoutContent>
+          {children}
+        </DashboardLayoutContent>
       </PomodoroProvider>
     </CoursesProvider>
   );

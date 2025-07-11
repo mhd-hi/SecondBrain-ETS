@@ -97,7 +97,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
               </Link>
             </div>
             {nextTask.dueDate && nextTask.status !== TaskStatus.COMPLETED && (
-              <div className="flex items-center">
+              <div className="flex items-center mb-2">
                 <DueDateDisplay
                   date={nextTask.dueDate}
                   className="text-xs"
@@ -109,7 +109,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
         {upcomingTask && upcomingTask !== nextTask && (
           <div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 mt-1 pt-1 border-t border-border">
               <span className="text-xs font-bold text-foreground">Upcoming:</span>
               <Link
                 href={`/courses/${course.id}#task-${upcomingTask.id}`}

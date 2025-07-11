@@ -6,6 +6,7 @@ import { ChevronDown, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { DurationSelector } from '@/components/Pomodoro/DurationSelector';
+import { StreakBadge } from '@/components/shared/atoms/StreakBadge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -218,7 +219,7 @@ export function PomodoroTile() {
         <div className="flex justify-center">
           <Button
             onClick={handleStartPomodoro}
-            className="mb-2 bg-violet-500 hover:bg-violet-600 text-violet-100"
+            className="pomodoro-button mb-2"
             size="lg"
           >
             <Play className="h-5 w-5 mr-2" />
@@ -228,22 +229,7 @@ export function PomodoroTile() {
 
         {/* Stats */}
         <div className="flex justify-between items-center text-sm mt-5">
-          {streak > 0
-            ? (
-              <div className="flex items-center gap-1">
-                <span>
-                  🔥 Streak:
-                  {' '}
-                  {streak}
-                  {' '}
-                  day
-                  {streak !== 1 ? 's' : ''}
-                </span>
-              </div>
-            )
-            : (
-              <div></div>
-            )}
+          <StreakBadge streak={streak} />
         </div>
       </div>
     </div>

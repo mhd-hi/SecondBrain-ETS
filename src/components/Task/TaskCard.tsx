@@ -9,10 +9,10 @@ import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-drop
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { cn, formatEffortTime, getCourseColor } from '@/lib/utils';
+import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
+import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 
 type TaskCardProps = {
   task: Task;
@@ -40,7 +40,6 @@ export function TaskCard({
   actions,
 }: TaskCardProps) {
   const router = useRouter();
-  const courseColor = task.course ? getCourseColor(task.course) : undefined;
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
 
   // Use controlled state if provided, otherwise use internal state
@@ -78,26 +77,16 @@ export function TaskCard({
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
       />
-      {showCourseBadge && task.course?.code && (
+      {showCourseBadge && task.course && (
         <div className="mb-1">
-          <Badge
-            variant="outline"
-            className="text-xs cursor-pointer hover:bg-muted/80 transition-colors"
-            style={{
-              borderColor: courseColor,
-              color: courseColor,
-              backgroundColor: courseColor ? `${courseColor}15` : undefined,
-            }}
+          <CourseCodeBadge
+            course={task.course}
             onClick={handleNavigateToTask}
-          >
-            {task.course.code}
-          </Badge>
-          {' '}
-
+          />
         </div>
       )}
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1 flex-grow">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1 flex-grow min-w-0">
           <h4 className={cn(
             'font-medium',
             isCompleted && 'text-muted-foreground',
@@ -129,11 +118,7 @@ export function TaskCard({
 
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
-              <span className={cn(
-                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
-                isCompleted && 'line-through',
-              )}
-              >
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <Clock className="h-3 w-3 flex-shrink-0" />
                 {formatEffortTime(task.estimatedEffort)}
               </span>
@@ -141,11 +126,7 @@ export function TaskCard({
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <span className={cn(
-                'text-xs font-medium flex items-center gap-1 text-muted-foreground',
-                isCompleted && 'line-through',
-              )}
-              >
+              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                 <BarChart3 className="h-3 w-3 flex-shrink-0" />
                 {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
                 % complete
@@ -158,24 +139,32 @@ export function TaskCard({
           </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <TaskStatusChanger
-            currentStatus={task.status}
-            onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
-          />
-
-          {task.status === TaskStatusEnum.IN_PROGRESS && (
-            <Button
-              onClick={handleStartPomodoro}
-              size="sm"
-              className="bg-violet-500 hover:bg-violet-600 text-white h-8 px-3"
-            >
-              <Play className="h-4 w-4" />
-              Pomodoro
-            </Button>
+        <div
+          className={cn(
+            // Row, wrap, full width on mobile, auto on desktop
+            'flex flex-row flex-wrap gap-2 w-full mt-3 items-start',
+            'md:flex-col md:items-end md:w-auto md:mt-0',
           )}
+        >
+          <div className="flex flex-row flex-wrap gap-2 w-full lg:flex-col lg:w-auto">
+            <div className="flex-shrink min-w-0">
+              <TaskStatusChanger
+                currentStatus={task.status}
+                onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
+              />
+            </div>
+            {task.status === TaskStatusEnum.IN_PROGRESS && (
+              <Button
+                onClick={handleStartPomodoro}
+                size="sm"
+                className="pomodoro-button h-8 px-3 flex-shrink min-w-0"
+              >
+                <Play className="h-4 w-4" />
+                Pomodoro
+              </Button>
+            )}
+          </div>
         </div>
-
       </div>
       <SubtasksList
         subtasks={task.subtasks ?? []}
