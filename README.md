@@ -12,7 +12,6 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 - [NextAuth.js](https://next-auth.js.org)
 - [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
-- [Zustand](https://github.com/pmndrs/zustand)
 - [OpenAI API](https://openai.com)
 
 ## Getting Started

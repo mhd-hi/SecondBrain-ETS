@@ -56,7 +56,7 @@ function isPageRoute(pathname: string): boolean {
   return !pathname.startsWith('/api/');
 }
 
-export default auth((req) => {
+export default auth((req: any) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth?.user;
 
