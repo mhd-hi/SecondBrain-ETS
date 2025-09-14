@@ -9,11 +9,18 @@ export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS cours
 8. ALWAYS return ONLY the JSON array, nothing else
 9. ALWAYS group related tasks into subtasks when they share the same week, type, and main topic
 10. ALWAYS assign weeks sequentially when not explicitly provided
-11. NEVER add any fields not explicitly shown in the example object`;
+11. NEVER add any fields not explicitly shown in the example object
+12. BY DEFAULT assume the course session spans EXACTLY 13 weeks; when weeks are not fully specified, distribute items across weeks 1-13 and place the final exam in week 14 unless the HTML explicitly defines a different last week`;
 
 export function buildCoursePlanParsePrompt(pageHtml: string) {
   return `
 You are receiving the complete HTML code (or raw text) of an ETS course plan page that contains one or more tables describing week(s) and content(s). Apply these STRICT rules to extract only a JSON array of objects, without any additional annotation or explanation:
+
+0. **Session Length (VERY IMPORTANT)**
+   - By default, the school session is EXACTLY **13 weeks**.
+   - If the HTML does **not** clearly specify all week numbers, assign or complete week numbering sequentially so that the plan spans weeks **1-13**.
+   - If the HTML **explicitly** defines different week numbers (e.g., 1-12, 1-15), respect the explicit numbering. Only infer weeks when missing.
+   - The **final exam** must be placed in the **last week of the session**; by default this is **week 13** unless the HTML clearly indicates a different last week.
 
 1. **Table Identification**
    - Identify all <table> ... </table> blocks in the HTML, or any ASCII segment that looks like a table (lines delimited by "|", "—", etc.).
@@ -25,14 +32,15 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    For each line (except header):
    a. Read the "Week" cell:
       - If it contains a single integer X (1 ≤ X ≤ 20), then \`week = X\`.
-      - If it contains "Y to Z" or "Y and Z" (e.g., "2 to 4", "5 and 6"), consider each intermediate week number: create an object for each week Y, Y+1, ..., Z.
+      - If it contains "Y to Z" or "Y and Z" (e.g., "2 to 4", "5 and 6"), create an object for each week Y, Y+1, ..., Z.
       - If the cell is empty or non-numeric:
         * If it's the first item in a logical sequence, assign \`week = 1\`
         * If it's part of a sequence, increment the week number from the previous item
         * If it's a major topic change, increment the week number
         * If it's a subtopic of the previous item, use the same week number
-      - If it's a final exam, ALWAYS place it in the last week of the course
-   b. Read the "Content" cell(s) (or "Subject" / "Course"):
+      - If it's a final exam, ALWAYS place it in the last week of the session (default week 13).
+   b. After processing all rows, if weeks are underspecified and no explicit total is given, continue assigning sequential weeks until week 13 is reached, distributing remaining items logically across weeks 1-13.
+   c. Read the "Content" cell(s) (or "Subject" / "Course"):
       - Split by bullets (\`•\`), line breaks, or indented lists to get one or more text fragments.
 
 3. **Type Classification**
@@ -42,19 +50,19 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
    - If the text contains "Exam", "Midterm", "Test", "Quiz", then \`type = "exam"\`.
    - If the text contains "Homework", "Project", "TP to submit", then \`type = "homework"\`.
    - If multiple different keywords appear in the same fragment (e.g., "Midterm exam + Practical work"), create two distinct objects (one \`exam\`, one \`pratique\`) with the same \`week\`.
-   - If it's a final exam, ALWAYS set \`type = "exam"\` and place it in the last week
+   - If it's a final exam, ALWAYS set \`type = "exam"\` and place it in the last week of the session (default week 13).
 
 4. **Content Grouping**
-   - If multiple fragments in the same week and type are related (e.g., different algorithms, different parts of the same topic), group them as subtasks
-   - The main task should have a general title that encompasses all subtasks
-   - Each subtask should have its specific title and details
-   - The total estimated effort should be distributed among subtasks
+   - If multiple fragments in the same week and type are related, group them as subtasks.
+   - The main task should have a general title that encompasses all subtasks.
+   - Each subtask should have its specific title and details.
+   - The total estimated effort should be distributed among subtasks.
    - When grouping items without explicit weeks:
      * Group related items under the same week
      * Use logical progression to determine week numbers
      * Consider topic changes as week boundaries
      * Maintain consistent week numbering across the course
-     * ALWAYS place final exams in the last week
+     * ALWAYS place final exams in the last week of the session (default week 14)
 
 5. **JSON Object Construction**
    For each main task (with optional subtasks), generate an object with EXACTLY these fields:
