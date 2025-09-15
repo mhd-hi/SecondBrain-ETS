@@ -19,8 +19,8 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 ## Getting Started
 
 ### Prerequisites
-- [Bun](https://bun.sh) >= 1.0.0 (recommended package manager)
-- Node.js (if you prefer npm/yarn)
+- [Bun](https://bun.sh) >= 1.0.0
+- Node.js
 
 ### Installation
 
