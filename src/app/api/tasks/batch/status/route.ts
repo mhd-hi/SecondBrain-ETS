@@ -8,6 +8,7 @@ import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { TaskStatus } from '@/types/task';
 
+// /api/tasks/batch/status
 export type BatchStatusUpdateRequest = {
   taskIds: string[];
   status: TaskStatus;

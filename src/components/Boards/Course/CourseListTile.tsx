@@ -8,7 +8,7 @@ import { api, handleApiSuccess } from '@/lib/api/util';
 import { handleConfirm } from '@/lib/dialog/util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/error/util';
 
-export function CoursesTile() {
+export function CourseListTile() {
   const { courses, isLoading, error, deleteCourse, refreshCourses } = useCourses();
 
   const handleDeleteCourse = async (courseId: string) => {
@@ -51,7 +51,7 @@ export function CoursesTile() {
         <h2 className="text-2xl font-semibold">Courses</h2>
         <AddCourseDialog onCourseAdded={refreshCourses} />
       </div>
-      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <div className="grid w-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
         {isLoading
           ? (
             Array.from({ length: 6 }).map((_, index) => (
@@ -74,7 +74,7 @@ export function CoursesTile() {
                 No courses found. Add a new course to get started!
               </div>
             )}
-      </div>
+  </div>
     </div>
   );
 }

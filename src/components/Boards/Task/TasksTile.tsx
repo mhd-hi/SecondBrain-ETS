@@ -368,7 +368,7 @@ export const TodaysFocusTile = () => {
               },
               {
                 key: 'quarter',
-                label: 'Next Quarter',
+                label: 'This Quarter',
               },
             ].map(({ key, label }) => (
               <Button
@@ -395,9 +395,11 @@ export const TodaysFocusTile = () => {
           : tasks.length === 0
             ? (
               <div className="text-center py-8 text-muted-foreground">
-                <p>No tasks require your focus right now! 🎉</p>
+                <p>No tasks require your focus right now!</p>
                 <p className="text-sm mt-1">
-                  {filter === 'week' ? 'This week' : filter === 'month' ? 'This month' : 'Next quarter'}
+
+                {'🌤️ '}
+                {filter === 'week' ? 'This week' : filter === 'month' ? 'This month' : 'Next quarter'}
                   {' '}
                   is looking clear.
                 </p>
