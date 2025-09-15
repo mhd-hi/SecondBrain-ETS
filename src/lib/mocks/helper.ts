@@ -1,5 +1,5 @@
 import type { CourseAIResponse } from '@/types/api';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 import { MOCK_COURSES } from './openai-data';
 
 export function setMockOpenAI(courseCode: string): CourseAIResponse {

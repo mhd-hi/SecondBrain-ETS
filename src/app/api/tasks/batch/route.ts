@@ -8,7 +8,7 @@ import { withAuthSimple } from '@/lib/auth/api';
 import { calculateTaskDueDate } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 export type BatchUpdateRequest = {
   action: 'update' | 'delete';

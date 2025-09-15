@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {
   try {

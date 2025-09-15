@@ -18,7 +18,7 @@ import { batchUpdateTaskStatus, deleteTask } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 type CoursePageProps = {
   params: Promise<{

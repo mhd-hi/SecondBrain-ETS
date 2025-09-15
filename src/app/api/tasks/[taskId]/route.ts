@@ -6,7 +6,7 @@ import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 async function handlePatchTask(
   request: NextRequest,

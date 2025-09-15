@@ -1,9 +1,10 @@
-import type { Subtask, Task } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
+import type { Task } from '@/types/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 export const GET = withAuthSimple(
   async (request, user) => {

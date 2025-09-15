@@ -24,7 +24,7 @@ import {
   getUpcomingTask,
 } from '@/lib/task/util';
 import { getCourseColor } from '@/lib/utils';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 type CourseCardProps = {
   course: Course;

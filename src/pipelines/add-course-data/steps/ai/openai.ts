@@ -2,7 +2,7 @@
 import type { Task } from '@/types/task';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 import { USE_MOCK_DATA } from '../../../../lib/config';
 import { setMockOpenAI } from '../../../../lib/mocks/helper';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';

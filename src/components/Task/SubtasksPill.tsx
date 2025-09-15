@@ -1,6 +1,6 @@
 'use client';
 
-import type { Subtask } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
 import { ChevronDown } from 'lucide-react';
 
 type SubtasksPillProps = {

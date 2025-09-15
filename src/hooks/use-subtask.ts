@@ -1,5 +1,6 @@
 import type React from 'react';
-import type { Task, TaskStatus } from '@/types/task';
+import type { Task } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 

@@ -1,8 +1,8 @@
 'use client';
 
-import type { Subtask } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
 import { Badge } from '@/components/ui/badge';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 type SubtaskProgressProps = {
   subtasks?: Subtask[];

@@ -1,12 +1,11 @@
 'use client';
-
-import type { Subtask } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn } from '@/lib/utils';
-import { TaskStatus as TaskStatusEnum } from '@/types/task';
+import { TaskStatus as TaskStatusEnum } from '@/types/task-status';
 import { EditableField } from '../shared/EditableField';
 
 type SubtasksListProps = {

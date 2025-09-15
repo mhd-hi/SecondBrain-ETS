@@ -1,4 +1,5 @@
-import type { Subtask, TaskStatus } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
+import type { TaskStatus } from '@/types/task-status';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { getUserTask, updateUserTask } from '@/lib/auth/db';
@@ -6,7 +7,7 @@ import { getUserTask, updateUserTask } from '@/lib/auth/db';
 export const PATCH = withAuth<{ taskId: string; subtaskId: string }>(
   async (request, { params, user }) => {
     const { taskId, subtaskId } = await params;
-    const { status } = await request.json() as { status: TaskStatus }; // Get the task with automatic ownership verification
+    const { status } = await request.json() as { status: TaskStatus };
     const task = await getUserTask(taskId, user.id);
 
     if (!task) {

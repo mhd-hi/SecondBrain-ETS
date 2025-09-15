@@ -1,20 +1,8 @@
 import type { Course } from './course';
-
-export enum TaskStatus {
-  TODO = 'TODO',
-  IN_PROGRESS = 'IN_PROGRESS',
-  COMPLETED = 'COMPLETED',
-}
+import type { Subtask } from './subtask';
+import type { TaskStatus } from './task-status';
 
 export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
-
-export type Subtask = {
-  id: string;
-  title: string;
-  status: TaskStatus;
-  notes?: string;
-  estimatedEffort?: number;
-};
 
 export type Task = {
   id: string;

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 const GroupSection = ({
   title,

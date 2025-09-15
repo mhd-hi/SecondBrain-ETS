@@ -1,4 +1,6 @@
-import type { Subtask, Task, TaskStatus } from '@/types/task';
+import type { Subtask } from '@/types/subtask';
+import type { Task } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { and, eq, gte, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';

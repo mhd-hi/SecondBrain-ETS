@@ -1,5 +1,5 @@
 import type { Task } from '@/types/task';
-import { TaskStatus } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 
 // Standard number of weeks per session
 const STANDARD_WEEKS_PER_SESSION = 15;
