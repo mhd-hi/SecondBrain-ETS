@@ -1,10 +1,21 @@
 'use client';
 
 import type { Course } from '@/types/course';
+import { Palette } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   calculateProgress,
   getCompletedTasksCount,
@@ -21,6 +32,9 @@ type CourseCardProps = {
 };
 
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
+  const [showColorDialog, setShowColorDialog] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
+  const [pendingColor, setPendingColor] = useState(selectedColor);
   // Ensure course.tasks is an array
   const tasks = course.tasks ?? [];
   const courseColor = getCourseColor(course);
@@ -38,7 +52,45 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
     onDeleteCourse(course.id);
   };
 
+  const handleChangeColorClick = () => {
+    setShowColorDialog(true);
+    setPendingColor(selectedColor);
+  };
+
+  const handleColorInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPendingColor(e.target.value);
+  };
+
+  const handleConfirmColor = async () => {
+    try {
+      const res = await fetch(`/api/courses/${course.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ color: pendingColor }),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to update course color');
+      }
+      setSelectedColor(pendingColor);
+      setShowColorDialog(false);
+      toast.success('Course color updated');
+    } catch {
+      toast.error('Failed to update course color');
+    }
+  };
+
+  const handleCancelColor = () => {
+    setShowColorDialog(false);
+    setPendingColor(selectedColor);
+  };
+
   const dropdownActions = [
+    {
+      label: 'Change color',
+      onClick: handleChangeColorClick,
+    },
     {
       label: 'Delete',
       onClick: handleDeleteClick,
@@ -49,12 +101,49 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   return (
     <div
       className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]"
-      style={{ borderLeft: `4px solid ${courseColor}` }}
+      style={{ borderLeft: `4px solid ${selectedColor}` }}
     >
-      <MoreActionsDropdown
-        actions={dropdownActions}
-        triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100"
-      />
+      <div className="absolute -top-[10px] -right-[10px] z-10">
+        <MoreActionsDropdown
+          actions={dropdownActions}
+          triggerClassName=""
+        />
+        <Dialog open={showColorDialog} onOpenChange={setShowColorDialog}>
+          <DialogContent>
+            <DialogDescription>
+              Pick a color for this course. This helps visually distinguish it in your dashboard.
+            </DialogDescription>
+            <DialogHeader>
+              <DialogTitle>
+                <span className="flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-muted-foreground" />
+                  Change Course Color
+                </span>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 mt-2">
+              <span className="text-xs">
+
+                {'Color: '}
+                {pendingColor}
+              </span>
+              <input
+                type="color"
+                value={pendingColor}
+                onChange={handleColorInput}
+                className="w-8 h-8 border-none cursor-pointer"
+                aria-label="Pick course color"
+                style={{ background: 'none' }}
+              />
+
+              <div className="flex gap-2 justify-end mt-4">
+                <Button size="sm" variant="outline" onClick={handleCancelColor}>Cancel</Button>
+                <Button size="sm" onClick={handleConfirmColor}>Confirm</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       <div className="flex justify-between items-start">
         <h2 className="text-lg font-bold">{course.code}</h2>
