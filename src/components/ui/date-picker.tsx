@@ -17,11 +17,12 @@ type DatePickerProps = {
   date?: Date;
   onDateChange?: (date: Date | undefined) => void;
   className?: string;
+  open?: boolean;
 };
 
-export function DatePicker({ date, onDateChange, className }: DatePickerProps) {
+export function DatePicker({ date, onDateChange, className, open }: DatePickerProps) {
   return (
-    <Popover>
+    <Popover open={open}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"

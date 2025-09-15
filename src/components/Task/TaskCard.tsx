@@ -15,6 +15,7 @@ import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
+import { DatePicker } from '../ui/date-picker';
 
 type TaskCardProps = {
   task: Task;
@@ -47,6 +48,24 @@ export function TaskCard({
   const [editedDescription, setEditedDescription] = useState(task.notes ?? '');
   const updateField = useUpdateField();
   const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
+
+    // State for editing due date
+    const [isEditingDueDate, setIsEditingDueDate] = useState(false);
+    const [editedDueDate, setEditedDueDate] = useState(task.dueDate ? new Date(task.dueDate) : undefined);
+
+    // Handler for saving due date
+    const handleSaveDueDate = async (newDate: Date | undefined) => {
+      setEditedDueDate(newDate);
+      setIsEditingDueDate(false);
+      if (newDate) {
+        await updateField({
+          type: 'task',
+          id: task.id,
+          input: 'dueDate',
+          value: newDate.toISOString(),
+        });
+      }
+    };
 
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
@@ -162,9 +181,29 @@ export function TaskCard({
               </span>
             )}
 
-            {task.dueDate && task.status !== TaskStatus.COMPLETED && (
-              <DueDateDisplay date={task.dueDate} />
-            )}
+              {task.dueDate && task.status !== TaskStatus.COMPLETED && (
+                <>
+                  <span
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setIsEditingDueDate(true)}
+                  >
+                    <DueDateDisplay date={editedDueDate ?? task.dueDate} />
+                  </span>
+              {isEditingDueDate && (
+                <div className="ml-2">
+                  <DatePicker
+                    date={editedDueDate}
+                    onDateChange={(date: Date | undefined) => {
+                      setEditedDueDate(date);
+                      handleSaveDueDate(date);
+                    }}
+                    className="w-[180px]"
+                    open={isEditingDueDate}
+                  />
+                </div>
+              )}
+                </>
+              )}
           </div>
         </div>
 

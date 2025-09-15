@@ -8,7 +8,6 @@ import { tasks } from '@/server/db/schema';
 export async function POST(req: NextRequest) {
   try {
     const { taskId, input, value } = await req.json();
-    // Only allow updating certain fields
     const allowedFields = ['title', 'notes', 'status', 'estimatedEffort', 'actualEffort', 'dueDate', 'week', 'type'];
 
     if (!allowedFields.includes(input)) {
@@ -17,6 +16,11 @@ export async function POST(req: NextRequest) {
 
     const updateObj: Record<string, any> = {};
     updateObj.updatedAt = new Date();
+    if (input === 'dueDate') {
+      updateObj[input] = new Date(value);
+    } else {
+      updateObj[input] = value;
+    }
 
     const result = await db.update(tasks)
       .set(updateObj)

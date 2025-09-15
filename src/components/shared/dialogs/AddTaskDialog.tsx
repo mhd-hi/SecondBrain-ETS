@@ -107,9 +107,9 @@ export const AddTaskDialog = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Add Task</DialogTitle>
           <DialogDescription>
-            {courseCode ? `Create a new task for ${courseCode}` : 'Create a new task'}
+            {courseCode ? `Add a new task for ${courseCode}` : 'Add a new task'}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleAddTask}>
@@ -144,12 +144,12 @@ export const AddTaskDialog = ({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
                 value={newTask.notes}
                 onChange={e => setNewTask({ ...newTask, notes: e.target.value })}
-                placeholder="Add any additional notes or details about the task"
+                placeholder="(Optional) Add any additional notes or details about the task"
               />
             </div>
             <div className="grid gap-2">
