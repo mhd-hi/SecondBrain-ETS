@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAddTask } from '@/hooks/use-add-task';
+import { useTask } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task';
 
 type AddTaskDialogProps = {
@@ -40,7 +40,7 @@ export const AddTaskDialog = ({
   courses,
 }: AddTaskDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { addTask, isLoading } = useAddTask();
+  const { addTask, isLoading } = useTask();
   const [newTask, setNewTask] = useState(() => ({
     title: '',
     notes: '',

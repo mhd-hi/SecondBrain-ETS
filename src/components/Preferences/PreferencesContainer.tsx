@@ -9,9 +9,9 @@ export function PreferencesContainer() {
   return (
     <Tabs defaultValue="profile" className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger value="profile" className="text-sm">Profile</TabsTrigger>
-        <TabsTrigger value="pomodoro" className="text-sm">Pomodoro</TabsTrigger>
-        <TabsTrigger value="settings" className="text-sm">Settings</TabsTrigger>
+        <TabsTrigger value="profile" className="text-sm" tabIndex={0}>Profile</TabsTrigger>
+        <TabsTrigger value="pomodoro" className="text-sm" tabIndex={0}>Pomodoro</TabsTrigger>
+        <TabsTrigger value="settings" className="text-sm" tabIndex={0}>Settings</TabsTrigger>
       </TabsList>
 
       <TabsContent value="profile" className="space-y-6">

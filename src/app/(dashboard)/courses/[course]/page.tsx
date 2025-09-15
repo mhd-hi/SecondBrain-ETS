@@ -1,6 +1,5 @@
 'use client';
 import type { Task } from '@/types/task';
-// (keep only the first occurrence of these imports)
 
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -14,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourse } from '@/hooks/use-course';
 import { useCourses } from '@/hooks/use-courses';
+import { updateSubtaskStatus } from '@/hooks/use-subtask';
+import { deleteTask } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { batchUpdateTaskStatus, getOverdueTasks } from '@/lib/task/util';
@@ -102,45 +103,10 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  const handleUpdateSubtaskStatus = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
-    try {
-      // Find the current task and its subtasks
-      const currentTask = tasks.find(task => task.id === taskId);
-      if (!currentTask?.subtasks) {
-        return;
-      }
-
-      // Update the subtask status
-      const updatedSubtasks = currentTask.subtasks.map(subtask =>
-        subtask.id === subtaskId
-          ? { ...subtask, status: newStatus }
-          : subtask,
-      );
-
-      // Update the task with new subtasks
-      await api.patch(`/api/tasks/${taskId}`, { subtasks: updatedSubtasks });
-
-      // Update local state
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId
-            ? { ...task, subtasks: updatedSubtasks }
-            : task,
-        ),
-      );
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to update subtask status');
-    }
-  };
+  const handleUpdateSubtaskStatus = updateSubtaskStatus(tasks, setTasks);
 
   const handleDeleteTask = async (taskId: string) => {
-    try {
-      await api.delete(`/api/tasks/${taskId}`);
-      toast.success('Task deleted successfully');
-      await fetchCourse();
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to delete task');
-    }
+    await deleteTask(taskId, fetchCourse);
   };
 
   const overdueTasks = getOverdueTasks(filteredTasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
@@ -196,9 +162,9 @@ export default function CoursePage({ params }: CoursePageProps) {
   if (!course) {
     return (
       <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           <Skeleton className="h-8 w-1/4" />
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[1, 2, 3].map(i => (
               <Skeleton key={i} className="h-32 w-full" />
             ))}
@@ -247,7 +213,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       {isLoading
         ? (
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             <div className="text-center text-muted-foreground mb-4">
               Loading tasks...
             </div>
@@ -260,16 +226,16 @@ export default function CoursePage({ params }: CoursePageProps) {
         )
         : filteredTasks.length > 0
           ? (
-            <div className="space-y-8 will-change-scroll">
+            <div className="space-y-5 will-change-scroll">
               {Object.entries(tasksByWeek)
                 .sort(([a], [b]) => Number(a) - Number(b))
                 .map(([week, weekTasks]) => (
-                  <div key={week} className="space-y-4">
-                    <h3 className="text-lg font-semibold mb-3">
+                  <div key={week} className="space-y-2.5">
+                    <h3 className="text-shadow-lg font-semibold mb-1.5">
                       {'Week '}
                       {week}
                     </h3>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {weekTasks.map(task => (
                         <div
                           id={`task-${task.id}`}

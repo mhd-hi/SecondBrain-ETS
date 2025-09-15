@@ -2,7 +2,7 @@
 
 ## Technical Debt
 - Fix "Default to winter if between sessions" smell (should select the next session)
-    - Add a input session dropdown and select the right session
+    - Add a input session dropdown when creating a course and select the right session
 
 ---
 
@@ -10,15 +10,9 @@
 
 ## Stories:
 
-### Complete All -> Review
-- Instead of "complete all" buttons, change to "Review tasks", that will open a modal where we can either complete the task or just leave as is (if student didnt complete the task).
-- Add a Must-do tile in dashboard to let users now that you need to review some tasks (will bring them to the specific page and open the "review tasks" dialog).
 ### Today's Focus Enhancements
 - In course page, when there's a change in course status, it doesnt change the count status badge in the sidebar.
 - Dont show overdue by x ... when task is completed.
-### Course
--  Add tasks "edit" functionality (5 points)
-    -   Follow GitHub issues style - sidebar opens on the right, allowing modification of tasks and subtasks.
 
 ### Story: AI/Onboarding course
 -  Ask user for course periods (session periods) to better determine task due dates (2 points)
@@ -28,11 +22,7 @@
     -   Benefits:
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
-        -   Performance: Faster response times for cached courses
--  Add intra date information in description of intra task.
-
--  (not sure if already completed) Improve date accuracy of tasks (2 points)
-    -   For new tasks, set default date as today+1week in the dialog.
+-  Add intra date information in description of intra task (cheerio).
 
 ### Story: PlanETS Integration Improvements
 - Enhance PlanETS error handling and session selection (5 points)
@@ -55,9 +45,6 @@
 ### Story: Roadmap Features
 - Implement Monthly roadmap for better task visualization and movement (3 points)
 
-## QOL
-- add tooltip to "Close sidebar" button located in navbar
-- make the add course button have less radius
 #### Course
 - change UI in course page to reduce week pb and mb
 #### Pomodoro
@@ -72,8 +59,7 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 - remove deep work tile (its useless)
 - add a bigger border between 2 parts of statusChanger
 #### Pomodoro
-- fix pomodoro settings
-    - fix indexing, cant switch over tabs using "tab" key, should be the first 3 to index over.
+
 #### Progress Tracking:
 -  Add semester progress Board and dashboard page (progressbar for all courses) (3 points)
 -  Add course progress Board inside the course page (progressBar for courses tasks) (2 points)

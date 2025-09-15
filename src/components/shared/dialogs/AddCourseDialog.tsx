@@ -269,7 +269,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       <DialogTrigger asChild>
         {trigger ?? (
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2 rounded-sm" />
             Add Course
           </Button>
         )}
