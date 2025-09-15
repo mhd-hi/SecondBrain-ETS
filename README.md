@@ -1,5 +1,7 @@
 # SecondBrain - Your Course Management Assistant
 
+[![CI](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml)
+
 A Next.js application that helps students manage their course workload by intelligently parsing course plans and creating manageable tasks.
 
 ## Project Overview
@@ -17,8 +19,8 @@ SecondBrain uses AI to parse ETS course plans and break them down into manageabl
 ## Getting Started
 
 ### Prerequisites
-- [Bun](https://bun.sh) >= 1.0.0 (recommended package manager)
-- Node.js (if you prefer npm/yarn)
+- [Bun](https://bun.sh) >= 1.0.0
+- Node.js
 
 ### Installation
 
