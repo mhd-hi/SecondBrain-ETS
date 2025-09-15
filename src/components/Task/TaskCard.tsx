@@ -10,9 +10,11 @@ import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Button } from '@/components/ui/button';
+import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
+import { EditableField } from '../shared/EditableField';
 
 type TaskCardProps = {
   task: Task;
@@ -41,11 +43,37 @@ export function TaskCard({
 }: TaskCardProps) {
   const router = useRouter();
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(task.title);
+  const [editedDescription, setEditedDescription] = useState(task.notes ?? '');
+  const updateField = useUpdateField();
+  const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
 
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
 
   const isCompleted = task.status === TaskStatus.COMPLETED;
+
+  // Save handler for title
+  const handleSaveTitle = async (newTitle: string) => {
+    setEditedTitle(newTitle);
+    await updateField({
+      type: 'task',
+      id: task.id,
+      input: 'title',
+      value: newTitle,
+    });
+  };
+
+  // Save handler for description
+  const handleSaveDescription = async (newDescription: string) => {
+    setEditedDescription(newDescription);
+    await updateField({
+      type: 'task',
+      id: task.id,
+      input: 'notes',
+      value: newDescription,
+    });
+  };
 
   const handleNavigateToTask = () => {
     if (task.course?.id) {
@@ -87,22 +115,23 @@ export function TaskCard({
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1 flex-grow min-w-0">
-          <h4 className={cn(
-            'font-medium',
-            isCompleted && 'text-muted-foreground',
-          )}
-          >
-            {task.title}
-          </h4>
-          {task.notes && (
-            <p className={cn(
-              'text-sm text-muted-foreground',
-              isCompleted && 'opacity-70',
-            )}
-            >
-              {task.notes}
-            </p>
-          )}
+          {/* Editable Title */}
+          <EditableField
+            value={editedTitle}
+            onSave={handleSaveTitle}
+            inputType="input"
+            className={cn('font-medium', isCompleted && 'text-muted-foreground')}
+            placeholder="Task title"
+          />
+
+          {/* Editable Description */}
+          <EditableField
+            value={editedDescription}
+            onSave={handleSaveDescription}
+            inputType="textarea"
+            className={cn('text-sm text-muted-foreground', isCompleted && 'opacity-70')}
+            placeholder="Task description"
+          />
           <div className="flex items-center gap-3">
             <SubtasksPill
               subtasks={task.subtasks ?? []}
@@ -167,9 +196,14 @@ export function TaskCard({
         </div>
       </div>
       <SubtasksList
-        subtasks={task.subtasks ?? []}
+        subtasks={subtasks}
         onSubtaskStatusChange={(subtaskId, newStatus) =>
           onUpdateSubtaskStatus(task.id, subtaskId, newStatus)}
+        onEditSubtask={(subtaskId, changes) => {
+          setSubtasks(prev => prev.map(sub =>
+            sub.id === subtaskId ? { ...sub, ...changes } : sub,
+          ));
+        }}
         collapsible={false}
         defaultExpanded={false}
         isExpanded={isSubtasksExpanded}

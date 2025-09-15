@@ -5,12 +5,15 @@ import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
+import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn } from '@/lib/utils';
 import { TaskStatus as TaskStatusEnum } from '@/types/task';
+import { EditableField } from '../shared/EditableField';
 
 type SubtasksListProps = {
   subtasks: Subtask[];
   onSubtaskStatusChange?: (subtaskId: string, newStatus: TaskStatus) => void;
+  onEditSubtask?: (subtaskId: string, changes: Partial<Subtask>) => void;
   readonly?: boolean;
   collapsible?: boolean;
   defaultExpanded?: boolean;
@@ -21,6 +24,7 @@ type SubtasksListProps = {
 const SubtasksList = ({
   subtasks,
   onSubtaskStatusChange,
+  onEditSubtask,
   readonly = false,
   collapsible = false,
   defaultExpanded = true,
@@ -28,6 +32,11 @@ const SubtasksList = ({
   onToggleExpanded,
 }: SubtasksListProps) => {
   const [internalIsExpanded, setInternalIsExpanded] = useState(defaultExpanded);
+
+  // Use shared hook for API update
+
+  const updateField = useUpdateField();
+
   // Use controlled state if provided, otherwise use internal state
   const isExpanded = controlledIsExpanded ?? internalIsExpanded;
 
@@ -53,6 +62,7 @@ const SubtasksList = ({
       toggleExpanded();
     }
   };
+
   return (
     <div id="subtasks-list" className={cn(isExpanded && 'mt-4 space-y-2')}>
       {collapsible && (
@@ -100,19 +110,25 @@ const SubtasksList = ({
               <div className="flex-grow space-y-1">
                 <div className="flex items-center gap-2">
                   {subtask.status === TaskStatusEnum.COMPLETED
-                    ? (
-                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
-                    )
-                    : (
-                      <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    )}
-                  <h6 className={cn(
-                    'text-sm font-medium',
-                    subtask.status === TaskStatusEnum.COMPLETED && 'text-muted-foreground',
-                  )}
-                  >
-                    {subtask.title}
-                  </h6>
+                    ? <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
+                    : <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                  <EditableField
+                    value={subtask.title}
+                    onSave={async (newTitle) => {
+                      await updateField({
+                        type: 'subtask',
+                        id: subtask.id,
+                        input: 'title',
+                        value: newTitle,
+                      });
+                      if (onEditSubtask) {
+                        onEditSubtask(subtask.id, { title: newTitle });
+                      }
+                    }}
+                    inputType="input"
+                    className={cn('text-sm font-medium', subtask.status === TaskStatusEnum.COMPLETED && 'text-muted-foreground')}
+                    placeholder="Subtask title"
+                  />
                   {subtask.estimatedEffort && (
                     <Badge variant="outline" className="text-xs">
                       {subtask.estimatedEffort}
@@ -120,8 +136,24 @@ const SubtasksList = ({
                     </Badge>
                   )}
                 </div>
-                {subtask.notes && (
-                  <p className="text-xs text-muted-foreground ml-6">{subtask.notes}</p>
+                {typeof subtask.notes === 'string' && (
+                  <EditableField
+                    value={subtask.notes}
+                    onSave={async (newNotes) => {
+                      await updateField({
+                        type: 'subtask',
+                        id: subtask.id,
+                        input: 'notes',
+                        value: newNotes,
+                      });
+                      if (onEditSubtask) {
+                        onEditSubtask(subtask.id, { notes: newNotes });
+                      }
+                    }}
+                    inputType="textarea"
+                    className="text-xs text-muted-foreground ml-6"
+                    placeholder="Subtask notes"
+                  />
                 )}
               </div>
               {!readonly && onSubtaskStatusChange && (
