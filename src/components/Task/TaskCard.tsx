@@ -36,7 +36,6 @@ export function TaskCard({
   task,
   onDeleteTask,
   onUpdateTaskStatus,
-  onUpdateSubtaskStatus,
   showCourseBadge = false,
   isSubtasksExpanded: controlledSubtasksExpanded,
   onToggleSubtasksExpanded,
@@ -244,8 +243,6 @@ export function TaskCard({
       </div>
       <SubtasksList
         subtasks={subtasks}
-        onSubtaskStatusChange={(subtaskId, newStatus) =>
-          onUpdateSubtaskStatus(task.id, subtaskId, newStatus)}
         onEditSubtask={(subtaskId, changes) => {
           setSubtasks(prev => prev.map(sub =>
             sub.id === subtaskId ? { ...sub, ...changes } : sub,

@@ -1,7 +1,7 @@
 'use client';
 
 import type { Subtask } from '@/types/task';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 type SubtasksPillProps = {
   subtasks: Subtask[];
@@ -26,13 +26,7 @@ export function SubtasksPill({ subtasks, isExpanded, onToggle }: SubtasksPillPro
       {' '}
       Subtask
       {subtasks.length !== 1 ? 's' : ''}
-      {isExpanded
-        ? (
-          <ChevronDown className="h-3 w-3 transition-transform duration-150" />
-        )
-        : (
-          <ChevronRight className="h-3 w-3 transition-transform duration-150" />
-        )}
+      <ChevronDown className="h-3 w-3 transition-transform duration-150" />
     </button>
   );
 }

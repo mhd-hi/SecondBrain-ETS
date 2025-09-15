@@ -35,32 +35,16 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.TODO;
   const config = TASK_STATUS_CONFIG[validStatus];
 
-  // Helper function to get background class for status
+  // Helper function to get background class for status using TASK_STATUS_CONFIG
   const getStatusBgClass = (status: TaskStatus) => {
-    switch (status) {
-      case TaskStatus.TODO:
-        return 'bg-blue-500';
-      case TaskStatus.IN_PROGRESS:
-        return 'bg-yellow-500';
-      case TaskStatus.COMPLETED:
-        return 'bg-green-600';
-      default:
-        return 'bg-muted';
-    }
+    const config = TASK_STATUS_CONFIG[status];
+    return config?.bgColor ? `bg-${config.bgColor}` : 'bg-muted';
   };
 
-  // Helper function to get text class for status
+  // Helper function to get text class for status using TASK_STATUS_CONFIG
   const getStatusTextClass = (status: TaskStatus) => {
-    switch (status) {
-      case TaskStatus.TODO:
-        return 'text-white';
-      case TaskStatus.IN_PROGRESS:
-        return 'text-white';
-      case TaskStatus.COMPLETED:
-        return 'text-white';
-      default:
-        return 'text-muted-foreground';
-    }
+    const config = TASK_STATUS_CONFIG[status];
+    return config?.textColor ? `text-${config.textColor}` : 'text-blue-500';
   };
 
   return (
@@ -79,9 +63,9 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
             type="button"
             className={cn(
               'px-3 h-full flex items-center',
-              getStatusTextClass(validStatus),
               'font-medium text-xs uppercase',
               'hover:bg-black/5 focus:outline-none',
+              getStatusTextClass(validStatus),
             )}
             aria-label="Change task status"
           >
@@ -93,9 +77,6 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0 rounded-md overflow-hidden"
         >
           {USER_STATUS_ORDER.map((status, index) => {
-            const statusConfig = TASK_STATUS_CONFIG[status];
-            const isCompleted = status === TaskStatus.COMPLETED;
-
             return (
               <DropdownMenuItem
                 key={status}
@@ -110,12 +91,12 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
               >
                 <div className={cn(
                   'w-3 h-3 rounded-full',
-                  isCompleted
+                  status === TaskStatus.COMPLETED
                     ? getStatusBgClass(status)
                     : `${getStatusBgClass(status)} border border-current`,
                 )}
                 />
-                {statusConfig.label}
+                {TASK_STATUS_CONFIG[status].label}
               </DropdownMenuItem>
             );
           })}
@@ -132,7 +113,10 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
         )}
         aria-label="Cycle to next status"
       >
-        <ChevronRight className="w-2.5 h-2.5 text-foreground" />
+        <ChevronRight
+          className="w-2.5 h-2.5"
+          color={validStatus === TaskStatus.IN_PROGRESS ? 'black' : 'white'}
+        />
       </button>
     </div>
   );

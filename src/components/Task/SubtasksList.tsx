@@ -1,9 +1,8 @@
 'use client';
 
-import type { Subtask, TaskStatus } from '@/types/task';
+import type { Subtask } from '@/types/task';
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
-import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn } from '@/lib/utils';
@@ -12,7 +11,6 @@ import { EditableField } from '../shared/EditableField';
 
 type SubtasksListProps = {
   subtasks: Subtask[];
-  onSubtaskStatusChange?: (subtaskId: string, newStatus: TaskStatus) => void;
   onEditSubtask?: (subtaskId: string, changes: Partial<Subtask>) => void;
   readonly?: boolean;
   collapsible?: boolean;
@@ -23,7 +21,6 @@ type SubtasksListProps = {
 
 const SubtasksList = ({
   subtasks,
-  onSubtaskStatusChange,
   onEditSubtask,
   readonly = false,
   collapsible = false,
@@ -32,8 +29,6 @@ const SubtasksList = ({
   onToggleExpanded,
 }: SubtasksListProps) => {
   const [internalIsExpanded, setInternalIsExpanded] = useState(defaultExpanded);
-
-  // Use shared hook for API update
 
   const updateField = useUpdateField();
 
@@ -156,14 +151,6 @@ const SubtasksList = ({
                   />
                 )}
               </div>
-              {!readonly && onSubtaskStatusChange && (
-                <div className="flex-shrink-0">
-                  <TaskStatusChanger
-                    currentStatus={subtask.status}
-                    onStatusChange={newStatus => onSubtaskStatusChange(subtask.id, newStatus)}
-                  />
-                </div>
-              )}
               {readonly && (
                 <Badge
                   variant="secondary"

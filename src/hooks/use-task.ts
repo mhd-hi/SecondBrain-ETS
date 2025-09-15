@@ -1,4 +1,4 @@
-import type { TaskType } from '@/types/task';
+import type { Task, TaskType } from '@/types/task';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
@@ -57,3 +57,31 @@ export function useTask() {
 
   return { addTask, isLoading, error };
 }
+
+/**
+ * Batch update task status for multiple tasks
+ * @param taskIds Array of task IDs to update
+ * @param status New status to set for all tasks
+ * @returns Promise that resolves when the batch update is complete
+ */
+export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
+  updatedCount: number;
+  status: TaskStatus;
+  updatedTasks: Task[];
+}> => {
+  const response = await fetch('/api/tasks/batch/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskIds, status }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to batch update task status: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<{
+    updatedCount: number;
+    status: TaskStatus;
+    updatedTasks: Task[];
+  }>;
+};

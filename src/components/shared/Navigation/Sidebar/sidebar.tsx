@@ -84,12 +84,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                   ))
                 )
                 : courses.length === 0
-                  ? (
-                    <div className="px-2 py-4 text-center text-muted-foreground">
-                      <p className="text-sm">No courses yet</p>
-                      <p className="text-xs mt-1">Add your first course to get started!</p>
-                    </div>
-                  )
+                  ? (' ')
                   : (
                     courses.map((course) => {
                       const isActive = pathname === `/courses/${course.id}`;
