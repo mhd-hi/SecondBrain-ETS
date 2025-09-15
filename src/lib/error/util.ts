@@ -76,11 +76,6 @@ export const CommonErrorMessages = {
   TASK_CREATE_FAILED: 'Failed to create task. Please try again.',
   TASK_UPDATE_FAILED: 'Failed to update task. Please try again.',
   TASK_DELETE_FAILED: 'Failed to delete task. Please try again.',
-  // Draft-specific
-  DRAFT_FETCH_FAILED: 'Failed to load drafts. Please try again.',
-  DRAFT_CREATE_FAILED: 'Failed to create draft. Please try again.',
-  DRAFT_UPDATE_FAILED: 'Failed to update draft. Please try again.',
-  DRAFT_DELETE_FAILED: 'Failed to delete draft. Please try again.',
 
   // General
   NETWORK_ERROR: 'Network error. Please check your connection.',

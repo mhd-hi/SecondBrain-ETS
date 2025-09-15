@@ -155,7 +155,7 @@ export const TodaysFocusTile = () => {
   }, [fetchFocusTasks]);
 
   const shouldRemoveTask = (newStatus: TaskStatus): boolean => {
-    return newStatus === TaskStatus.COMPLETED || newStatus === TaskStatus.DRAFT;
+    return newStatus === TaskStatus.COMPLETED;
   };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
@@ -286,8 +286,7 @@ export const TodaysFocusTile = () => {
     const priorityOrder = {
       [TaskStatus.IN_PROGRESS]: 1,
       [TaskStatus.TODO]: 2,
-      [TaskStatus.DRAFT]: 3,
-      [TaskStatus.COMPLETED]: 4,
+      [TaskStatus.COMPLETED]: 3,
     };
 
     return tasks.sort((a, b) => {

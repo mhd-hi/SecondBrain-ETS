@@ -47,7 +47,7 @@ CREATE TABLE "tasks" (
 	"notes" text,
 	"week" integer NOT NULL,
 	"type" text DEFAULT 'theorie' NOT NULL,
-	"status" text DEFAULT 'DRAFT' NOT NULL,
+	"status" text DEFAULT 'TODO' NOT NULL,
 	"estimated_effort" real DEFAULT 1 NOT NULL,
 	"actual_effort" real DEFAULT 0 NOT NULL,
 	"subtasks" json,

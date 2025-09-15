@@ -36,7 +36,7 @@ export const POST = withAuthSimple(
   async (request, user) => {
     const data = await request.json() as {
       courseId: string;
-      tasks: Array<Omit<Task, 'id' | 'courseId' | 'isDraft'> & {
+      tasks: Array<Omit<Task, 'id' | 'courseId'> & {
         subtasks?: Subtask[];
         notes?: string;
         dueDate?: string;
@@ -58,7 +58,7 @@ export const POST = withAuthSimple(
         // Calculate week from due date if not provided (for manual task creation)
         // Otherwise preserve the original week number from AI parsing
         week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
-        status: task.status ?? TaskStatus.DRAFT,
+        status: task.status ?? TaskStatus.TODO,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: crypto.randomUUID(),

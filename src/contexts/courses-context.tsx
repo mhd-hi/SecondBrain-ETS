@@ -6,7 +6,6 @@ import React, { createContext, useCallback, useEffect, useMemo, useState } from 
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task';
 
 type CoursesContextType = {
   courses: Course[];
@@ -38,7 +37,6 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
       code: course.code,
       name: course.name,
       overdueCount: getOverdueTasks(course.tasks ?? []).length,
-      draftCount: course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0,
     })),
     [courses],
   );

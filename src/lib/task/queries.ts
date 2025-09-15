@@ -70,6 +70,6 @@ export const createTask = async (data: {
     ...data,
     week,
     type: 'theorie',
-    status: 'DRAFT',
+    status: 'TODO',
   }).returning();
 };

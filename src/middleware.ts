@@ -5,7 +5,6 @@ import { auth } from './middleware/auth';
 const protectedApiRoutes = [
   '/api/courses',
   '/api/tasks',
-  '/api/drafts',
   '/api/cron/cleanup-courses', // Protect cron jobs
   '/api/pomodoro',
   '/api/course-pipeline',

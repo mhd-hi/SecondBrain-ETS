@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextStatus, isValidStatus, STATUS_CONFIG } from '@/lib/task/util';
+import { getNextStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task/util';
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/types/task';
 
@@ -32,14 +32,12 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   };
 
   // Ensure currentStatus is a valid TaskStatus
-  const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.DRAFT;
-  const config = STATUS_CONFIG[validStatus];
+  const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.TODO;
+  const config = TASK_STATUS_CONFIG[validStatus];
 
   // Helper function to get background class for status
   const getStatusBgClass = (status: TaskStatus) => {
     switch (status) {
-      case TaskStatus.DRAFT:
-        return 'bg-muted';
       case TaskStatus.TODO:
         return 'bg-blue-500';
       case TaskStatus.IN_PROGRESS:
@@ -54,10 +52,10 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   // Helper function to get text class for status
   const getStatusTextClass = (status: TaskStatus) => {
     switch (status) {
-      case TaskStatus.DRAFT:
-        return 'text-muted-foreground';
       case TaskStatus.TODO:
+        return 'text-white';
       case TaskStatus.IN_PROGRESS:
+        return 'text-white';
       case TaskStatus.COMPLETED:
         return 'text-white';
       default:
@@ -95,7 +93,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
           className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0 rounded-md overflow-hidden"
         >
           {USER_STATUS_ORDER.map((status, index) => {
-            const statusConfig = STATUS_CONFIG[status];
+            const statusConfig = TASK_STATUS_CONFIG[status];
             const isCompleted = status === TaskStatus.COMPLETED;
 
             return (

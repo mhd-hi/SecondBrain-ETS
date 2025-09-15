@@ -335,7 +335,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'DRAFT'"
+          "default": "'TODO'"
         },
         "estimated_effort": {
           "name": "estimated_effort",

@@ -1,14 +1,14 @@
 'use client';
-
 import type { Task } from '@/types/task';
+// (keep only the first occurrence of these imports)
+
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { CourseSelector } from '@/components/shared/atoms/CourseSelector';
+import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-import { TaskBanner } from '@/components/Task/TaskBanner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,7 +16,7 @@ import { useCourse } from '@/hooks/use-course';
 import { useCourses } from '@/hooks/use-courses';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
-import { batchAcceptTasks, batchUpdateTaskStatus, getCurrentSession, getOverdueTasks, getSessionWeeks } from '@/lib/task/util';
+import { batchUpdateTaskStatus, getOverdueTasks } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task';
 
 type CoursePageProps = {
@@ -143,45 +143,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  const draftTasks = filteredTasks.filter(task => task.status === TaskStatus.DRAFT);
-
   const overdueTasks = getOverdueTasks(filteredTasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
-
-  // Handlers for accept all and delete all DRAFT tasks
-  const handleAcceptAllDrafts = async () => {
-    try {
-      const currentSession = getCurrentSession() ?? 'winter'; // Default to winter if between sessions
-      const sessionWeeks = getSessionWeeks(currentSession);
-
-      // Use the new utility function to batch accept tasks
-      await batchAcceptTasks(draftTasks, sessionWeeks);
-
-      toast.success(`${draftTasks.length} tasks accepted`, {
-        description: `All draft tasks for ${course?.code ?? 'this course'} have been accepted`,
-      });
-      await fetchCourse();
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to accept draft tasks');
-    }
-  };
-
-  const handleDeleteAllDrafts = async () => {
-    try {
-      const taskIds = draftTasks.map(task => task.id);
-
-      await api.post('/api/tasks/batch', {
-        action: 'delete',
-        taskIds,
-      });
-
-      toast.success('Draft tasks deleted', {
-        description: `All draft tasks for ${course?.code ?? 'this course'} have been deleted`,
-      });
-      await fetchCourse();
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to delete draft tasks');
-    }
-  };
 
   const handleCompleteOverdueTasks = async () => {
     try {
@@ -248,15 +210,15 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   return (
     <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
+
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          {!isLoading && courses.length > 0 && (
-            <CourseSelector
-              courses={courses}
-              selectedCourse={course}
-              onCourseSelect={courseId => router.push(`/courses/${courseId}`)}
-            />
+          {!isLoading && course && (
+            <h2 className="text-3xl font-bold">{course.code}</h2>
           )}
+        </div>
+        <div>
+          <BulkActionsDropdown overdueCount={overdueTasks.length} onCompleteAll={handleCompleteOverdueTasks} />
         </div>
       </div>
 
@@ -282,37 +244,6 @@ export default function CoursePage({ params }: CoursePageProps) {
           />
         )}
       </div>
-
-      <TaskBanner
-        tasks={draftTasks}
-        variant="draft"
-        isLoading={isLoading}
-        actions={[
-          {
-            label: 'Accept All',
-            onClick: handleAcceptAllDrafts,
-            className: 'text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950 dark:border-green-800',
-          },
-          {
-            label: 'Delete All',
-            onClick: handleDeleteAllDrafts,
-            className: 'text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950 dark:border-red-800',
-          },
-        ]}
-      />
-
-      <TaskBanner
-        tasks={overdueTasks}
-        variant="overdue"
-        isLoading={isLoading}
-        actions={[
-          {
-            label: 'Complete All',
-            onClick: handleCompleteOverdueTasks,
-            className: 'text-yellow-600 hover:text-yellow-700 hover:bg-yellow-100 border-yellow-300 dark:text-yellow-400 dark:hover:text-yellow-300 dark:hover:bg-yellow-900 dark:border-yellow-700',
-          },
-        ]}
-      />
 
       {isLoading
         ? (

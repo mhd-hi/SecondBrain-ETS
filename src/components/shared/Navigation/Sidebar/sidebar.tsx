@@ -100,13 +100,6 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                               <NotebookText className="size-4" />
                               <span>{course.code}</span>
                               <div className="ml-auto flex items-center gap-1">
-                                {course.draftCount > 0 && (
-                                  <StatusBadge
-                                    content={course.draftCount}
-                                    variant="red"
-                                    tooltipText={`${course.draftCount} tasks to review`}
-                                  />
-                                )}
                                 {course.overdueCount > 0 && (
                                   <StatusBadge
                                     content={course.overdueCount}

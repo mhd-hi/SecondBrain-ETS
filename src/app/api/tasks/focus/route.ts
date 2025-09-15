@@ -31,18 +31,17 @@ export const GET = withAuthSimple(
     }
 
     // Fetch tasks that are:
-    // 1. Overdue (due date < today) and not completed and not draft OR
+    // 1. Overdue (due date < today) OR
     // 2. Due within the selected time range AND are actionable (IN_PROGRESS or TODO)
     // AND belong to the current user
     const results = await db.select().from(tasks).where(
       and(
         eq(tasks.userId, user.id), // Filter by current user
         or(
-          // Overdue tasks (not completed and not draft)
+          // Overdue tasks (not completed)
           and(
             lt(tasks.dueDate, now),
             ne(tasks.status, 'COMPLETED'),
-            ne(tasks.status, 'DRAFT'),
           ),
           // Tasks due within filter range that are actionable (IN_PROGRESS or TODO)
           and(

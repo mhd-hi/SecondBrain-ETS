@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { TaskStatus } from '@/types/task';
 
 type CourseSelectorProps = {
   courses: Course[];
@@ -53,7 +52,6 @@ export function CourseSelector({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className={`w-[${dropdownWidth}]`}>
           {courses.map((course) => {
-            const draftTasks = course.tasks?.filter(task => task.status === TaskStatus.DRAFT).length ?? 0;
             return (
               <DropdownMenuItem
                 key={course.id}
@@ -61,13 +59,6 @@ export function CourseSelector({
                 className="flex items-center justify-between py-3"
               >
                 <span className="text-lg font-medium">{course.code}</span>
-                {draftTasks > 0 && (
-                  <span className="text-sm text-destructive">
-                    {draftTasks}
-                    {' '}
-                    draft
-                  </span>
-                )}
               </DropdownMenuItem>
             );
           })}

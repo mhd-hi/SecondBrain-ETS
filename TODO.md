@@ -43,7 +43,7 @@
     -   Check the response when the session is not valid.
 
 ### Story: Kanban Board
-- Implement GitHub-like Kanban board (DRAFT, TODO, IN PROGRESS, COMPLETED) (5 points)
+- Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
 
 ### Story: Integrations
 - Add Google Calendar integration (5 points)
@@ -86,8 +86,6 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 - Test remove task (1 point)
 - Test edit task (change date, title, subtasks) (3 points)
 - Test change task status (2 points)
-- Test "Accept all" DRAFT tasks (should change all DRAFT tasks to TODO) (2 points)
-- Test "Remove all" DRAFT tasks (will remove all DRAFT tasks) (1 point)
 - Test Pomodoro effort tracking (user and task tables) (3 points)
 - Test add subtasks (1 point)
 - Test remove subtasks (1 point)

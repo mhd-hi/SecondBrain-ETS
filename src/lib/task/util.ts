@@ -31,8 +31,6 @@ const SESSION_DATES = getSessionDates();
 
 export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
   switch (currentStatus) {
-    case TaskStatus.DRAFT:
-      return TaskStatus.TODO;
     case TaskStatus.TODO:
       return TaskStatus.IN_PROGRESS;
     case TaskStatus.IN_PROGRESS:
@@ -255,13 +253,15 @@ export const getTotalTasksCount = (tasks: Task[]): number => {
   return tasks.length;
 };
 
+export const STATUS_ORDER = [
+  TaskStatus.TODO,
+  TaskStatus.IN_PROGRESS,
+  TaskStatus.COMPLETED,
+] as const;
+
 // TODO: these bgColor and  textColor not used anywhere, remove them if not needed
-export const STATUS_CONFIG = {
-  [TaskStatus.DRAFT]: {
-    label: 'DRAFT',
-    bgColor: 'muted',
-    textColor: 'muted-foreground',
-  },
+// OR Implement bgColor and textColor in TaskStatusChanger component
+export const TASK_STATUS_CONFIG = {
   [TaskStatus.TODO]: {
     label: 'TODO',
     bgColor: 'blue-500',
@@ -273,7 +273,7 @@ export const STATUS_CONFIG = {
     textColor: 'white',
   },
   [TaskStatus.COMPLETED]: {
-    label: 'COMPLETED',
+    label: 'DONE',
     bgColor: 'green-600',
     textColor: 'white',
   },
@@ -315,17 +315,8 @@ export function getDueDateColor(date: Date | string): string {
   return 'text-muted-foreground';
 }
 
-export const STATUS_ORDER = [
-  TaskStatus.TODO,
-  TaskStatus.IN_PROGRESS,
-  TaskStatus.COMPLETED,
-] as const;
-
 export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
-  // If current status is DRAFT, move to TODO (can't go back to DRAFT)
-  if (currentStatus === TaskStatus.DRAFT) {
-    return TaskStatus.TODO;
-  }
+  // Only handle TODO, IN_PROGRESS, COMPLETED
 
   const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);
 

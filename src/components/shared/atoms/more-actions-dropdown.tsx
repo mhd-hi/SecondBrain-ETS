@@ -21,6 +21,7 @@ type MoreActionsDropdownProps = {
   triggerClassName?: string;
   contentAlign?: 'start' | 'center' | 'end';
   className?: string;
+  triggerText?: string;
 };
 
 export function MoreActionsDropdown({
@@ -28,17 +29,24 @@ export function MoreActionsDropdown({
   triggerClassName,
   contentAlign = 'end',
   className,
+  triggerText,
 }: MoreActionsDropdownProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className={cn(
         'rounded-full bg-accent p-[6px] hover:bg-muted hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity',
         triggerClassName,
+        triggerText && 'rounded-md px-4 py-2 font-medium',
       )}
       >
-        <MoreHorizontal className="h-5 w-5 text-muted-foreground" aria-label="More actions" />
+        {triggerText
+          ? (
+            <span>{triggerText}</span>
+          )
+          : (
+            <MoreHorizontal className="h-5 w-5 text-muted-foreground" aria-label="More actions" />
+          )}
       </DropdownMenuTrigger>
-      {' '}
       <DropdownMenuContent align={contentAlign} className={className}>
         {actions.map(action => (
           <DropdownMenuItem
