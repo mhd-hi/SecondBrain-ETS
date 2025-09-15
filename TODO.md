@@ -3,9 +3,6 @@
 ## Technical Debt
 - Fix "Default to winter if between sessions" smell (should select the next session)
     - Add a input session dropdown and select the right session
-- Fix `dueDate` being passed as a string (3 points)
-    -   Convert `dueDate` strings to Date objects as soon as possible and better handle invalid dates (in edit task, add task, in the pipeline when trying to convert tasks from weeks to dates).
-    -   Avoid excessive conversion between string and Date types.
 
 ---
 
@@ -67,7 +64,6 @@
 - we should be able to select a task in pomdoro page, it should be on top of pomodoroContainer, having a sort of select where its searchable to find our task. We should show a dropdown with CourseCodeBadge on the left (as a optional input), and show the title of the task on the right on a different searchable input select (if CourseCodeBadge not selected, we search on all the tasks of the user). We can either select the course code, then the task, OR the task directly. CourseCode should take smaller space then task.
 Once we selected a task, and completed a pomdoro, we can call the pomodoro complete endpoint and passing the task id.
 - pomodoro page should be able to receive duration and task id in query params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
-- add preference to pomodoro default settings (duration of pomodoro, small and long break, volume, preference of sound) in localstorage and in settings page (under pomodoro section).
 - Add github-like calendar to track pomdoro activity
     - might need to refactor db to create new pomodoro table
 #### Dashboard

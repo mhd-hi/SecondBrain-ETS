@@ -7,8 +7,8 @@ export const POMODORO_DURATION_OPTIONS = [
   { label: '30:00', value: 30 }, // Extended focus
   { label: '45:00', value: 45 }, // Deep work session
   { label: '52:00', value: 52 }, // 52/17 variant (popular alternative)
-  { label: '1:00:00', value: 60 }, // Full hour session
-  { label: '1:30:00', value: 90 }, // Ultradian rhythm session
+  { label: '60:00', value: 60 }, // Full hour session
+  { label: '90:00', value: 90 }, // Ultradian rhythm session
 ];
 
 export const formatTime = (minutes: number) => {

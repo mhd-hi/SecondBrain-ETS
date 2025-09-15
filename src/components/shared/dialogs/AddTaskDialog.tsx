@@ -19,9 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { api } from '@/lib/api/util';
-import { ErrorHandlers } from '@/lib/error/util';
-import { withLoadingState } from '@/lib/loading/util';
+import { useAddTask } from '@/hooks/use-add-task';
 import { TaskStatus } from '@/types/task';
 
 type AddTaskDialogProps = {
@@ -42,7 +40,7 @@ export const AddTaskDialog = ({
   courses,
 }: AddTaskDialogProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { addTask, isLoading } = useAddTask();
   const [newTask, setNewTask] = useState(() => ({
     title: '',
     notes: '',
@@ -59,40 +57,27 @@ export const AddTaskDialog = ({
   }, [courseId]);
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!courseId && !selectedCourseId) {
       toast.error('Please select a course.');
       return;
     }
-
-    await withLoadingState(async () => {
-      try {
-        await api.post('/api/tasks', {
-          courseId: courseId ?? selectedCourseId,
-          tasks: [
-            {
-              ...newTask,
-              status: TaskStatus.TODO,
-              dueDate: newTask.dueDate.toISOString(),
-            },
-          ],
-        });
-
-        toast.success('Task added successfully');
-        setIsOpen(false);
-        setNewTask({
-          title: '',
-          notes: '',
-          estimatedEffort: 1,
-          dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
-          type: 'theorie' as TaskType,
-          status: TaskStatus.TODO,
-        });
-        onTaskAdded();
-      } catch (error) {
-        ErrorHandlers.api(error, 'Failed to add task');
-      }
-    }, setIsLoading);
+    const success = await addTask({
+      courseId: courseId ?? selectedCourseId!,
+      newTask,
+    });
+    if (success) {
+      toast.success('Task added successfully');
+      setIsOpen(false);
+      setNewTask({
+        title: '',
+        notes: '',
+        estimatedEffort: 1,
+        dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
+        type: 'theorie' as TaskType,
+        status: TaskStatus.TODO,
+      });
+      onTaskAdded();
+    }
   };
 
   return (

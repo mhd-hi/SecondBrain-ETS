@@ -21,8 +21,12 @@ export function useUpdateField() {
         endpoint = '/api/subtasks/update';
         break;
       default:
+        console.error('Invalid type for update:', params.type);
         throw new Error('Invalid type for update');
     }
+
+    const value = params.value;
+
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -34,7 +38,7 @@ export function useUpdateField() {
             ? { taskId: params.id }
             : { id: params.id }),
           input: params.input,
-          value: params.value,
+          value,
         }),
       });
       if (!res.ok) {

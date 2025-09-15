@@ -18,6 +18,7 @@ export const DueDateDisplay = ({
 
   // Check if the conversion was successful
   if (Number.isNaN(dateObj.getTime())) {
+    console.error('Invalid date provided to DueDateDisplay:', date);
     return (
       <span className={cn('text-xs font-medium text-red-600', className)}>
         Invalid date

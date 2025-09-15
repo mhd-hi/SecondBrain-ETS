@@ -17,9 +17,6 @@ export function SettingsTab() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="space-y-0.5">
             <Label className="text-base">Theme</Label>
-            <div className="text-sm text-muted-foreground">
-              Select your preferred color scheme
-            </div>
           </div>
           <ThemeToggle />
         </div>

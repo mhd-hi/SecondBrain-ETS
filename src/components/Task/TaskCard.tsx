@@ -57,7 +57,7 @@ export function TaskCard({
     const handleSaveDueDate = async (newDate: Date | undefined) => {
       setEditedDueDate(newDate);
       setIsEditingDueDate(false);
-      if (newDate) {
+      if (newDate instanceof Date && !isNaN(newDate.getTime())) {
         await updateField({
           type: 'task',
           id: task.id,

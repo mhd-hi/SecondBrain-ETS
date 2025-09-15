@@ -1,89 +1,45 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import type { PomodoroSettings } from '@/lib/localstorage/pomodoro';
+
+import { useCallback, useEffect, useReducer } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { playAlertSound, playCompletionSound, playNotificationSound } from '@/lib/audio/util';
-
-export type PomodoroSettings = {
-  workDuration: number;
-  shortBreakDuration: number;
-  longBreakDuration: number;
-  soundVolume: number;
-  notificationSound: string;
-};
-
-const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
-  workDuration: 25,
-  shortBreakDuration: 5,
-  longBreakDuration: 15,
-  soundVolume: 50,
-  notificationSound: 'default',
-};
+import { playSelectedNotificationSound } from '@/lib/audio/util';
+import { loadPomodoroSettings, savePomodoroSettings } from '@/lib/localstorage/pomodoro';
+import { initialPomodoroSettingsState, pomodoroSettingsReducer } from '@/lib/localstorage/pomodoro-settings-reducer';
 
 export function PomodoroTab() {
-  const [pomodoroSettings, setPomodoroSettings] = useState<PomodoroSettings>(DEFAULT_POMODORO_SETTINGS);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, dispatch] = useReducer(pomodoroSettingsReducer, initialPomodoroSettingsState);
 
   // Load settings from localStorage on mount
   useEffect(() => {
-    const loadAndSetSettings = async () => {
-      const loadSettings = () => {
-        const savedSettings = localStorage.getItem('pomodoroSettings');
-        if (savedSettings) {
-          try {
-            const parsed = JSON.parse(savedSettings);
-            return { ...DEFAULT_POMODORO_SETTINGS, ...parsed };
-          } catch (error) {
-            console.error('Failed to parse saved pomodoro settings:', error);
-            return DEFAULT_POMODORO_SETTINGS;
-          }
-        }
-        return DEFAULT_POMODORO_SETTINGS;
-      };
-
-      const settings = loadSettings();
-      setPomodoroSettings(settings);
-      setIsLoading(false);
-    };
-
-    loadAndSetSettings();
+    const settings = loadPomodoroSettings();
+    dispatch({ type: 'LOAD_SETTINGS', payload: settings });
   }, []);
 
   // Save settings to localStorage
-  const savePomodoroSettings = useCallback(() => {
-    localStorage.setItem('pomodoroSettings', JSON.stringify(pomodoroSettings));
-  }, [pomodoroSettings]);
+  const savePomodoroSettingsHandler = useCallback(() => {
+    savePomodoroSettings(state.pomodoroSettings);
+    toast.success('Pomodoro settings saved!');
+  }, [state.pomodoroSettings]);
 
   const updatePomodoroSetting = useCallback((key: keyof PomodoroSettings, value: number | string) => {
-    setPomodoroSettings(prev => ({
-      ...prev,
-      [key]: value,
-    }));
+    dispatch({ type: 'UPDATE_SETTING', key, value });
   }, []);
 
   const testNotificationSound = useCallback(() => {
-    switch (pomodoroSettings.notificationSound) {
-      case 'chime':
-        playNotificationSound();
-        break;
-      case 'bell':
-        playAlertSound();
-        break;
-      case 'none':
-        // No sound
-        break;
-      default:
-        playCompletionSound();
-        break;
-    }
-  }, [pomodoroSettings.notificationSound]);
+    const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
 
-  if (isLoading) {
+    playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
+  }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume]);
+
+  if (state.isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -91,10 +47,16 @@ export function PomodoroTab() {
     );
   }
 
+  // Compare current state to loaded settings to determine if changes exist
+  const loadedSettings = loadPomodoroSettings();
+  const isDirty = Object.keys(state.pomodoroSettings).some(
+    key => state.pomodoroSettings[key as keyof PomodoroSettings] !== loadedSettings[key as keyof PomodoroSettings],
+  );
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold pb-0 mb-0">Pomodoro Settings (not stable)</CardTitle>
+        <CardTitle className="text-lg font-semibold pb-0 mb-0">Pomodoro</CardTitle>
         <CardDescription>
           Configure your focus timer preferences
         </CardDescription>
@@ -110,7 +72,7 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={pomodoroSettings.workDuration}
+                value={state.pomodoroSettings.workDuration}
                 onChange={e => updatePomodoroSetting('workDuration', Number.parseInt(e.target.value) || 25)}
                 className="w-20 text-center"
               />
@@ -128,7 +90,7 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={pomodoroSettings.shortBreakDuration}
+                value={state.pomodoroSettings.shortBreakDuration}
                 onChange={e => updatePomodoroSetting('shortBreakDuration', Number.parseInt(e.target.value) || 5)}
                 className="w-20 text-center"
               />
@@ -144,7 +106,7 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={pomodoroSettings.longBreakDuration}
+                value={state.pomodoroSettings.longBreakDuration}
                 onChange={e => updatePomodoroSetting('longBreakDuration', Number.parseInt(e.target.value) || 15)}
                 className="w-20 text-center"
               />
@@ -167,14 +129,14 @@ export function PomodoroTab() {
             </div>
             <div className="flex items-center gap-3">
               <Slider
-                value={[pomodoroSettings.soundVolume]}
+                value={[state.pomodoroSettings.soundVolume]}
                 onValueChange={value => updatePomodoroSetting('soundVolume', value[0] || 10)}
                 max={100}
                 step={10}
                 className="w-24"
               />
               <span className="text-sm text-muted-foreground w-10">
-                {pomodoroSettings.soundVolume}
+                {state.pomodoroSettings.soundVolume}
                 %
               </span>
             </div>
@@ -190,7 +152,7 @@ export function PomodoroTab() {
             </div>
             <div className="flex items-center gap-2">
               <Select
-                value={pomodoroSettings.notificationSound}
+                value={state.pomodoroSettings.notificationSound}
                 onValueChange={(value: string) => updatePomodoroSetting('notificationSound', value)}
               >
                 <SelectTrigger className="w-32">
@@ -207,7 +169,7 @@ export function PomodoroTab() {
                 variant="outline"
                 size="sm"
                 onClick={testNotificationSound}
-                disabled={pomodoroSettings.notificationSound === 'none'}
+                disabled={state.pomodoroSettings.notificationSound === 'none'}
               >
                 Test
               </Button>
@@ -217,7 +179,11 @@ export function PomodoroTab() {
 
         {/* Save Button */}
         <div className="flex justify-end pt-4">
-          <Button onClick={savePomodoroSettings} className="w-full sm:w-auto">
+          <Button
+            onClick={savePomodoroSettingsHandler}
+            className="w-full sm:w-auto"
+            disabled={!isDirty}
+          >
             Save Pomodoro Settings
           </Button>
         </div>

@@ -1,0 +1,54 @@
+// Utility functions and types for Pomodoro localStorage management
+
+export type PomodoroSettings = {
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  soundVolume: number;
+  notificationSound: string;
+};
+
+export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
+  workDuration: 25,
+  shortBreakDuration: 5,
+  longBreakDuration: 15,
+  soundVolume: 60,
+  notificationSound: 'default',
+};
+
+export function loadPomodoroSettings(): PomodoroSettings {
+  const savedSettings = typeof window !== 'undefined' ? localStorage.getItem('pomodoroSettings') : null;
+  if (savedSettings) {
+    try {
+      const parsed = JSON.parse(savedSettings);
+      return { ...DEFAULT_POMODORO_SETTINGS, ...parsed };
+    } catch (error) {
+      console.error('Failed to parse saved pomodoro settings:', error);
+      return DEFAULT_POMODORO_SETTINGS;
+    }
+  }
+  return DEFAULT_POMODORO_SETTINGS;
+}
+
+export function savePomodoroSettings(settings: PomodoroSettings) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+  }
+}
+
+export function getPomodoroDurations(settings?: PomodoroSettings) {
+  const s = settings || loadPomodoroSettings();
+  return {
+    work: typeof s.workDuration === 'number' ? s.workDuration : DEFAULT_POMODORO_SETTINGS.workDuration,
+    shortBreak: typeof s.shortBreakDuration === 'number' ? s.shortBreakDuration : DEFAULT_POMODORO_SETTINGS.shortBreakDuration,
+    longBreak: typeof s.longBreakDuration === 'number' ? s.longBreakDuration : DEFAULT_POMODORO_SETTINGS.longBreakDuration,
+  };
+}
+
+export function getPomodoroSoundSettings(settings?: PomodoroSettings) {
+  const s = settings || loadPomodoroSettings();
+  return {
+    notificationSound: s.notificationSound || DEFAULT_POMODORO_SETTINGS.notificationSound,
+    soundVolume: typeof s.soundVolume === 'number' ? Math.max(0, Math.min(1, s.soundVolume / 100)) : 0.5,
+  };
+}

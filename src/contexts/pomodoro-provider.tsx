@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
 'use client';
 
 import type { ReactNode } from 'react';
@@ -5,7 +6,7 @@ import type { PomodoroContextType, PomodoroType } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { playCompletionSound } from '@/lib/audio/util';
+import { playSelectedNotificationSound } from '@/lib/audio/util';
 import { PomodoroContext } from './pomodoro-context';
 
 const DEFAULT_WORK_DURTION = 25;
@@ -22,20 +23,42 @@ type PomodoroProviderProps = {
 };
 
 export function PomodoroProvider({ children }: PomodoroProviderProps) {
+  // SSR-safe: always use defaults for initial state
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [streak, setStreak] = useState(0);
   const [pomodoroType, setPomodoroType] = useState<PomodoroType>('work');
   const [isPomodoroActive, setIsPomodoroActive] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [timeLeftSec, setTimeLeftSec] = useState(DEFAULT_WORK_DURTION * 60);
-  const [totalTimeSec, setTotalTimeSec] = useState(DEFAULT_WORK_DURTION * 60);
-
-  // Track durations for each session type
   const [sessionDurations, setSessionDurations] = useState<SessionDurations>({
     work: DEFAULT_WORK_DURTION,
     shortBreak: DEFAULT_WORK_DURTION * 0.2,
     longBreak: DEFAULT_WORK_DURTION * 0.6,
   });
+  const [timeLeftSec, setTimeLeftSec] = useState<number | null>(null);
+  const [totalTimeSec, setTotalTimeSec] = useState<number | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // On mount, update durations from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const settings = localStorage.getItem('pomodoroSettings');
+      let work = DEFAULT_WORK_DURTION;
+      let shortBreak = DEFAULT_WORK_DURTION * 0.2;
+      let longBreak = DEFAULT_WORK_DURTION * 0.6;
+      if (settings) {
+        try {
+          const parsed = JSON.parse(settings);
+          work = typeof parsed.workDuration === 'number' ? parsed.workDuration : DEFAULT_WORK_DURTION;
+          shortBreak = typeof parsed.shortBreakDuration === 'number' ? parsed.shortBreakDuration : DEFAULT_WORK_DURTION * 0.2;
+          longBreak = typeof parsed.longBreakDuration === 'number' ? parsed.longBreakDuration : DEFAULT_WORK_DURTION * 0.6;
+        } catch {}
+      }
+      setSessionDurations({ work, shortBreak, longBreak });
+      setTimeLeftSec(work * 60);
+      setTotalTimeSec(work * 60);
+      setIsLoaded(true);
+    }
+  }, []);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -149,16 +172,16 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   }, [sessionDurations.work]);
 
   const addFiveMinutes = useCallback(() => {
-    setTimeLeftSec(prev => prev + 5 * 60);
-    setTotalTimeSec(prev => prev + 5 * 60);
+    setTimeLeftSec(prev => (prev !== null ? prev + 5 * 60 : 5 * 60));
+    setTotalTimeSec(prev => (prev !== null ? prev + 5 * 60 : 5 * 60));
   }, []);
 
   // Timer logic
   useEffect(() => {
-    if (isRunning && timeLeftSec > 0) {
+    if (isRunning && timeLeftSec !== null && timeLeftSec > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeftSec((prev) => {
-          if (prev <= 1) {
+          if (prev === null || prev <= 1) {
             setIsRunning(false);
             return 0;
           }
@@ -199,24 +222,35 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
 
   // Handle auto-completion when timer reaches 0
   useEffect(() => {
-    if (timeLeftSec === 0 && isPomodoroActive && totalTimeSec > 0) {
+    if (
+      timeLeftSec === 0
+      && isPomodoroActive
+      && totalTimeSec !== null
+      && totalTimeSec > 0
+    ) {
       const timer = setTimeout(() => {
-        playCompletionSound();
+        // Read notification sound and volume from localStorage
+        let sound = 'default';
+        let volume = 0.2;
+        try {
+          const settings = localStorage.getItem('pomodoroSettings');
+          if (settings) {
+            const parsed = JSON.parse(settings);
+            sound = parsed.notificationSound || 'default';
+            volume = typeof parsed.soundVolume === 'number' ? Math.max(0, Math.min(1, parsed.soundVolume / 100)) : 0.2;
+          }
+        } catch {}
 
-        if (pomodoroType === 'work') {
+        playSelectedNotificationSound(sound, volume);
+
+        if (pomodoroType === 'work' && totalTimeSec !== null) {
           const completedMinutes = totalTimeSec / 60;
           const durationHours = completedMinutes / 60;
           handlePomodoroComplete(durationHours);
         }
 
-        toast.success(
-          pomodoroType === 'work'
-            ? 'Work session completed! Starting your break...'
-            : 'Break completed! Starting your work session...',
-        );
-
         // Auto-progress to next session
-        if (pomodoroType === 'work') {
+        if (pomodoroType === 'work' && totalTimeSec !== null) {
           const workMinutes = totalTimeSec / 60;
           const nextBreakType = workMinutes >= LONG_BREAK_THRESHOLD ? 'longBreak' : 'shortBreak';
           switchToPomodoroType(nextBreakType);
@@ -237,8 +271,8 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     streak,
     isPomodoroActive,
     isRunning,
-    timeLeftSec,
-    totalTimeSec,
+    timeLeftSec: timeLeftSec ?? 0,
+    totalTimeSec: totalTimeSec ?? 0,
     pomodoroType,
     currentDuration,
     toggleTimer,
@@ -263,6 +297,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     updateDuration,
   ]);
 
+  // Only render children when timer is loaded
+  if (!isLoaded || timeLeftSec === null || totalTimeSec === null) {
+    return null;
+  }
   return (
     <PomodoroContext.Provider value={value}>
       {children}

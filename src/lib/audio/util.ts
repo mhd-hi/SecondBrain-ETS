@@ -1,4 +1,23 @@
 /**
+ * Plays the selected notification sound based on user settings
+ */
+export function playSelectedNotificationSound(sound: string, volume: number) {
+  switch (sound) {
+    case 'chime':
+      playNotificationSound(volume);
+      break;
+    case 'bell':
+      playAlertSound(volume);
+      break;
+    case 'none':
+      // No sound
+      break;
+    default:
+      playCompletionSound(volume);
+      break;
+  }
+}
+/**
  * Audio utility functions for creating pleasant notification sounds
  */
 
@@ -52,17 +71,16 @@ function createBeep(
  * Plays a friendly completion sound with an ascending melody
  * Uses musical notes E4-G4-C5 for a warm and pleasant notification
  */
-export function playCompletionSound(): void {
+export function playCompletionSound(volume?: number): void {
   try {
     const audioContext = createAudioContext();
     if (!audioContext) {
       return;
     }
-
-    // Friendly ascending melody with lower, warmer frequencies
-    createBeep(audioContext, { frequency: 330, startTime: 0, duration: 0.4 }); // E4 - warm and friendly
-    createBeep(audioContext, { frequency: 392, startTime: 0.25, duration: 0.4 }); // G4 - pleasant interval
-    createBeep(audioContext, { frequency: 523, startTime: 0.5, duration: 0.6 }); // C5 - satisfying resolution
+    const v = typeof volume === 'number' ? volume : 0.2;
+    createBeep(audioContext, { frequency: 330, startTime: 0, duration: 0.4, volume: v });
+    createBeep(audioContext, { frequency: 392, startTime: 0.25, duration: 0.4, volume: v });
+    createBeep(audioContext, { frequency: 523, startTime: 0.5, duration: 0.6, volume: v });
   } catch (error) {
     console.warn('Could not play completion sound:', error);
   }
@@ -72,18 +90,18 @@ export function playCompletionSound(): void {
  * Plays a gentle notification sound for less important events
  * Single soft tone for subtle notifications
  */
-export function playNotificationSound(): void {
+export function playNotificationSound(volume?: number): void {
   try {
     const audioContext = createAudioContext();
     if (!audioContext) {
       return;
     }
-
+    const v = typeof volume === 'number' ? volume : 0.15;
     createBeep(audioContext, {
-      frequency: 440, // A4 - standard reference tone
+      frequency: 440,
       startTime: 0,
       duration: 0.3,
-      volume: 0.15, // Quieter for notifications
+      volume: v,
     });
   } catch (error) {
     console.warn('Could not play notification sound:', error);
@@ -94,15 +112,15 @@ export function playNotificationSound(): void {
  * Plays an alert sound for important notifications
  * Two quick beeps to grab attention
  */
-export function playAlertSound(): void {
+export function playAlertSound(volume?: number): void {
   try {
     const audioContext = createAudioContext();
     if (!audioContext) {
       return;
     }
-
-    createBeep(audioContext, { frequency: 587, startTime: 0, duration: 0.2 }); // D5
-    createBeep(audioContext, { frequency: 659, startTime: 0.3, duration: 0.2 }); // E5
+    const v = typeof volume === 'number' ? volume : 0.2;
+    createBeep(audioContext, { frequency: 587, startTime: 0, duration: 0.2, volume: v });
+    createBeep(audioContext, { frequency: 659, startTime: 0.3, duration: 0.2, volume: v });
   } catch (error) {
     console.warn('Could not play alert sound:', error);
   }

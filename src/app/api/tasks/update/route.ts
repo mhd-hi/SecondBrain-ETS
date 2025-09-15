@@ -11,24 +11,32 @@ export async function POST(req: NextRequest) {
     const allowedFields = ['title', 'notes', 'status', 'estimatedEffort', 'actualEffort', 'dueDate', 'week', 'type'];
 
     if (!allowedFields.includes(input)) {
+      console.error('Invalid field while updating task, field: ', input);
       return NextResponse.json({ success: false, error: 'Invalid field' }, { status: 400 });
     }
 
     const updateObj: Record<string, any> = {};
-    updateObj.updatedAt = new Date();
+
     if (input === 'dueDate') {
       updateObj[input] = new Date(value);
     } else {
       updateObj[input] = value;
     }
 
-    const result = await db.update(tasks)
-      .set(updateObj)
-      .where(sql`id = ${taskId}`)
-      .returning();
+    updateObj.updatedAt = new Date();
 
-    return NextResponse.json({ success: true, taskId, input, value, updated: result });
+    try {
+      const result = await db.update(tasks)
+        .set(updateObj)
+        .where(sql`id = ${taskId}`)
+        .returning();
+      return NextResponse.json({ success: true, taskId, input, value, updated: result });
+    } catch (dbErr) {
+      console.error('DB update error:', dbErr);
+      return NextResponse.json({ success: false, error: (dbErr as any)?.message || 'Unknown DB error' }, { status: 400 });
+    }
   } catch (err) {
+    console.error('API error:', err);
     return NextResponse.json({ success: false, error: (err as any)?.message || 'Unknown error' }, { status: 400 });
   }
 }
