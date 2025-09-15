@@ -1,5 +1,7 @@
 # SecondBrain - Your Course Management Assistant
 
+[![CI](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml)
+
 A Next.js application that helps students manage their course workload by intelligently parsing course plans and creating manageable tasks.
 
 ## Project Overview
