@@ -1,5 +1,5 @@
 import type { AdapterAccountType } from 'next-auth/adapters';
-import type { TaskStatus } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { relations, sql } from 'drizzle-orm';
 import {
   integer,

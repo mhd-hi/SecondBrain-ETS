@@ -2,7 +2,8 @@
 
 import type { Course } from '@/types/course';
 import type { DropTargetData } from '@/types/drag-drop';
-import type { TaskStatus, Task as TaskType } from '@/types/task';
+import type { Task as TaskType } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';

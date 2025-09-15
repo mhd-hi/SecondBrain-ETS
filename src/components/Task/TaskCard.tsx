@@ -12,7 +12,7 @@ import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Button } from '@/components/ui/button';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn, formatEffortTime } from '@/lib/utils';
-import { TaskStatus, TaskStatus as TaskStatusEnum } from '@/types/task';
+import { TaskStatus } from '@/types/task-status';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
 import { DatePicker } from '../ui/date-picker';
@@ -228,7 +228,7 @@ export function TaskCard({
                 onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
               />
             </div>
-            {task.status === TaskStatusEnum.IN_PROGRESS && (
+            {task.status === TaskStatus.IN_PROGRESS && (
               <Button
                 onClick={handleStartPomodoro}
                 size="sm"

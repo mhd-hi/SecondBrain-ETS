@@ -3,7 +3,8 @@
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { TransitionState } from '@/lib/ui-transitions/util';
 import type { DraggedTask, DropTargetData } from '@/types/drag-drop';
-import type { TaskStatus, Task as TaskType } from '@/types/task';
+import type { Task as TaskType } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import {
   closestCenter,
   DndContext,

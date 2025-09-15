@@ -1,7 +1,8 @@
 'use client';
 
 import type { Course } from '@/types/course';
-import type { Task, TaskStatus, TaskType } from '@/types/task';
+import type { Task, TaskType } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';

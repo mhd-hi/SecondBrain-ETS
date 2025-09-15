@@ -1,7 +1,8 @@
 'use client';
 
 import type { DraggedTask } from '@/types/drag-drop';
-import type { TaskStatus, Task as TaskType } from '@/types/task';
+import type { Task as TaskType } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { useDraggable } from '@dnd-kit/core';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';

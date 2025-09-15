@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import type { AuthenticatedUser } from '@/lib/auth/api';
-import type { TaskStatus } from '@/types/task';
+import type { TaskStatus } from '@/types/task-status';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { updateTaskStatus } from '@/lib/task/queries';
