@@ -49,15 +49,15 @@ export function TaskCard({
   const updateField = useUpdateField();
   const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
 
-    // State for editing due date
-    const [isEditingDueDate, setIsEditingDueDate] = useState(false);
-    const [editedDueDate, setEditedDueDate] = useState(task.dueDate ? new Date(task.dueDate) : undefined);
+  // State for editing due date
+  const [isEditingDueDate, setIsEditingDueDate] = useState(false);
+  const [editedDueDate, setEditedDueDate] = useState(() => (task.dueDate ? new Date(task.dueDate) : undefined));
 
     // Handler for saving due date
     const handleSaveDueDate = async (newDate: Date | undefined) => {
       setEditedDueDate(newDate);
       setIsEditingDueDate(false);
-      if (newDate instanceof Date && !isNaN(newDate.getTime())) {
+      if (newDate instanceof Date && !Number.isNaN(newDate.getTime())) {
         await updateField({
           type: 'task',
           id: task.id,
@@ -185,7 +185,15 @@ export function TaskCard({
                 <>
                   <span
                     style={{ cursor: 'pointer' }}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setIsEditingDueDate(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        setIsEditingDueDate(true);
+                      }
+                    }}
+                    aria-label="Edit due date"
                   >
                     <DueDateDisplay date={editedDueDate ?? task.dueDate} />
                   </span>

@@ -54,4 +54,11 @@ export default antfu(
       'react/no-context-provider': 'off', // Disable to prevent false positives with Radix UI components
     },
   },
+  {
+    files: ['**/*.{ts,tsx,js,jsx}'],
+    rules: {
+      // Turn off the crashing rule; let Prettier handle indentation
+      'style/indent': 'off',
+    },
+  },
 );

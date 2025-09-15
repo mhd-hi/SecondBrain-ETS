@@ -6,6 +6,7 @@ import './src/env.js';
 
 /** @type {import("next").NextConfig} */
 const config = {
+  typedRoutes: true,
   eslint: {
     // Fail build on any errors (0 threshold)
     // and fail on 2 or more warnings
