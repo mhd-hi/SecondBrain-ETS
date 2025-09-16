@@ -294,7 +294,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           }}
           >
             <div className="space-y-2">
-              <Label htmlFor="courseCode">Course Code</Label>
+              <Label htmlFor="courseCode">Course code: </Label>
               <Input
                 id="courseCode"
                 value={courseCode}
@@ -320,7 +320,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           {/* Processing Steps */}
           {showSteps && (
             <div className="space-y-3">
-              <div className="text-sm font-medium text-muted-foreground">Processing Steps:</div>
+              <div className="text-sm font-medium">Processing steps:</div>
               {renderStepIndicator('planets')}
               {renderStepIndicator('openai')}
               {renderStepIndicator('create-course')}
@@ -370,6 +370,10 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                           {' '}
                           tasks.
                         </AlertTitle>
+                        <AlertDescription className="mt-2">
+                          Please review the generated tasks to make sure they match your course plan.
+
+                        </AlertDescription>
                       </Alert>
                     )}
             </div>

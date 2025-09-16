@@ -39,7 +39,10 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
         <PopoverTrigger asChild>
           <button
             type="button"
-            className={cn('text-xs font-medium flex items-center gap-1 text-muted-foreground', className)}
+            className={cn(
+              'text-xs font-medium flex items-center gap-1 text-muted-foreground transition-colors duration-150 hover:text-foreground',
+              className,
+            )}
             title="Choose due date"
           >
             <CalendarIcon className="h-3 w-3 flex-shrink-0" />
@@ -77,8 +80,8 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
         <button
           type="button"
           className={cn(
-            'text-xs font-medium flex items-center gap-1',
-            isOverdue ? 'text-yellow-600' : 'text-muted-foreground',
+            'text-xs font-medium flex items-center gap-1 transition-colors duration-150',
+            isOverdue ? 'text-yellow-600 hover:text-yellow-700' : 'text-muted-foreground hover:text-foreground',
             className,
           )}
           title="Choose due date"

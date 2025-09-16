@@ -11,6 +11,7 @@ import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCourses as useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { useCourses } from '@/hooks/use-courses';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
@@ -36,6 +37,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses } = useCourses();
+  const { deleteCourse } = useCoursesContext();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
 
   useEffect(() => {
@@ -107,6 +109,39 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const handleDeleteTask = async (taskId: string) => {
     await deleteTask(taskId, fetchCourse);
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!course) {
+      return;
+    }
+
+    try {
+      // Confirm deletion using the existing dialog util
+      const { handleConfirm } = await import('@/lib/dialog/util');
+      await handleConfirm(
+        'Are you sure you want to delete this course? This action cannot be undone.',
+        async () => {
+          await api.delete(`/api/courses/${course.id}`, 'Failed to delete course');
+          // Remove from local courses context
+          deleteCourse(course.id);
+          // Redirect to root
+          router.push('/');
+          // Show toast with course code
+          toast.success(`Course ${course.code} deleted successfully`);
+        },
+        undefined,
+        {
+          title: 'Delete Course',
+          confirmText: 'Delete',
+          cancelText: 'Cancel',
+          variant: 'destructive',
+        },
+      );
+    } catch (error) {
+      // Use centralized error handling
+      ErrorHandlers.api(error, 'Failed to delete course', 'CoursePage');
+    }
   };
 
   const overdueTasks = getOverdueTasks(filteredTasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
@@ -184,7 +219,11 @@ export default function CoursePage({ params }: CoursePageProps) {
           )}
         </div>
         <div>
-          <BulkActionsDropdown overdueCount={overdueTasks.length} onCompleteAll={handleCompleteOverdueTasks} />
+          <BulkActionsDropdown
+            overdueCount={overdueTasks.length}
+            onCompleteAll={handleCompleteOverdueTasks}
+            onDeleteCourse={handleDeleteCourse}
+          />
         </div>
       </div>
 
