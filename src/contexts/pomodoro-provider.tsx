@@ -84,7 +84,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
       const result = await response.json() as {
         success: boolean;
         sessionType: 'task' | 'free';
-        taskUpdated?: any;
+        taskUpdated?: Task | null;
       };
 
       if (result.sessionType === 'task') {

@@ -30,6 +30,7 @@ export default antfu(
     rules: {
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@stylistic/indent': ['warn', 2],
     },
     settings: {

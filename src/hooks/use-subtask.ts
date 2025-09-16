@@ -1,4 +1,5 @@
 import type React from 'react';
+import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
 import { api } from '@/lib/api/util';
@@ -21,13 +22,11 @@ export function updateSubtaskStatus(
                 return;
             }
 
-            const updatedSubtasks = currentTask.subtasks.map((subtask: any) =>
+            const updatedSubtasks = currentTask.subtasks.map((subtask: Subtask) =>
                 subtask.id === subtaskId
                     ? { ...subtask, status: newStatus }
                     : subtask,
             );
-
-            await api.patch(`/api/tasks/${taskId}`, { subtasks: updatedSubtasks });
 
             setTasks((prevTasks: Task[]) =>
                 prevTasks.map((task: Task) =>
@@ -36,8 +35,36 @@ export function updateSubtaskStatus(
                         : task,
                 ),
             );
+
+            // Persist change to server (single-subtask endpoint)
+            await api.patch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, { status: newStatus });
         } catch (error) {
             ErrorHandlers.api(error, 'Failed to update subtask status');
         }
     };
+}
+
+export async function createSubtask(taskId: string, payload: {
+    title: string;
+    notes: string;
+    estimatedEffort: number;
+    status: TaskStatus;
+}): Promise<Subtask | null> {
+    try {
+        const created = await api.post(`/api/tasks/${taskId}/subtasks`, payload);
+        return created as Subtask;
+    } catch (error) {
+        ErrorHandlers.api(error, 'Failed to create subtask');
+        return null;
+    }
+}
+
+export async function deleteSubtask(taskId: string, subtaskId: string): Promise<boolean> {
+    try {
+        await api.delete(`/api/tasks/${taskId}/subtasks/${subtaskId}`);
+        return true;
+    } catch (error) {
+        ErrorHandlers.api(error, 'Failed to delete subtask');
+        return false;
+    }
 }

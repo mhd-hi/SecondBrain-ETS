@@ -1,4 +1,4 @@
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 // Re-export from the proper location
 // Legacy exports - these are now handled by the course processing pipeline
 // For backwards compatibility, we re-export the parseCourse function

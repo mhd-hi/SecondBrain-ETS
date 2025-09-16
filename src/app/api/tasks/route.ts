@@ -1,5 +1,4 @@
-import type { Subtask } from '@/types/subtask';
-import type { Task } from '@/types/task';
+import type { NewTaskInput, UpdateTaskInput } from '@/types/api/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
@@ -37,11 +36,7 @@ export const POST = withAuthSimple(
   async (request, user) => {
     const data = await request.json() as {
       courseId: string;
-      tasks: Array<Omit<Task, 'id' | 'courseId'> & {
-        subtasks?: Subtask[];
-        notes?: string;
-        dueDate?: string;
-      }>;
+      tasks: NewTaskInput[];
     };
 
     const { courseId, tasks: newTasks } = data;
@@ -56,16 +51,13 @@ export const POST = withAuthSimple(
       return {
         ...task,
         courseId,
-        // Calculate week from due date if not provided (for manual task creation)
-        // Otherwise preserve the original week number from AI parsing
         week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
         status: task.status ?? TaskStatus.TODO,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
-          id: crypto.randomUUID(),
+          id: subtask.id ?? crypto.randomUUID(),
           status: subtask.status ?? TaskStatus.TODO,
         })),
-        // Use user-provided due date if available, otherwise calculate from week
         dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
           ? userProvidedDueDate
           : calculateTaskDueDate(task.week || 1),
@@ -95,22 +87,21 @@ export const PATCH = withAuthSimple(
       );
     }
 
-    const updates = await request.json() as Partial<Task> & {
-      subtasks?: Subtask[];
-      notes?: string;
-    };
+    const updates = await request.json() as UpdateTaskInput;
 
-    const updatedTask = await updateUserTask(id, user.id, {
+    const payload = {
       ...updates,
       status: updates.status ?? TaskStatus.TODO,
       subtasks: updates.subtasks?.map(subtask => ({
         ...subtask,
-        id: crypto.randomUUID(),
+        id: subtask.id ?? crypto.randomUUID(),
         status: subtask.status ?? TaskStatus.TODO,
       })),
       notes: updates.notes,
       dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,
-    });
+    } as Partial<typeof import('@/server/db/schema').tasks.$inferInsert> & { subtasks?: Partial<typeof import('@/server/db/schema').subtasks.$inferInsert>[] };
+
+    const updatedTask = await updateUserTask(id, user.id, payload);
 
     return NextResponse.json(updatedTask);
   },

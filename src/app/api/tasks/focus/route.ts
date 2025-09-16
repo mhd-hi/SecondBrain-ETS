@@ -1,11 +1,11 @@
 import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
-import { and, eq, gte, lt, ne, or } from 'drizzle-orm';
+import { and, eq, gte, inArray, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
+import { parseTaskStatus } from '@/lib/task/util';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
+import { courses, subtasks, tasks } from '@/server/db/schema';
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -58,11 +58,31 @@ export const GET = withAuthSimple(
       ),
     ).leftJoin(courses, eq(tasks.courseId, courses.id));
 
+    const taskIds = results.map(r => r.tasks.id);
+
+    const subsByTask = new Map<string, Subtask[]>();
+    if (taskIds.length > 0) {
+      const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+      for (const s of subs as Array<Record<string, unknown>>) {
+        const key = String(s.taskId);
+        const mapped: Subtask = {
+          id: String(s.id),
+          title: String(s.title),
+          status: parseTaskStatus(String(s.status)),
+          notes: s.notes == null ? undefined : String(s.notes),
+          estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+        };
+        const list = subsByTask.get(key) ?? [];
+        list.push(mapped);
+        subsByTask.set(key, list);
+      }
+    }
+
     const tasksData: Task[] = results.map(row => ({
       ...row.tasks,
       course: row.courses ?? undefined,
-      status: row.tasks.status as TaskStatus,
-      subtasks: row.tasks.subtasks as Subtask[] | undefined,
+      status: parseTaskStatus(String(row.tasks.status)),
+      subtasks: subsByTask.get(String(row.tasks.id)) ?? [],
       notes: row.tasks.notes ?? undefined,
     }));
 

@@ -146,7 +146,11 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       </div>
 
       <div className="flex justify-between items-start">
-        <h2 className="text-lg font-bold">{course.code}</h2>
+        <h2 className="text-lg font-bold">
+          <Link href={`/courses/${course.id}`} className="hover:underline transition-colors">
+            {course.code}
+          </Link>
+        </h2>
       </div>
 
       <div>

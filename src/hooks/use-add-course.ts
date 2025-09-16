@@ -1,6 +1,6 @@
 'use client';
 
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 import type { PipelineStepResult } from '@/types/pipeline';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';

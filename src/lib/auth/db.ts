@@ -1,12 +1,10 @@
 import type { SQL } from 'drizzle-orm';
-import { and, eq } from 'drizzle-orm';
+import type { Subtask } from '@/types/subtask';
+import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
+import { parseTaskStatus } from '@/lib/task/util';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
-
-/**
- * Database query utilities with automatic user filtering for security
- */
+import { courses, subtasks, tasks } from '@/server/db/schema';
 
 /**
  * Get courses for authenticated user
@@ -45,11 +43,40 @@ export async function getUserCourseTasks(courseId: string, userId: string) {
   // First verify course ownership
   await getUserCourse(courseId, userId);
 
-  return db
+  const rows = await db
     .select()
     .from(tasks)
     .where(and(eq(tasks.courseId, courseId), eq(tasks.userId, userId)))
     .orderBy(tasks.week);
+  // Fetch subtasks for these tasks and attach
+  const taskIds = rows.map(r => r.id);
+  if (taskIds.length === 0) {
+    return rows;
+  }
+
+  const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+
+  // Map subtasks to their task id using a Map to avoid dynamic object indexing
+  const subsByTask = new Map<string, Subtask[]>();
+  for (const s of subs as Array<Record<string, unknown>>) {
+    const key = String(s.taskId);
+    const mapped: Subtask = {
+      id: String(s.id),
+      title: String(s.title),
+      status: parseTaskStatus(String(s.status)),
+      notes: s.notes == null ? undefined : String(s.notes),
+      estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+    };
+    const list = subsByTask.get(key) ?? [];
+    list.push(mapped);
+    subsByTask.set(key, list);
+  }
+
+  // Attach
+  return rows.map(r => ({
+    ...r,
+    subtasks: subsByTask.get(String(r.id)) ?? [],
+  }));
 }
 
 /**
@@ -66,7 +93,10 @@ export async function getUserTask(taskId: string, userId: string) {
     throw new AuthorizationError('Task not found or access denied');
   }
 
-  return task[0];
+  const t = task[0]!;
+  // Attach subtasks
+  const subs = await db.select().from(subtasks).where(eq(subtasks.taskId, t.id));
+  return { ...t, subtasks: subs };
 }
 
 /**
@@ -92,10 +122,15 @@ export async function updateUserTask(
   userId: string,
   updates: Partial<typeof tasks.$inferInsert>,
 ) {
+  // If updates include subtasks, handle them separately
+  type SubUpdate = Partial<typeof subtasks.$inferInsert>;
+  type UpdateWithSubs = Partial<typeof tasks.$inferInsert> & { subtasks?: SubUpdate[] };
+  const { subtasks: subUpdates, ...taskUpdates } = updates as UpdateWithSubs;
+
   const result = await db
     .update(tasks)
     .set({
-      ...updates,
+      ...taskUpdates,
       updatedAt: new Date(),
     })
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
@@ -103,6 +138,48 @@ export async function updateUserTask(
 
   if (!result.length) {
     throw new AuthorizationError('Task not found or access denied');
+  }
+
+  // Process subtasks updates: upsert by id, delete missing ones if provided as full set
+  if (Array.isArray(subUpdates)) {
+    // Fetch existing subtask ids for this task
+    const existing = await db.select().from(subtasks).where(eq(subtasks.taskId, taskId));
+    const existingIds = new Set(existing.map(e => e.id));
+
+    // Upsert provided subtasks
+    for (const s of subUpdates) {
+      const subToUpsert: Partial<typeof subtasks.$inferInsert> = {
+        title: s.title ?? '',
+        notes: s.notes ?? null,
+        // Narrow status/type into the subtasks insert types
+        status: (s.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+        estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+        type: (s.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
+      };
+
+      if (!s.id) {
+        // insert
+        await db.insert(subtasks).values({
+          ...(subToUpsert as typeof subtasks.$inferInsert),
+          id: crypto.randomUUID(),
+          taskId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as typeof subtasks.$inferInsert);
+      } else {
+        // update
+        await db.update(subtasks).set({
+          ...subToUpsert,
+          updatedAt: new Date(),
+        }).where(eq(subtasks.id, s.id));
+        existingIds.delete(s.id);
+      }
+    }
+
+    // Delete any existing subtasks not present in the provided list
+    for (const idToDelete of existingIds) {
+      await db.delete(subtasks).where(eq(subtasks.id, idToDelete));
+    }
   }
 
   return result[0];
@@ -134,10 +211,14 @@ export async function createUserTask(
   // Verify course ownership first
   await getUserCourse(taskData.courseId, userId);
 
+  type ProvidedSub = Partial<typeof subtasks.$inferInsert>;
+  type CreateTaskWithSubs = Omit<typeof tasks.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'> & { subtasks?: ProvidedSub[] };
+  const { subtasks: providedSubs, ...taskFields } = taskData as CreateTaskWithSubs;
+
   const result = await db
     .insert(tasks)
     .values({
-      ...taskData,
+      ...taskFields,
       userId,
       id: crypto.randomUUID(),
       createdAt: new Date(),
@@ -145,7 +226,27 @@ export async function createUserTask(
     })
     .returning();
 
-  return result[0];
+  const createdTask = result[0]!;
+
+  // Insert provided subtasks
+  if (Array.isArray(providedSubs) && providedSubs.length > 0) {
+    for (const s of providedSubs) {
+      const subToInsert: typeof subtasks.$inferInsert = {
+        title: s.title ?? '',
+        notes: s.notes ?? null,
+        status: (s.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+        estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+        type: (s.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
+        id: s.id ?? crypto.randomUUID(),
+        taskId: createdTask.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as typeof subtasks.$inferInsert;
+      await db.insert(subtasks).values(subToInsert);
+    }
+  }
+
+  return createdTask;
 }
 
 /**

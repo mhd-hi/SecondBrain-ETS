@@ -14,6 +14,8 @@ type DropdownAction = {
   onClick: () => void;
   className?: string;
   destructive?: boolean;
+  disabled?: boolean;
+  title?: string;
 };
 
 type MoreActionsDropdownProps = {
@@ -56,6 +58,11 @@ export function MoreActionsDropdown({
               action.destructive && 'text-destructive focus:text-destructive',
               action.className,
             )}
+            // forward disabled and title for accessibility
+            disabled={action.disabled}
+            title={action.title}
+            // map destructive to variant prop supported by the ui component
+            variant={action.destructive ? 'destructive' : 'default'}
           >
             {action.label}
           </DropdownMenuItem>

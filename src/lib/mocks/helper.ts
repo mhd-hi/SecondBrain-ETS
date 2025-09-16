@@ -1,4 +1,4 @@
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 import { TaskStatus } from '@/types/task-status';
 import { MOCK_COURSES } from './openai-data';
 

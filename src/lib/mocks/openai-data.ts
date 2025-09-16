@@ -1,4 +1,4 @@
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 
 export const MOCK_COURSES: Record<string, CourseAIResponse> = {
   MAT145: {

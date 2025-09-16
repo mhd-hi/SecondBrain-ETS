@@ -3,19 +3,22 @@
 import type { Task } from '@/types/task';
 import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/sonner';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
-import { DatePicker } from '../ui/date-picker';
 
 type TaskCardProps = {
   task: Task;
@@ -43,28 +46,55 @@ export function TaskCard({
 }: TaskCardProps) {
   const router = useRouter();
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
+  const [isAddSubtaskOpen, setIsAddSubtaskOpen] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.notes ?? '');
   const updateField = useUpdateField();
   const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
+  const [isEditingEffort, setIsEditingEffort] = useState(false);
+  const [editedEffort, setEditedEffort] = useState<number | undefined>(
+    task.estimatedEffort > 0 ? task.estimatedEffort : undefined,
+  );
+  const inputContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Focus the numeric input when entering edit mode
+  useEffect(() => {
+    if (isEditingEffort) {
+      // query the actual input inside the container (avoids changing Input component)
+      const el = inputContainerRef.current?.querySelector('input') as HTMLInputElement | null;
+      if (el) {
+        el.focus();
+        el.select();
+      }
+    }
+  }, [isEditingEffort]);
 
   // State for editing due date
-  const [isEditingDueDate, setIsEditingDueDate] = useState(false);
   const [editedDueDate, setEditedDueDate] = useState(() => (task.dueDate ? new Date(task.dueDate) : undefined));
 
-    // Handler for saving due date
-    const handleSaveDueDate = async (newDate: Date | undefined) => {
-      setEditedDueDate(newDate);
-      setIsEditingDueDate(false);
-      if (newDate instanceof Date && !Number.isNaN(newDate.getTime())) {
-        await updateField({
-          type: 'task',
-          id: task.id,
-          input: 'dueDate',
-          value: newDate.toISOString(),
-        });
-      }
-    };
+  // Handler for saving due date (used by DueDateDisplay onChange)
+  const handleSaveDueDate = async (newDate: Date | undefined | null) => {
+    const dateToStore = newDate instanceof Date && !Number.isNaN(newDate.getTime()) ? newDate : undefined;
+    setEditedDueDate(dateToStore);
+    if (dateToStore) {
+      await updateField({
+        type: 'task',
+        id: task.id,
+        input: 'dueDate',
+        value: dateToStore.toISOString(),
+      });
+      toast.success('Due date updated');
+    } else {
+      // clear due date
+      await updateField({
+        type: 'task',
+        id: task.id,
+        input: 'dueDate',
+        value: '',
+      });
+      toast.success('Due date cleared');
+    }
+  };
 
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
@@ -105,7 +135,11 @@ export function TaskCard({
 
   const defaultActions = [
     {
-      label: 'Delete',
+      label: 'Add subtask',
+      onClick: () => setIsAddSubtaskOpen(true),
+    },
+    {
+      label: 'Delete task',
       onClick: () => onDeleteTask(task.id),
       destructive: true,
     },
@@ -122,6 +156,15 @@ export function TaskCard({
       <MoreActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      />
+      {/* Add Subtask dialog controlled by this card */}
+      <AddSubtaskDialog
+        taskId={task.id}
+        open={isAddSubtaskOpen}
+        onOpenChange={setIsAddSubtaskOpen}
+        onSubtaskAdded={(subtask) => {
+          setSubtasks(prev => [...prev, subtask]);
+        }}
       />
       {showCourseBadge && task.course && (
         <div className="mb-1">
@@ -152,7 +195,7 @@ export function TaskCard({
           />
           <div className="flex items-center gap-3">
             <SubtasksPill
-              subtasks={task.subtasks ?? []}
+              subtasks={subtasks ?? []}
               isExpanded={isSubtasksExpanded}
               onToggle={() => {
                 if (onToggleSubtasksExpanded) {
@@ -163,53 +206,98 @@ export function TaskCard({
               }}
             />
 
-            {/* Effort Time */}
-            {task.estimatedEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3 flex-shrink-0" />
-                {formatEffortTime(task.estimatedEffort)}
-              </span>
+            {/* Effort Time (editable) */}
+            {((task.estimatedEffort >= 0) || editedEffort) && (
+              <div>
+                {isEditingEffort && (
+                  <div ref={inputContainerRef} className="w-16 max-w-[72px]">
+                    {/* Use existing Input component styled for numbers */}
+                    <Input
+                      type="number"
+                      value={editedEffort ?? ''}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setEditedEffort(e.target.value === '' ? undefined : Number(e.target.value));
+                      }}
+                      onBlur={async () => {
+                        setIsEditingEffort(false);
+                        // ensure value is a number; if negative default to 0.5, otherwise use value (min 0)
+                        const rawVal = editedEffort ?? 0;
+                        const newVal = Number.isFinite(rawVal) ? (rawVal < 0 ? 0.5 : Math.max(0, rawVal)) : 0.5;
+                        const oldVal = typeof task.estimatedEffort === 'number' ? task.estimatedEffort : 0;
+                        // Only persist if value actually changed
+                        if (newVal === oldVal) {
+                          return;
+                        }
+                        // Persist update via hook
+                        try {
+                          await updateField({
+                            type: 'task',
+                            id: task.id,
+                            input: 'estimatedEffort',
+                            value: String(newVal),
+                          });
+                          toast.success('Estimated effort updated');
+                        } catch (err) {
+                          // ignore - keep UI in sync locally
+                          console.error('Failed to save estimated effort', err);
+                          toast.error('Failed to update estimated effort');
+                        }
+                      }}
+                      onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                        if (e.key === 'Enter') {
+                          (e.target as HTMLInputElement).blur();
+                        }
+                        if (e.key === 'Escape') {
+                          setEditedEffort(task.estimatedEffort > 0 ? task.estimatedEffort : undefined);
+                          setIsEditingEffort(false);
+                        }
+                      }}
+                      className="h-6 px-2 py-0.5 text-xs"
+                      min={0}
+                    />
+                  </div>
+                )}
+
+                {!isEditingEffort && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs cursor-pointer"
+                    onClick={() => {
+                      // initialize edit value from task and open editor
+                      setEditedEffort(task.estimatedEffort > 0 ? task.estimatedEffort : undefined);
+                      setIsEditingEffort(true);
+                    }}
+                    title="Click to edit estimated effort (hours)"
+                  >
+                    <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      {formatEffortTime(editedEffort ?? task.estimatedEffort)}
+                    </span>
+                  </Badge>
+                )}
+              </div>
             )}
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <BarChart3 className="h-3 w-3 flex-shrink-0" />
-                {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
-                % complete
-              </span>
+              <Badge variant="outline" className="text-xs">
+                <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                  <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                  {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
+                  % complete
+                </span>
+              </Badge>
             )}
 
               {task.dueDate && task.status !== TaskStatus.COMPLETED && (
-                <>
-                  <span
-                    style={{ cursor: 'pointer' }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setIsEditingDueDate(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setIsEditingDueDate(true);
-                      }
-                    }}
-                    aria-label="Edit due date"
-                  >
-                    <DueDateDisplay date={editedDueDate ?? task.dueDate} />
+                <Badge variant="outline" className="text-xs">
+                  <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
+                    <DueDateDisplay
+                      date={editedDueDate ?? task.dueDate}
+                      onChange={d => handleSaveDueDate(d ?? null)}
+                    />
                   </span>
-              {isEditingDueDate && (
-                <div className="ml-2">
-                  <DatePicker
-                    date={editedDueDate}
-                    onDateChange={(date: Date | undefined) => {
-                      setEditedDueDate(date);
-                      handleSaveDueDate(date);
-                    }}
-                    className="w-[180px]"
-                    open={isEditingDueDate}
-                  />
-                </div>
-              )}
-                </>
+                </Badge>
               )}
           </div>
         </div>
@@ -242,11 +330,15 @@ export function TaskCard({
         </div>
       </div>
       <SubtasksList
+        taskId={task.id}
         subtasks={subtasks}
         onEditSubtask={(subtaskId, changes) => {
           setSubtasks(prev => prev.map(sub =>
             sub.id === subtaskId ? { ...sub, ...changes } : sub,
           ));
+        }}
+        onDeleteSubtask={(subtaskId) => {
+          setSubtasks(prev => prev.filter(s => s.id !== subtaskId));
         }}
         collapsible={false}
         defaultExpanded={false}

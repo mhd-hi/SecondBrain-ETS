@@ -262,18 +262,18 @@ export const STATUS_ORDER = [
 export const TASK_STATUS_CONFIG = {
   [TaskStatus.TODO]: {
     label: 'TODO',
-    bgColor: 'blue-500',
-    textColor: 'blue-100',
+    bgColor: 'bg-blue-500',
+    textColor: 'text-blue-100',
   },
   [TaskStatus.IN_PROGRESS]: {
     label: 'IN PROGRESS',
-    bgColor: 'amber-500',
-    textColor: 'gray-900',
+    bgColor: 'bg-amber-500',
+    textColor: 'text-gray-800',
   },
   [TaskStatus.COMPLETED]: {
     label: 'DONE',
-    bgColor: 'green-600',
-    textColor: 'green-100',
+    bgColor: 'bg-green-600',
+    textColor: 'text-green-100',
   },
 } as const;
 
@@ -329,6 +329,16 @@ export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
 
 export const isValidStatus = (status: TaskStatus): boolean => {
   return Object.values(TaskStatus).includes(status);
+};
+
+/**
+ * Normalize an incoming status value (possibly a string from the DB) to a valid TaskStatus.
+ */
+export const parseTaskStatus = (value: unknown): TaskStatus => {
+  if (typeof value === 'string' && Object.values(TaskStatus).includes(value as TaskStatus)) {
+    return value as TaskStatus;
+  }
+  return TaskStatus.TODO;
 };
 
 export const getOverdueTasks = (tasks: Task[], excludeStatuses: TaskStatus[] = [TaskStatus.COMPLETED]): Task[] => {
