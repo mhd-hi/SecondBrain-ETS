@@ -6,6 +6,19 @@ import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, upda
 import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task-status';
 
+// Type for tasks provided in the POST body when creating new tasks.
+export type NewTaskInput = Omit<Task, 'id' | 'courseId'> & {
+  subtasks?: Subtask[];
+  notes?: string;
+  dueDate?: string;
+};
+
+// Type for partial task updates accepted by the PATCH endpoint
+export type UpdateTaskInput = Partial<Omit<Task, 'id' | 'courseId'>> & {
+  subtasks?: Subtask[];
+  notes?: string;
+};
+
 export const GET = withAuthSimple(
   async (request, user) => {
     const { searchParams } = new URL(request.url);
@@ -37,11 +50,7 @@ export const POST = withAuthSimple(
   async (request, user) => {
     const data = await request.json() as {
       courseId: string;
-      tasks: Array<Omit<Task, 'id' | 'courseId'> & {
-        subtasks?: Subtask[];
-        notes?: string;
-        dueDate?: string;
-      }>;
+      tasks: NewTaskInput[];
     };
 
     const { courseId, tasks: newTasks } = data;
@@ -95,22 +104,21 @@ export const PATCH = withAuthSimple(
       );
     }
 
-    const updates = await request.json() as Partial<Task> & {
-      subtasks?: Subtask[];
-      notes?: string;
-    };
+    const updates = await request.json() as UpdateTaskInput;
 
-    const updatedTask = await updateUserTask(id, user.id, {
+    const payload = {
       ...updates,
       status: updates.status ?? TaskStatus.TODO,
       subtasks: updates.subtasks?.map(subtask => ({
         ...subtask,
-        id: crypto.randomUUID(),
+        id: subtask.id ?? crypto.randomUUID(),
         status: subtask.status ?? TaskStatus.TODO,
       })),
       notes: updates.notes,
       dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,
-    });
+    } as any;
+
+    const updatedTask = await updateUserTask(id, user.id, payload);
 
     return NextResponse.json(updatedTask);
   },

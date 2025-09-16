@@ -1,11 +1,11 @@
 import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
-import { and, eq, gte, lt, ne, or } from 'drizzle-orm';
+import { and, eq, gte, inArray, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
+import { courses, subtasks, tasks } from '@/server/db/schema';
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -58,11 +58,24 @@ export const GET = withAuthSimple(
       ),
     ).leftJoin(courses, eq(tasks.courseId, courses.id));
 
+    const taskIds = results.map(r => r.tasks.id);
+
+    const subsByTask: Record<string, Subtask[]> = {};
+    if (taskIds.length > 0) {
+      const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+      for (const s of subs) {
+        if (!subsByTask[s.taskId]) {
+          subsByTask[s.taskId] = [];
+        }
+        subsByTask[s.taskId]!.push(s as unknown as Subtask);
+      }
+    }
+
     const tasksData: Task[] = results.map(row => ({
       ...row.tasks,
       course: row.courses ?? undefined,
       status: row.tasks.status as TaskStatus,
-      subtasks: row.tasks.subtasks as Subtask[] | undefined,
+      subtasks: subsByTask[row.tasks.id] ?? [],
       notes: row.tasks.notes ?? undefined,
     }));
 

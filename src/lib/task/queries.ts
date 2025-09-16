@@ -1,9 +1,9 @@
 import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
-import { and, eq, gte, lt } from 'drizzle-orm';
+import { and, eq, gte, inArray, lt } from 'drizzle-orm';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
+import { courses, subtasks, tasks } from '@/server/db/schema';
 
 export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: string): Promise<Task[]> => {
   try {
@@ -19,11 +19,29 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
 
     const results = await db.select().from(tasks).where(and(...conditions)).leftJoin(courses, eq(tasks.courseId, courses.id));
 
-    return results.map(row => ({
+    const taskRows = results.map(r => r as any);
+    const taskIds = taskRows.map(tr => tr.tasks?.id ?? tr.id ?? tr.tasksId).filter(Boolean);
+
+    let subs: any[] = [];
+    if (taskIds.length > 0) {
+      subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+    }
+
+    const subsByTask: Record<string, any[]> = {};
+    for (const s of subs) {
+      let arr = subsByTask[s.taskId];
+      if (!arr) {
+        arr = [];
+        subsByTask[s.taskId] = arr;
+      }
+      arr.push(s);
+    }
+
+    return taskRows.map(row => ({
       ...row.tasks,
       course: row.courses ?? undefined,
       status: row.tasks.status as TaskStatus,
-      subtasks: row.tasks.subtasks as Subtask[] | undefined,
+      subtasks: subsByTask[row.tasks.id] ?? [],
       notes: row.tasks.notes ?? undefined,
     }));
   } catch (error) {

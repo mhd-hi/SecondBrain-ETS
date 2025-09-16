@@ -27,8 +27,6 @@ export function updateSubtaskStatus(
                     : subtask,
             );
 
-            await api.patch(`/api/tasks/${taskId}`, { subtasks: updatedSubtasks });
-
             setTasks((prevTasks: Task[]) =>
                 prevTasks.map((task: Task) =>
                     task.id === taskId
@@ -36,6 +34,9 @@ export function updateSubtaskStatus(
                         : task,
                 ),
             );
+
+            // Persist change to server (single-subtask endpoint)
+            await api.patch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, { status: newStatus });
         } catch (error) {
             ErrorHandlers.api(error, 'Failed to update subtask status');
         }

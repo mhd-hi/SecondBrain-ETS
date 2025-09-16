@@ -1,41 +1,39 @@
 import type { NextRequest } from 'next/server';
-import { sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { withAuth } from '@/lib/auth/api';
 import { db } from '@/server/db';
-import { tasks } from '@/server/db/schema';
+import { subtasks, tasks } from '@/server/db/schema';
 
-// POST /api/subtasks/update
-export async function POST(req: NextRequest) {
+export const POST = withAuth(async (req: NextRequest, { user }) => {
   try {
     const { id, input, value } = await req.json();
-    // Only allow updating title or notes for subtasks
-    const allowedFields = ['title', 'notes', 'status', 'estimatedEffort', 'actualEffort'];
+    // Only allow updating specific fields for subtasks
+    const allowedFields = ['title', 'notes', 'status', 'estimatedEffort', 'actualEffort', 'dueDate'];
     if (!allowedFields.includes(input)) {
       return NextResponse.json({ success: false, error: 'Invalid field' }, { status: 400 });
     }
 
-    // Find the parent task containing this subtask
-    const allTasks = await db.select().from(tasks);
-    const parentTask = allTasks.find((t: any) => Array.isArray(t.subtasks) && t.subtasks.some((sub: any) => sub.id === id));
-    if (!parentTask) {
+    // Verify subtask exists and belongs to a task owned by the user
+    const sub = await db.select().from(subtasks).where(eq(subtasks.id, id)).limit(1);
+    if (!sub.length) {
       return NextResponse.json({ success: false, error: 'Subtask not found' }, { status: 404 });
     }
-    const subtasks = Array.isArray(parentTask.subtasks)
-      ? parentTask.subtasks.map((sub: any) => {
-        if (sub.id === id) {
-          return { ...sub, [input]: value };
-        }
-        return sub;
-      })
-      : [];
+    const sub0 = sub[0]!;
 
-    // Update the parent task's subtasks array
-    const result = await db.update(tasks)
-      .set({ subtasks, updatedAt: new Date() })
-      .where(sql`id = ${parentTask.id}`)
+    const parentTask = await db.select().from(tasks).where(eq(tasks.id, sub0.taskId)).limit(1);
+    if (!parentTask.length || parentTask[0]!.userId !== user.id) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Perform update
+    const updated = await db.update(subtasks)
+      .set({ [input]: value, updatedAt: new Date() } as any)
+      .where(and(eq(subtasks.id, id), eq(subtasks.taskId, sub0.taskId)))
       .returning();
-    return NextResponse.json({ success: true, id, input, value, updated: result });
+
+    return NextResponse.json({ success: true, updated });
   } catch (err) {
     return NextResponse.json({ success: false, error: (err as any)?.message || 'Unknown error' }, { status: 400 });
   }
-}
+});

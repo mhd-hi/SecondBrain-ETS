@@ -1,8 +1,8 @@
 import type { SQL } from 'drizzle-orm';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
 import { db } from '@/server/db';
-import { courses, tasks } from '@/server/db/schema';
+import { courses, subtasks, tasks } from '@/server/db/schema';
 
 /**
  * Database query utilities with automatic user filtering for security
@@ -45,11 +45,32 @@ export async function getUserCourseTasks(courseId: string, userId: string) {
   // First verify course ownership
   await getUserCourse(courseId, userId);
 
-  return db
+  const rows = await db
     .select()
     .from(tasks)
     .where(and(eq(tasks.courseId, courseId), eq(tasks.userId, userId)))
     .orderBy(tasks.week);
+  // Fetch subtasks for these tasks and attach
+  const taskIds = rows.map(r => r.id);
+  if (taskIds.length === 0) {
+    return rows;
+  }
+
+  const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+
+  // Map subtasks to their task id
+  const subsByTask: Record<string, any[]> = {};
+  for (const s of subs) {
+    const key = s.taskId;
+    subsByTask[key] = subsByTask[key] || [];
+    subsByTask[key].push(s);
+  }
+
+  // Attach
+  return rows.map(r => ({
+    ...r,
+    subtasks: subsByTask[r.id] ?? [],
+  }));
 }
 
 /**
@@ -66,7 +87,10 @@ export async function getUserTask(taskId: string, userId: string) {
     throw new AuthorizationError('Task not found or access denied');
   }
 
-  return task[0];
+  const t = task[0]!;
+  // Attach subtasks
+  const subs = await db.select().from(subtasks).where(eq(subtasks.taskId, t.id));
+  return { ...t, subtasks: subs };
 }
 
 /**
@@ -92,10 +116,13 @@ export async function updateUserTask(
   userId: string,
   updates: Partial<typeof tasks.$inferInsert>,
 ) {
+  // If updates include subtasks, handle them separately
+  const { subtasks: subUpdates, ...taskUpdates } = updates as any;
+
   const result = await db
     .update(tasks)
     .set({
-      ...updates,
+      ...taskUpdates,
       updatedAt: new Date(),
     })
     .where(and(eq(tasks.id, taskId), eq(tasks.userId, userId)))
@@ -103,6 +130,39 @@ export async function updateUserTask(
 
   if (!result.length) {
     throw new AuthorizationError('Task not found or access denied');
+  }
+
+  // Process subtasks updates: upsert by id, delete missing ones if provided as full set
+  if (Array.isArray(subUpdates)) {
+    // Fetch existing subtask ids for this task
+    const existing = await db.select().from(subtasks).where(eq(subtasks.taskId, taskId));
+    const existingIds = new Set(existing.map(e => e.id));
+
+    // Upsert provided subtasks
+    for (const s of subUpdates) {
+      if (!s.id) {
+        // insert
+        await db.insert(subtasks).values({
+          ...s,
+          id: crypto.randomUUID(),
+          taskId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      } else {
+        // update
+        await db.update(subtasks).set({
+          ...s,
+          updatedAt: new Date(),
+        }).where(eq(subtasks.id, s.id));
+        existingIds.delete(s.id);
+      }
+    }
+
+    // Delete any existing subtasks not present in the provided list
+    for (const idToDelete of existingIds) {
+      await db.delete(subtasks).where(eq(subtasks.id, idToDelete));
+    }
   }
 
   return result[0];
@@ -134,10 +194,12 @@ export async function createUserTask(
   // Verify course ownership first
   await getUserCourse(taskData.courseId, userId);
 
+  const { subtasks: providedSubs, ...taskFields } = taskData as any;
+
   const result = await db
     .insert(tasks)
     .values({
-      ...taskData,
+      ...taskFields,
       userId,
       id: crypto.randomUUID(),
       createdAt: new Date(),
@@ -145,7 +207,22 @@ export async function createUserTask(
     })
     .returning();
 
-  return result[0];
+  const createdTask = result[0]!;
+
+  // Insert provided subtasks
+  if (Array.isArray(providedSubs) && providedSubs.length > 0) {
+    for (const s of providedSubs) {
+      await db.insert(subtasks).values({
+        ...s,
+        id: s.id ?? crypto.randomUUID(),
+        taskId: createdTask.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  }
+
+  return createdTask;
 }
 
 /**
