@@ -20,6 +20,7 @@ const GroupSection = ({
   handleDeleteTask,
   handleStatusChange,
   handleSubtaskStatusChange,
+  onTaskAdded,
   removingTaskIds,
 }: {
   title: string;
@@ -32,6 +33,7 @@ const GroupSection = ({
   handleDeleteTask: (taskId: string) => Promise<void>;
   handleStatusChange: (taskId: string, newStatus: TaskStatus) => Promise<void>;
   handleSubtaskStatusChange: (taskId: string, subtaskId: string, newStatus: TaskStatus) => Promise<void>;
+  onTaskAdded?: () => void;
   removingTaskIds: Set<string>;
 }) => {
   if (tasks.length === 0) {
@@ -79,6 +81,7 @@ const GroupSection = ({
               showCourseBadge={true}
               isSubtasksExpanded={expandedSubtasks.has(task.id)}
               onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
+              onTaskAdded={onTaskAdded}
               actions={task.course?.id
                 ? [
                   {
@@ -422,6 +425,7 @@ export const TodaysFocusTile = () => {
                       handleDeleteTask={handleDeleteTask}
                       handleStatusChange={handleStatusChange}
                       handleSubtaskStatusChange={handleSubtaskStatusChange}
+                      onTaskAdded={fetchFocusTasks}
                       removingTaskIds={removingTaskIds}
                     />
                   );

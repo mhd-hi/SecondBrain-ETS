@@ -5,13 +5,13 @@ export const navigationItems = [
     icon: '🎯',
   },
   {
-    title: 'Weekly Roadmap',
-    url: '/weekly-roadmap',
-    icon: '🗺️',
-  },
-  {
     title: 'Pomodoro',
     url: '/pomodoro',
     icon: '🍅',
+  },
+  {
+    title: 'Weekly Roadmap',
+    url: '/weekly-roadmap',
+    icon: '🗺️',
   },
 ];

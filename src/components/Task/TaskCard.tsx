@@ -25,6 +25,7 @@ type TaskCardProps = {
   onDeleteTask: (taskId: string) => void;
   onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
   onUpdateSubtaskStatus: (taskId: string, subtaskId: string, newStatus: TaskStatus) => void;
+  onTaskAdded?: () => void;
   showCourseBadge?: boolean;
   isSubtasksExpanded?: boolean;
   onToggleSubtasksExpanded?: () => void;
@@ -43,6 +44,7 @@ export function TaskCard({
   isSubtasksExpanded: controlledSubtasksExpanded,
   onToggleSubtasksExpanded,
   actions,
+  onTaskAdded,
 }: TaskCardProps) {
   const router = useRouter();
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
@@ -332,6 +334,9 @@ export function TaskCard({
       <SubtasksList
         taskId={task.id}
         subtasks={subtasks}
+        courseId={task.courseId}
+        courseIdDueDate={task.dueDate}
+        onTaskAdded={onTaskAdded}
         onEditSubtask={(subtaskId, changes) => {
           setSubtasks(prev => prev.map(sub =>
             sub.id === subtaskId ? { ...sub, ...changes } : sub,

@@ -286,6 +286,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                             onDeleteTask={handleDeleteTask}
                             onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
                             onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
+                            onTaskAdded={fetchCourse}
                           />
                         </div>
                       ))}
