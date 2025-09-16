@@ -167,7 +167,15 @@ export const AddTaskDialog = ({
                 type="number"
                 step="0.25"
                 value={newTask.estimatedEffort}
-                onChange={e => setNewTask({ ...newTask, estimatedEffort: Number.parseFloat(e.target.value) || 1 })}
+                onChange={(e) => {
+                  const raw = Number.parseFloat(e.target.value);
+                  // If input is negative -> default to 0.5. If input is positive, enforce minimum 0.25.
+                  // For non-numeric input, default to 0.5 as requested.
+                  const clamped = Number.isFinite(raw)
+                    ? (raw < 0 ? 0.5 : Math.max(0.25, raw))
+                    : 0.5;
+                  setNewTask({ ...newTask, estimatedEffort: clamped });
+                }}
                 min="0.25"
                 required
               />

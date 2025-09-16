@@ -207,7 +207,7 @@ export function TaskCard({
             />
 
             {/* Effort Time (editable) */}
-            {((task.estimatedEffort > 0) || editedEffort) && (
+            {((task.estimatedEffort >= 0) || editedEffort) && (
               <div>
                 {isEditingEffort && (
                   <div ref={inputContainerRef} className="w-16 max-w-[72px]">
@@ -220,7 +220,9 @@ export function TaskCard({
                       }}
                       onBlur={async () => {
                         setIsEditingEffort(false);
-                        const newVal = editedEffort ?? 0;
+                        // ensure value is a number; if negative default to 0.5, otherwise use value (min 0)
+                        const rawVal = editedEffort ?? 0;
+                        const newVal = Number.isFinite(rawVal) ? (rawVal < 0 ? 0.5 : Math.max(0, rawVal)) : 0.5;
                         const oldVal = typeof task.estimatedEffort === 'number' ? task.estimatedEffort : 0;
                         // Only persist if value actually changed
                         if (newVal === oldVal) {

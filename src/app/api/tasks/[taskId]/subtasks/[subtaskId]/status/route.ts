@@ -17,7 +17,7 @@ export const PATCH = withAuth<{ taskId: string; subtaskId: string }>(
 
     // Update the subtask row directly
     const updated = await db.update(subtasks)
-      .set({ status, updatedAt: new Date() } as Partial<typeof subtasks.$inferSelect>)
+      .set({ status, updatedAt: new Date() } as Partial<typeof subtasks.$inferInsert>)
       .where(and(eq(subtasks.id, subtaskId), eq(subtasks.taskId, taskId)))
       .returning();
 

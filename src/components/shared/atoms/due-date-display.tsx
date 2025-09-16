@@ -55,7 +55,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
             selected={displayedDate ?? undefined}
             onSelect={(d) => {
               // Calendar onSelect can pass Date | undefined
-              const selected = (d as Date) ?? null;
+              const selected = d ?? null;
               setLocalDate(selected);
               onChange?.(selected);
               setOpen(false);
@@ -95,7 +95,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
           mode="single"
           selected={displayedDate ?? undefined}
           onSelect={(d) => {
-            const selected = (d as Date) ?? null;
+            const selected = d ?? null;
             setLocalDate(selected);
             onChange?.(selected);
             setOpen(false);

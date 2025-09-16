@@ -26,9 +26,16 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
+    // sanitize numeric fields for subtasks
+    let sanitizedValue: unknown = value;
+    if (input === 'estimatedEffort' || input === 'actualEffort') {
+      const num = Number(value);
+      sanitizedValue = Number.isFinite(num) ? (num < 0 ? 0.5 : Math.max(0, num)) : 0.5;
+    }
+
     // Perform update
     const updated = await db.update(subtasks)
-      .set({ [input]: value, updatedAt: new Date() } as Partial<typeof subtasks.$inferSelect>)
+      .set({ [input]: sanitizedValue, updatedAt: new Date() } as Partial<typeof subtasks.$inferInsert>)
       .where(and(eq(subtasks.id, id), eq(subtasks.taskId, sub0.taskId)))
       .returning();
 

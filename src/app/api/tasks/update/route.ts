@@ -19,6 +19,11 @@ export async function POST(req: NextRequest) {
 
     if (input === 'dueDate') {
       (updateObj as unknown as Record<string, unknown>)[input] = new Date(value);
+    } else if (input === 'estimatedEffort' || input === 'actualEffort') {
+      // sanitize numeric fields: coerce to number; if negative default to 0.5, otherwise clamp to >= 0
+      const num = Number(value);
+      const safe = Number.isFinite(num) ? (num < 0 ? 0.5 : Math.max(0, num)) : 0.5;
+      (updateObj as unknown as Record<string, unknown>)[input] = safe;
     } else {
       (updateObj as unknown as Record<string, unknown>)[input] = value;
     }
