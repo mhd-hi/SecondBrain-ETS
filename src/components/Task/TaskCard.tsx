@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
@@ -43,6 +44,7 @@ export function TaskCard({
 }: TaskCardProps) {
   const router = useRouter();
   const [internalSubtasksExpanded, setInternalSubtasksExpanded] = useState(false);
+  const [isAddSubtaskOpen, setIsAddSubtaskOpen] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.notes ?? '');
   const updateField = useUpdateField();
@@ -105,6 +107,10 @@ export function TaskCard({
 
   const defaultActions = [
     {
+      label: 'Add subtask',
+      onClick: () => setIsAddSubtaskOpen(true),
+    },
+    {
       label: 'Delete',
       onClick: () => onDeleteTask(task.id),
       destructive: true,
@@ -122,6 +128,15 @@ export function TaskCard({
       <MoreActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+      />
+      {/* Add Subtask dialog controlled by this card */}
+      <AddSubtaskDialog
+        taskId={task.id}
+        open={isAddSubtaskOpen}
+        onOpenChange={setIsAddSubtaskOpen}
+        onSubtaskAdded={(subtask) => {
+          setSubtasks(prev => [...prev, subtask]);
+        }}
       />
       {showCourseBadge && task.course && (
         <div className="mb-1">

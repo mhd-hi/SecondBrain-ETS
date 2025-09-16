@@ -188,7 +188,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-4 mb-10">
         <SearchBar
           placeholder="Search tasks by title, notes, or subtasks..."
           value={searchQuery}

@@ -262,18 +262,18 @@ export const STATUS_ORDER = [
 export const TASK_STATUS_CONFIG = {
   [TaskStatus.TODO]: {
     label: 'TODO',
-    bgColor: 'blue-500',
-    textColor: 'blue-100',
+    bgColor: 'bg-blue-500',
+    textColor: 'text-blue-100',
   },
   [TaskStatus.IN_PROGRESS]: {
     label: 'IN PROGRESS',
-    bgColor: 'amber-500',
-    textColor: 'gray-900',
+    bgColor: 'bg-amber-500',
+    textColor: 'text-gray-900',
   },
   [TaskStatus.COMPLETED]: {
     label: 'DONE',
-    bgColor: 'green-600',
-    textColor: 'green-100',
+    bgColor: 'bg-green-600',
+    textColor: 'text-green-100',
   },
 } as const;
 

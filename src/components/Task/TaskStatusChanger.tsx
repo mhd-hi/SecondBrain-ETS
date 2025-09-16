@@ -38,13 +38,13 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   // Helper function to get background class for status using TASK_STATUS_CONFIG
   const getStatusBgClass = (status: TaskStatus) => {
     const config = TASK_STATUS_CONFIG[status];
-    return config?.bgColor ? `bg-${config.bgColor}` : 'bg-muted';
+    return config?.bgColor ?? 'bg-muted';
   };
 
   // Helper function to get text class for status using TASK_STATUS_CONFIG
   const getStatusTextClass = (status: TaskStatus) => {
     const config = TASK_STATUS_CONFIG[status];
-    return config?.textColor ? `text-${config.textColor}` : 'text-blue-500';
+    return config?.textColor ?? 'text-blue-500';
   };
 
   return (
@@ -63,7 +63,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
             type="button"
             className={cn(
               'px-3 h-full flex items-center',
-              'font-medium text-xs uppercase',
+              'font-medium text-xs uppercase leading-none',
               'hover:bg-black/5 focus:outline-none',
               getStatusTextClass(validStatus),
             )}
@@ -89,12 +89,13 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                   index !== USER_STATUS_ORDER.length - 1 && 'border-b border-border',
                 )}
               >
-                <div className={cn(
-                  'w-3 h-3 rounded-full',
-                  status === TaskStatus.COMPLETED
-                    ? getStatusBgClass(status)
-                    : `${getStatusBgClass(status)} border border-current`,
-                )}
+                <div
+                  className={cn(
+                    'w-3 h-3 rounded-full',
+                    status === TaskStatus.COMPLETED
+                      ? getStatusBgClass(status)
+                      : `${getStatusBgClass(status)} border border-current`,
+                  )}
                 />
                 {TASK_STATUS_CONFIG[status].label}
               </DropdownMenuItem>
@@ -107,16 +108,14 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
         type="button"
         onClick={handleArrowClick}
         className={cn(
-          'h-full flex items-center justify-center px-2',
+          'h-full flex items-center justify-center px-2 leading-none',
           'hover:bg-black/5 focus:outline-none',
           'transition-colors',
+          getStatusTextClass(validStatus),
         )}
         aria-label="Cycle to next status"
       >
-        <ChevronRight
-          className="w-2.5 h-2.5"
-          color={validStatus === TaskStatus.IN_PROGRESS ? 'black' : 'white'}
-        />
+        <ChevronRight className="w-2.5 h-2.5" />
       </button>
     </div>
   );
