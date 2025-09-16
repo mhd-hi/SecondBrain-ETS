@@ -2,6 +2,8 @@
 import type { Subtask } from '@/types/subtask';
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { Badge } from '@/components/ui/badge';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn } from '@/lib/utils';
@@ -11,6 +13,8 @@ import { EditableField } from '../shared/EditableField';
 type SubtasksListProps = {
   subtasks: Subtask[];
   onEditSubtask?: (subtaskId: string, changes: Partial<Subtask>) => void;
+  onDeleteSubtask?: (subtaskId: string) => void;
+  taskId?: string;
   readonly?: boolean;
   collapsible?: boolean;
   defaultExpanded?: boolean;
@@ -21,6 +25,8 @@ type SubtasksListProps = {
 const SubtasksList = ({
   subtasks,
   onEditSubtask,
+  onDeleteSubtask,
+  taskId,
   readonly = false,
   collapsible = false,
   defaultExpanded = true,
@@ -28,6 +34,7 @@ const SubtasksList = ({
   onToggleExpanded,
 }: SubtasksListProps) => {
   const [internalIsExpanded, setInternalIsExpanded] = useState(defaultExpanded);
+  const [hoveredSubtaskId, setHoveredSubtaskId] = useState<string | null>(null);
 
   const updateField = useUpdateField();
 
@@ -93,8 +100,10 @@ const SubtasksList = ({
           {subtasks.map(subtask => (
             <div
               key={subtask.id}
+              onMouseEnter={() => setHoveredSubtaskId(subtask.id)}
+              onMouseLeave={() => setHoveredSubtaskId(prev => (prev === subtask.id ? null : prev))}
               className={cn(
-                'flex items-start justify-between gap-4 p-3 rounded-lg border border-muted',
+                'relative overflow-visible flex items-start justify-between gap-4 p-3 rounded-lg border border-muted',
                 'transition-colors',
                 subtask.status === TaskStatusEnum.COMPLETED
                   ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
@@ -150,14 +159,50 @@ const SubtasksList = ({
                   />
                 )}
               </div>
-              {readonly && (
-                <Badge
-                  variant="secondary"
-                  className="text-xs flex-shrink-0"
-                >
-                  {subtask.status}
-                </Badge>
-              )}
+              {
+                readonly
+                  ? (
+                    <Badge variant="secondary" className="text-xs flex-shrink-0">
+                      {subtask.status}
+                    </Badge>
+                  )
+                  : (
+                    // Hover-only actions dropdown
+                    <MoreActionsDropdown
+                      actions={[
+                        {
+                          label: 'Delete subtask',
+                          destructive: true,
+                          onClick: async () => {
+                            try {
+                              if (!taskId) {
+                                throw new Error('Missing task id');
+                              }
+                              const res = await fetch(
+                                `/api/tasks/${taskId}/subtasks/${subtask.id}`,
+                                { method: 'DELETE' },
+                              );
+                              if (!res.ok) {
+                                throw new Error('Failed to delete');
+                              }
+                              toast.success('Subtask deleted');
+                              if (onDeleteSubtask) {
+                                onDeleteSubtask(subtask.id);
+                              }
+                            } catch (err) {
+                              console.error(err);
+                              toast.error('Failed to delete subtask');
+                            }
+                          },
+                        },
+                      ]}
+                      triggerClassName={cn(
+                        'absolute -top-[10px] -right-[10px] z-50 transition-opacity',
+                        hoveredSubtaskId === subtask.id ? 'opacity-100' : 'opacity-0 pointer-events-none',
+                      )}
+                    />
+                  )
+              }
             </div>
           ))}
         </div>

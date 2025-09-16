@@ -268,7 +268,7 @@ export const TASK_STATUS_CONFIG = {
   [TaskStatus.IN_PROGRESS]: {
     label: 'IN PROGRESS',
     bgColor: 'bg-amber-500',
-    textColor: 'text-gray-900',
+    textColor: 'text-gray-800',
   },
   [TaskStatus.COMPLETED]: {
     label: 'DONE',

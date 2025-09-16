@@ -10,13 +10,13 @@ import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
-import { DatePicker } from '../ui/date-picker';
 
 type TaskCardProps = {
   task: Task;
@@ -51,22 +51,29 @@ export function TaskCard({
   const [subtasks, setSubtasks] = useState(task.subtasks ?? []);
 
   // State for editing due date
-  const [isEditingDueDate, setIsEditingDueDate] = useState(false);
   const [editedDueDate, setEditedDueDate] = useState(() => (task.dueDate ? new Date(task.dueDate) : undefined));
 
-    // Handler for saving due date
-    const handleSaveDueDate = async (newDate: Date | undefined) => {
-      setEditedDueDate(newDate);
-      setIsEditingDueDate(false);
-      if (newDate instanceof Date && !Number.isNaN(newDate.getTime())) {
-        await updateField({
-          type: 'task',
-          id: task.id,
-          input: 'dueDate',
-          value: newDate.toISOString(),
-        });
-      }
-    };
+  // Handler for saving due date (used by DueDateDisplay onChange)
+  const handleSaveDueDate = async (newDate: Date | undefined | null) => {
+    const dateToStore = newDate instanceof Date && !Number.isNaN(newDate.getTime()) ? newDate : undefined;
+    setEditedDueDate(dateToStore);
+    if (dateToStore) {
+      await updateField({
+        type: 'task',
+        id: task.id,
+        input: 'dueDate',
+        value: dateToStore.toISOString(),
+      });
+    } else {
+      // clear due date
+      await updateField({
+        type: 'task',
+        id: task.id,
+        input: 'dueDate',
+        value: null as any,
+      });
+    }
+  };
 
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
@@ -111,7 +118,7 @@ export function TaskCard({
       onClick: () => setIsAddSubtaskOpen(true),
     },
     {
-      label: 'Delete',
+      label: 'Delete task',
       onClick: () => onDeleteTask(task.id),
       destructive: true,
     },
@@ -180,51 +187,34 @@ export function TaskCard({
 
             {/* Effort Time */}
             {task.estimatedEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <Clock className="h-3 w-3 flex-shrink-0" />
-                {formatEffortTime(task.estimatedEffort)}
-              </span>
+              <Badge variant="outline" className="text-xs">
+                <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                  <Clock className="h-3 w-3 flex-shrink-0" />
+                  {formatEffortTime(task.estimatedEffort)}
+                </span>
+              </Badge>
             )}
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                <BarChart3 className="h-3 w-3 flex-shrink-0" />
-                {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
-                % complete
-              </span>
+              <Badge variant="outline" className="text-xs">
+                <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
+                  <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                  {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
+                  % complete
+                </span>
+              </Badge>
             )}
 
               {task.dueDate && task.status !== TaskStatus.COMPLETED && (
-                <>
-                  <span
-                    style={{ cursor: 'pointer' }}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setIsEditingDueDate(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        setIsEditingDueDate(true);
-                      }
-                    }}
-                    aria-label="Edit due date"
-                  >
-                    <DueDateDisplay date={editedDueDate ?? task.dueDate} />
+                <Badge variant="outline" className="text-xs">
+                  <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
+                    <DueDateDisplay
+                      date={editedDueDate ?? task.dueDate}
+                      onChange={d => handleSaveDueDate(d ?? null)}
+                    />
                   </span>
-              {isEditingDueDate && (
-                <div className="ml-2">
-                  <DatePicker
-                    date={editedDueDate}
-                    onDateChange={(date: Date | undefined) => {
-                      setEditedDueDate(date);
-                      handleSaveDueDate(date);
-                    }}
-                    className="w-[180px]"
-                    open={isEditingDueDate}
-                  />
-                </div>
-              )}
-                </>
+                </Badge>
               )}
           </div>
         </div>
@@ -257,11 +247,15 @@ export function TaskCard({
         </div>
       </div>
       <SubtasksList
+        taskId={task.id}
         subtasks={subtasks}
         onEditSubtask={(subtaskId, changes) => {
           setSubtasks(prev => prev.map(sub =>
             sub.id === subtaskId ? { ...sub, ...changes } : sub,
           ));
+        }}
+        onDeleteSubtask={(subtaskId) => {
+          setSubtasks(prev => prev.filter(s => s.id !== subtaskId));
         }}
         collapsible={false}
         defaultExpanded={false}
