@@ -56,13 +56,7 @@ export const createTask = async (data: {
   notes?: string;
   estimatedEffort: number;
   dueDate: Date;
-  subtasks?: Array<{
-    id: string;
-    title: string;
-    status: TaskStatus;
-    notes?: string;
-    estimatedEffort?: number;
-  }>;
+  subtasks?: Subtask[];
 }) => {
   // Calculate week number based on due date
   const startOfYear = new Date(new Date().getFullYear(), 0, 1);
