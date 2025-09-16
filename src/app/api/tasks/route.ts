@@ -1,23 +1,9 @@
-import type { Subtask } from '@/types/subtask';
-import type { Task } from '@/types/task';
+import type { NewTaskInput, UpdateTaskInput } from '@/types/api/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task-status';
-
-// Type for tasks provided in the POST body when creating new tasks.
-export type NewTaskInput = Omit<Task, 'id' | 'courseId'> & {
-  subtasks?: Subtask[];
-  notes?: string;
-  dueDate?: string;
-};
-
-// Type for partial task updates accepted by the PATCH endpoint
-export type UpdateTaskInput = Partial<Omit<Task, 'id' | 'courseId'>> & {
-  subtasks?: Subtask[];
-  notes?: string;
-};
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -65,16 +51,13 @@ export const POST = withAuthSimple(
       return {
         ...task,
         courseId,
-        // Calculate week from due date if not provided (for manual task creation)
-        // Otherwise preserve the original week number from AI parsing
         week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
         status: task.status ?? TaskStatus.TODO,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
-          id: crypto.randomUUID(),
+          id: subtask.id ?? crypto.randomUUID(),
           status: subtask.status ?? TaskStatus.TODO,
         })),
-        // Use user-provided due date if available, otherwise calculate from week
         dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
           ? userProvidedDueDate
           : calculateTaskDueDate(task.week || 1),
@@ -116,7 +99,7 @@ export const PATCH = withAuthSimple(
       })),
       notes: updates.notes,
       dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,
-    } as any;
+    } as Partial<typeof import('@/server/db/schema').tasks.$inferInsert> & { subtasks?: Partial<typeof import('@/server/db/schema').subtasks.$inferInsert>[] };
 
     const updatedTask = await updateUserTask(id, user.id, payload);
 

@@ -1,12 +1,10 @@
 import type { SQL } from 'drizzle-orm';
+import type { Subtask } from '@/types/subtask';
 import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
+import { parseTaskStatus } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
-
-/**
- * Database query utilities with automatic user filtering for security
- */
 
 /**
  * Get courses for authenticated user
@@ -58,18 +56,26 @@ export async function getUserCourseTasks(courseId: string, userId: string) {
 
   const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
 
-  // Map subtasks to their task id
-  const subsByTask: Record<string, any[]> = {};
-  for (const s of subs) {
-    const key = s.taskId;
-    subsByTask[key] = subsByTask[key] || [];
-    subsByTask[key].push(s);
+  // Map subtasks to their task id using a Map to avoid dynamic object indexing
+  const subsByTask = new Map<string, Subtask[]>();
+  for (const s of subs as Array<Record<string, unknown>>) {
+    const key = String(s.taskId);
+    const mapped: Subtask = {
+      id: String(s.id),
+      title: String(s.title),
+      status: parseTaskStatus(String(s.status)),
+      notes: s.notes == null ? undefined : String(s.notes),
+      estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+    };
+    const list = subsByTask.get(key) ?? [];
+    list.push(mapped);
+    subsByTask.set(key, list);
   }
 
   // Attach
   return rows.map(r => ({
     ...r,
-    subtasks: subsByTask[r.id] ?? [],
+    subtasks: subsByTask.get(String(r.id)) ?? [],
   }));
 }
 
@@ -117,7 +123,9 @@ export async function updateUserTask(
   updates: Partial<typeof tasks.$inferInsert>,
 ) {
   // If updates include subtasks, handle them separately
-  const { subtasks: subUpdates, ...taskUpdates } = updates as any;
+  type SubUpdate = Partial<typeof subtasks.$inferInsert>;
+  type UpdateWithSubs = Partial<typeof tasks.$inferInsert> & { subtasks?: SubUpdate[] };
+  const { subtasks: subUpdates, ...taskUpdates } = updates as UpdateWithSubs;
 
   const result = await db
     .update(tasks)
@@ -140,19 +148,28 @@ export async function updateUserTask(
 
     // Upsert provided subtasks
     for (const s of subUpdates) {
+      const subToUpsert: Partial<typeof subtasks.$inferInsert> = {
+        title: s.title ?? '',
+        notes: s.notes ?? null,
+        // Narrow status/type into the subtasks insert types
+        status: (s.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+        estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+        type: (s.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
+      };
+
       if (!s.id) {
         // insert
         await db.insert(subtasks).values({
-          ...s,
+          ...(subToUpsert as typeof subtasks.$inferInsert),
           id: crypto.randomUUID(),
           taskId,
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        } as typeof subtasks.$inferInsert);
       } else {
         // update
         await db.update(subtasks).set({
-          ...s,
+          ...subToUpsert,
           updatedAt: new Date(),
         }).where(eq(subtasks.id, s.id));
         existingIds.delete(s.id);
@@ -194,7 +211,9 @@ export async function createUserTask(
   // Verify course ownership first
   await getUserCourse(taskData.courseId, userId);
 
-  const { subtasks: providedSubs, ...taskFields } = taskData as any;
+  type ProvidedSub = Partial<typeof subtasks.$inferInsert>;
+  type CreateTaskWithSubs = Omit<typeof tasks.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'> & { subtasks?: ProvidedSub[] };
+  const { subtasks: providedSubs, ...taskFields } = taskData as CreateTaskWithSubs;
 
   const result = await db
     .insert(tasks)
@@ -212,13 +231,18 @@ export async function createUserTask(
   // Insert provided subtasks
   if (Array.isArray(providedSubs) && providedSubs.length > 0) {
     for (const s of providedSubs) {
-      await db.insert(subtasks).values({
-        ...s,
+      const subToInsert: typeof subtasks.$inferInsert = {
+        title: s.title ?? '',
+        notes: s.notes ?? null,
+        status: (s.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+        estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+        type: (s.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
         id: s.id ?? crypto.randomUUID(),
         taskId: createdTask.id,
         createdAt: new Date(),
         updatedAt: new Date(),
-      });
+      } as typeof subtasks.$inferInsert;
+      await db.insert(subtasks).values(subToInsert);
     }
   }
 

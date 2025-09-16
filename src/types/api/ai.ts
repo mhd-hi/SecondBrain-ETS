@@ -1,4 +1,4 @@
-import type { Task, TaskType } from './task';
+import type { Task, TaskType } from '@/types/task';
 
 export type AISubtask = {
   title: string;

@@ -28,12 +28,13 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
 
     // Perform update
     const updated = await db.update(subtasks)
-      .set({ [input]: value, updatedAt: new Date() } as any)
+      .set({ [input]: value, updatedAt: new Date() } as Partial<typeof subtasks.$inferSelect>)
       .where(and(eq(subtasks.id, id), eq(subtasks.taskId, sub0.taskId)))
       .returning();
 
     return NextResponse.json({ success: true, updated });
   } catch (err) {
-    return NextResponse.json({ success: false, error: (err as any)?.message || 'Unknown error' }, { status: 400 });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ success: false, error: errMsg || 'Unknown error' }, { status: 400 });
   }
 });

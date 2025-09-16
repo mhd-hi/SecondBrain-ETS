@@ -18,18 +18,18 @@ export const POST = withAuth<{ taskId: string }>(
         }
 
         // Insert the new subtask
-        const toInsert = {
+        const toInsert: typeof subtasks.$inferInsert = {
             id: body.id ?? crypto.randomUUID(),
             taskId,
             title: body.title ?? '',
-            notes: body.notes ?? '',
-            status: body.status ?? 'TODO',
-            estimatedEffort: body.estimatedEffort ?? 0,
-            type: body.type ?? 'theorie',
+            notes: body.notes ?? null,
+            status: (body.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+            estimatedEffort: typeof body.estimatedEffort === 'number' ? body.estimatedEffort : 0,
+            type: (body.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
             dueDate: body.dueDate ? new Date(String(body.dueDate)) : undefined,
             createdAt: new Date(),
             updatedAt: new Date(),
-        } as any;
+        };
 
         const result = await db.insert(subtasks).values(toInsert).returning();
         const created = result[0];

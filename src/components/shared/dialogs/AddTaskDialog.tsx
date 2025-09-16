@@ -134,7 +134,7 @@ export const AddTaskDialog = ({
                 id="notes"
                 value={newTask.notes}
                 onChange={e => setNewTask({ ...newTask, notes: e.target.value })}
-                placeholder="(Optional) Add any additional notes or details about the task"
+                placeholder="(Optional) Add additional notes about the task"
               />
             </div>
             <div className="grid gap-2">

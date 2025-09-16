@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { api } from '@/lib/api/util';
+import { createSubtask } from '@/hooks/use-subtask';
 import { TaskStatus } from '@/types/task-status';
 
 type AddSubtaskDialogProps = {
@@ -41,7 +41,6 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
 
     setIsLoading(true);
     try {
-      // POST the new subtask (only title/notes/estimatedEffort needed)
       const payload = {
         title: newSubtask.title,
         notes: newSubtask.notes ?? '',
@@ -49,10 +48,13 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
         status: TaskStatus.TODO,
       };
 
-      const created = await api.post(`/api/tasks/${taskId}/subtasks`, payload);
+      const created = await createSubtask(taskId, payload);
+      if (!created) {
+        throw new Error('Creation failed');
+      }
       toast.success('Subtask added');
       handleClose();
-  setNewSubtask({ title: '', notes: '', estimatedEffort: 0.5 });
+      setNewSubtask({ title: '', notes: '', estimatedEffort: 0.5 });
       if (onSubtaskAdded) {
         onSubtaskAdded(created as Subtask);
       }

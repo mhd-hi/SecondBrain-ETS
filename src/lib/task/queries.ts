@@ -2,8 +2,49 @@ import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
 import { and, eq, gte, inArray, lt } from 'drizzle-orm';
+import { parseTaskStatus } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
+
+type TaskRow = {
+  tasks: {
+    id: string;
+    courseId: string;
+    title: string;
+    notes?: string | null;
+    week: number;
+    type: string;
+    status: TaskStatus;
+    estimatedEffort: number;
+    actualEffort: number;
+    createdAt: Date;
+    updatedAt: Date;
+    dueDate: Date;
+  };
+  courses?: {
+    id: string;
+    userId: string;
+    name: string;
+    code: string;
+    term: string;
+    color: string;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+};
+
+type DBSubtaskRow = {
+  id: string;
+  type: string;
+  taskId: string;
+  title: string;
+  notes?: string | null;
+  status: string;
+  estimatedEffort: number;
+  createdAt: Date;
+  updatedAt: Date;
+  dueDate?: Date | null;
+};
 
 export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: string): Promise<Task[]> => {
   try {
@@ -17,33 +58,53 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
       eq(tasks.userId, userId),
     ];
 
-    const results = await db.select().from(tasks).where(and(...conditions)).leftJoin(courses, eq(tasks.courseId, courses.id));
+    const results = await db
+      .select()
+      .from(tasks)
+      .where(and(...conditions))
+      .leftJoin(courses, eq(tasks.courseId, courses.id));
 
-    const taskRows = results.map(r => r as any);
-    const taskIds = taskRows.map(tr => tr.tasks?.id ?? tr.id ?? tr.tasksId).filter(Boolean);
+    const taskRows = results as TaskRow[];
 
-    let subs: any[] = [];
-    if (taskIds.length > 0) {
-      subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
-    }
+    const taskIds = taskRows.map(tr => tr.tasks.id).filter(Boolean);
 
-    const subsByTask: Record<string, any[]> = {};
+    const subs: DBSubtaskRow[] = taskIds.length > 0
+      ? await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds))
+      : [];
+
+    const subsByTask = new Map<string, Subtask[]>();
     for (const s of subs) {
-      let arr = subsByTask[s.taskId];
-      if (!arr) {
-        arr = [];
-        subsByTask[s.taskId] = arr;
-      }
-      arr.push(s);
+      const list = subsByTask.get(s.taskId) ?? [];
+      list.push({
+        id: s.id,
+        title: s.title,
+        status: parseTaskStatus(String(s.status)),
+        notes: s.notes ?? undefined,
+        estimatedEffort: s.estimatedEffort,
+      });
+      subsByTask.set(s.taskId, list);
     }
 
-    return taskRows.map(row => ({
-      ...row.tasks,
-      course: row.courses ?? undefined,
-      status: row.tasks.status as TaskStatus,
-      subtasks: subsByTask[row.tasks.id] ?? [],
-      notes: row.tasks.notes ?? undefined,
-    }));
+    return taskRows.map((row) => {
+      const t = row.tasks;
+      const course = row.courses ?? undefined;
+      return {
+        id: t.id,
+        courseId: t.courseId,
+        title: t.title,
+        notes: t.notes ?? undefined,
+        week: t.week,
+        type: t.type as Task['type'],
+        status: t.status,
+        estimatedEffort: t.estimatedEffort,
+        actualEffort: t.actualEffort,
+        subtasks: subsByTask.get(t.id) ?? [],
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        dueDate: t.dueDate,
+        course,
+      } as Task;
+    });
   } catch (error) {
     console.error('Error fetching tasks:', error);
     throw error;

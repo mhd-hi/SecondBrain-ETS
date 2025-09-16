@@ -55,6 +55,7 @@ function isPageRoute(pathname: string): boolean {
   return !pathname.startsWith('/api/');
 }
 
+// eslint-disable-next-line ts/no-explicit-any
 export default auth((req: any) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth?.user;

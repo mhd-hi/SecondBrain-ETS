@@ -70,7 +70,7 @@ export function TaskCard({
         type: 'task',
         id: task.id,
         input: 'dueDate',
-        value: null as any,
+        value: null as unknown as string,
       });
     }
   };

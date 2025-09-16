@@ -3,7 +3,7 @@
  * Simplified and more flexible pipeline for server-side course processing
  */
 
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 import type {
   DataSource,
   PipelineOptions,

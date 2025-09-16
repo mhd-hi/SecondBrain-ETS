@@ -331,6 +331,16 @@ export const isValidStatus = (status: TaskStatus): boolean => {
   return Object.values(TaskStatus).includes(status);
 };
 
+/**
+ * Normalize an incoming status value (possibly a string from the DB) to a valid TaskStatus.
+ */
+export const parseTaskStatus = (value: unknown): TaskStatus => {
+  if (typeof value === 'string' && Object.values(TaskStatus).includes(value as TaskStatus)) {
+    return value as TaskStatus;
+  }
+  return TaskStatus.TODO;
+};
+
 export const getOverdueTasks = (tasks: Task[], excludeStatuses: TaskStatus[] = [TaskStatus.COMPLETED]): Task[] => {
   // Get current date at start of day to ensure consistent overdue detection
   const now = new Date();

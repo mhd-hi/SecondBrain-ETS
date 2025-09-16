@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { Badge } from '@/components/ui/badge';
+import { deleteSubtask } from '@/hooks/use-subtask';
 import { useUpdateField } from '@/hooks/useUpdateField';
 import { cn } from '@/lib/utils';
 import { TaskStatus as TaskStatusEnum } from '@/types/task-status';
@@ -178,11 +179,8 @@ const SubtasksList = ({
                               if (!taskId) {
                                 throw new Error('Missing task id');
                               }
-                              const res = await fetch(
-                                `/api/tasks/${taskId}/subtasks/${subtask.id}`,
-                                { method: 'DELETE' },
-                              );
-                              if (!res.ok) {
+                              const ok = await deleteSubtask(taskId, subtask.id);
+                              if (!ok) {
                                 throw new Error('Failed to delete');
                               }
                               toast.success('Subtask deleted');

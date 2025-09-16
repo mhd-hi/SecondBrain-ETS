@@ -15,28 +15,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid field' }, { status: 400 });
     }
 
-    const updateObj: Record<string, any> = {};
+    const updateObj: Partial<typeof tasks.$inferSelect> = {};
 
     if (input === 'dueDate') {
-      updateObj[input] = new Date(value);
+      (updateObj as unknown as Record<string, unknown>)[input] = new Date(value);
     } else {
-      updateObj[input] = value;
+      (updateObj as unknown as Record<string, unknown>)[input] = value;
     }
 
     updateObj.updatedAt = new Date();
 
     try {
       const result = await db.update(tasks)
-        .set(updateObj)
+        .set(updateObj as Partial<typeof tasks.$inferInsert>)
         .where(sql`id = ${taskId}`)
         .returning();
       return NextResponse.json({ success: true, taskId, input, value, updated: result });
     } catch (dbErr) {
       console.error('DB update error:', dbErr);
-      return NextResponse.json({ success: false, error: (dbErr as any)?.message || 'Unknown DB error' }, { status: 400 });
+      const dbErrMsg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+      return NextResponse.json({ success: false, error: dbErrMsg || 'Unknown DB error' }, { status: 400 });
     }
   } catch (err) {
     console.error('API error:', err);
-    return NextResponse.json({ success: false, error: (err as any)?.message || 'Unknown error' }, { status: 400 });
+    const errMsg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ success: false, error: errMsg || 'Unknown error' }, { status: 400 });
   }
 }

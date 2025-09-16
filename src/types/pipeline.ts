@@ -3,7 +3,7 @@
  * Used by both client and server-side implementations
  */
 
-import type { CourseAIResponse } from '@/types/api';
+import type { CourseAIResponse } from '@/types/api/ai';
 
 export type ProcessingStep = {
   id: string;
