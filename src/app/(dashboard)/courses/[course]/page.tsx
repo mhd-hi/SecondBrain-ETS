@@ -270,7 +270,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                 .sort(([a], [b]) => Number(a) - Number(b))
                 .map(([week, weekTasks]) => (
                   <div key={week} className="space-y-2.5">
-                    <h3 className="text-shadow-lg font-semibold mb-1.5">
+                    <h3 className="font-semibold mb-1.5">
                       {'Week '}
                       {week}
                     </h3>

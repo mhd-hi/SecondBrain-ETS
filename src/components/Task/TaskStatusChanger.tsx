@@ -64,6 +64,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
             className={cn(
               'px-3 h-full flex items-center',
               'font-medium text-xs uppercase leading-none',
+              'border-r-[0.5px] border-background',
               'hover:bg-black/5 focus:outline-none',
               getStatusTextClass(validStatus),
             )}

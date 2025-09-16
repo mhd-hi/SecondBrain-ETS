@@ -3,7 +3,8 @@
 ## Technical Debt
 - Fix "Default to winter if between sessions" smell (should select the next session)
     - Add a input session dropdown when creating a course and select the right session
-
+- pomodoro sort of contribution github
+    - migrate pomodoro single attribute to pomodoro table
 ---
 
 # Features
@@ -53,11 +54,6 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 - pomodoro page should be able to receive duration and task id in query params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
 - Add github-like calendar to track pomdoro activity
     - might need to refactor db to create new pomodoro table
-#### Dashboard
-- make TaskCard responsive
-- make Deep Work responsive
-- remove deep work tile (its useless)
-- add a bigger border between 2 parts of statusChanger
 #### Pomodoro
 
 #### Progress Tracking:

@@ -90,7 +90,7 @@ export function TaskCard({
         type: 'task',
         id: task.id,
         input: 'dueDate',
-        value: null as unknown as string,
+        value: '',
       });
       toast.success('Due date cleared');
     }
