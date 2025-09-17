@@ -23,7 +23,7 @@ import {
   getTotalTasksCount,
   getUpcomingTask,
 } from '@/lib/task/util';
-import { getCourseColor } from '@/lib/utils';
+// getCourseColor removed - we rely on local selectedColor instead
 import { TaskStatus } from '@/types/task-status';
 
 type CourseCardProps = {
@@ -37,7 +37,9 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const [pendingColor, setPendingColor] = useState(selectedColor);
   // Ensure course.tasks is an array
   const tasks = course.tasks ?? [];
-  const courseColor = getCourseColor(course);
+  // Use the locally selected color as the source of truth for rendering.
+  // `selectedColor` is updated when the user confirms a color change.
+  const displayColor = selectedColor || course.color || '#3b82f6';
 
   // Calculate progress and task counts
   const progressPercentage = calculateProgress(tasks);
@@ -98,10 +100,18 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
     },
   ];
 
+  const rawStyle: Record<string, string> = {
+    'borderLeft': `4px solid ${selectedColor}`,
+    // expose course color as a CSS variable so Tailwind classes can still work
+    '--course-color': displayColor,
+  };
+
+  const cardStyle = rawStyle as React.CSSProperties;
+
   return (
     <div
       className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]"
-      style={{ borderLeft: `4px solid ${selectedColor}` }}
+      style={cardStyle}
     >
       <div className="absolute -top-[10px] -right-[10px] z-10">
         <MoreActionsDropdown
@@ -167,9 +177,8 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
         <div className="w-full bg-muted rounded-full h-2 mb-2">
           <div
             className="h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progressPercentage}%`, backgroundColor: courseColor }}
-          >
-          </div>
+            style={{ width: `${progressPercentage}%`, backgroundColor: displayColor }}
+          />
         </div>
       </div>
 
@@ -242,7 +251,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
         <Link
           href={`/courses/${course.id}`}
           className="text-xs text-muted-foreground hover:text-accent-foreground transition-colors hover:underline"
-          style={{ color: courseColor }}
+          style={{ color: displayColor }}
         >
           View course
         </Link>
