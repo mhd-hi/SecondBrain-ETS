@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCourses as useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
-import { useCourses } from '@/hooks/use-courses';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
 import { batchUpdateTaskStatus, deleteTask } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
@@ -36,8 +35,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Use custom hooks instead of duplicate state management
-  const { courses, fetchCourses } = useCourses();
-  const { deleteCourse } = useCoursesContext();
+  const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
 
   useEffect(() => {
@@ -100,15 +98,22 @@ export default function CoursePage({ params }: CoursePageProps) {
             : task,
         ),
       );
+      // Ensure global course list (used by sidebar) reflects any overdue count changes
+      void refreshCourses();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to update task');
     }
   };
 
   const handleUpdateSubtaskStatus = updateSubtaskStatus(tasks, setTasks);
+  const handleUpdateSubtaskStatusAndRefresh = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
+    await handleUpdateSubtaskStatus(taskId, subtaskId, newStatus);
+    void refreshCourses();
+  };
 
   const handleDeleteTask = async (taskId: string) => {
     await deleteTask(taskId, fetchCourse);
+    void refreshCourses();
   };
 
   const handleDeleteCourse = async () => {
@@ -163,6 +168,8 @@ export default function CoursePage({ params }: CoursePageProps) {
         description: `${currentOverdueTasks.length} overdue tasks have been marked as completed`,
       });
       await fetchCourse();
+      // Batch operation changed task statuses; update global courses used by sidebar
+      await refreshCourses();
     } catch (error) {
       ErrorHandlers.api(error, 'Failed to complete overdue tasks');
     }
@@ -285,7 +292,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                             task={task}
                             onDeleteTask={handleDeleteTask}
                             onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
-                            onUpdateSubtaskStatus={handleUpdateSubtaskStatus}
+                            onUpdateSubtaskStatus={handleUpdateSubtaskStatusAndRefresh}
                             onTaskAdded={fetchCourse}
                           />
                         </div>

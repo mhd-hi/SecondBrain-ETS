@@ -130,10 +130,10 @@ export const pomodoroDaily = pgTable('pomodoro_daily', {
   uniqUserDay: uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
 }));
 
-export const openaiCache = pgTable('openai_cache', {
+export const AICoursesCache = pgTable('ai_courses_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
   courseCode: text('course_code').notNull().unique(),
-  parsedOpenAIContent: json('parsed_openai_content').notNull(),
+  parsedContent: json('parsed_content').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
