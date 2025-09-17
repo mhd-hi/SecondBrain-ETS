@@ -16,7 +16,7 @@
 
 ### Story: AI
 -  Cache OpenAI tasks response in DB (5 points)
-    -   If course is not in the `ai_courses_cache` db, add it.
+    -   If course is not in the `courses_cache` db, add it.
     -   Benefits:
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
@@ -80,6 +80,6 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
 - Test middleware using sensitive API endpoints (2 points)
 
 ### Story: Course Management Testing
-- Test add course (with `openai_cache`) (2 points)
+- Test add course (with `courses_cache`) (2 points)
 - Test remove course (1 point)
 - Test task creation upon course addition (2 points)

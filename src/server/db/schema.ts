@@ -120,17 +120,28 @@ export const pomodoroDaily = pgTable('pomodoro_daily', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  // Store as DATE (no time). The date should already be computed in the user's timezone
-  // at write-time (see helpers below).
   day: date('day', { mode: 'date' }).notNull(),
   totalMinutes: integer('total_minutes').notNull().default(0),
-  // NEW: set of task ids worked on that day (distinct). Keep it optional/empty by default.
   taskIds: uuid('task_ids').array().notNull().default(sql`ARRAY[]::uuid[]`),
 }, t => ({
   uniqUserDay: uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
 }));
 
-export const AICoursesCache = pgTable('ai_courses_cache', {
+export const links = pgTable('links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  url: text('url').notNull(),
+  title: text('title').notNull(),
+  type: text('type').notNull().default('custom'),
+  imageUrl: text('image_url'),
+
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  courseId: uuid('course_id').references(() => courses.id, { onDelete: 'cascade' }),
+
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const coursesCache = pgTable('courses_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
   courseCode: text('course_code').notNull().unique(),
   parsedContent: json('parsed_content').notNull(),
@@ -144,6 +155,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   courses: many(courses),
   tasks: many(tasks),
+  links: many(links),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -157,6 +169,12 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const coursesRelations = relations(courses, ({ one, many }) => ({
   user: one(users, { fields: [courses.userId], references: [users.id] }),
   tasks: many(tasks),
+  links: many(links),
+}));
+
+export const linksRelations = relations(links, ({ one }) => ({
+  user: one(users, { fields: [links.userId], references: [users.id] }),
+  course: one(courses, { fields: [links.courseId], references: [courses.id] }),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
