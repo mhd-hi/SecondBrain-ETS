@@ -19,7 +19,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCourses } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
+import { useTerms } from '@/hooks/use-terms';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
+import { getCurrentSession } from '@/lib/task';
 
 type AddCourseDialogProps = {
   onCourseAdded?: () => void;
@@ -29,7 +31,22 @@ type AddCourseDialogProps = {
 export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
+  // trimester like 'A2025' (A=Automne, E=Été, H=Hiver)
+  const [trimester, setTrimester] = useState<string>(() => {
+    try {
+      const session = getCurrentSession();
+      const year = new Date().getFullYear();
+      // Map session key to letter used in UI
+      const mapping: Record<string, string> = { autumn: 'A', summer: 'E', winter: 'H' };
+      const letter = session ? mapping[session] ?? 'A' : 'A';
+      return `${letter}${year}`;
+    } catch {
+      return `A${new Date().getFullYear()}`;
+    }
+  });
   const [existingCourse, setExistingCourse] = useState<{ id: string; code: string; name: string } | null>(null);
+  const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
+  const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
   const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
 
@@ -97,7 +114,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         return;
       }
 
-      const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(cleanCode)}`);
+  // pass trimester in query so existence check can consider term if needed
+  const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(cleanCode)}&term=${encodeURIComponent(trimester)}`);
       if (response.ok) {
         const result = await response.json() as { exists: boolean; course?: { id: string; code: string; name: string } };
         setExistingCourse(result.course ?? null);
@@ -149,7 +167,13 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }
 
     // Course doesn't exist, proceed with normal processing
-    await startProcessing(cleanCode);
+    // Convert trimester UI value (e.g. A2025) to PlanETS numeric format (e.g. 20253)
+    const letter = trimester.charAt(0).toUpperCase();
+    const yearStr = trimester.slice(1);
+    const letterToDigit: Record<string, string> = { A: '3', E: '2', H: '1' };
+    const digit = letterToDigit[letter] ?? '3';
+    const planetsTerm = `${yearStr}${digit}`;
+    await startProcessing(cleanCode, planetsTerm);
   };
 
   const handleRetry = () => {
@@ -262,6 +286,20 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         if (open) {
           // Reset dialog state when opening
           resetDialog();
+          // Fetch available terms (previous, current, next) so we can populate the dropdown
+          (async () => {
+            try {
+              const got = await fetchTerms();
+              setAvailableTerms(got);
+              // default trimester to current session (middle item) if present (prev/current/next)
+              const middle = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+              if (middle) {
+                setTrimester(middle.label);
+              }
+            } catch (err) {
+              console.error('Failed to fetch terms:', err);
+            }
+          })();
         }
         handleDialogClose(open);
       }}
@@ -295,26 +333,41 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           >
             <div className="space-y-2">
               <Label htmlFor="courseCode">Course code: </Label>
-              <Input
-                id="courseCode"
-                value={courseCode}
-                onChange={(e) => {
-                  const value = e.target.value.toUpperCase();
-                  // Limit length to prevent excessively long inputs
-                  if (value.length <= 10) {
-                    setCourseCode(value);
-                  }
-                }}
-                placeholder="Enter course code (e.g. MAT145, LOG210)"
-                disabled={isProcessing}
-                maxLength={10}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
-                    e.preventDefault();
-                    void handleStartParsing();
-                  }
-                }}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="courseCode"
+                  value={courseCode}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    // Limit length to prevent excessively long inputs
+                    if (value.length <= 10) {
+                      setCourseCode(value);
+                    }
+                  }}
+                  placeholder="Enter course code (e.g. MAT145, LOG210)"
+                  disabled={isProcessing}
+                  maxLength={10}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
+                      e.preventDefault();
+                      void handleStartParsing();
+                    }
+                  }}
+                />
+                <select
+                  aria-label="Trimester"
+                  value={trimester}
+                  onChange={e => setTrimester(e.target.value)}
+                  className="px-2 py-1 rounded border bg-white"
+                  disabled={isProcessing}
+                >
+                  {availableTerms.length > 0 && (
+                    availableTerms.map(t => (
+                      <option key={t.id} value={t.label}>{t.label}</option>
+                    ))
+                  )}
+                </select>
+              </div>
             </div>
           </form>
           {/* Processing Steps */}

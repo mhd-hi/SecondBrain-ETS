@@ -2,7 +2,7 @@ import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
 import { and, eq, gte, inArray, lt } from 'drizzle-orm';
-import { parseTaskStatus } from '@/lib/task/util';
+import { parseTaskStatus } from '@/lib/task';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 

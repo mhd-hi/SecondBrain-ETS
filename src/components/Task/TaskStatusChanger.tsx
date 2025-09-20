@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task/util';
+import { getNextStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task';
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 

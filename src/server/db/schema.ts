@@ -71,6 +71,12 @@ export const verificationTokens = pgTable('verificationToken', {
   }),
 }));
 
+export const terms = pgTable('terms', {
+  id: text('id').primaryKey(), // '20253'
+  label: text('label'), // 'Automne 2025'
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const courses = pgTable('courses', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id')
@@ -78,7 +84,7 @@ export const courses = pgTable('courses', {
     .references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   code: text('code').notNull(),
-  term: text('term').notNull(),
+  term: text('term').notNull().references(() => terms.id, { onDelete: 'restrict' }),
   color: text('color').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),

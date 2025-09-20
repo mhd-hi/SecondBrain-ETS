@@ -22,7 +22,7 @@ import {
   getNextTask,
   getTotalTasksCount,
   getUpcomingTask,
-} from '@/lib/task/util';
+} from '@/lib/task';
 import { TaskStatus } from '@/types/task-status';
 
 type CourseCardProps = {
