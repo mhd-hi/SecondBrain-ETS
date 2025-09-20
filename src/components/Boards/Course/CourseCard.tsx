@@ -23,7 +23,6 @@ import {
   getTotalTasksCount,
   getUpcomingTask,
 } from '@/lib/task/util';
-// getCourseColor removed - we rely on local selectedColor instead
 import { TaskStatus } from '@/types/task-status';
 
 type CourseCardProps = {
@@ -35,10 +34,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const [showColorDialog, setShowColorDialog] = useState(false);
   const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
   const [pendingColor, setPendingColor] = useState(selectedColor);
-  // Ensure course.tasks is an array
   const tasks = course.tasks ?? [];
-  // Use the locally selected color as the source of truth for rendering.
-  // `selectedColor` is updated when the user confirms a color change.
   const displayColor = selectedColor || course.color || '#3b82f6';
 
   // Calculate progress and task counts

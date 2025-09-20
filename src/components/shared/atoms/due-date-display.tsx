@@ -69,10 +69,20 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
 
   // More robust overdue detection - compare at day level
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  const isOverdue = displayedDate < today;
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDisplayed = displayedDate
+    ? new Date(displayedDate.getFullYear(), displayedDate.getMonth(), displayedDate.getDate())
+    : null;
 
+  const isOverdue = startOfDisplayed != null && startOfDisplayed < startOfToday;
   const dueDateText = formatDueDate(displayedDate);
+
+  // formatted date for the badge (e.g. "Wed 12 Sep")
+  const formattedBadgeDate = displayedDate
+    ? new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).format(
+        displayedDate,
+      )
+    : '';
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -87,6 +97,8 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
           title="Choose due date"
         >
           <CalendarIcon className="h-3 w-3 flex-shrink-0" />
+          {formattedBadgeDate}
+          {' - '}
           {dueDateText}
         </button>
       </PopoverTrigger>
