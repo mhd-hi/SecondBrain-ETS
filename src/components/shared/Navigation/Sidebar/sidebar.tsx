@@ -1,6 +1,6 @@
 'use client';
 
-import type { CourseListItem } from '@/types/course';
+import type { CourseListItem } from '@/types/api/course';
 import { ChevronsUpDown, LogOut, NotebookText, Plus, Settings } from 'lucide-react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';

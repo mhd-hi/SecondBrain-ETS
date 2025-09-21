@@ -1,20 +1,9 @@
 import type { Task } from '@/types/task';
 import type { TrimesterKey } from '@/types/term';
 
-import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TERM_DATES } from '@/lib/term/util';
+import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/term/util';
 import { TaskStatus } from '@/types/task-status';
 import { calculateWeeksBetweenDates } from '../date/util';
-
-export function getNextTaskStatus(currentStatus: TaskStatus): TaskStatus {
-  switch (currentStatus) {
-    case TaskStatus.TODO:
-      return TaskStatus.IN_PROGRESS;
-    case TaskStatus.IN_PROGRESS:
-      return TaskStatus.COMPLETED;
-    default:
-      return currentStatus;
-  }
-}
 
 /**
  * Calculates the due date for a task based on the trimester, week number, and total course weeks
@@ -28,7 +17,7 @@ export function calculateDueDate(
   week: number,
   totalCourseWeeks: number,
 ): Date {
-  const termDates = TERM_DATES[trimester];
+  const termDates = TRIMESTER_DATES[trimester];
 
   // Calculate the adjusted week based on the course's total weeks
   const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_TERM;
@@ -50,12 +39,6 @@ export function calculateDueDate(
   return dueDate;
 }
 
-/**
- * Calculates the due date for a task based on course information
- * @param week The week number of the task
- * @param totalCourseWeeks The total number of weeks in the course
- * @returns The calculated due date
- */
 export function calculateTaskDueDate(week: number, totalCourseWeeks = 15): Date {
   // Reuse existing helpers to avoid duplicating term-detection logic.
   // If currently inside a trimester, use that; otherwise use the next trimester.
@@ -63,18 +46,15 @@ export function calculateTaskDueDate(week: number, totalCourseWeeks = 15): Date 
   return calculateDueDate(trimester, week, totalCourseWeeks);
 }
 
-/**
- * Gets the number of weeks for a given trimester
- */
-export function getTrimesterWeeks(trimester: TrimesterKey): number {
-  const termDates = TERM_DATES[trimester];
+export function getCountTrimesterWeeks(trimester: TrimesterKey): number {
+  const termDates = TRIMESTER_DATES[trimester];
   return calculateWeeksBetweenDates(termDates.start, termDates.end);
 }
 
 /**
  * Sorts tasks by due date and filters out completed tasks
  */
-export const getSortedTasks = (tasks: Task[]) => {
+export const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
     .filter(task => task.status !== TaskStatus.COMPLETED && task.dueDate != null)
     .sort((a, b) => {
@@ -93,7 +73,7 @@ export const getSortedTasks = (tasks: Task[]) => {
  * Gets the next task from a list of tasks
  */
 export const getNextTask = (tasks: Task[]) => {
-  const sortedTasks = getSortedTasks(tasks);
+  const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.length > 0 ? sortedTasks[0] : null;
 };
 
@@ -101,7 +81,7 @@ export const getNextTask = (tasks: Task[]) => {
  * Gets the upcoming task (exam or homework) from a list of tasks
  */
 export const getUpcomingTask = (tasks: Task[]) => {
-  const sortedTasks = getSortedTasks(tasks);
+  const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
 };
 
@@ -179,9 +159,7 @@ export function getDueDateColor(date: Date | string): string {
   return 'text-muted-foreground';
 }
 
-export const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
-  // Only handle TODO, IN_PROGRESS, COMPLETED
-
+export const getNextTaskStatus = (currentStatus: TaskStatus): TaskStatus => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);
 
   // If status is not found in STATUS_ORDER, default to TODO

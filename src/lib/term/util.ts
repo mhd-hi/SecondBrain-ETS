@@ -32,7 +32,7 @@ export const buildTerm = (term: TermBuildInput): Term => {
 // Canonical term helpers used across the app.
 export const STANDARD_WEEKS_PER_TERM = 15;
 
-const getTermDates = () => {
+const getTrimesterDates = () => {
     const currentYear = new Date().getFullYear();
 
     return {
@@ -54,28 +54,28 @@ const getTermDates = () => {
     } as const;
 };
 
-export const TERM_DATES = getTermDates();
+export const TRIMESTER_DATES = getTrimesterDates();
 
-export function getCurrentTerm(): keyof typeof TERM_DATES | null {
+export function getCurrentTerm(): keyof typeof TRIMESTER_DATES | null {
     const now = new Date();
 
-    for (const [term, dates] of Object.entries(TERM_DATES)) {
+    for (const [term, dates] of Object.entries(TRIMESTER_DATES)) {
         if (now >= dates.start && now <= dates.end) {
-            return term as keyof typeof TERM_DATES;
+            return term as keyof typeof TRIMESTER_DATES;
         }
     }
 
     return null;
 }
 
-export function getNextTerm(): keyof typeof TERM_DATES {
+export function getNextTerm(): keyof typeof TRIMESTER_DATES {
     const now = new Date();
 
-    if (now < TERM_DATES.winter.start) {
+    if (now < TRIMESTER_DATES.winter.start) {
         return 'winter';
-    } else if (now < TERM_DATES.summer.start) {
+    } else if (now < TRIMESTER_DATES.summer.start) {
         return 'summer';
-    } else if (now < TERM_DATES.autumn.start) {
+    } else if (now < TRIMESTER_DATES.autumn.start) {
         return 'autumn';
     } else {
         return 'winter';
@@ -119,27 +119,27 @@ export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): 
     // Determine which term the due date falls into
     let trimester: TrimesterKey;
 
-    if (dueDate >= TERM_DATES.winter.start && dueDate <= TERM_DATES.winter.end) {
+    if (dueDate >= TRIMESTER_DATES.winter.start && dueDate <= TRIMESTER_DATES.winter.end) {
         trimester = 'winter';
-    } else if (dueDate >= TERM_DATES.summer.start && dueDate <= TERM_DATES.summer.end) {
+    } else if (dueDate >= TRIMESTER_DATES.summer.start && dueDate <= TRIMESTER_DATES.summer.end) {
         trimester = 'summer';
-    } else if (dueDate >= TERM_DATES.autumn.start && dueDate <= TERM_DATES.autumn.end) {
+    } else if (dueDate >= TRIMESTER_DATES.autumn.start && dueDate <= TRIMESTER_DATES.autumn.end) {
         trimester = 'autumn';
     } else {
         // If the date doesn't fall in any term, find the closest one
         const now = new Date();
-        if (now < TERM_DATES.winter.start) {
+        if (now < TRIMESTER_DATES.winter.start) {
             trimester = 'winter';
-        } else if (now < TERM_DATES.summer.start) {
+        } else if (now < TRIMESTER_DATES.summer.start) {
             trimester = 'summer';
-        } else if (now < TERM_DATES.autumn.start) {
+        } else if (now < TRIMESTER_DATES.autumn.start) {
             trimester = 'autumn';
         } else {
             trimester = 'winter';
         }
     }
 
-    const termDates = TERM_DATES[trimester];
+    const termDates = TRIMESTER_DATES[trimester];
 
     // Calculate the number of days from term start to due date
     const daysDiff = Math.max(0, Math.floor((dueDate.getTime() - termDates.start.getTime()) / (1000 * 60 * 60 * 24)));

@@ -4,7 +4,6 @@ import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import type { TransitionState } from '@/lib/ui-transitions/util';
 import type { DraggedTask, DropTargetData } from '@/types/drag-drop';
 import type { Task as TaskType } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 import {
   closestCenter,
   DndContext,
@@ -26,6 +25,7 @@ import {
   getTransitionDirectionFromOffset,
   resetTransitionState,
 } from '@/lib/ui-transitions/util';
+import { TaskStatus } from '@/types/task-status';
 import { DayColumn } from './DayColumn';
 import { NavigationControls } from './NavigationControls';
 
@@ -117,6 +117,13 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
   };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    // Optimistic update - update UI immediately
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status: newStatus } : task,
+      ),
+    );
+
     try {
       const response = await fetch(`/api/tasks/${taskId}/status`, {
         method: 'PATCH',
@@ -127,16 +134,18 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       if (!response.ok) {
         throw new Error('Failed to update task status');
       }
-
-      // Update local state
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId ? { ...task, status: newStatus } : task,
-        ),
-      );
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
+
+      // Rollback optimistic update on error
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId
+            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+            : task,
+        ),
+      );
     }
   };
 

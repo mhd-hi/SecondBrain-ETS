@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { fetchFocusTasks } from '@/hooks/use-task';
+import { fetchFocusTasks, updateTaskStatus } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task-status';
 
 const GroupSection = ({
@@ -159,39 +159,52 @@ export const TodaysFocusTile = () => {
   };
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    // Optimistic update - update UI immediately
+    if (shouldRemoveTask(newStatus)) {
+      setRemovingTaskIds(prev => new Set(prev).add(taskId));
+
+      setTimeout(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+        setRemovingTaskIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(taskId);
+          return newSet;
+        });
+      }, 300);
+    } else {
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId ? { ...task, status: newStatus } : task,
+        ),
+      );
+    }
+
     try {
-      // TODO: move in hook
-      const response = await fetch(`/api/tasks/${taskId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task status');
-      }
-
-      if (shouldRemoveTask(newStatus)) {
-        setRemovingTaskIds(prev => new Set(prev).add(taskId));
-
-        setTimeout(() => {
-          setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
-          setRemovingTaskIds((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(taskId);
-            return newSet;
-          });
-        }, 300);
-      } else {
-        setTasks(prevTasks =>
-          prevTasks.map(task =>
-            task.id === taskId ? { ...task, status: newStatus } : task,
-          ),
-        );
-      }
+      await updateTaskStatus(taskId, newStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
+
+      // Rollback optimistic update on error
+      if (shouldRemoveTask(newStatus)) {
+        // Restore the removed task
+        setRemovingTaskIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(taskId);
+          return newSet;
+        });
+        // Note: We can't easily restore the removed task since we don't have the original data
+        // In this case, we could refetch the data or maintain a backup
+      } else {
+        // Rollback status change
+        setTasks(prevTasks =>
+          prevTasks.map(task =>
+            task.id === taskId
+              ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+              : task,
+          ),
+        );
+      }
     }
   };
 

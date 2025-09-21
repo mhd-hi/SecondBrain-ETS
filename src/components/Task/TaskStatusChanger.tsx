@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task';
+import { getNextTaskStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task';
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 
@@ -24,7 +24,7 @@ const USER_STATUS_ORDER = [
 
 const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerProps) => {
   const handleArrowClick = () => {
-    onStatusChange(getNextStatus(currentStatus));
+    onStatusChange(getNextTaskStatus(currentStatus));
   };
 
   const handleDropdownSelect = (status: TaskStatus) => {

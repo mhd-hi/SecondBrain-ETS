@@ -1,36 +1,13 @@
 'use client';
 
+import type { CourseApiResponse } from '@/types/api/course';
 import type { Course } from '@/types/course';
-import type { Task, TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 import type { TaskStatus } from '@/types/task-status';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingAndErrorHandling } from '@/lib/loading/util';
-
-type CourseResponse = {
-  id: string;
-  code: string;
-  name: string;
-  color: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
-  tasks: Array<{
-    id: string;
-    title: string;
-    notes?: string;
-    dueDate?: string;
-    week: number;
-    type: TaskType;
-    status: TaskStatus;
-    estimatedEffort: number;
-    actualEffort: number;
-    courseId: string;
-    createdAt: string;
-    updatedAt: string;
-  }>;
-};
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
@@ -40,7 +17,7 @@ export function useCourse(courseId: string) {
   const fetchCourse = useCallback(async () => {
     await withLoadingAndErrorHandling(
       async () => {
-        const data = await api.get<CourseResponse>(`/api/courses/${courseId}`);
+        const data = await api.get<CourseApiResponse>(`/api/courses/${courseId}`);
 
         // Convert dueDate strings to Date objects and handle invalid dates
         const tasksWithValidatedDates: Task[] = data.tasks.map(task => ({
@@ -86,12 +63,6 @@ export function useCourse(courseId: string) {
   };
 }
 
-/**
- * Check if a course exists with the given code and term
- * @param code Course code to check
- * @param term Term/trimester to check
- * @returns Promise with existence result and course data if found
- */
 export const checkCourseExists = async (code: string, term: string): Promise<{
   exists: boolean;
   course?: { id: string; code: string; name: string };

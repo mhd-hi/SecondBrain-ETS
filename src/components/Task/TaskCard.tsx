@@ -310,8 +310,8 @@ export function TaskCard({
             'md:flex-col md:items-end md:w-auto md:mt-0',
           )}
         >
-          <div className="flex flex-row flex-wrap gap-2 w-full lg:flex-col lg:w-auto">
-            <div className="flex-shrink min-w-0">
+          <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:w-auto">
+            <div className="flex-shrink min-w-0 ml-auto lg:ml-0">
               <TaskStatusChanger
                 currentStatus={task.status}
                 onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
@@ -321,7 +321,7 @@ export function TaskCard({
               <Button
                 onClick={handleStartPomodoro}
                 size="sm"
-                className="pomodoro-button h-8 px-3 flex-shrink min-w-0"
+                className="pomodoro-button h-8 px-3 flex-shrink min-w-0 ml-auto lg:ml-0"
               >
                 <Play className="h-4 w-4" />
                 Pomodoro

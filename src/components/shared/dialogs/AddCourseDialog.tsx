@@ -486,7 +486,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                   setTimeout(() => {
                     router.push(`/courses/${courseId}`);
                   }, 0);
-                  // Note: refreshCourses() and onCourseAdded() are already called automatically in useEffect
                 }}
                 >
                   Go to Course

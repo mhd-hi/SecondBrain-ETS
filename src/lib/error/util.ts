@@ -135,14 +135,6 @@ export const handleAsyncOperation = async <T>(
 };
 
 /**
- * Legacy API error handler for backward compatibility
- * @deprecated Use ErrorHandlers.api instead
- */
-export const handleApiError = (error: unknown, errorMessage: string) => {
-  ErrorHandlers.api(error, errorMessage);
-};
-
-/**
  * Pipeline-specific error handling utilities
  */
 export const PipelineErrorHandlers = {
