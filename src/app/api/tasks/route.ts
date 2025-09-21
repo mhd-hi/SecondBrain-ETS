@@ -56,7 +56,7 @@ export const POST = withAuthSimple(
         status: task.status ?? StatusTask.TODO,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
-          id: subtask.id ?? crypto.randomUUID(),
+          id: crypto.randomUUID(),
           status: subtask.status ?? StatusTask.TODO,
         })),
         dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())

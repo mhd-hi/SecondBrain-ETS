@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geist.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${geist.variable}`} data-scroll-behavior="smooth">
       <body className={cn(inter.className, 'min-h-screen bg-background')}>
         <SessionProvider>
           <GlobalConfirmDialogProvider>

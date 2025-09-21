@@ -232,8 +232,6 @@ export function useAddCourse(): UseAddCourseReturn {
       setStepStatus(prev => ({ ...prev, 'create-tasks': 'success' }));
 
       setCurrentStep('completed');
-
-      toast.success('Course and tasks created successfully!');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
