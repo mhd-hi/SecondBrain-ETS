@@ -2,12 +2,6 @@
 
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 
-export {
-  CommonErrorMessages,
-  ErrorHandlers,
-  handleApiSuccess,
-} from '@/lib/utils/errors/error';
-
 /**
  * Generic API request handler that handles loading state and errors
  */

@@ -127,24 +127,3 @@ export const updateStatusTask = async (taskId: string, status: StatusTask, userI
     .where(and(...conditions))
     .returning();
 };
-
-export const createTask = async (data: {
-  courseId: string;
-  userId: string;
-  title: string;
-  notes?: string;
-  estimatedEffort: number;
-  dueDate: Date;
-  subtasks?: Subtask[];
-}) => {
-  // Calculate week number based on due date
-  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
-  const week = Math.ceil((data.dueDate.getTime() - startOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000));
-
-  return db.insert(tasks).values({
-    ...data,
-    week,
-    type: 'theorie',
-    status: 'TODO',
-  }).returning();
-};

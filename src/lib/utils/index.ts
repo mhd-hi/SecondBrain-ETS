@@ -7,7 +7,6 @@ export * from './course';
 export * from './date-util';
 export * from './dialog-util';
 export * from './errors/error';
-export * from './form-util';
 export * from './task';
 export * from './term-util';
 export * from './ui-transition-util';

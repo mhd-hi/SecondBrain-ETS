@@ -1,4 +1,3 @@
-import type { Course } from '@/types/course';
 import type { StatusTask } from '@/types/status-task';
 import type { Task, TaskType } from '@/types/task';
 
@@ -24,11 +23,6 @@ export type CourseApiResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
-};
-
-export type CourseResponse = {
-    data: Course;
-    error?: string;
 };
 
 export type TaskResponse = {

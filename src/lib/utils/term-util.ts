@@ -9,12 +9,6 @@ export const isValidTermId = (termId: string): boolean => {
     return TERM_ID_REGEX.test(termId);
 };
 
-export const validateTermId = (termId: string): void => {
-    if (!isValidTermId(termId)) {
-        throw new Error(`Invalid term ID format: ${termId}. Expected format: YYYY[1-3]`);
-    }
-};
-
 // convert PlanETS numeric term code (e.g. '20252') to a localized label
 export const convertTermCodeToLabel = (code: string) => {
     // Expect format YYYY[1-3]

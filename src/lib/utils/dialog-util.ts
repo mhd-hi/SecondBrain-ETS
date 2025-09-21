@@ -18,7 +18,7 @@ export const setGlobalConfirmFunction = (confirmFn: (options: ConfirmOptions) =>
 /**
  * Shows a confirmation dialog and returns a promise that resolves to boolean
  */
-export const showConfirmDialog = (options: ConfirmOptions): Promise<boolean> => {
+const showConfirmDialog = (options: ConfirmOptions): Promise<boolean> => {
   if (globalConfirmFunction) {
     return globalConfirmFunction(options);
   }

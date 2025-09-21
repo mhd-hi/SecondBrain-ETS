@@ -35,25 +35,6 @@ export function normalizeCourseCode(courseCode: string): string {
 }
 
 /**
- * Validates and normalizes a course code in one step
- *
- * @param courseCode - The course code to validate and normalize
- * @returns An object containing the normalized code and validation status
- */
-export function validateAndNormalizeCourseCode(courseCode: string): {
-  isValid: boolean;
-  normalizedCode: string;
-} {
-  const normalizedCode = normalizeCourseCode(courseCode);
-  const isValid = isValidCourseCode(normalizedCode);
-
-  return {
-    isValid,
-    normalizedCode,
-  };
-}
-
-/**
  * Validates a course code and throws an error if invalid
  *
  * @param courseCode - The course code to validate

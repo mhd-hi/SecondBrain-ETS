@@ -1,15 +1,13 @@
 import type { Task } from '@/types/task';
 
-import type { TrimesterKey } from '@/types/term';
-import { calculateWeeksBetweenDates, getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils';
+import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
 
-// Calculates the due date for a task based on the trimester, week number, and total course weeks
-export function calculateDueDate(
-  trimester: TrimesterKey,
-  week: number,
-  totalCourseWeeks: number,
-): Date {
+export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date {
+  // Reuse existing helpers to avoid duplicating term-detection logic.
+  // If currently inside a trimester, use that; otherwise use the next trimester.
+  const trimester = getCurrentTerm() ?? getNextTerm();
+
   const termDates = TRIMESTER_DATES[trimester];
 
   // Calculate the adjusted week based on the course's total weeks
@@ -30,18 +28,6 @@ export function calculateDueDate(
   }
 
   return dueDate;
-}
-
-export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date {
-  // Reuse existing helpers to avoid duplicating term-detection logic.
-  // If currently inside a trimester, use that; otherwise use the next trimester.
-  const trimester = getCurrentTerm() ?? getNextTerm();
-  return calculateDueDate(trimester, week, totalCourseWeeks);
-}
-
-export function getCountTrimesterWeeks(trimester: TrimesterKey): number {
-  const termDates = TRIMESTER_DATES[trimester];
-  return calculateWeeksBetweenDates(termDates.start, termDates.end);
 }
 
 /**
@@ -115,42 +101,6 @@ export const TASK_STATUS_CONFIG = {
     textColor: 'text-green-100',
   },
 } as const;
-
-export function getDueDateColor(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-  // Check if the date is valid
-  if (!dateObj || Number.isNaN(dateObj.getTime())) {
-    return 'text-muted-foreground';
-  }
-
-  const now = new Date();
-  const diffMs = dateObj.getTime() - now.getTime();
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-
-  // Overdue
-  if (diffMs < 0) {
-    return 'text-yellow-600';
-  }
-
-  // Due today
-  if (diffDays <= 1) {
-    return 'text-red-300';
-  }
-
-  // Due within 3 days
-  if (diffDays <= 3) {
-    return 'text-orange-500';
-  }
-
-  // Due within 1 week
-  if (diffDays <= 7) {
-    return 'text-yellow-600';
-  }
-
-  // Default
-  return 'text-muted-foreground';
-}
 
 export const getNextStatusTask = (currentStatus: StatusTask): StatusTask => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);

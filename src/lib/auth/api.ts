@@ -9,14 +9,7 @@ export type AuthenticatedUser = {
   name?: string;
 };
 
-export type AuthError = {
-  error: string;
-  code: string;
-};
-
-/**
- * Get authenticated user from middleware headers (fast path) or session (fallback)
- */
+//  Get authenticated user from middleware headers (fast path) or session (fallback)
 export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
   try {
     // Try to get user from middleware headers first (faster)
