@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
 import { useCoursesContext } from '@/contexts/use-courses';
+import { fetchWeeklyTasks } from '@/hooks/use-task';
 import { getWeekDates, getWeekStart } from '@/lib/date/util';
 import {
   createTransitionState,
@@ -74,11 +75,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 7);
 
-        const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch tasks');
-        }
-        const weekTasks = await response.json() as TaskType[];
+        const weekTasks = await fetchWeeklyTasks(weekStart, weekEnd);
 
         // Shorter delay for more responsive feel
         const timeoutId = setTimeout(() => {
@@ -219,17 +216,19 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     }
   };
 
-  const handleTaskAdded = () => {
+  const handleTaskAdded = async () => {
     // Reload tasks for the current week
     const weekStart = getWeekStart(weekOffset);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
 
-    void fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`)
-      .then(response => response.json())
-      .then((weekTasks: TaskType[]) => {
-        setTasks(weekTasks);
-      });
+    try {
+      const weekTasks = await fetchWeeklyTasks(weekStart, weekEnd);
+      setTasks(weekTasks);
+    } catch (error) {
+      console.error('Failed to reload tasks:', error);
+      toast.error('Failed to reload tasks');
+    }
   };
 
   const weekDates = getWeekDates(weekOffset);

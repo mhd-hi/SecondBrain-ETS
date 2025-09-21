@@ -8,7 +8,7 @@ import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
-import { fetchFocusTasks, updateTaskStatus } from '@/hooks/use-task';
+import { deleteTask, fetchFocusTasks, updateTaskStatus } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task-status';
 
 const GroupSection = ({
@@ -218,13 +218,7 @@ export const TodaysFocusTile = () => {
     try {
       setRemovingTaskIds(prev => new Set(prev).add(taskId));
 
-      const response = await fetch(`/api/tasks/${taskId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete task');
-      }
+      await deleteTask(taskId);
 
       setTimeout(() => {
         setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
@@ -234,8 +228,6 @@ export const TodaysFocusTile = () => {
           return newSet;
         });
       }, 300);
-
-      toast.success('Task deleted successfully');
     } catch (error) {
       console.error('Failed to delete task:', error);
       toast.error('Failed to delete task');

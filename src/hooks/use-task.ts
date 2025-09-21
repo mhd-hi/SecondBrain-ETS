@@ -69,6 +69,26 @@ export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatu
   }>;
 };
 
+export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<Task[]>;
+};
+
+export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks');
+  }
+
+  return response.json() as Promise<Task[]>;
+};
+
 export const updateTaskStatus = async (taskId: string, status: TaskStatus): Promise<void> => {
   const response = await fetch(`/api/tasks/${taskId}/status`, {
     method: 'PATCH',
@@ -79,16 +99,6 @@ export const updateTaskStatus = async (taskId: string, status: TaskStatus): Prom
   if (!response.ok) {
     throw new Error('Failed to update task status');
   }
-};
-
-export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
-  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<Task[]>;
 };
 
 export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {
