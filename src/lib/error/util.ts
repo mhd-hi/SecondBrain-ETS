@@ -33,13 +33,6 @@ export const ErrorHandlers = {
   },
 
   /**
-   * Network error handler
-   */
-  network: (error: unknown) => {
-    console.error('Network Error:', error);
-    toast.error('Network error. Please check your connection and try again.');
-  },
-  /**
    * Generic error handler with customizable message
    */
   generic: (error: unknown, userMessage = 'Something went wrong') => {
@@ -83,6 +76,12 @@ export const CommonErrorMessages = {
   UNAUTHORIZED: 'You are not authorized to perform this action.',
   SERVER_ERROR: 'Server error. Please try again later.',
   UNKNOWN_ERROR: 'Something went wrong. Please try again.',
+
+  // Pipeline-specific
+  PIPELINE_PLANETS_ERROR: 'PlanETS error, please try another session or course.',
+  PIPELINE_COURSE_NOT_FOUND: 'Course not found or not available for the current term',
+  PIPELINE_PARSING_ERROR: 'Unable to process course information. Please try again',
+  PIPELINE_INVALID_FORMAT: 'Invalid course code format. Please use format like MAT145 or LOG210',
 } as const;
 
 /**
@@ -129,9 +128,108 @@ export const handleAsyncOperation = async <T>(
 };
 
 /**
- * Legacy API error handler for backward compatibility
- * @deprecated Use ErrorHandlers.api instead
+ * Pipeline-specific error handling utilities
  */
-export const handleApiError = (error: unknown, errorMessage: string) => {
-  ErrorHandlers.api(error, errorMessage);
-};
+export const PipelineErrorHandlers = {
+  /**
+   * Error categories for pipeline operations
+   */
+  ErrorCategory: {
+    PLANETS_ERROR: 'PLANETS_ERROR',
+    COURSE_NOT_FOUND: 'COURSE_NOT_FOUND',
+    PARSING_ERROR: 'PARSING_ERROR',
+    INVALID_FORMAT: 'INVALID_FORMAT',
+    UNKNOWN: 'UNKNOWN',
+  } as const,
+
+  /**
+   * Classify a pipeline error based on error message patterns
+   */
+  classifyError: (errorMessage: string): 'PLANETS_ERROR' | 'COURSE_NOT_FOUND' | 'PARSING_ERROR' | 'INVALID_FORMAT' | 'UNKNOWN' => {
+    if (!errorMessage) {
+      return 'UNKNOWN';
+    }
+
+    const normalizedError = errorMessage.toLowerCase().trim();
+
+    // PlanETS-related errors
+    const planetsPatterns = [
+      'failed to fetch planets data',
+      'planets fetch failed',
+      'content div not found in planets page',
+      'no html content found in divcontenustraining',
+      'content div',
+      'planets error',
+    ];
+
+    if (planetsPatterns.some(pattern => normalizedError.includes(pattern))) {
+      return 'PLANETS_ERROR';
+    }
+
+    // Course not found errors
+    const courseNotFoundPatterns = [
+      'failed to fetch course data',
+      'fetch course data',
+      'course not found',
+      'not available for the current term',
+    ];
+
+    if (courseNotFoundPatterns.some(pattern => normalizedError.includes(pattern))) {
+      return 'COURSE_NOT_FOUND';
+    }
+
+    // Parsing errors
+    const parsingPatterns = [
+      'failed to parse course content',
+      'parse course content',
+      'parsing error',
+      'unable to process',
+    ];
+
+    if (parsingPatterns.some(pattern => normalizedError.includes(pattern))) {
+      return 'PARSING_ERROR';
+    }
+
+    // Format validation errors
+    const formatPatterns = [
+      'invalid course code format',
+      'invalid format',
+    ];
+
+    if (formatPatterns.some(pattern => normalizedError.includes(pattern))) {
+      return 'INVALID_FORMAT';
+    }
+
+    return 'UNKNOWN';
+  },
+
+  /**
+   * Get a user-friendly error message for pipeline errors
+   */
+  getSafeErrorMessage: (errorMessage: string): string => {
+    const category = PipelineErrorHandlers.classifyError(errorMessage);
+
+    switch (category) {
+      case 'PLANETS_ERROR':
+        return CommonErrorMessages.PIPELINE_PLANETS_ERROR;
+      case 'COURSE_NOT_FOUND':
+        return CommonErrorMessages.PIPELINE_COURSE_NOT_FOUND;
+      case 'PARSING_ERROR':
+        return CommonErrorMessages.PIPELINE_PARSING_ERROR;
+      case 'INVALID_FORMAT':
+        return CommonErrorMessages.PIPELINE_INVALID_FORMAT;
+      default:
+        return CommonErrorMessages.UNKNOWN_ERROR;
+    }
+  },
+
+  /**
+   * Handle pipeline errors with proper classification and user-friendly messages
+   */
+  handle: (error: unknown, context = 'Pipeline Error') => {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const userFriendlyMessage = PipelineErrorHandlers.getSafeErrorMessage(errorMessage);
+
+    return ErrorHandlers.api(error, userFriendlyMessage, context);
+  },
+} as const;

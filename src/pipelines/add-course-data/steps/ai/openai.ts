@@ -15,9 +15,20 @@ export class MockDataError extends Error {
   }
 }
 
-const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
-});
+// Lazy initialization to avoid errors during build time
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openaiInstance) {
+    if (!env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is required for AI processing');
+    }
+    openaiInstance = new OpenAI({
+      apiKey: env.OPENAI_API_KEY,
+    });
+  }
+  return openaiInstance;
+}
 
 export type ParseAIResult = {
   tasks: Array<Omit<Task, 'id' | 'courseId'>>;
@@ -82,6 +93,7 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
   try {
     log('Starting OpenAI API call...');
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [

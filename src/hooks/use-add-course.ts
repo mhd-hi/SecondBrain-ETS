@@ -5,7 +5,7 @@ import type { PipelineStepResult } from '@/types/pipeline';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { assertValidCourseCode } from '@/lib/course/util';
-import { calculateTaskDueDate } from '@/lib/task/util';
+import { calculateTaskDueDate } from '@/lib/task';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
@@ -23,12 +23,14 @@ export type UseAddCourseReturn = {
   createdCourseId: string | null;
   error: string | null;
   isProcessing: boolean;
-  startProcessing: (courseCode: string) => Promise<void>;
+  // courseCode is the code like MAT145. term is PlanETS numeric format like '20252'
+  startProcessing: (courseCode: string, term: string) => Promise<void>;
   retry: () => void;
   reset: () => void;
 };
 
-async function fetchCourseFromPlanets(courseCode: string, term = '20252') {
+// term is expected in PlanETS numeric format like '20252' (see mapping in AddCourseDialog)
+async function fetchCourseFromPlanETS(courseCode: string, term: string) {
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -61,7 +63,7 @@ async function fetchCourseFromPlanets(courseCode: string, term = '20252') {
   };
 }
 
-async function parseCourseWithAI(html: string, courseCode: string, term = '20252'): Promise<CourseAIResponse> {
+async function parseCourseWithAI(html: string, courseCode: string, term: string): Promise<CourseAIResponse> {
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -91,7 +93,7 @@ async function parseCourseWithAI(html: string, courseCode: string, term = '20252
   return result.data as CourseAIResponse;
 }
 
-async function createCourse(courseCode: string, courseName: string): Promise<{ id: string }> {
+async function createCourse(courseCode: string, courseName: string, term: string): Promise<{ id: string }> {
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -101,6 +103,7 @@ async function createCourse(courseCode: string, courseName: string): Promise<{ i
     body: JSON.stringify({
       code: cleanCode,
       name: courseName,
+      term,
     }),
   });
 
@@ -175,7 +178,7 @@ export function useAddCourse(): UseAddCourseReturn {
     setError(null);
   }, []);
 
-  const startProcessing = useCallback(async (courseCode: string) => {
+  const startProcessing = useCallback(async (courseCode: string, term: string) => {
     if (!courseCode.trim()) {
       toast.error('Please enter a course code');
       return;
@@ -191,13 +194,13 @@ export function useAddCourse(): UseAddCourseReturn {
 
     try {
       // Step 1: Fetch from Planets
-      const planetsData = await fetchCourseFromPlanets(courseCode.trim());
+      const planetsData = await fetchCourseFromPlanETS(courseCode.trim(), term);
       setStepStatus(prev => ({ ...prev, planets: 'success' }));
 
       // Step 2: Parse with OpenAI
       setCurrentStep('openai');
       setStepStatus(prev => ({ ...prev, openai: 'loading' }));
-      const aiData = await parseCourseWithAI(planetsData.html, courseCode.trim());
+      const aiData = await parseCourseWithAI(planetsData.html, courseCode.trim(), term);
       setStepStatus(prev => ({ ...prev, openai: 'success' }));
 
       setParsedData(aiData);
@@ -206,7 +209,7 @@ export function useAddCourse(): UseAddCourseReturn {
       setCurrentStep('create-course');
       setStepStatus(prev => ({ ...prev, 'create-course': 'loading' }));
 
-      const course = await createCourse(courseCode.trim(), aiData.courseCode);
+      const course = await createCourse(courseCode.trim(), aiData.courseCode, term);
       setStepStatus(prev => ({ ...prev, 'create-course': 'success' }));
       setCreatedCourseId(course.id);
 

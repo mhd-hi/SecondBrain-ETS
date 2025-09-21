@@ -1,22 +1,11 @@
 import type { Task, TaskType } from '@/types/task';
+import type { FilterType } from '@/types/todays-focus';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
 import { TaskStatus } from '@/types/task-status';
-
-export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {
-  try {
-    await api.delete(`/api/tasks/${taskId}`);
-    toast.success('Task deleted successfully');
-    if (fetchCourse) {
-      await fetchCourse();
-    }
-  } catch (error) {
-    ErrorHandlers.api(error, 'Failed to delete task');
-  }
-}
 
 export function useTask() {
   const [isLoading, setIsLoading] = useState(false);
@@ -58,12 +47,6 @@ export function useTask() {
   return { addTask, isLoading, error };
 }
 
-/**
- * Batch update task status for multiple tasks
- * @param taskIds Array of task IDs to update
- * @param status New status to set for all tasks
- * @returns Promise that resolves when the batch update is complete
- */
 export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
   updatedCount: number;
   status: TaskStatus;
@@ -85,3 +68,37 @@ export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatu
     updatedTasks: Task[];
   }>;
 };
+
+export const updateTaskStatus = async (taskId: string, status: TaskStatus): Promise<void> => {
+  const response = await fetch(`/api/tasks/${taskId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update task status');
+  }
+};
+
+export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<Task[]>;
+};
+
+export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {
+  try {
+    await api.delete(`/api/tasks/${taskId}`);
+    toast.success('Task deleted successfully');
+    if (fetchCourse) {
+      await fetchCourse();
+    }
+  } catch (error) {
+    ErrorHandlers.api(error, 'Failed to delete task');
+  }
+}

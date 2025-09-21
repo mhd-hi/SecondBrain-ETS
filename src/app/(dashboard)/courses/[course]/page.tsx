@@ -11,11 +11,12 @@ import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCourses as useCoursesContext } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
-import { batchUpdateTaskStatus, deleteTask } from '@/hooks/use-task';
+import { batchUpdateTaskStatus, deleteTask, updateTaskStatus } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
+import { handleConfirm } from '@/lib/dialog/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task-status';
@@ -86,22 +87,29 @@ export default function CoursePage({ params }: CoursePageProps) {
     });
   }, [tasks, searchQuery]);
 
-  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
-    try {
-      await api.patch(`/api/tasks/${taskId}`, updates);
+  const handleUpdateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
+    // Optimistic update - update UI immediately
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status: newStatus } : task,
+      ),
+    );
 
-      // Update local state instead of refetching
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId
-            ? { ...task, ...updates }
-            : task,
-        ),
-      );
+    try {
+      await updateTaskStatus(taskId, newStatus);
+
       // Ensure global course list (used by sidebar) reflects any overdue count changes
       void refreshCourses();
     } catch (error) {
-      ErrorHandlers.api(error, 'Failed to update task');
+      // Rollback optimistic update on error
+      setTasks(prevTasks =>
+        prevTasks.map(task =>
+          task.id === taskId
+            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+            : task,
+        ),
+      );
+      ErrorHandlers.api(error, 'Failed to update task status');
     }
   };
 
@@ -123,7 +131,6 @@ export default function CoursePage({ params }: CoursePageProps) {
 
     try {
       // Confirm deletion using the existing dialog util
-      const { handleConfirm } = await import('@/lib/dialog/util');
       await handleConfirm(
         'Are you sure you want to delete this course? This action cannot be undone.',
         async () => {
@@ -291,7 +298,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                           <TaskCard
                             task={task}
                             onDeleteTask={handleDeleteTask}
-                            onUpdateTaskStatus={(taskId, newStatus) => handleUpdateTask(taskId, { status: newStatus })}
+                            onUpdateTaskStatus={handleUpdateTaskStatus}
                             onUpdateSubtaskStatus={handleUpdateSubtaskStatusAndRefresh}
                             onTaskAdded={fetchCourse}
                           />

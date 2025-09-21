@@ -6,14 +6,14 @@ import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { CoursesProvider } from '@/contexts/courses-context';
 import { PomodoroProvider } from '@/contexts/pomodoro-provider';
-import { useCourses } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 
 function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { coursesListItems, isLoading, refreshCourses } = useCourses();
+  const { coursesListItems, isLoading, refreshCourses } = useCoursesContext();
 
   return (
     <SidebarProvider>

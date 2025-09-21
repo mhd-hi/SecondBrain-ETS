@@ -6,7 +6,7 @@ import { ServerCourseProcessingPipeline } from '@/pipelines/server-pipeline';
 
 export { api } from '@/lib/api/util';
 
-export async function parseCourse(courseCode: string, term = '20252'): Promise<CourseAIResponse> {
+export async function parseCourse(courseCode: string, term: string): Promise<CourseAIResponse> {
   const pipeline = new ServerCourseProcessingPipeline();
   const result = await pipeline.process({ courseCode, term });
   return result.courseData;

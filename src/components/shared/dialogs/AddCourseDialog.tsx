@@ -17,9 +17,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCourses } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
+import { checkCourseExists } from '@/hooks/use-course';
+import { useTerms } from '@/hooks/use-terms';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
+import { PipelineErrorHandlers } from '@/lib/error/util';
+import { isValidTermId } from '@/lib/term/util';
 
 type AddCourseDialogProps = {
   onCourseAdded?: () => void;
@@ -29,31 +33,15 @@ type AddCourseDialogProps = {
 export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
+  const [term, setTerm] = useState<string>('');
   const [existingCourse, setExistingCourse] = useState<{ id: string; code: string; name: string } | null>(null);
+  const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
+  const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
   const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
 
-  const { refreshCourses } = useCourses();
+  const { refreshCourses } = useCoursesContext();
 
-  // Safe error messages to prevent information disclosure
-  const SAFE_ERROR_MESSAGES: Record<string, string> = {
-    'fetch course data': 'Course not found or not available for the current term',
-    'parse course content': 'Unable to process course information. Please try again',
-    'Failed to fetch course data': 'Course not found or not available for the current term',
-    'Failed to parse course content': 'Unable to process course information. Please try again',
-    'Invalid course code format': 'Invalid course code format. Please use format like MAT145 or LOG210',
-  };
-
-  const getSafeErrorMessage = (error: string): string => {
-    // Check for known error patterns
-    for (const [pattern, safeMessage] of Object.entries(SAFE_ERROR_MESSAGES)) {
-      if (error.includes(pattern)) {
-        return safeMessage;
-      }
-    }
-    // Return generic message for unknown errors
-    return 'An error occurred while processing your request. Please try again';
-  };
   const {
     currentStep,
     stepStatus,
@@ -97,15 +85,9 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         return;
       }
 
-      const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(cleanCode)}`);
-      if (response.ok) {
-        const result = await response.json() as { exists: boolean; course?: { id: string; code: string; name: string } };
-        setExistingCourse(result.course ?? null);
-        setHasCheckedExistence(true);
-      } else {
-        console.error('Failed to check course existence:', response.statusText);
-        // Don't show error to user as this is not critical
-      }
+      const result = await checkCourseExists(cleanCode, term);
+      setExistingCourse(result.course ?? null);
+      setHasCheckedExistence(true);
     } catch (err) {
       console.error('Failed to check course existence:', err);
       // Don't show error to user as this is not critical
@@ -149,7 +131,24 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }
 
     // Course doesn't exist, proceed with normal processing
-    await startProcessing(cleanCode);
+    if (!term) {
+      toast.error('Please select a term');
+      return;
+    }
+
+    let termToUse = term;
+    if (!isValidTermId(termToUse)) {
+      // Try light normalization: remove leading zeros and test again
+      const cleaned = termToUse.replace(/^0+/, '');
+      if (isValidTermId(cleaned)) {
+        termToUse = cleaned;
+      } else {
+        toast.error('Selected term id looks invalid. Please pick a valid term.');
+        return;
+      }
+    }
+
+    await startProcessing(cleanCode, termToUse);
   };
 
   const handleRetry = () => {
@@ -262,6 +261,20 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         if (open) {
           // Reset dialog state when opening
           resetDialog();
+          // Fetch available terms (previous, current, next) so we can populate the dropdown
+          (async () => {
+            try {
+              const got = await fetchTerms();
+              setAvailableTerms(got);
+              // default term to current session (middle item) if present (prev/current/next)
+              const middle = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+              if (middle) {
+                setTerm(middle.id);
+              }
+            } catch (err) {
+              console.error('Failed to fetch terms:', err);
+            }
+          })();
         }
         handleDialogClose(open);
       }}
@@ -281,7 +294,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
         <DialogHeader>
           <DialogTitle>Add New Course</DialogTitle>
           <DialogDescription id="add-course-description">
-            Enter a course code to automatically fetch its syllabus data and generate a structured learning plan with tasks.
+            Enter a course code to automatically fetch its syllabus data and generate a structured learning plan.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -295,26 +308,41 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           >
             <div className="space-y-2">
               <Label htmlFor="courseCode">Course code: </Label>
-              <Input
-                id="courseCode"
-                value={courseCode}
-                onChange={(e) => {
-                  const value = e.target.value.toUpperCase();
-                  // Limit length to prevent excessively long inputs
-                  if (value.length <= 10) {
-                    setCourseCode(value);
-                  }
-                }}
-                placeholder="Enter course code (e.g. MAT145, LOG210)"
-                disabled={isProcessing}
-                maxLength={10}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
-                    e.preventDefault();
-                    void handleStartParsing();
-                  }
-                }}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="courseCode"
+                  value={courseCode}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    // Limit length to prevent excessively long inputs
+                    if (value.length <= 10) {
+                      setCourseCode(value);
+                    }
+                  }}
+                  placeholder="(e.g. MAT145, LOG210)"
+                  disabled={isProcessing}
+                  maxLength={10}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
+                      e.preventDefault();
+                      void handleStartParsing();
+                    }
+                  }}
+                />
+                <select
+                  aria-label="Term"
+                  value={term}
+                  onChange={e => setTerm(e.target.value)}
+                  className="px-2 py-1 rounded border bg-white"
+                  disabled={isProcessing}
+                >
+                  {availableTerms.length > 0 && (
+                    availableTerms.map(t => (
+                      <option key={t.id} value={t.id}>{t.label}</option>
+                    ))
+                  )}
+                </select>
+              </div>
             </div>
           </form>
           {/* Processing Steps */}
@@ -351,6 +379,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                         has already been added.
                       </AlertTitle>
                       <AlertDescription>
+                        Please remove it first if you want to re-add it.
                       </AlertDescription>
                     </Alert>
                   )
@@ -385,7 +414,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
-                {getSafeErrorMessage(error)}
+                {PipelineErrorHandlers.getSafeErrorMessage(error)}
               </AlertDescription>
             </Alert>
           )}
@@ -457,7 +486,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
                   setTimeout(() => {
                     router.push(`/courses/${courseId}`);
                   }, 0);
-                  // Note: refreshCourses() and onCourseAdded() are already called automatically in useEffect
                 }}
                 >
                   Go to Course

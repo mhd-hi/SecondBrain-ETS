@@ -13,7 +13,7 @@ export const GET = withAuthSimple(
 
 export const POST = withAuthSimple(
   async (request, user) => {
-    const data = await request.json() as { code: string; name: string };
+    const data = await request.json() as { code: string; name: string; term?: string };
 
     if (!data.code || !data.name) {
       return NextResponse.json(
@@ -22,8 +22,14 @@ export const POST = withAuthSimple(
       );
     }
 
-    const { code, name } = data;
+    const { code, name, term } = data;
 
+    if (!term) {
+      return NextResponse.json(
+        { error: 'term is required', code: 'MISSING_TERM' },
+        { status: 400 },
+      );
+    }
     // Check if course already exists for this user
     const existingCourses = await getUserCourses(user.id);
     const existingCourse = existingCourses.find(course => course.code === code);
@@ -37,7 +43,7 @@ export const POST = withAuthSimple(
     const course = await createUserCourse(user.id, {
       code,
       name,
-      term: '20252', // Default term
+      term,
       color: generateRandomCourseColor(),
     });
 

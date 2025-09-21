@@ -1,10 +1,10 @@
 'use client';
 
-// Re-export consolidated error handling utilities
+import { ErrorHandlers } from '@/lib/error/util';
+
 export {
   CommonErrorMessages,
   ErrorHandlers,
-  handleApiError,
   handleApiSuccess,
 } from '@/lib/error/util';
 
@@ -54,8 +54,7 @@ export const apiRequest = async <T>(
   } catch (error) {
     console.error('API request to', url, 'failed:', error);
     // Use the consolidated error handler instead of direct toast
-    const { handleApiError } = await import('@/lib/error/util');
-    handleApiError(error, errorMessage);
+    ErrorHandlers.api(error, errorMessage);
     throw error;
   }
 };

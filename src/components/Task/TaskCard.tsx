@@ -262,8 +262,7 @@ export function TaskCard({
 
                 {!isEditingEffort && (
                   <Badge
-                    variant="outline"
-                    className="text-xs cursor-pointer"
+                    variant="muted"
                     onClick={() => {
                       // initialize edit value from task and open editor
                       setEditedEffort(task.estimatedEffort > 0 ? task.estimatedEffort : undefined);
@@ -282,7 +281,7 @@ export function TaskCard({
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="muted">
                 <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                   <BarChart3 className="h-3 w-3 flex-shrink-0" />
                   {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
@@ -292,7 +291,7 @@ export function TaskCard({
             )}
 
               {task.dueDate && task.status !== TaskStatus.COMPLETED && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="muted">
                   <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
                     <DueDateDisplay
                       date={editedDueDate ?? task.dueDate}
@@ -311,8 +310,8 @@ export function TaskCard({
             'md:flex-col md:items-end md:w-auto md:mt-0',
           )}
         >
-          <div className="flex flex-row flex-wrap gap-2 w-full lg:flex-col lg:w-auto">
-            <div className="flex-shrink min-w-0">
+          <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:w-auto">
+            <div className="flex-shrink min-w-0 ml-auto lg:ml-0">
               <TaskStatusChanger
                 currentStatus={task.status}
                 onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
@@ -322,7 +321,7 @@ export function TaskCard({
               <Button
                 onClick={handleStartPomodoro}
                 size="sm"
-                className="pomodoro-button h-8 px-3 flex-shrink min-w-0"
+                className="pomodoro-button h-8 px-3 flex-shrink min-w-0 ml-auto lg:ml-0"
               >
                 <Play className="h-4 w-4" />
                 Pomodoro

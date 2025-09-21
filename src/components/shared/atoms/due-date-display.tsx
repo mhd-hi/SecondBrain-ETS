@@ -91,7 +91,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
           type="button"
           className={cn(
             'text-xs font-medium flex items-center gap-1 transition-colors duration-150',
-            isOverdue ? 'text-yellow-600 hover:text-yellow-700' : 'text-muted-foreground hover:text-foreground',
+            isOverdue ? 'text-amber-500 hover:text-yellow-500 transition-all duration-300 ease-in-out' : 'text-muted-foreground hover:text-foreground',
             className,
           )}
           title="Choose due date"

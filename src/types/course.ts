@@ -23,30 +23,3 @@ export type CourseCreateResponse = {
   name: string;
   description: string;
 };
-
-// API Response Types
-export type CourseResponse = {
-  data: Course;
-  error?: string;
-};
-
-export type TaskResponse = {
-  data: Task;
-  error?: string;
-};
-
-export type TasksResponse = {
-  data: Task[];
-  error?: string;
-};
-
-// Error Types
-export type ApiError = {
-  error: string;
-};
-
-export type CourseListItem = {
-  id: string;
-  code: string;
-  overdueCount: number;
-};

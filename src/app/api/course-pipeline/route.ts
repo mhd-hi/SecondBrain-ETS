@@ -9,7 +9,14 @@ export const POST = withAuthSimple(
   async (request, _user) => {
     try {
       const body = await request.json() as PipelineStepRequest;
-      const { courseCode, term = '20252', step, htmlData } = body;
+      const { courseCode, term, step, htmlData } = body;
+
+      if (!term) {
+        return NextResponse.json(
+          { error: 'term is required', code: 'MISSING_TERM' },
+          { status: 400 },
+        );
+      }
       if (!courseCode) {
         return NextResponse.json(
           { error: 'Missing required parameter: courseCode' },
@@ -85,7 +92,7 @@ export const POST = withAuthSimple(
         try {
           const startTime = new Date().toISOString();
           const aiProcessor = new OpenAIProcessor();
-          const result = await aiProcessor.process(htmlData, cleanCode);
+          const result = await aiProcessor.process(htmlData, cleanCode, term);
           const endTime = new Date().toISOString();
           const courseData = {
             courseCode: cleanCode,

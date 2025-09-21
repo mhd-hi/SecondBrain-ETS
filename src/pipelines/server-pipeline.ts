@@ -12,14 +12,18 @@ import type {
   SourceResult,
   StepStatus,
 } from '@/types/pipeline';
+import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai';
+import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
 
 // Server-side data source implementations
 export class PlanetsDataSource implements DataSource {
   name = 'planets';
   description = 'PlanETS Course Content';
 
-  async fetch(courseCode: string, term = '20252'): Promise<SourceResult> {
-    const { fetchPlanETSContent } = await import('@/pipelines/add-course-data/steps/planets');
+  async fetch(courseCode: string, term: string): Promise<SourceResult> {
+    if (!term) {
+      throw new Error('Term id is required for PlanETS fetch');
+    }
     const result = await fetchPlanETSContent(courseCode, term);
 
     if (!result.html || result.html.trim().length < 100) {
@@ -35,13 +39,12 @@ export class PlanetsDataSource implements DataSource {
 }
 
 export class OpenAIProcessor {
-  async process(combinedData: string, courseCode: string): Promise<CourseAIResponse> {
-    const { parseContentWithAI } = await import('@/pipelines/add-course-data/steps/ai/openai');
+  async process(combinedData: string, courseCode: string, term: string): Promise<CourseAIResponse> {
     const result = await parseContentWithAI(combinedData, courseCode);
 
     return {
       courseCode,
-      term: '20252',
+      term,
       tasks: result.tasks.map(task => ({
         week: task.week,
         type: task.type,
@@ -106,7 +109,10 @@ export class ServerCourseProcessingPipeline {
     courseData?: CourseAIResponse;
     logs: string[];
   }> {
-    const { courseCode, term = '20252' } = options;
+    const { courseCode, term } = options;
+    if (!term) {
+      throw new Error('Term id is required');
+    }
 
     // Initialize step status
     const stepStatus: StepStatus = {
@@ -149,7 +155,7 @@ export class ServerCourseProcessingPipeline {
       stepStatus.openai = { ...stepStatus.openai, status: 'loading', startTime: new Date() };
 
       try {
-        courseData = await this.processor.process(htmlData, courseCode);
+        courseData = await this.processor.process(htmlData, courseCode, term);
 
         stepStatus.openai = {
           ...stepStatus.openai,
@@ -174,7 +180,10 @@ export class ServerCourseProcessingPipeline {
    * Process a course with all registered data sources
    */
   async process(options: PipelineOptions): Promise<PipelineResult> {
-    const { courseCode, term = '20252' } = options;
+    const { courseCode, term } = options;
+    if (!term) {
+      throw new Error('Term id is required');
+    }
 
     this.steps = [];
     this.logs = [];
@@ -230,7 +239,7 @@ export class ServerCourseProcessingPipeline {
 
       try {
         this.log('Starting AI Content Parsing...');
-        const aiResult = await this.processor.process(combinedData, courseCode);
+        const aiResult = await this.processor.process(combinedData, courseCode, term);
 
         this.updateStep('ai_processing', {
           status: 'success',
@@ -272,7 +281,10 @@ export class ServerCourseProcessingPipeline {
 }
 
 // Convenience function for simple usage
-export async function processCourse(courseCode: string, term = '20252'): Promise<CourseAIResponse> {
+export async function processCourse(courseCode: string, term: string): Promise<CourseAIResponse> {
+  if (!term) {
+    throw new Error('Term id is required');
+  }
   const pipeline = new ServerCourseProcessingPipeline();
   const result = await pipeline.process({ courseCode, term });
   return result.courseData;

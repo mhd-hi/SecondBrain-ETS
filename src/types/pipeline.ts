@@ -35,7 +35,7 @@ export type SourceResult = {
 export type DataSource = {
   name: string;
   description: string;
-  fetch: (courseCode: string, term?: string) => Promise<SourceResult>;
+  fetch: (courseCode: string, term: string) => Promise<SourceResult>;
 };
 
 /**

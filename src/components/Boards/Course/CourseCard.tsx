@@ -22,7 +22,7 @@ import {
   getNextTask,
   getTotalTasksCount,
   getUpcomingTask,
-} from '@/lib/task/util';
+} from '@/lib/task';
 import { TaskStatus } from '@/types/task-status';
 
 type CourseCardProps = {
@@ -61,6 +61,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const handleConfirmColor = async () => {
     try {
+      // TODO: move in hook
       const res = await fetch(`/api/courses/${course.id}`, {
         method: 'PATCH',
         headers: {
