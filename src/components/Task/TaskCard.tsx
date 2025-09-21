@@ -262,8 +262,7 @@ export function TaskCard({
 
                 {!isEditingEffort && (
                   <Badge
-                    variant="outline"
-                    className="text-xs cursor-pointer"
+                    variant="muted"
                     onClick={() => {
                       // initialize edit value from task and open editor
                       setEditedEffort(task.estimatedEffort > 0 ? task.estimatedEffort : undefined);
@@ -282,7 +281,7 @@ export function TaskCard({
 
             {/* Effort Progress */}
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="muted">
                 <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
                   <BarChart3 className="h-3 w-3 flex-shrink-0" />
                   {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
@@ -292,7 +291,7 @@ export function TaskCard({
             )}
 
               {task.dueDate && task.status !== TaskStatus.COMPLETED && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="muted">
                   <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
                     <DueDateDisplay
                       date={editedDueDate ?? task.dueDate}

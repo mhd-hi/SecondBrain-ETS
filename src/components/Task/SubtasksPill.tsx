@@ -2,6 +2,7 @@
 
 import type { Subtask } from '@/types/subtask';
 import { ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type SubtasksPillProps = {
@@ -16,20 +17,24 @@ export function SubtasksPill({ subtasks, isExpanded, onToggle }: SubtasksPillPro
   }
 
   return (
-    <button
-      type="button"
-      className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 px-2 py-0.5 rounded-full border border-muted transition-colors cursor-pointer"
-      onClick={onToggle}
-      aria-expanded={isExpanded}
-      aria-controls="subtasks-list"
+    <Badge
+      variant="muted"
+      asChild
     >
-      {subtasks.length}
-      {' '}
-      Subtask
-      {subtasks.length !== 1 ? 's' : ''}
-      <ChevronDown
-        className={cn('h-3 w-3 transition-transform duration-150', isExpanded && 'rotate-180')}
-      />
-    </button>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isExpanded}
+        aria-controls="subtasks-list"
+      >
+        {subtasks.length}
+        {' '}
+        Subtask
+        {subtasks.length !== 1 ? 's' : ''}
+        <ChevronDown
+          className={cn('h-3 w-3 transition-transform duration-150', isExpanded && 'rotate-180')}
+        />
+      </button>
+    </Badge>
   );
 }

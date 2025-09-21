@@ -30,7 +30,7 @@ export type UseAddCourseReturn = {
 };
 
 // term is expected in PlanETS numeric format like '20252' (see mapping in AddCourseDialog)
-async function fetchCourseFromPlanets(courseCode: string, term: string) {
+async function fetchCourseFromPlanETS(courseCode: string, term: string) {
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -194,7 +194,7 @@ export function useAddCourse(): UseAddCourseReturn {
 
     try {
       // Step 1: Fetch from Planets
-      const planetsData = await fetchCourseFromPlanets(courseCode.trim(), term);
+      const planetsData = await fetchCourseFromPlanETS(courseCode.trim(), term);
       setStepStatus(prev => ({ ...prev, planets: 'success' }));
 
       // Step 2: Parse with OpenAI

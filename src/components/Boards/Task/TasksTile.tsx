@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { fetchFocusTasks } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task-status';
 
 const GroupSection = ({
@@ -135,14 +136,10 @@ export const TodaysFocusTile = () => {
   const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(() => new Set());
   const [removingTaskIds, setRemovingTaskIds] = useState<Set<string>>(() => new Set());
 
-  const fetchFocusTasks = useCallback(async () => {
+  const fetchFocusTasksData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/tasks/focus?filter=${filter}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch focus tasks');
-      }
-      const focusTasks = await response.json() as TaskType[];
+      const focusTasks = await fetchFocusTasks(filter);
       setTasks(focusTasks);
       setRemovingTaskIds(new Set());
     } catch (error) {
@@ -154,8 +151,8 @@ export const TodaysFocusTile = () => {
   }, [filter]);
 
   useEffect(() => {
-    void fetchFocusTasks();
-  }, [fetchFocusTasks]);
+    void fetchFocusTasksData();
+  }, [fetchFocusTasksData]);
 
   const shouldRemoveTask = (newStatus: TaskStatus): boolean => {
     return newStatus === TaskStatus.COMPLETED;
@@ -163,6 +160,7 @@ export const TodaysFocusTile = () => {
 
   const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
     try {
+      // TODO: move in hook
       const response = await fetch(`/api/tasks/${taskId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -199,6 +197,7 @@ export const TodaysFocusTile = () => {
 
   const handleSubtaskStatusChange = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
     try {
+      // TODO: move in hook
       const response = await fetch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -425,7 +424,7 @@ export const TodaysFocusTile = () => {
                       handleDeleteTask={handleDeleteTask}
                       handleStatusChange={handleStatusChange}
                       handleSubtaskStatusChange={handleSubtaskStatusChange}
-                      onTaskAdded={fetchFocusTasks}
+                      onTaskAdded={fetchFocusTasksData}
                       removingTaskIds={removingTaskIds}
                     />
                   );

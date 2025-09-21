@@ -85,3 +85,25 @@ export function useCourse(courseId: string) {
     setTasks,
   };
 }
+
+/**
+ * Check if a course exists with the given code and term
+ * @param code Course code to check
+ * @param term Term/trimester to check
+ * @returns Promise with existence result and course data if found
+ */
+export const checkCourseExists = async (code: string, term: string): Promise<{
+  exists: boolean;
+  course?: { id: string; code: string; name: string };
+}> => {
+  const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(code)}&term=${encodeURIComponent(term)}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to check course existence: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<{
+    exists: boolean;
+    course?: { id: string; code: string; name: string };
+  }>;
+};

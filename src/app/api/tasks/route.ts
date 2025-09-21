@@ -2,7 +2,8 @@ import type { NewTaskInput, UpdateTaskInput } from '@/types/api/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
-import { calculateTaskDueDate, calculateWeekFromDueDate } from '@/lib/task/util';
+import { calculateTaskDueDate } from '@/lib/task/util';
+import { calculateWeekFromDueDate } from '@/lib/term/util';
 import { TaskStatus } from '@/types/task-status';
 
 export const GET = withAuthSimple(

@@ -92,7 +92,7 @@ export const POST = withAuthSimple(
         try {
           const startTime = new Date().toISOString();
           const aiProcessor = new OpenAIProcessor();
-          const result = await aiProcessor.process(htmlData, cleanCode);
+          const result = await aiProcessor.process(htmlData, cleanCode, term);
           const endTime = new Date().toISOString();
           const courseData = {
             courseCode: cleanCode,

@@ -61,6 +61,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const handleConfirmColor = async () => {
     try {
+      // TODO: move in hook
       const res = await fetch(`/api/courses/${course.id}`, {
         method: 'PATCH',
         headers: {

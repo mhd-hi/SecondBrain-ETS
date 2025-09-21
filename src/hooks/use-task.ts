@@ -1,4 +1,5 @@
 import type { Task, TaskType } from '@/types/task';
+import type { FilterType } from '@/types/todays-focus';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
@@ -84,4 +85,19 @@ export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatu
     status: TaskStatus;
     updatedTasks: Task[];
   }>;
+};
+
+/**
+ * Fetch focus tasks based on filter
+ * @param filter Filter type for time period (week, month, quarter)
+ * @returns Promise with array of focus tasks
+ */
+export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<Task[]>;
 };
