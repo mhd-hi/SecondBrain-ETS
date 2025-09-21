@@ -1,4 +1,4 @@
-import type { ProcessingStepsProps, StepName } from './AddCourseDialog.types';
+import type { ProcessingStepsProps, StepName } from '@/types/dialog/add-course-dialog';
 import { AlertCircle, CheckCircle, Database, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -16,7 +16,7 @@ export function ProcessingSteps({ currentStep, stepStatus }: ProcessingStepsProp
     if (stepName === 'create-tasks') {
       return '/favicon-16x16.png';
     }
-    return '/favicon-16x16.png'; // Default fallback
+    return '/favicon-16x16.png';
   };
 
   const getStepLabel = (stepName: StepName) => {

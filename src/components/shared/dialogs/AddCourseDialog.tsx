@@ -16,13 +16,11 @@ import {
 } from '@/components/ui/dialog';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
-import { checkCourseExists } from '@/hooks/use-course';
 import { useTerms } from '@/hooks/use-terms';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
 import { PipelineErrorHandlers } from '@/lib/error/util';
 import { isValidTermId } from '@/lib/term/util';
 import { ActionButtons } from './ActionButtons';
-import { CourseExistenceAlert } from './CourseExistenceAlert';
 import { CourseInputForm } from './CourseInputForm';
 import { ProcessingSteps } from './ProcessingSteps';
 
@@ -35,11 +33,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   const [isOpen, setIsOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
-  const [existingCourse, setExistingCourse] = useState<{ id: string; code: string; name: string } | null>(null);
   const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
   const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
-  const [isCheckingExistence, setIsCheckingExistence] = useState(false);
-  const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
 
   const { refreshCourses } = useCoursesContext();
 
@@ -58,8 +53,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
 
   const resetDialog = useCallback(() => {
     setCourseCode('');
-    setExistingCourse(null);
-    setHasCheckedExistence(false);
     reset();
   }, [reset]);
 
@@ -75,27 +68,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }
   }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
 
-  const checkCourseExistence = async (courseCode: string) => {
-    setIsCheckingExistence(true);
-    try {
-      const cleanCode = normalizeCourseCode(courseCode);
-      // Validate course code format client-side for better UX
-      if (!isValidCourseCode(cleanCode)) {
-        toast.error('Invalid course code format. Please use format like MAT145 or LOG210');
-        setHasCheckedExistence(true);
-        return;
-      }
-
-      const result = await checkCourseExists(cleanCode, term);
-      setExistingCourse(result.course ?? null);
-      setHasCheckedExistence(true);
-    } catch (err) {
-      console.error('Failed to check course existence:', err);
-      // Don't show error to user as this is not critical
-    } finally {
-      setIsCheckingExistence(false);
-    }
-  };
   const handleDialogClose = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
@@ -117,17 +89,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     // Validate course code format
     if (!isValidCourseCode(cleanCode)) {
       toast.error('Invalid course code format. Please use format like MAT145 or LOG210');
-      return;
-    }
-
-    setExistingCourse(null); // Reset existence check
-    setHasCheckedExistence(false);
-
-    // Check if course already exists
-    await checkCourseExistence(cleanCode);
-
-    // If a course was found, don't proceed with processing
-    if (existingCourse) {
       return;
     }
 
@@ -157,12 +118,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   };
   const handleTryDifferentCourse = () => {
     resetDialog();
-  };
-  const handleGoToExistingCourse = () => {
-    if (existingCourse) {
-      handleDialogClose(false);
-      router.push(`/courses/${existingCourse.id}`);
-    }
   };
 
   const handleGoToCourse = () => {
@@ -233,14 +188,16 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           {/* Processing Steps */}
           <ProcessingSteps currentStep={currentStep} stepStatus={stepStatus} />
 
-          {/* Course Existence Check */}
-          <CourseExistenceAlert
-            isCheckingExistence={isCheckingExistence}
-            existingCourse={existingCourse}
-            hasCheckedExistence={hasCheckedExistence}
-            currentStep={currentStep}
-            parsedData={parsedData}
-          />
+          {/* Success Display */}
+          {currentStep === 'completed' && parsedData && createdCourseId && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Course Created Successfully!</AlertTitle>
+              <AlertDescription>
+                AI-generated tasks have been created. Please review the tasks and adjust them as needed.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Error Display */}
           {error && (
@@ -256,8 +213,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           {/* Action Buttons */}
           <ActionButtons
             currentStep={currentStep}
-            existingCourse={existingCourse}
-            isCheckingExistence={isCheckingExistence}
+            existingCourse={null}
+            isCheckingExistence={false}
             courseCode={courseCode}
             isProcessing={isProcessing}
             parsedData={parsedData}
@@ -265,7 +222,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             onStartParsing={handleStartParsing}
             onRetry={handleRetry}
             onTryDifferentCourse={handleTryDifferentCourse}
-            onGoToExistingCourse={handleGoToExistingCourse}
+            onGoToExistingCourse={() => {}} // No longer needed since existence check is in pipeline
             onDialogClose={handleDialogClose}
             onGoToCourse={handleGoToCourse}
           />

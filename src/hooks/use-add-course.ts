@@ -6,6 +6,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { assertValidCourseCode } from '@/lib/course/util';
 import { calculateTaskDueDate } from '@/lib/task';
+import { checkCourseExists } from './use-course';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
@@ -184,6 +185,16 @@ export function useAddCourse(): UseAddCourseReturn {
       return;
     }
     setError(null);
+
+    const existenceResult = await checkCourseExists(courseCode.trim(), term);
+    if (existenceResult.exists) {
+      setCurrentStep('error');
+      const errorMessage = `Course ${courseCode.trim()} already exists in your account.`;
+      setError(errorMessage);
+      return;
+    }
+
+    // Start UI processing steps
     setCurrentStep('planets');
     setStepStatus({
       'planets': 'loading',

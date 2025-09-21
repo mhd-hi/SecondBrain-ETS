@@ -7,14 +7,6 @@ export type ProcessingStepsProps = {
     stepStatus: UseAddCourseReturn['stepStatus'];
 };
 
-export type CourseExistenceAlertProps = {
-    isCheckingExistence: boolean;
-    existingCourse: { id: string; code: string; name: string } | null;
-    hasCheckedExistence: boolean;
-    currentStep: UseAddCourseReturn['currentStep'];
-    parsedData: UseAddCourseReturn['parsedData'];
-};
-
 export type ActionButtonsProps = {
     currentStep: UseAddCourseReturn['currentStep'];
     existingCourse: { id: string; code: string; name: string } | null;

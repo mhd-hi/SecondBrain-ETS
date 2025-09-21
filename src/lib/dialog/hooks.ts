@@ -1,4 +1,4 @@
-import type { ConfirmDialogContextType } from '@/types/dialog';
+import type { ConfirmDialogContextType } from '@/types/dialog/confirmation-dialog';
 
 import { createContext, use } from 'react';
 

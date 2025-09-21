@@ -7,9 +7,7 @@ export const handleApiSuccess = (message: string) => {
 };
 
 export const ErrorHandlers = {
-  /**
-   * API error handler with consistent logging and user notification
-   */
+  // API error handler with consistent logging and user notification
   api: (error: unknown, userMessage: string, context?: string) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     const logContext = context ? `[${context}]` : '';
@@ -20,18 +18,14 @@ export const ErrorHandlers = {
     return errorMessage;
   },
 
-  /**
-   * Silent error handler (logs but doesn't show toast)
-   */
+  // Silent error handler (logs but doesn't show toast)
   silent: (error: unknown, context?: string) => {
     const logContext = context ? `[${context}]` : '';
     console.error(logContext, 'Silent Error:', error);
   },
 };
 
-/**
- * Common error messages for consistency across the app
- */
+// Common error messages for consistency across the app
 export const CommonErrorMessages = {
   // Course-specific
   COURSE_DELETE_FAILED: 'Failed to delete course. Please try again.',
@@ -40,6 +34,7 @@ export const CommonErrorMessages = {
   UNKNOWN_ERROR: 'Something went wrong. Please try again.',
 
   // Pipeline-specific
+  PIPELINE_COURSE_EXISTS: 'This course already exists in your account. Please remove it first if you want to re-create it.',
   PIPELINE_PLANETS_ERROR: 'PlanETS error, please try another session or course.',
   PIPELINE_COURSE_NOT_FOUND: 'Course not found or not available for the current term',
   PIPELINE_PARSING_ERROR: 'Unable to process course information. Please try again',
@@ -47,19 +42,28 @@ export const CommonErrorMessages = {
   PIPELINE_INVALID_FORMAT: 'Invalid course code format. Please use format like MAT145 or LOG210',
 } as const;
 
-/**
- * Pipeline-specific error handling utilities
- */
+// Pipeline-specific error handling utilities
 export const PipelineErrorHandlers = {
   /**
    * Classify a pipeline error based on error message patterns
    */
-  classifyError: (errorMessage: string): 'PLANETS_ERROR' | 'COURSE_NOT_FOUND' | 'PARSING_ERROR' | 'OPENAI_ERROR' | 'INVALID_FORMAT' | 'UNKNOWN' => {
+  classifyError: (errorMessage: string): 'COURSE_EXISTS' | 'PLANETS_ERROR' | 'COURSE_NOT_FOUND' | 'PARSING_ERROR' | 'OPENAI_ERROR' | 'INVALID_FORMAT' | 'UNKNOWN' => {
     if (!errorMessage) {
       return 'UNKNOWN';
     }
 
     const normalizedError = errorMessage.toLowerCase().trim();
+
+    // Course existence errors
+    const courseExistsPatterns = [
+      'already exists in your account',
+      'course already exists',
+      'already exists',
+    ];
+
+    if (courseExistsPatterns.some(pattern => normalizedError.includes(pattern))) {
+      return 'COURSE_EXISTS';
+    }
 
     // OpenAI-specific errors
     const openaiPatterns = [
@@ -124,13 +128,12 @@ export const PipelineErrorHandlers = {
     return 'UNKNOWN';
   },
 
-  /**
-   * Get a user-friendly error message for pipeline errors
-   */
   getSafeErrorMessage: (errorMessage: string): string => {
     const category = PipelineErrorHandlers.classifyError(errorMessage);
 
     switch (category) {
+      case 'COURSE_EXISTS':
+        return CommonErrorMessages.PIPELINE_COURSE_EXISTS;
       case 'PLANETS_ERROR':
         return CommonErrorMessages.PIPELINE_PLANETS_ERROR;
       case 'COURSE_NOT_FOUND':

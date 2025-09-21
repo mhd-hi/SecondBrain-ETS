@@ -1,4 +1,4 @@
-import type { ActionButtonsProps } from './AddCourseDialog.types';
+import type { ActionButtonsProps } from '@/types/dialog/add-course-dialog';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

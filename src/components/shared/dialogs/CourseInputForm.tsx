@@ -1,6 +1,7 @@
-import type { CourseInputFormProps } from './AddCourseDialog.types';
+import type { CourseInputFormProps } from '@/types/dialog/add-course-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export function CourseInputForm({
   courseCode,
@@ -44,19 +45,24 @@ export function CourseInputForm({
               }
             }}
           />
-          <select
-            aria-label="Term"
-            value={term}
-            onChange={e => setTerm(e.target.value)}
-            className="px-2 py-1 rounded border bg-white"
-            disabled={isProcessing}
-          >
-            {availableTerms.length > 0 && (
-              availableTerms.map(t => (
-                <option key={t.id} value={t.id}>{t.label}</option>
-              ))
-            )}
-          </select>
+          {availableTerms.length > 0 && (
+            <Select
+              value={term}
+              onValueChange={setTerm}
+              disabled={isProcessing}
+            >
+              <SelectTrigger aria-label="Term">
+                <SelectValue placeholder="Select term" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTerms.map(t => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
     </form>
