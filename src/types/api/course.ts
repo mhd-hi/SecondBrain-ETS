@@ -25,11 +25,6 @@ export type CourseApiResponse = {
     }>;
 };
 
-export type TaskResponse = {
-    data: Task;
-    error?: string;
-};
-
 export type TasksResponse = {
     data: Task[];
     error?: string;

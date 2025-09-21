@@ -5,7 +5,6 @@ import type {
   PipelineResult,
   ProcessingStep,
   SourceResult,
-  StepStatus,
 } from '@/types/server-pipelines/pipelines';
 import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai';
 import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
@@ -33,10 +32,14 @@ export class PlanetsDataSource implements DataSource {
 }
 
 export class OpenAIProcessor {
-  async process(combinedData: string, courseCode: string, term: string): Promise<CourseAIResponse> {
+  async process(
+    combinedData: string,
+    courseCode: string,
+    term: string,
+  ): Promise<{ courseData: CourseAIResponse; logs: string[] }> {
     const result = await parseContentWithAI(combinedData);
 
-    return {
+    const courseData: CourseAIResponse = {
       courseCode,
       term,
       tasks: result.tasks.map(task => ({
@@ -48,6 +51,8 @@ export class OpenAIProcessor {
         subtasks: task.subtasks,
       })),
     };
+
+    return { courseData, logs: result.logs };
   }
 }
 
@@ -92,82 +97,6 @@ export class ServerCourseProcessingPipeline {
   private log(message: string) {
     console.log(message); // eslint-disable-line no-console
     this.logs.push(`[${new Date().toISOString()}] ${message}`);
-  }
-
-  /**
-   * Process course with independent step tracking
-   * Each step runs and updates independently
-   */
-  async processWithIndependentSteps(options: PipelineOptions): Promise<{
-    stepStatus: StepStatus;
-    courseData?: CourseAIResponse;
-    logs: string[];
-  }> {
-    const { courseCode, term } = options;
-    if (!term) {
-      throw new Error('Term id is required');
-    }
-
-    // Initialize step status
-    const stepStatus: StepStatus = {
-      planets: { id: 'planets', name: 'PlanETS Data Fetch', status: 'pending' },
-      openai: { id: 'openai', name: 'AI Content Parsing', status: 'pending' },
-    };
-
-    const logs: string[] = [];
-    let htmlData: string | undefined;
-    let courseData: CourseAIResponse | undefined;
-
-    // Step 1: Fetch from planets
-    stepStatus.planets = { ...stepStatus.planets, status: 'loading', startTime: new Date() };
-
-    try {
-      const source = new PlanetsDataSource();
-      const result = await source.fetch(courseCode, term);
-      htmlData = result.data;
-      logs.push(...result.logs);
-
-      stepStatus.planets = {
-        ...stepStatus.planets,
-        status: 'success',
-        endTime: new Date(),
-        data: { contentLength: htmlData.length },
-      };
-    } catch (error) {
-      stepStatus.planets = {
-        ...stepStatus.planets,
-        status: 'error',
-        endTime: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
-
-      return { stepStatus, logs };
-    }
-
-    // Step 2: Process with OpenAI
-    if (htmlData) {
-      stepStatus.openai = { ...stepStatus.openai, status: 'loading', startTime: new Date() };
-
-      try {
-        courseData = await this.processor.process(htmlData, courseCode, term);
-
-        stepStatus.openai = {
-          ...stepStatus.openai,
-          status: 'success',
-          endTime: new Date(),
-          data: { tasksCount: courseData.tasks.length },
-        };
-      } catch (error) {
-        stepStatus.openai = {
-          ...stepStatus.openai,
-          status: 'error',
-          endTime: new Date(),
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
-      }
-    }
-
-    return { stepStatus, courseData, logs };
   }
 
   /**
@@ -235,16 +164,21 @@ export class ServerCourseProcessingPipeline {
         this.log('Starting AI Content Parsing...');
         const aiResult = await this.processor.process(combinedData, courseCode, term);
 
+        // Append AI-specific logs to pipeline logs
+        if (Array.isArray(aiResult.logs) && aiResult.logs.length) {
+          this.logs.push(...aiResult.logs.map(l => `[AI] ${l}`));
+        }
+
         this.updateStep('ai_processing', {
           status: 'success',
           endTime: new Date(),
-          data: { tasksCount: aiResult.tasks.length },
+          data: { tasksCount: aiResult.courseData.tasks.length },
         });
 
-        this.log(`AI processing completed successfully. Generated ${aiResult.tasks.length} tasks`);
+        this.log(`AI processing completed successfully. Generated ${aiResult.courseData.tasks.length} tasks`);
 
         return {
-          courseData: aiResult,
+          courseData: aiResult.courseData,
           steps: this.steps,
           logs: this.logs,
         };

@@ -100,21 +100,6 @@ export async function getUserTask(taskId: string, userId: string) {
 }
 
 /**
- * Get tasks with additional filtering (but always include user filter)
- */
-export async function getUserTasksWhere(userId: string, additionalWhere?: SQL) {
-  const whereClause = additionalWhere
-    ? and(eq(tasks.userId, userId), additionalWhere)
-    : eq(tasks.userId, userId);
-
-  return db
-    .select()
-    .from(tasks)
-    .where(whereClause)
-    .orderBy(tasks.week);
-}
-
-/**
  * Update task with ownership verification
  */
 export async function updateUserTask(
