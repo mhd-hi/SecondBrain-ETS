@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useCourses } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
 import { checkCourseExists } from '@/hooks/use-course';
 import { useTerms } from '@/hooks/use-terms';
@@ -39,7 +39,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   const [isCheckingExistence, setIsCheckingExistence] = useState(false);
   const [hasCheckedExistence, setHasCheckedExistence] = useState(false);
 
-  const { refreshCourses } = useCourses();
+  const { refreshCourses } = useCoursesContext();
 
   const {
     currentStep,

@@ -16,7 +16,7 @@ import {
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
-import { useCourses } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { getWeekDates, getWeekStart } from '@/lib/date/util';
 import {
   createTransitionState,
@@ -42,7 +42,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
   const [transitionState, setTransitionState] = useState<TransitionState>(() => createTransitionState());
 
   // Use global courses context
-  const { courses } = useCourses();
+  const { courses } = useCoursesContext();
 
   // Drag and drop state
   const [isDragActive, setIsDragActive] = useState(false);

@@ -2,7 +2,6 @@
 
 import { ErrorHandlers } from '@/lib/error/util';
 
-// Re-export consolidated error handling utilities
 export {
   CommonErrorMessages,
   ErrorHandlers,

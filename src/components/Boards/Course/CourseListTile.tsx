@@ -3,13 +3,13 @@
 import CourseCard from '@/components/Boards/Course/CourseCard';
 import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCourses } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { api, handleApiSuccess } from '@/lib/api/util';
 import { handleConfirm } from '@/lib/dialog/util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/error/util';
 
 export function CourseListTile() {
-  const { courses, isLoading, error, deleteCourse, refreshCourses } = useCourses();
+  const { courses, isLoading, error, deleteCourse, refreshCourses } = useCoursesContext();
 
   const handleDeleteCourse = async (courseId: string) => {
     await handleConfirm(

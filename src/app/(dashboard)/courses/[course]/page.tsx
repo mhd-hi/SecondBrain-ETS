@@ -11,7 +11,7 @@ import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCourses as useCoursesContext } from '@/contexts/use-courses';
+import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
 import { batchUpdateTaskStatus, deleteTask, updateTaskStatus } from '@/hooks/use-task';
