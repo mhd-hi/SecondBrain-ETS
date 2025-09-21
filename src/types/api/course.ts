@@ -1,6 +1,6 @@
 import type { Course } from '@/types/course';
+import type { StatusTask } from '@/types/status-task';
 import type { Task, TaskType } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 
 export type CourseApiResponse = {
     id: string;
@@ -17,7 +17,7 @@ export type CourseApiResponse = {
         dueDate?: string;
         week: number;
         type: TaskType;
-        status: TaskStatus;
+        status: StatusTask;
         estimatedEffort: number;
         actualEffort: number;
         courseId: string;

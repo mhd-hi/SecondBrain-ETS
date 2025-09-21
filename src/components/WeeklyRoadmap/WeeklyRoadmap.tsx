@@ -26,7 +26,7 @@ import {
   getTransitionDirectionFromOffset,
   resetTransitionState,
 } from '@/lib/ui-transitions/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { DayColumn } from './DayColumn';
 import { NavigationControls } from './NavigationControls';
 
@@ -113,7 +113,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     setWeekOffset(0);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+  const handleStatusChange = async (taskId: string, newStatus: StatusTask) => {
     // Optimistic update - update UI immediately
     setTasks(prevTasks =>
       prevTasks.map(task =>
@@ -131,7 +131,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       setTasks(prevTasks =>
         prevTasks.map(task =>
           task.id === taskId
-            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || StatusTask.TODO }
             : task,
         ),
       );

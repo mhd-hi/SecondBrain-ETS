@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { createSubtask } from '@/hooks/use-subtask';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type AddSubtaskDialogProps = {
   taskId: string;
@@ -45,7 +45,7 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
         title: newSubtask.title,
         notes: newSubtask.notes ?? '',
         estimatedEffort: newSubtask.estimatedEffort ?? 0.5,
-        status: TaskStatus.TODO,
+        status: StatusTask.TODO,
       };
 
       const created = await createSubtask(taskId, payload);

@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useTask } from '@/hooks/use-task';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type AddTaskDialogProps = {
   courseId?: string;
@@ -47,7 +47,7 @@ export const AddTaskDialog = ({
     estimatedEffort: 1,
     dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
     type: 'theorie' as TaskType,
-    status: TaskStatus.TODO,
+    status: StatusTask.TODO,
   }));
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
 
@@ -74,7 +74,7 @@ export const AddTaskDialog = ({
         estimatedEffort: 1,
         dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
         type: 'theorie' as TaskType,
-        status: TaskStatus.TODO,
+        status: StatusTask.TODO,
       });
       onTaskAdded();
     }

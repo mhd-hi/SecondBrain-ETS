@@ -7,45 +7,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextTaskStatus, isValidStatus, TASK_STATUS_CONFIG } from '@/lib/task';
+import { getNextStatusTask, getStatusBgClass, getStatusTextClass, isValidStatusTask, TASK_STATUS_CONFIG } from '@/lib/task';
 import { cn } from '@/lib/utils';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
-type TaskStatusChangerProps = {
-  currentStatus: TaskStatus;
-  onStatusChange: (newStatus: TaskStatus) => void;
+type StatusTaskChangerProps = {
+  currentStatus: StatusTask;
+  onStatusChange: (newStatus: StatusTask) => void;
 };
 
 const USER_STATUS_ORDER = [
-  TaskStatus.TODO,
-  TaskStatus.IN_PROGRESS,
-  TaskStatus.COMPLETED,
+  StatusTask.TODO,
+  StatusTask.IN_PROGRESS,
+  StatusTask.COMPLETED,
 ] as const;
 
-const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerProps) => {
+const StatusTaskChanger = ({ currentStatus, onStatusChange }: StatusTaskChangerProps) => {
   const handleArrowClick = () => {
-    onStatusChange(getNextTaskStatus(currentStatus));
+    onStatusChange(getNextStatusTask(currentStatus));
   };
 
-  const handleDropdownSelect = (status: TaskStatus) => {
+  const handleDropdownSelect = (status: StatusTask) => {
     onStatusChange(status);
   };
 
-  // Ensure currentStatus is a valid TaskStatus
-  const validStatus = isValidStatus(currentStatus) ? currentStatus : TaskStatus.TODO;
+  const validStatus = isValidStatusTask(currentStatus) ? currentStatus : StatusTask.TODO;
   const config = TASK_STATUS_CONFIG[validStatus];
-
-  // Helper function to get background class for status using TASK_STATUS_CONFIG
-  const getStatusBgClass = (status: TaskStatus) => {
-    const config = TASK_STATUS_CONFIG[status];
-    return config?.bgColor ?? 'bg-muted';
-  };
-
-  // Helper function to get text class for status using TASK_STATUS_CONFIG
-  const getStatusTextClass = (status: TaskStatus) => {
-    const config = TASK_STATUS_CONFIG[status];
-    return config?.textColor ?? 'text-blue-500';
-  };
 
   return (
     <div
@@ -55,7 +42,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
         'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
       )}
       role="group"
-      aria-label="Task status changer"
+      aria-label="Status task changer"
     >
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -93,7 +80,7 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
                 <div
                   className={cn(
                     'w-3 h-3 rounded-full',
-                    status === TaskStatus.COMPLETED
+                    status === StatusTask.COMPLETED
                       ? getStatusBgClass(status)
                       : `${getStatusBgClass(status)} border border-current`,
                   )}
@@ -122,4 +109,4 @@ const TaskStatusChanger = ({ currentStatus, onStatusChange }: TaskStatusChangerP
   );
 };
 
-export { TaskStatusChanger };
+export { StatusTaskChanger };

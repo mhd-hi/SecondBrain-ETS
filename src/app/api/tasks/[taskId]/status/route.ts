@@ -1,16 +1,16 @@
 import type { NextRequest } from 'next/server';
 import type { AuthenticatedUser } from '@/lib/auth/api';
-import type { TaskStatus } from '@/types/task-status';
+import type { StatusTask } from '@/types/status-task';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
-import { updateTaskStatus } from '@/lib/task/queries';
+import { updateStatusTask } from '@/lib/task/queries';
 
-async function handleUpdateTaskStatus(
+async function handleUpdateStatusTask(
   request: NextRequest,
   context: { params: Promise<{ taskId: string }>; user: AuthenticatedUser },
 ): Promise<NextResponse> {
   const { taskId } = await context.params;
-  const { status } = await request.json() as { status: TaskStatus };
+  const { status } = await request.json() as { status: StatusTask };
 
   if (!status) {
     return NextResponse.json(
@@ -19,8 +19,8 @@ async function handleUpdateTaskStatus(
     );
   }
 
-  const updatedTask = await updateTaskStatus(taskId, status, context.user.id);
+  const updatedTask = await updateStatusTask(taskId, status, context.user.id);
   return NextResponse.json(updatedTask);
 }
 
-export const PATCH = withAuth(handleUpdateTaskStatus);
+export const PATCH = withAuth(handleUpdateStatusTask);

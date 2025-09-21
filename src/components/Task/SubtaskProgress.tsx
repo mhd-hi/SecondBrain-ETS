@@ -2,7 +2,7 @@
 
 import type { Subtask } from '@/types/subtask';
 import { Badge } from '@/components/ui/badge';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type SubtaskProgressProps = {
   subtasks?: Subtask[];
@@ -14,7 +14,7 @@ const SubtaskProgress = ({ subtasks, showProgress = true }: SubtaskProgressProps
     return null;
   }
 
-  const completedCount = subtasks.filter(subtask => subtask.status === TaskStatus.COMPLETED).length;
+  const completedCount = subtasks.filter(subtask => subtask.status === StatusTask.COMPLETED).length;
   const totalCount = subtasks.length;
   const progressPercentage = (completedCount / totalCount) * 100;
 

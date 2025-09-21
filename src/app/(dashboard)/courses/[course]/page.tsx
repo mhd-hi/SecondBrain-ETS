@@ -13,13 +13,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
-import { updateSubtaskStatus } from '@/hooks/use-subtask';
-import { batchUpdateTaskStatus, deleteTask, updateTaskStatus } from '@/hooks/use-task';
+import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
 import { handleConfirm } from '@/lib/dialog/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type CoursePageProps = {
   params: Promise<{
@@ -87,7 +86,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     });
   }, [tasks, searchQuery]);
 
-  const handleUpdateTaskStatus = async (taskId: string, newStatus: TaskStatus) => {
+  const handleUpdateStatusTask = async (taskId: string, newStatus: StatusTask) => {
     // Optimistic update - update UI immediately
     setTasks(prevTasks =>
       prevTasks.map(task =>
@@ -96,7 +95,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     );
 
     try {
-      await updateTaskStatus(taskId, newStatus);
+      await updateStatusTask(taskId, newStatus);
 
       // Ensure global course list (used by sidebar) reflects any overdue count changes
       void refreshCourses();
@@ -105,18 +104,12 @@ export default function CoursePage({ params }: CoursePageProps) {
       setTasks(prevTasks =>
         prevTasks.map(task =>
           task.id === taskId
-            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || StatusTask.TODO }
             : task,
         ),
       );
       ErrorHandlers.api(error, 'Failed to update task status');
     }
-  };
-
-  const handleUpdateSubtaskStatus = updateSubtaskStatus(tasks, setTasks);
-  const handleUpdateSubtaskStatusAndRefresh = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
-    await handleUpdateSubtaskStatus(taskId, subtaskId, newStatus);
-    void refreshCourses();
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -156,11 +149,11 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  const overdueTasks = getOverdueTasks(filteredTasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
+  const overdueTasks = getOverdueTasks(filteredTasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
 
   const handleCompleteOverdueTasks = async () => {
     try {
-      const currentOverdueTasks = getOverdueTasks(tasks, [TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED]);
+      const currentOverdueTasks = getOverdueTasks(tasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
 
       if (currentOverdueTasks.length === 0) {
         toast.success('No overdue tasks found');
@@ -169,7 +162,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       const taskIds = currentOverdueTasks.map(task => task.id);
 
-      await batchUpdateTaskStatus(taskIds, TaskStatus.COMPLETED);
+      await batchUpdateStatusTask(taskIds, StatusTask.COMPLETED);
 
       toast.success('Overdue tasks completed', {
         description: `${currentOverdueTasks.length} overdue tasks have been marked as completed`,
@@ -298,8 +291,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                           <TaskCard
                             task={task}
                             onDeleteTask={handleDeleteTask}
-                            onUpdateTaskStatus={handleUpdateTaskStatus}
-                            onUpdateSubtaskStatus={handleUpdateSubtaskStatusAndRefresh}
+                            onUpdateStatusTask={handleUpdateStatusTask}
                             onTaskAdded={fetchCourse}
                           />
                         </div>

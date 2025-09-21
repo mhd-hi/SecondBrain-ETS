@@ -1,5 +1,5 @@
 import type { CourseAIResponse } from '@/types/api/ai';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { MOCK_COURSES } from './openai-data';
 
 export function setMockOpenAI(courseCode: string): CourseAIResponse {
@@ -18,7 +18,7 @@ export function setMockOpenAI(courseCode: string): CourseAIResponse {
       subtasks: task.subtasks?.map(subtask => ({
         ...subtask,
         id: crypto.randomUUID(),
-        status: TaskStatus.TODO,
+        status: StatusTask.TODO,
       })),
     })),
   };

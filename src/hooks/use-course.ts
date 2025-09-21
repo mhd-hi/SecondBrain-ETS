@@ -2,8 +2,8 @@
 
 import type { CourseApiResponse } from '@/types/api/course';
 import type { Course } from '@/types/course';
+import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
@@ -44,7 +44,7 @@ export function useCourse(courseId: string) {
     );
   }, [courseId]);
 
-  const getFilteredTasks = useCallback((status?: TaskStatus) => {
+  const getFilteredTasks = useCallback((status?: StatusTask) => {
     if (!status) {
       return tasks;
     }

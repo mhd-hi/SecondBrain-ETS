@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import * as cheerio from 'cheerio';
 
 export type PlanETSContent = {
@@ -9,7 +8,7 @@ export type PlanETSContent = {
 export async function fetchPlanETSContent(courseCode: string, term: string): Promise<PlanETSContent> {
   const logs: string[] = [];
   const log = (message: string) => {
-    console.log(message);
+    log(message);
     logs.push(message);
   };
 

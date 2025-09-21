@@ -7,9 +7,8 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { updateSubtaskStatus } from '@/hooks/use-subtask';
 import { deleteTask, fetchFocusTasks, updateStatusTask } from '@/hooks/use-task';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 const GroupSection = ({
   title,
@@ -21,7 +20,6 @@ const GroupSection = ({
   toggleSubtasksExpanded,
   handleDeleteTask,
   handleStatusChange,
-  handleSubtaskStatusChange,
   onTaskAdded,
   removingTaskIds,
 }: {
@@ -33,8 +31,7 @@ const GroupSection = ({
   expandedSubtasks: Set<string>;
   toggleSubtasksExpanded: (taskId: string) => void;
   handleDeleteTask: (taskId: string) => Promise<void>;
-  handleStatusChange: (taskId: string, newStatus: TaskStatus) => Promise<void>;
-  handleSubtaskStatusChange: (taskId: string, subtaskId: string, newStatus: TaskStatus) => Promise<void>;
+  handleStatusChange: (taskId: string, newStatus: StatusTask) => Promise<void>;
   onTaskAdded?: () => void;
   removingTaskIds: Set<string>;
 }) => {
@@ -78,8 +75,7 @@ const GroupSection = ({
             <TaskCard
               task={task}
               onDeleteTask={handleDeleteTask}
-              onUpdateTaskStatus={handleStatusChange}
-              onUpdateSubtaskStatus={handleSubtaskStatusChange}
+              onUpdateStatusTask={handleStatusChange}
               showCourseBadge={true}
               isSubtasksExpanded={expandedSubtasks.has(task.id)}
               onToggleSubtasksExpanded={() => toggleSubtasksExpanded(task.id)}
@@ -155,11 +151,11 @@ export const TodaysFocusTile = () => {
     void fetchFocusTasksData();
   }, [fetchFocusTasksData]);
 
-  const shouldRemoveTask = (newStatus: TaskStatus): boolean => {
-    return newStatus === TaskStatus.COMPLETED;
+  const shouldRemoveTask = (newStatus: StatusTask): boolean => {
+    return newStatus === StatusTask.COMPLETED;
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+  const handleStatusChange = async (taskId: string, newStatus: StatusTask) => {
     // Optimistic update - update UI immediately
     if (shouldRemoveTask(newStatus)) {
       setRemovingTaskIds(prev => new Set(prev).add(taskId));
@@ -201,17 +197,12 @@ export const TodaysFocusTile = () => {
         setTasks(prevTasks =>
           prevTasks.map(task =>
             task.id === taskId
-              ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+              ? { ...task, status: tasks.find(t => t.id === taskId)?.status || StatusTask.TODO }
               : task,
           ),
         );
       }
     }
-  };
-
-  const handleSubtaskStatusChange = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
-    const updateSubtaskStatusFn = updateSubtaskStatus(tasks, setTasks);
-    await updateSubtaskStatusFn(taskId, subtaskId, newStatus);
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -266,9 +257,9 @@ export const TodaysFocusTile = () => {
 
   const sortTasksByPriority = (tasks: TaskType[]): TaskType[] => {
     const priorityOrder = {
-      [TaskStatus.IN_PROGRESS]: 1,
-      [TaskStatus.TODO]: 2,
-      [TaskStatus.COMPLETED]: 3,
+      [StatusTask.IN_PROGRESS]: 1,
+      [StatusTask.TODO]: 2,
+      [StatusTask.COMPLETED]: 3,
     };
 
     return tasks.sort((a, b) => {
@@ -292,7 +283,7 @@ export const TodaysFocusTile = () => {
       const taskDate = new Date(task.dueDate);
       taskDate.setHours(0, 0, 0, 0);
 
-      if (taskDate < today && task.status !== TaskStatus.COMPLETED) {
+      if (taskDate < today && task.status !== StatusTask.COMPLETED) {
         groups.overdue.push(task);
       } else if (taskDate.getTime() === today.getTime()) {
         groups.today.push(task);
@@ -403,7 +394,6 @@ export const TodaysFocusTile = () => {
                       toggleSubtasksExpanded={toggleSubtasksExpanded}
                       handleDeleteTask={handleDeleteTask}
                       handleStatusChange={handleStatusChange}
-                      handleSubtaskStatusChange={handleSubtaskStatusChange}
                       onTaskAdded={fetchFocusTasksData}
                       removingTaskIds={removingTaskIds}
                     />

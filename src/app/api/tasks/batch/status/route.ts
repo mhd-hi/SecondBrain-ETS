@@ -6,12 +6,12 @@ import { successResponse } from '@/lib/api/server-util';
 import { withAuthSimple } from '@/lib/auth/api';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 // /api/tasks/batch/status
 export type BatchStatusUpdateRequest = {
   taskIds: string[];
-  status: TaskStatus;
+  status: StatusTask;
 };
 
 async function handleBatchStatusUpdate(
@@ -34,8 +34,8 @@ async function handleBatchStatusUpdate(
     );
   }
 
-  // Validate status is a valid TaskStatus
-  if (!Object.values(TaskStatus).includes(status)) {
+  // Validate status is a valid StatusTask value
+  if (!Object.values(StatusTask).includes(status)) {
     return NextResponse.json(
       { error: 'Invalid status value' },
       { status: 400 },

@@ -24,7 +24,7 @@ import {
   getTotalTasksCount,
   getUpcomingTask,
 } from '@/lib/task';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type CourseCardProps = {
   course: Course;
@@ -187,7 +187,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 />
               </Link>
             </div>
-            {nextTask.dueDate && nextTask.status !== TaskStatus.COMPLETED && (
+            {nextTask.dueDate && nextTask.status !== StatusTask.COMPLETED && (
               <div className="flex items-center mb-2">
                 <DueDateDisplay
                   date={nextTask.dueDate}
@@ -213,7 +213,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 />
               </Link>
             </div>
-            {upcomingTask.dueDate && upcomingTask.status !== TaskStatus.COMPLETED && (
+            {upcomingTask.dueDate && upcomingTask.status !== StatusTask.COMPLETED && (
               <div className="flex items-center">
                 <DueDateDisplay
                   date={upcomingTask.dueDate}

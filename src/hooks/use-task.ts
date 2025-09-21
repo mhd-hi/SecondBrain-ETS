@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 export function useTask() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,7 @@ export function useTask() {
       estimatedEffort: number;
       dueDate: Date;
       type: TaskType;
-      status: TaskStatus;
+      status: StatusTask;
     };
   }) => {
     setError(null);
@@ -30,7 +30,7 @@ export function useTask() {
           tasks: [
             {
               ...newTask,
-              status: TaskStatus.TODO,
+              status: StatusTask.TODO,
               dueDate: newTask.dueDate.toISOString(),
             },
           ],
@@ -67,7 +67,7 @@ export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<
   return response.json() as Promise<Task[]>;
 };
 
-export const updateStatusTask = async (taskId: string, status: TaskStatus): Promise<void> => {
+export const updateStatusTask = async (taskId: string, status: StatusTask): Promise<void> => {
   const response = await fetch(`/api/tasks/${taskId}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -93,9 +93,9 @@ export const updateDueDateTask = async (taskId: string, dueDate: Date): Promise<
   }
 };
 
-export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
+export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTask): Promise<{
   updatedCount: number;
-  status: TaskStatus;
+  status: StatusTask;
   updatedTasks: Task[];
 }> => {
   const response = await fetch('/api/tasks/batch/status', {
@@ -110,7 +110,7 @@ export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatu
 
   return response.json() as Promise<{
     updatedCount: number;
-    status: TaskStatus;
+    status: StatusTask;
     updatedTasks: Task[];
   }>;
 };

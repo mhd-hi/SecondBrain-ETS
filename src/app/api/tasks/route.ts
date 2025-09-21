@@ -4,7 +4,7 @@ import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate } from '@/lib/task/util';
 import { calculateWeekFromDueDate } from '@/lib/term/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -53,11 +53,11 @@ export const POST = withAuthSimple(
         ...task,
         courseId,
         week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
-        status: task.status ?? TaskStatus.TODO,
+        status: task.status ?? StatusTask.TODO,
         subtasks: task.subtasks?.map(subtask => ({
           ...subtask,
           id: subtask.id ?? crypto.randomUUID(),
-          status: subtask.status ?? TaskStatus.TODO,
+          status: subtask.status ?? StatusTask.TODO,
         })),
         dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
           ? userProvidedDueDate
@@ -92,11 +92,11 @@ export const PATCH = withAuthSimple(
 
     const payload = {
       ...updates,
-      status: updates.status ?? TaskStatus.TODO,
+      status: updates.status ?? StatusTask.TODO,
       subtasks: updates.subtasks?.map(subtask => ({
         ...subtask,
         id: subtask.id ?? crypto.randomUUID(),
-        status: subtask.status ?? TaskStatus.TODO,
+        status: subtask.status ?? StatusTask.TODO,
       })),
       notes: updates.notes,
       dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,

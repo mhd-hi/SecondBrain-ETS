@@ -1,8 +1,8 @@
+import type { StatusTask } from '@/types/status-task';
 import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 import { and, eq, gte, inArray, lt } from 'drizzle-orm';
-import { parseTaskStatus } from '@/lib/task';
+import { parseStatusTask } from '@/lib/task';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 
@@ -14,7 +14,7 @@ type TaskRow = {
     notes?: string | null;
     week: number;
     type: string;
-    status: TaskStatus;
+    status: StatusTask;
     estimatedEffort: number;
     actualEffort: number;
     createdAt: Date;
@@ -78,7 +78,7 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
       list.push({
         id: s.id,
         title: s.title,
-        status: parseTaskStatus(String(s.status)),
+        status: parseStatusTask(String(s.status)),
         notes: s.notes ?? undefined,
         estimatedEffort: s.estimatedEffort,
       });
@@ -111,7 +111,7 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
   }
 };
 
-export const updateTaskStatus = async (taskId: string, status: TaskStatus, userId: string) => {
+export const updateStatusTask = async (taskId: string, status: StatusTask, userId: string) => {
   if (!userId) {
     throw new Error('User authentication required');
   }

@@ -2,7 +2,7 @@ import type { Task } from '@/types/task';
 import type { TrimesterKey } from '@/types/term';
 
 import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/term/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { calculateWeeksBetweenDates } from '../date/util';
 
 /**
@@ -56,7 +56,7 @@ export function getCountTrimesterWeeks(trimester: TrimesterKey): number {
  */
 export const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
-    .filter(task => task.status !== TaskStatus.COMPLETED && task.dueDate != null)
+    .filter(task => task.status !== StatusTask.COMPLETED && task.dueDate != null)
     .sort((a, b) => {
       // Attempt to create Date objects and get time, handling invalid dates
       const dateA = a.dueDate instanceof Date ? a.dueDate : new Date(a.dueDate);
@@ -86,13 +86,13 @@ export const getUpcomingTask = (tasks: Task[]) => {
 };
 
 export const calculateProgress = (tasks: Task[]) => {
-  const completedTasks = tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+  const completedTasks = tasks.filter(task => task.status === StatusTask.COMPLETED).length;
   const totalTasks = tasks.length;
   return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 };
 
 export const getCompletedTasksCount = (tasks: Task[]): number => {
-  return tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+  return tasks.filter(task => task.status === StatusTask.COMPLETED).length;
 };
 
 export const getTotalTasksCount = (tasks: Task[]): number => {
@@ -100,23 +100,23 @@ export const getTotalTasksCount = (tasks: Task[]): number => {
 };
 
 export const STATUS_ORDER = [
-  TaskStatus.TODO,
-  TaskStatus.IN_PROGRESS,
-  TaskStatus.COMPLETED,
+  StatusTask.TODO,
+  StatusTask.IN_PROGRESS,
+  StatusTask.COMPLETED,
 ] as const;
 
 export const TASK_STATUS_CONFIG = {
-  [TaskStatus.TODO]: {
+  [StatusTask.TODO]: {
     label: 'TODO',
     bgColor: 'bg-blue-500',
     textColor: 'text-blue-100',
   },
-  [TaskStatus.IN_PROGRESS]: {
+  [StatusTask.IN_PROGRESS]: {
     label: 'DOING',
     bgColor: 'bg-amber-500',
     textColor: 'text-gray-800',
   },
-  [TaskStatus.COMPLETED]: {
+  [StatusTask.COMPLETED]: {
     label: 'DONE',
     bgColor: 'bg-green-600',
     textColor: 'text-green-100',
@@ -159,34 +159,41 @@ export function getDueDateColor(date: Date | string): string {
   return 'text-muted-foreground';
 }
 
-export const getNextTaskStatus = (currentStatus: TaskStatus): TaskStatus => {
+export const getNextStatusTask = (currentStatus: StatusTask): StatusTask => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);
 
   // If status is not found in STATUS_ORDER, default to TODO
   if (currentIndex === -1) {
-    return TaskStatus.TODO;
+    return StatusTask.TODO;
   }
 
   const nextIndex = (currentIndex + 1) % STATUS_ORDER.length;
   return STATUS_ORDER[nextIndex]!;
 };
 
-export const isValidStatus = (status: TaskStatus): boolean => {
-  return Object.values(TaskStatus).includes(status);
+export const isValidStatusTask = (status: StatusTask): boolean => {
+  return Object.values(StatusTask).includes(status);
 };
 
-/**
- * Normalize an incoming status value (possibly a string from the DB) to a valid TaskStatus.
- */
-export const parseTaskStatus = (value: unknown): TaskStatus => {
-  if (typeof value === 'string' && Object.values(TaskStatus).includes(value as TaskStatus)) {
-    return value as TaskStatus;
+export const getStatusBgClass = (status: StatusTask) => {
+  const config = TASK_STATUS_CONFIG[status];
+  return config?.bgColor ?? 'bg-muted';
+};
+
+export const getStatusTextClass = (status: StatusTask) => {
+  const config = TASK_STATUS_CONFIG[status];
+  return config?.textColor ?? 'text-blue-500';
+};
+
+// Normalize an incoming status value (possibly a string from the DB) to a valid StatusTask value.
+export const parseStatusTask = (value: unknown): StatusTask => {
+  if (typeof value === 'string' && Object.values(StatusTask).includes(value as StatusTask)) {
+    return value as StatusTask;
   }
-  return TaskStatus.TODO;
+  return StatusTask.TODO;
 };
 
-export const getOverdueTasks = (tasks: Task[], excludeStatuses: TaskStatus[] = [TaskStatus.COMPLETED]): Task[] => {
-  // Get current date at start of day to ensure consistent overdue detection
+export const getOverdueTasks = (tasks: Task[], excludeStatuses: StatusTask[] = [StatusTask.COMPLETED]): Task[] => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 

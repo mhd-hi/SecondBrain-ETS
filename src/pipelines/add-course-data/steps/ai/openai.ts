@@ -2,7 +2,7 @@
 import type { Task } from '@/types/task';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { USE_MOCK_DATA } from '../../../../lib/config';
 import { setMockOpenAI } from '../../../../lib/mocks/helper';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';
@@ -62,13 +62,13 @@ export async function parseContentWithAI(html: string, courseCode?: string): Pro
           notes: task.notes,
           week: task.week,
           type: task.type,
-          status: TaskStatus.TODO,
+          status: StatusTask.TODO,
           estimatedEffort: task.estimatedEffort,
           actualEffort: 0,
           subtasks: task.subtasks?.map(subtask => ({
             id: crypto.randomUUID(),
             title: subtask.title,
-            status: TaskStatus.TODO,
+            status: StatusTask.TODO,
             notes: subtask.notes,
             estimatedEffort: subtask.estimatedEffort,
           })),
