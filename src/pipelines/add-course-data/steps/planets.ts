@@ -8,7 +8,8 @@ export type PlanETSContent = {
 export async function fetchPlanETSContent(courseCode: string, term: string): Promise<PlanETSContent> {
   const logs: string[] = [];
   const log = (message: string) => {
-    log(message);
+    // eslint-disable-next-line no-console
+    console.log(message);
     logs.push(message);
   };
 
