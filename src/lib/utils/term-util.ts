@@ -119,7 +119,7 @@ export function getNextTerm(): TrimesterKey {
     }
 }
 
-export const prevTerm = (trimester: TrimesterKey, year: number) => {
+export const getPrevTerm = (trimester: TrimesterKey, year: number) => {
     if (trimester === TRIMESTER.WINTER) {
         return { trimester: TRIMESTER.AUTUMN, year: year - 1 };
     }
@@ -145,13 +145,6 @@ export const nextTerm = (trimester: TrimesterKey, year: number) => {
     return { trimester: TRIMESTER.AUTUMN, year };
 };
 
-/**
- * Calculates the week number from a due date based on trimesters
- * This is the inverse of calculateTaskDueDate
- * @param dueDate The due date to calculate week from
- * @param totalCourseWeeks The total number of weeks in the course
- * @returns The calculated week number
- */
 export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): number {
     // Determine which term the due date falls into
     let trimester: TrimesterKey;

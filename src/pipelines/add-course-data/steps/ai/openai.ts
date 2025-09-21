@@ -2,7 +2,7 @@ import type { AITask } from '@/types/api/ai';
 import type { Task } from '@/types/task';
 import { callOpenAI } from './call';
 import normalizeTasks from './normalize';
-import extractJsonArrayFromText from './parse';
+import { extractJsonArrayFromText } from './parse';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompt';
 
 export type ParseAIResult = {

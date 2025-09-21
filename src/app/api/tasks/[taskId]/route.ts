@@ -4,7 +4,7 @@ import type { Task } from '@/types/task';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
-import { successResponse } from '@/lib/utils/api/server-util';
+import { successResponse } from '@/lib/utils/api/api-util';
 import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { StatusTask } from '@/types/status-task';
 

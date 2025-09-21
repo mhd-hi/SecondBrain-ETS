@@ -31,16 +31,3 @@ export const withLoadingAndErrorHandling = async <T>(
     setLoading(false);
   }
 };
-
-export const withMultipleLoadingStates = async <T>(
-  asyncOperation: () => Promise<T>,
-  loadingStates: Array<Dispatch<SetStateAction<boolean>>>,
-): Promise<T> => {
-  loadingStates.forEach(setLoading => setLoading(true));
-
-  try {
-    return await asyncOperation();
-  } finally {
-    loadingStates.forEach(setLoading => setLoading(false));
-  }
-};

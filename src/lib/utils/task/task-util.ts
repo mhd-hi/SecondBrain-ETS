@@ -30,9 +30,7 @@ export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date 
   return dueDate;
 }
 
-/**
- * Sorts tasks by due date and filters out completed tasks
- */
+// Sorts tasks by due date and filters out completed tasks
 export const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
     .filter(task => task.status !== StatusTask.COMPLETED && task.dueDate != null)
@@ -48,17 +46,13 @@ export const getTasksByDueDate = (tasks: Task[]) => {
     });
 };
 
-/**
- * Gets the next task from a list of tasks
- */
+// Gets the next task from a list of tasks
 export const getNextTask = (tasks: Task[]) => {
   const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.length > 0 ? sortedTasks[0] : null;
 };
 
-/**
- * Gets the upcoming task (exam or homework) from a list of tasks
- */
+// Gets the upcoming task (exam or homework) from a list of tasks
 export const getUpcomingTask = (tasks: Task[]) => {
   const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
@@ -159,11 +153,7 @@ export const getOverdueTasks = (tasks: Task[], excludeStatuses: StatusTask[] = [
   });
 };
 
-/**
- * Formats effort hours to "1h 30min" format
- * @param hours - The number of hours (can be decimal)
- * @returns Formatted string like "1h 30min" or "30min" for less than 1 hour
- */
+// Formats effort hours to "1h 30min" format
 export function formatEffortTime(hours: number): string {
   if (hours === 0) {
     return '0min';

@@ -3,7 +3,7 @@ import type { AuthenticatedUser } from '@/lib/auth/api';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { successResponse } from '@/lib/utils/api/server-util';
+import { successResponse } from '@/lib/utils/api/api-util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';

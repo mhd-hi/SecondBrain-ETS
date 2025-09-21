@@ -38,5 +38,3 @@ export function extractJsonArrayFromText(aiText: string): AITask[] {
 
     throw new Error('Unable to parse JSON array of tasks from AI response');
 }
-
-export default extractJsonArrayFromText;

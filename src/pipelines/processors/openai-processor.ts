@@ -12,9 +12,7 @@ export class OpenAIProcessor {
         const courseData: CourseAIResponse = {
             courseCode,
             term,
-            tasks: result.tasks.map(task => ({
-                ...task,
-            })),
+            tasks: result.tasks,
         };
 
         return { courseData, logs: result.logs };
