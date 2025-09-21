@@ -36,5 +36,3 @@ BEGIN
   END IF;
 END
 $$;
-
-ALTER TABLE "courses" ADD CONSTRAINT "courses_term_terms_id_fk" FOREIGN KEY ("term") REFERENCES "public"."terms"("id") ON DELETE restrict ON UPDATE no action;
