@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Analytics } from '@vercel/analytics/next';
 import { SessionProvider } from 'next-auth/react';
 import { Geist, Inter } from 'next/font/google';
 import { GlobalConfirmDialogProvider } from '@/components/shared/dialogs/ConfirmDialogProvider';
@@ -41,7 +40,6 @@ export default function RootLayout({
               <PomodoroProvider>
                 {children}
                 <Toaster />
-                <Analytics />
               </PomodoroProvider>
             </ThemeProvider>
           </GlobalConfirmDialogProvider>
