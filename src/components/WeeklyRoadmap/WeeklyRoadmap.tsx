@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
 import { useCoursesContext } from '@/contexts/use-courses';
-import { fetchWeeklyTasks } from '@/hooks/use-task';
+import { fetchWeeklyTasks, updateDueDateTask, updateStatusTask } from '@/hooks/use-task';
 import { getWeekDates, getWeekStart } from '@/lib/date/util';
 import {
   createTransitionState,
@@ -122,15 +122,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     );
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task status');
-      }
+      await updateStatusTask(taskId, newStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
@@ -193,17 +185,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     );
 
     try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dueDate: targetDate.toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task due date');
-      }
+      await updateDueDateTask(task.id, targetDate);
     } catch (error) {
       // REVERT ON ERROR
       setTasks(prevTasks =>

@@ -47,28 +47,6 @@ export function useTask() {
   return { addTask, isLoading, error };
 }
 
-export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
-  updatedCount: number;
-  status: TaskStatus;
-  updatedTasks: Task[];
-}> => {
-  const response = await fetch('/api/tasks/batch/status', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ taskIds, status }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to batch update task status: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<{
-    updatedCount: number;
-    status: TaskStatus;
-    updatedTasks: Task[];
-  }>;
-};
-
 export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
   const response = await fetch(`/api/tasks/focus?filter=${filter}`);
 
@@ -89,7 +67,7 @@ export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<
   return response.json() as Promise<Task[]>;
 };
 
-export const updateTaskStatus = async (taskId: string, status: TaskStatus): Promise<void> => {
+export const updateStatusTask = async (taskId: string, status: TaskStatus): Promise<void> => {
   const response = await fetch(`/api/tasks/${taskId}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -99,6 +77,42 @@ export const updateTaskStatus = async (taskId: string, status: TaskStatus): Prom
   if (!response.ok) {
     throw new Error('Failed to update task status');
   }
+};
+
+export const updateDueDateTask = async (taskId: string, dueDate: Date): Promise<void> => {
+  const response = await fetch(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      dueDate: dueDate.toISOString(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update task due date');
+  }
+};
+
+export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
+  updatedCount: number;
+  status: TaskStatus;
+  updatedTasks: Task[];
+}> => {
+  const response = await fetch('/api/tasks/batch/status', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ taskIds, status }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to batch update task status: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<{
+    updatedCount: number;
+    status: TaskStatus;
+    updatedTasks: Task[];
+  }>;
 };
 
 export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {

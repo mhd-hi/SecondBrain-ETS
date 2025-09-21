@@ -7,7 +7,7 @@ import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-drop
 import { Badge } from '@/components/ui/badge';
 import { deleteSubtask } from '@/hooks/use-subtask';
 import { useTask } from '@/hooks/use-task';
-import { useUpdateField } from '@/hooks/useUpdateField';
+import { useUpdateField } from '@/hooks/use-update-field';
 import { cn } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 import { EditableField } from '../shared/EditableField';

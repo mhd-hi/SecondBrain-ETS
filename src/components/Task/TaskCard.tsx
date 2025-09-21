@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
-import { useUpdateField } from '@/hooks/useUpdateField';
+import { useUpdateField } from '@/hooks/use-update-field';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { TaskStatus } from '@/types/task-status';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';

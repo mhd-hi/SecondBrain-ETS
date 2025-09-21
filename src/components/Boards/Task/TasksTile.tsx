@@ -8,7 +8,7 @@ import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
-import { deleteTask, fetchFocusTasks, updateTaskStatus } from '@/hooks/use-task';
+import { deleteTask, fetchFocusTasks, updateStatusTask } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task-status';
 
 const GroupSection = ({
@@ -181,7 +181,7 @@ export const TodaysFocusTile = () => {
     }
 
     try {
-      await updateTaskStatus(taskId, newStatus);
+      await updateStatusTask(taskId, newStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');

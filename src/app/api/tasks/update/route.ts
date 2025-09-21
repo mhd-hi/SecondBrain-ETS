@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 
-// POST /api/tasks/update
 export async function POST(req: NextRequest) {
   try {
     const { taskId, input, value } = await req.json();
