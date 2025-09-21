@@ -2,7 +2,6 @@
 
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';

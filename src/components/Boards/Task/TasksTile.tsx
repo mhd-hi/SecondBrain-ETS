@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { updateSubtaskStatus } from '@/hooks/use-subtask';
 import { fetchFocusTasks, updateTaskStatus } from '@/hooks/use-task';
 import { TaskStatus } from '@/types/task-status';
 
@@ -209,34 +210,8 @@ export const TodaysFocusTile = () => {
   };
 
   const handleSubtaskStatusChange = async (taskId: string, subtaskId: string, newStatus: TaskStatus) => {
-    try {
-      // TODO: move in hook
-      const response = await fetch(`/api/tasks/${taskId}/subtasks/${subtaskId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update subtask status');
-      }
-
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId
-            ? {
-              ...task,
-              subtasks: task.subtasks?.map(subtask =>
-                subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask,
-              ),
-            }
-            : task,
-        ),
-      );
-    } catch (error) {
-      console.error('Failed to update subtask status:', error);
-      toast.error('Failed to update subtask status');
-    }
+    const updateSubtaskStatusFn = updateSubtaskStatus(tasks, setTasks);
+    await updateSubtaskStatusFn(taskId, subtaskId, newStatus);
   };
 
   const handleDeleteTask = async (taskId: string) => {

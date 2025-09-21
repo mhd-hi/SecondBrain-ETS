@@ -1,8 +1,3 @@
-/**
- * Server-side Course Processing Pipeline
- * Simplified and more flexible pipeline for server-side course processing
- */
-
 import type { CourseAIResponse } from '@/types/api/ai';
 import type {
   DataSource,
@@ -15,7 +10,6 @@ import type {
 import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai';
 import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
 
-// Server-side data source implementations
 export class PlanetsDataSource implements DataSource {
   name = 'planets';
   description = 'PlanETS Course Content';

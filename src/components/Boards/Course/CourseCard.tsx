@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useCourse } from '@/hooks/use-course';
 import {
   calculateProgress,
   getCompletedTasksCount,
@@ -34,6 +35,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const [showColorDialog, setShowColorDialog] = useState(false);
   const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
   const [pendingColor, setPendingColor] = useState(selectedColor);
+  const { updateCourseColor } = useCourse(course.id);
   const tasks = course.tasks ?? [];
   const displayColor = selectedColor || course.color || '#3b82f6';
 
@@ -61,17 +63,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const handleConfirmColor = async () => {
     try {
-      // TODO: move in hook
-      const res = await fetch(`/api/courses/${course.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ color: pendingColor }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to update course color');
-      }
+      await updateCourseColor(pendingColor);
       setSelectedColor(pendingColor);
       setShowColorDialog(false);
       toast.success('Course color updated');

@@ -51,6 +51,33 @@ export function useCourse(courseId: string) {
     return tasks.filter(task => task.status === status);
   }, [tasks]);
 
+  const updateCourseColor = useCallback(async (color: string) => {
+    await withLoadingAndErrorHandling(
+      async () => {
+        const res = await fetch(`/api/courses/${courseId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ color }),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to update course color');
+        }
+
+        // Update the local course state with the new color
+        setCourse(prevCourse =>
+          prevCourse ? { ...prevCourse, color } : prevCourse,
+        );
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to update course color');
+        ErrorHandlers.api(error, 'Failed to update course color');
+      },
+    );
+  }, [courseId]);
+
   return {
     course,
     tasks,
@@ -60,6 +87,7 @@ export function useCourse(courseId: string) {
     getFilteredTasks,
     setCourse,
     setTasks,
+    updateCourseColor,
   };
 }
 
