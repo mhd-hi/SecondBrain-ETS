@@ -16,10 +16,3 @@ export type CourseCreateRequest = {
   name: string;
   description: string;
 };
-
-export type CourseCreateResponse = {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
-};
