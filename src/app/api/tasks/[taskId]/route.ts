@@ -6,7 +6,7 @@ import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
 import { calculateTaskDueDate } from '@/lib/task/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 async function handlePatchTask(
   request: NextRequest,
@@ -35,7 +35,7 @@ async function handlePatchTask(
     processedUpdates.subtasks = updates.subtasks.map(subtask => ({
       ...subtask,
       id: subtask.id || crypto.randomUUID(),
-      status: subtask.status ?? TaskStatus.TODO,
+      status: subtask.status ?? StatusTask.TODO,
     }));
   }
 

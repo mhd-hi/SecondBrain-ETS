@@ -6,6 +6,7 @@ import type { PomodoroContextType, PomodoroType } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { completePomodoroSession, fetchPomodoroStreak } from '@/hooks/use-pomodoro';
 import { playSelectedNotificationSound } from '@/lib/audio/util';
 import { PomodoroContext } from './pomodoro-context';
 
@@ -67,25 +68,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
 
   const handlePomodoroComplete = useCallback(async (durationHours: number) => {
     try {
-      const response = await fetch('/api/pomodoro/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          durationHours,
-          taskId: currentTask?.id, // Always send taskId (can be undefined)
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json() as { message?: string };
-        throw new Error(errorData.message ?? 'Failed to complete Pomodoro');
-      }
-
-      const result = await response.json() as {
-        success: boolean;
-        sessionType: 'task' | 'free';
-        taskUpdated?: Task | null;
-      };
+      const result = await completePomodoroSession(durationHours, currentTask?.id);
 
       if (result.sessionType === 'task') {
         toast.success(`Pomodoro completed! ${(durationHours * 60).toFixed(0)} minutes added to task.`);
@@ -205,19 +188,16 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
 
   // Fetch user streak on mount
   useEffect(() => {
-    const fetchStreak = async () => {
+    const loadStreak = async () => {
       try {
-        const streakResponse = await fetch('/api/pomodoro/streak');
-        if (streakResponse.ok) {
-          const streakData = await streakResponse.json() as { streakDays: number };
-          setStreak(streakData.streakDays ?? 0);
-        }
+        const streakDays = await fetchPomodoroStreak();
+        setStreak(streakDays);
       } catch (error) {
         console.error('Failed to fetch streak:', error);
       }
     };
 
-    void fetchStreak();
+    void loadStreak();
   }, []);
 
   // Handle auto-completion when timer reaches 0

@@ -7,9 +7,9 @@ import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-drop
 import { Badge } from '@/components/ui/badge';
 import { deleteSubtask } from '@/hooks/use-subtask';
 import { useTask } from '@/hooks/use-task';
-import { useUpdateField } from '@/hooks/useUpdateField';
+import { useUpdateField } from '@/hooks/use-update-field';
 import { cn } from '@/lib/utils';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { EditableField } from '../shared/EditableField';
 
 type SubtasksListProps = {
@@ -114,14 +114,14 @@ const SubtasksList = ({
               className={cn(
                 'relative overflow-visible flex items-start justify-between gap-4 p-3 rounded-lg border border-muted',
                 'transition-colors',
-                subtask.status === TaskStatus.COMPLETED
+                subtask.status === StatusTask.COMPLETED
                   ? 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800'
                   : 'bg-muted/30',
               )}
             >
               <div className="flex-grow space-y-1">
                 <div className="flex items-center gap-2">
-                  {subtask.status === TaskStatus.COMPLETED
+                  {subtask.status === StatusTask.COMPLETED
                     ? <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 flex-shrink-0" />
                     : <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                   <EditableField
@@ -138,7 +138,7 @@ const SubtasksList = ({
                       }
                     }}
                     inputType="input"
-                    className={cn('text-sm font-medium', subtask.status === TaskStatus.COMPLETED && 'text-muted-foreground')}
+                    className={cn('text-sm font-medium', subtask.status === StatusTask.COMPLETED && 'text-muted-foreground')}
                     placeholder="Subtask title"
                   />
                   {subtask.estimatedEffort && (
@@ -205,7 +205,7 @@ const SubtasksList = ({
                                   estimatedEffort: subtask.estimatedEffort ?? 0,
                                   dueDate: newDueDate,
                                   type: 'theorie',
-                                  status: TaskStatus.TODO,
+                                  status: StatusTask.TODO,
                                 },
                               });
 

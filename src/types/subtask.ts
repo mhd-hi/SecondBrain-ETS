@@ -1,9 +1,9 @@
-import type { TaskStatus } from '@/types/task-status';
+import type { StatusTask } from '@/types/status-task';
 
 export type Subtask = {
     id: string;
     title: string;
-    status: TaskStatus;
+    status: StatusTask;
     notes?: string;
     estimatedEffort?: number;
 };

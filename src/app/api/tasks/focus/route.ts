@@ -3,7 +3,7 @@ import type { Task } from '@/types/task';
 import { and, eq, gte, inArray, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { parseTaskStatus } from '@/lib/task/util';
+import { parseStatusTask } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 
@@ -68,7 +68,7 @@ export const GET = withAuthSimple(
         const mapped: Subtask = {
           id: String(s.id),
           title: String(s.title),
-          status: parseTaskStatus(String(s.status)),
+          status: parseStatusTask(String(s.status)),
           notes: s.notes == null ? undefined : String(s.notes),
           estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
         };
@@ -81,7 +81,7 @@ export const GET = withAuthSimple(
     const tasksData: Task[] = results.map(row => ({
       ...row.tasks,
       course: row.courses ?? undefined,
-      status: parseTaskStatus(String(row.tasks.status)),
+      status: parseStatusTask(String(row.tasks.status)),
       subtasks: subsByTask.get(String(row.tasks.id)) ?? [],
       notes: row.tasks.notes ?? undefined,
     }));

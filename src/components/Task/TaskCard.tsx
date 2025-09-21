@@ -7,24 +7,23 @@ import React, { useEffect, useRef, useState } from 'react';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
+import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
-import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
-import { useUpdateField } from '@/hooks/useUpdateField';
+import { useUpdateField } from '@/hooks/use-update-field';
 import { cn, formatEffortTime } from '@/lib/utils';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
 
 type TaskCardProps = {
   task: Task;
   onDeleteTask: (taskId: string) => void;
-  onUpdateTaskStatus: (taskId: string, newStatus: TaskStatus) => void;
-  onUpdateSubtaskStatus: (taskId: string, subtaskId: string, newStatus: TaskStatus) => void;
+  onUpdateStatusTask: (taskId: string, newStatus: StatusTask) => void;
   onTaskAdded?: () => void;
   showCourseBadge?: boolean;
   isSubtasksExpanded?: boolean;
@@ -39,7 +38,7 @@ type TaskCardProps = {
 export function TaskCard({
   task,
   onDeleteTask,
-  onUpdateTaskStatus,
+  onUpdateStatusTask,
   showCourseBadge = false,
   isSubtasksExpanded: controlledSubtasksExpanded,
   onToggleSubtasksExpanded,
@@ -101,7 +100,7 @@ export function TaskCard({
   // Use controlled state if provided, otherwise use internal state
   const isSubtasksExpanded = controlledSubtasksExpanded ?? internalSubtasksExpanded;
 
-  const isCompleted = task.status === TaskStatus.COMPLETED;
+  const isCompleted = task.status === StatusTask.COMPLETED;
 
   // Save handler for title
   const handleSaveTitle = async (newTitle: string) => {
@@ -290,7 +289,7 @@ export function TaskCard({
               </Badge>
             )}
 
-              {task.dueDate && task.status !== TaskStatus.COMPLETED && (
+              {task.dueDate && task.status !== StatusTask.COMPLETED && (
                 <Badge variant="muted">
                   <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
                     <DueDateDisplay
@@ -312,12 +311,12 @@ export function TaskCard({
         >
           <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:w-auto">
             <div className="flex-shrink min-w-0 ml-auto lg:ml-0">
-              <TaskStatusChanger
+              <StatusTaskChanger
                 currentStatus={task.status}
-                onStatusChange={newStatus => onUpdateTaskStatus(task.id, newStatus)}
+                onStatusChange={newStatus => onUpdateStatusTask(task.id, newStatus)}
               />
             </div>
-            {task.status === TaskStatus.IN_PROGRESS && (
+            {task.status === StatusTask.IN_PROGRESS && (
               <Button
                 onClick={handleStartPomodoro}
                 size="sm"

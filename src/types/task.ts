@@ -1,6 +1,6 @@
 import type { Course } from './course';
+import type { StatusTask } from './status-task';
 import type { Subtask } from './subtask';
-import type { TaskStatus } from './task-status';
 
 export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
 
@@ -11,7 +11,7 @@ export type Task = {
   notes?: string;
   week: number;
   type: TaskType;
-  status: TaskStatus;
+  status: StatusTask;
   estimatedEffort: number;
   actualEffort: number;
   subtasks?: Subtask[];

@@ -8,7 +8,7 @@ import { withAuthSimple } from '@/lib/auth/api';
 import { calculateTaskDueDate } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 export type BatchUpdateRequest = {
   action: 'update' | 'delete';
@@ -63,7 +63,7 @@ async function handleBatchOperation(
           processedUpdates.subtasks = taskUpdate.subtasks.map(subtask => ({
             ...subtask,
             id: subtask.id || crypto.randomUUID(),
-            status: subtask.status ?? TaskStatus.TODO,
+            status: subtask.status ?? StatusTask.TODO,
           }));
         }
 
@@ -100,7 +100,7 @@ async function handleBatchOperation(
         processedUpdates.subtasks = updates.subtasks.map(subtask => ({
           ...subtask,
           id: subtask.id || crypto.randomUUID(),
-          status: subtask.status ?? TaskStatus.TODO,
+          status: subtask.status ?? StatusTask.TODO,
         }));
       }
 

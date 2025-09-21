@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 export function useTask() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,7 @@ export function useTask() {
       estimatedEffort: number;
       dueDate: Date;
       type: TaskType;
-      status: TaskStatus;
+      status: StatusTask;
     };
   }) => {
     setError(null);
@@ -30,7 +30,7 @@ export function useTask() {
           tasks: [
             {
               ...newTask,
-              status: TaskStatus.TODO,
+              status: StatusTask.TODO,
               dueDate: newTask.dueDate.toISOString(),
             },
           ],
@@ -47,9 +47,55 @@ export function useTask() {
   return { addTask, isLoading, error };
 }
 
-export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatus): Promise<{
+export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
+  }
+
+  return response.json() as Promise<Task[]>;
+};
+
+export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<Task[]> => {
+  const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch tasks');
+  }
+
+  return response.json() as Promise<Task[]>;
+};
+
+export const updateStatusTask = async (taskId: string, status: StatusTask): Promise<void> => {
+  const response = await fetch(`/api/tasks/${taskId}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update task status');
+  }
+};
+
+export const updateDueDateTask = async (taskId: string, dueDate: Date): Promise<void> => {
+  const response = await fetch(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      dueDate: dueDate.toISOString(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update task due date');
+  }
+};
+
+export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTask): Promise<{
   updatedCount: number;
-  status: TaskStatus;
+  status: StatusTask;
   updatedTasks: Task[];
 }> => {
   const response = await fetch('/api/tasks/batch/status', {
@@ -64,31 +110,9 @@ export const batchUpdateTaskStatus = async (taskIds: string[], status: TaskStatu
 
   return response.json() as Promise<{
     updatedCount: number;
-    status: TaskStatus;
+    status: StatusTask;
     updatedTasks: Task[];
   }>;
-};
-
-export const updateTaskStatus = async (taskId: string, status: TaskStatus): Promise<void> => {
-  const response = await fetch(`/api/tasks/${taskId}/status`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to update task status');
-  }
-};
-
-export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
-  const response = await fetch(`/api/tasks/focus?filter=${filter}`);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch focus tasks: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<Task[]>;
 };
 
 export async function deleteTask(taskId: string, fetchCourse?: () => Promise<void>) {

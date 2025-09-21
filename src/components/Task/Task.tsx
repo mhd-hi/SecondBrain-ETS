@@ -1,17 +1,17 @@
 'use client';
 
 import type { DraggedTask } from '@/types/drag-drop';
+import type { StatusTask } from '@/types/status-task';
 import type { Task as TaskType } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 import { useDraggable } from '@dnd-kit/core';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
-import { TaskStatusChanger } from '@/components/Task/TaskStatusChanger';
+import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { Badge } from '@/components/ui/badge';
 
 type TaskProps = {
   task: TaskType;
   sourceDate: Date;
-  onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
+  onStatusChange: (taskId: string, newStatus: StatusTask) => void;
   isDragOverlay?: boolean;
 };
 
@@ -70,9 +70,9 @@ export const Task = ({
         />
 
         <div className="mt-2">
-          <TaskStatusChanger
+          <StatusTaskChanger
             currentStatus={task.status}
-            onStatusChange={(newStatus: TaskStatus) => onStatusChange(task.id, newStatus)}
+            onStatusChange={(newStatus: StatusTask) => onStatusChange(task.id, newStatus)}
           />
         </div>
       </div>

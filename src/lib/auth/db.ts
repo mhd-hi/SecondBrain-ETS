@@ -2,7 +2,7 @@ import type { SQL } from 'drizzle-orm';
 import type { Subtask } from '@/types/subtask';
 import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
-import { parseTaskStatus } from '@/lib/task/util';
+import { parseStatusTask } from '@/lib/task/util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 
@@ -63,7 +63,7 @@ export async function getUserCourseTasks(courseId: string, userId: string) {
     const mapped: Subtask = {
       id: String(s.id),
       title: String(s.title),
-      status: parseTaskStatus(String(s.status)),
+      status: parseStatusTask(String(s.status)),
       notes: s.notes == null ? undefined : String(s.notes),
       estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
     };

@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useCourse } from '@/hooks/use-course';
 import {
   calculateProgress,
   getCompletedTasksCount,
@@ -23,7 +24,7 @@ import {
   getTotalTasksCount,
   getUpcomingTask,
 } from '@/lib/task';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 
 type CourseCardProps = {
   course: Course;
@@ -34,6 +35,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const [showColorDialog, setShowColorDialog] = useState(false);
   const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
   const [pendingColor, setPendingColor] = useState(selectedColor);
+  const { updateCourseColor } = useCourse(course.id);
   const tasks = course.tasks ?? [];
   const displayColor = selectedColor || course.color || '#3b82f6';
 
@@ -61,17 +63,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const handleConfirmColor = async () => {
     try {
-      // TODO: move in hook
-      const res = await fetch(`/api/courses/${course.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ color: pendingColor }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to update course color');
-      }
+      await updateCourseColor(pendingColor);
       setSelectedColor(pendingColor);
       setShowColorDialog(false);
       toast.success('Course color updated');
@@ -195,7 +187,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 />
               </Link>
             </div>
-            {nextTask.dueDate && nextTask.status !== TaskStatus.COMPLETED && (
+            {nextTask.dueDate && nextTask.status !== StatusTask.COMPLETED && (
               <div className="flex items-center mb-2">
                 <DueDateDisplay
                   date={nextTask.dueDate}
@@ -221,7 +213,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
                 />
               </Link>
             </div>
-            {upcomingTask.dueDate && upcomingTask.status !== TaskStatus.COMPLETED && (
+            {upcomingTask.dueDate && upcomingTask.status !== StatusTask.COMPLETED && (
               <div className="flex items-center">
                 <DueDateDisplay
                   date={upcomingTask.dueDate}

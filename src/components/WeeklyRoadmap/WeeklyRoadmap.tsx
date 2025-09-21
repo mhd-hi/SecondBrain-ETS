@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
 import { useCoursesContext } from '@/contexts/use-courses';
+import { fetchWeeklyTasks, updateDueDateTask, updateStatusTask } from '@/hooks/use-task';
 import { getWeekDates, getWeekStart } from '@/lib/date/util';
 import {
   createTransitionState,
@@ -25,7 +26,7 @@ import {
   getTransitionDirectionFromOffset,
   resetTransitionState,
 } from '@/lib/ui-transitions/util';
-import { TaskStatus } from '@/types/task-status';
+import { StatusTask } from '@/types/status-task';
 import { DayColumn } from './DayColumn';
 import { NavigationControls } from './NavigationControls';
 
@@ -74,11 +75,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekStart.getDate() + 7);
 
-        const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch tasks');
-        }
-        const weekTasks = await response.json() as TaskType[];
+        const weekTasks = await fetchWeeklyTasks(weekStart, weekEnd);
 
         // Shorter delay for more responsive feel
         const timeoutId = setTimeout(() => {
@@ -116,7 +113,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     setWeekOffset(0);
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+  const handleStatusChange = async (taskId: string, newStatus: StatusTask) => {
     // Optimistic update - update UI immediately
     setTasks(prevTasks =>
       prevTasks.map(task =>
@@ -125,15 +122,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     );
 
     try {
-      const response = await fetch(`/api/tasks/${taskId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task status');
-      }
+      await updateStatusTask(taskId, newStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
@@ -142,7 +131,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       setTasks(prevTasks =>
         prevTasks.map(task =>
           task.id === taskId
-            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || TaskStatus.TODO }
+            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || StatusTask.TODO }
             : task,
         ),
       );
@@ -196,17 +185,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     );
 
     try {
-      const response = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dueDate: targetDate.toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update task due date');
-      }
+      await updateDueDateTask(task.id, targetDate);
     } catch (error) {
       // REVERT ON ERROR
       setTasks(prevTasks =>
@@ -219,17 +198,19 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
     }
   };
 
-  const handleTaskAdded = () => {
+  const handleTaskAdded = async () => {
     // Reload tasks for the current week
     const weekStart = getWeekStart(weekOffset);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
 
-    void fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`)
-      .then(response => response.json())
-      .then((weekTasks: TaskType[]) => {
-        setTasks(weekTasks);
-      });
+    try {
+      const weekTasks = await fetchWeeklyTasks(weekStart, weekEnd);
+      setTasks(weekTasks);
+    } catch (error) {
+      console.error('Failed to reload tasks:', error);
+      toast.error('Failed to reload tasks');
+    }
   };
 
   const weekDates = getWeekDates(weekOffset);

@@ -1,0 +1,70 @@
+import type { CourseInputFormProps } from '@/types/dialog/add-course-dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+export function CourseInputForm({
+  courseCode,
+  setCourseCode,
+  term,
+  setTerm,
+  availableTerms,
+  isProcessing,
+  currentStep,
+  onSubmit,
+}: CourseInputFormProps) {
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (currentStep === 'idle' && courseCode.trim()) {
+          void onSubmit();
+        }
+      }}
+    >
+      <div className="space-y-2">
+        <Label htmlFor="courseCode">Course code: </Label>
+        <div className="flex gap-2">
+          <Input
+            id="courseCode"
+            value={courseCode}
+            onChange={(e) => {
+              const value = e.target.value.toUpperCase();
+              // Limit length to prevent excessively long inputs
+              if (value.length <= 10) {
+                setCourseCode(value);
+              }
+            }}
+            placeholder="(e.g. MAT145, LOG210)"
+            disabled={isProcessing}
+            maxLength={10}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && currentStep === 'idle' && courseCode.trim()) {
+                e.preventDefault();
+                void onSubmit();
+              }
+            }}
+          />
+          {availableTerms.length > 0 && (
+            <Select
+              value={term}
+              onValueChange={setTerm}
+              disabled={isProcessing}
+            >
+              <SelectTrigger aria-label="Term">
+                <SelectValue placeholder="Select term" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableTerms.map(t => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </div>
+    </form>
+  );
+}

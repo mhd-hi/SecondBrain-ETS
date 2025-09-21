@@ -2,8 +2,8 @@
 
 import type { CourseApiResponse } from '@/types/api/course';
 import type { Course } from '@/types/course';
+import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
-import type { TaskStatus } from '@/types/task-status';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
 import { ErrorHandlers } from '@/lib/error/util';
@@ -44,12 +44,39 @@ export function useCourse(courseId: string) {
     );
   }, [courseId]);
 
-  const getFilteredTasks = useCallback((status?: TaskStatus) => {
+  const getFilteredTasks = useCallback((status?: StatusTask) => {
     if (!status) {
       return tasks;
     }
     return tasks.filter(task => task.status === status);
   }, [tasks]);
+
+  const updateCourseColor = useCallback(async (color: string) => {
+    await withLoadingAndErrorHandling(
+      async () => {
+        const res = await fetch(`/api/courses/${courseId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ color }),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to update course color');
+        }
+
+        // Update the local course state with the new color
+        setCourse(prevCourse =>
+          prevCourse ? { ...prevCourse, color } : prevCourse,
+        );
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to update course color');
+        ErrorHandlers.api(error, 'Failed to update course color');
+      },
+    );
+  }, [courseId]);
 
   return {
     course,
@@ -60,6 +87,7 @@ export function useCourse(courseId: string) {
     getFilteredTasks,
     setCourse,
     setTasks,
+    updateCourseColor,
   };
 }
 
