@@ -1,10 +1,24 @@
-import type { Term, TermBuildInput, TrimesterKey } from '@/types/term';
+import type { Term, TermBuildInput, TrimesterDates, TrimesterKey } from '@/types/term';
 import { TRIMESTER_DIGIT } from '@/types/term';
+
+// Term ID validation regex - expects format YYYY[1-3]
+const TERM_ID_REGEX = /^\d{4}[1-3]$/;
+
+// Expected format YYYY[1-3]
+export const isValidTermId = (termId: string): boolean => {
+    return TERM_ID_REGEX.test(termId);
+};
+
+export const validateTermId = (termId: string): void => {
+    if (!isValidTermId(termId)) {
+        throw new Error(`Invalid term ID format: ${termId}. Expected format: YYYY[1-3]`);
+    }
+};
 
 // convert PlanETS numeric term code (e.g. '20252') to a localized label
 export const convertTermCodeToLabel = (code: string) => {
     // Expect format YYYY[1-3]
-    if (!/\d{4}[1-3]$/.test(code)) {
+    if (!isValidTermId(code)) {
         return code;
     }
 
@@ -32,7 +46,7 @@ export const buildTerm = (term: TermBuildInput): Term => {
 // Canonical term helpers used across the app.
 export const STANDARD_WEEKS_PER_TERM = 15;
 
-const getTrimesterDates = () => {
+const getTrimesterDates = (): TrimesterDates => {
     const currentYear = new Date().getFullYear();
 
     return {
@@ -51,24 +65,24 @@ const getTrimesterDates = () => {
             end: new Date(currentYear, 11, 18),
             weeks: STANDARD_WEEKS_PER_TERM,
         },
-    } as const;
+    };
 };
 
 export const TRIMESTER_DATES = getTrimesterDates();
 
-export function getCurrentTerm(): keyof typeof TRIMESTER_DATES | null {
+export function getCurrentTerm(): TrimesterKey | null {
     const now = new Date();
 
     for (const [term, dates] of Object.entries(TRIMESTER_DATES)) {
         if (now >= dates.start && now <= dates.end) {
-            return term as keyof typeof TRIMESTER_DATES;
+            return term as TrimesterKey;
         }
     }
 
     return null;
 }
 
-export function getNextTerm(): keyof typeof TRIMESTER_DATES {
+export function getNextTerm(): TrimesterKey {
     const now = new Date();
 
     if (now < TRIMESTER_DATES.winter.start) {

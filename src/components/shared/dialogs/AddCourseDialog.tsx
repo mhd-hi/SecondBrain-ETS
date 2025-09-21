@@ -23,6 +23,7 @@ import { checkCourseExists } from '@/hooks/use-course';
 import { useTerms } from '@/hooks/use-terms';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
 import { PipelineErrorHandlers } from '@/lib/error/util';
+import { isValidTermId } from '@/lib/term/util';
 
 type AddCourseDialogProps = {
   onCourseAdded?: () => void;
@@ -130,17 +131,16 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     }
 
     // Course doesn't exist, proceed with normal processing
-    const TERM_ID_RE = /^\d{4}[1-3]$/;
     if (!term) {
       toast.error('Please select a term');
       return;
     }
 
     let termToUse = term;
-    if (!TERM_ID_RE.test(termToUse)) {
+    if (!isValidTermId(termToUse)) {
       // Try light normalization: remove leading zeros and test again
       const cleaned = termToUse.replace(/^0+/, '');
-      if (TERM_ID_RE.test(cleaned)) {
+      if (isValidTermId(cleaned)) {
         termToUse = cleaned;
       } else {
         toast.error('Selected term id looks invalid. Please pick a valid term.');

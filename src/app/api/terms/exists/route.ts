@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { withAuthSimple } from '@/lib/auth/api';
-import { buildTerm, getCurrentTerm, getNextTerm, nextTerm, prevTerm } from '@/lib/term/util';
+import { buildTerm, getCurrentTerm, getNextTerm, isValidTermId, nextTerm, prevTerm } from '@/lib/term/util';
 import { db } from '@/server/db';
 
 // Returns and ensures previous, current and next sessions exist in terms table.
@@ -21,9 +21,8 @@ export const GET = withAuthSimple(async (_request, _user) => {
   const terms = [buildTerm(prevInfo), buildTerm(currentInfo), buildTerm(nextInfo)];
 
   // Validate IDs and only insert well-formed term ids (YYYY[1-3])
-  const TERM_ID_RE = /\d{4}[1-3]$/;
   for (const t of terms) {
-    if (!TERM_ID_RE.test(t.id)) {
+    if (!isValidTermId(t.id)) {
       console.error(`Skipping malformed term ID: ${t.id}`);
       continue;
     }

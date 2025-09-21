@@ -38,3 +38,5 @@ export const TRIMESTER_LABEL: Record<TrimesterKey, string> = {
 };
 
 export type TermBuildInput = { trimester: TrimesterKey; year: number };
+
+export type TrimesterDates = Record<TrimesterKey, { start: Date; end: Date; weeks: number }>;
