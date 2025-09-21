@@ -1,5 +1,5 @@
 import type { Term, TermBuildInput, TrimesterDates, TrimesterKey } from '@/types/term';
-import { TRIMESTER_DIGIT } from '@/types/term';
+import { TRIMESTER, TRIMESTER_DIGIT } from '@/types/term';
 
 // Term ID validation regex - expects format YYYY[1-3]
 const TERM_ID_REGEX = /^\d{4}[1-3]$/;
@@ -50,17 +50,17 @@ const getTrimesterDates = (): TrimesterDates => {
     const currentYear = new Date().getFullYear();
 
     return {
-        winter: {
+        [TRIMESTER.WINTER]: {
             start: new Date(currentYear, 0, 5),
             end: new Date(currentYear, 3, 27),
             weeks: STANDARD_WEEKS_PER_TERM,
         },
-        summer: {
+        [TRIMESTER.SUMMER]: {
             start: new Date(currentYear, 4, 1),
             end: new Date(currentYear, 7, 16),
             weeks: STANDARD_WEEKS_PER_TERM,
         },
-        autumn: {
+        [TRIMESTER.AUTUMN]: {
             start: new Date(currentYear, 8, 2),
             end: new Date(currentYear, 11, 18),
             weeks: STANDARD_WEEKS_PER_TERM,
@@ -73,9 +73,11 @@ export const TRIMESTER_DATES = getTrimesterDates();
 export function getCurrentTerm(): TrimesterKey | null {
     const now = new Date();
 
-    for (const [term, dates] of Object.entries(TRIMESTER_DATES)) {
+    // Iterate over the known trimester keys to ensure type safety
+    for (const term of Object.values(TRIMESTER)) {
+        const dates = TRIMESTER_DATES[term];
         if (now >= dates.start && now <= dates.end) {
-            return term as TrimesterKey;
+            return term;
         }
     }
 
@@ -85,41 +87,41 @@ export function getCurrentTerm(): TrimesterKey | null {
 export function getNextTerm(): TrimesterKey {
     const now = new Date();
 
-    if (now < TRIMESTER_DATES.winter.start) {
-        return 'winter';
-    } else if (now < TRIMESTER_DATES.summer.start) {
-        return 'summer';
-    } else if (now < TRIMESTER_DATES.autumn.start) {
-        return 'autumn';
+    if (now < TRIMESTER_DATES[TRIMESTER.WINTER].start) {
+        return TRIMESTER.WINTER;
+    } else if (now < TRIMESTER_DATES[TRIMESTER.SUMMER].start) {
+        return TRIMESTER.SUMMER;
+    } else if (now < TRIMESTER_DATES[TRIMESTER.AUTUMN].start) {
+        return TRIMESTER.AUTUMN;
     } else {
-        return 'winter';
+        return TRIMESTER.WINTER;
     }
 }
 
 export const prevTerm = (trimester: TrimesterKey, year: number) => {
-    if (trimester === 'winter') {
-        return { trimester: 'autumn' as const, year: year - 1 };
+    if (trimester === TRIMESTER.WINTER) {
+        return { trimester: TRIMESTER.AUTUMN, year: year - 1 };
     }
 
-    if (trimester === 'summer') {
-        return { trimester: 'winter' as const, year };
+    if (trimester === TRIMESTER.SUMMER) {
+        return { trimester: TRIMESTER.WINTER, year };
     }
 
     // autumn
-    return { trimester: 'summer' as const, year };
+    return { trimester: TRIMESTER.SUMMER, year };
 };
 
 export const nextTerm = (trimester: TrimesterKey, year: number) => {
-    if (trimester === 'autumn') {
-        return { trimester: 'winter' as const, year: year + 1 };
+    if (trimester === TRIMESTER.AUTUMN) {
+        return { trimester: TRIMESTER.WINTER, year: year + 1 };
     }
 
-    if (trimester === 'winter') {
-        return { trimester: 'summer' as const, year };
+    if (trimester === TRIMESTER.WINTER) {
+        return { trimester: TRIMESTER.SUMMER, year };
     }
 
     // summer
-    return { trimester: 'autumn' as const, year };
+    return { trimester: TRIMESTER.AUTUMN, year };
 };
 
 /**
@@ -133,23 +135,23 @@ export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): 
     // Determine which term the due date falls into
     let trimester: TrimesterKey;
 
-    if (dueDate >= TRIMESTER_DATES.winter.start && dueDate <= TRIMESTER_DATES.winter.end) {
-        trimester = 'winter';
-    } else if (dueDate >= TRIMESTER_DATES.summer.start && dueDate <= TRIMESTER_DATES.summer.end) {
-        trimester = 'summer';
-    } else if (dueDate >= TRIMESTER_DATES.autumn.start && dueDate <= TRIMESTER_DATES.autumn.end) {
-        trimester = 'autumn';
+    if (dueDate >= TRIMESTER_DATES[TRIMESTER.WINTER].start && dueDate <= TRIMESTER_DATES[TRIMESTER.WINTER].end) {
+        trimester = TRIMESTER.WINTER;
+    } else if (dueDate >= TRIMESTER_DATES[TRIMESTER.SUMMER].start && dueDate <= TRIMESTER_DATES[TRIMESTER.SUMMER].end) {
+        trimester = TRIMESTER.SUMMER;
+    } else if (dueDate >= TRIMESTER_DATES[TRIMESTER.AUTUMN].start && dueDate <= TRIMESTER_DATES[TRIMESTER.AUTUMN].end) {
+        trimester = TRIMESTER.AUTUMN;
     } else {
         // If the date doesn't fall in any term, find the closest one
         const now = new Date();
-        if (now < TRIMESTER_DATES.winter.start) {
-            trimester = 'winter';
-        } else if (now < TRIMESTER_DATES.summer.start) {
-            trimester = 'summer';
-        } else if (now < TRIMESTER_DATES.autumn.start) {
-            trimester = 'autumn';
+        if (now < TRIMESTER_DATES[TRIMESTER.WINTER].start) {
+            trimester = TRIMESTER.WINTER;
+        } else if (now < TRIMESTER_DATES[TRIMESTER.SUMMER].start) {
+            trimester = TRIMESTER.SUMMER;
+        } else if (now < TRIMESTER_DATES[TRIMESTER.AUTUMN].start) {
+            trimester = TRIMESTER.AUTUMN;
         } else {
-            trimester = 'winter';
+            trimester = TRIMESTER.WINTER;
         }
     }
 
