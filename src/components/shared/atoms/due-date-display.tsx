@@ -4,8 +4,8 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { formatDueDate } from '@/lib/date/util';
 import { cn } from '@/lib/utils';
+import { formatDueDate } from '@/lib/utils/date-util';
 
 type DueDateDisplayProps = {
   date: Date | string | null; // Accept Date, string, or null

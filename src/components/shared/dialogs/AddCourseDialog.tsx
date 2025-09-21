@@ -17,9 +17,9 @@ import {
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
 import { useTerms } from '@/hooks/use-terms';
-import { isValidCourseCode, normalizeCourseCode } from '@/lib/course/util';
-import { isValidTermId } from '@/lib/term/util';
-import { PipelineErrorHandlers } from '@/lib/utils/error';
+import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
+import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
+import { isValidTermId } from '@/lib/utils/term-util';
 import { ActionButtons } from './ActionButtons';
 import { CourseInputForm } from './CourseInputForm';
 import { ProcessingSteps } from './ProcessingSteps';

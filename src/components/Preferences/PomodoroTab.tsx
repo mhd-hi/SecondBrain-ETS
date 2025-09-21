@@ -10,9 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { playSelectedNotificationSound } from '@/lib/audio/util';
 import { loadPomodoroSettings, savePomodoroSettings } from '@/lib/localstorage/pomodoro';
 import { initialPomodoroSettingsState, pomodoroSettingsReducer } from '@/lib/localstorage/pomodoro-settings-reducer';
+import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
 export function PomodoroTab() {
   const [state, dispatch] = useReducer(pomodoroSettingsReducer, initialPomodoroSettingsState);

@@ -2,8 +2,8 @@ import type { NewTaskInput, UpdateTaskInput } from '@/types/api/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
-import { calculateTaskDueDate } from '@/lib/task/util';
-import { calculateWeekFromDueDate } from '@/lib/term/util';
+import { calculateDueDateTask } from '@/lib/utils/task/task-util';
+import { calculateWeekFromDueDate } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 
 export const GET = withAuthSimple(
@@ -61,7 +61,7 @@ export const POST = withAuthSimple(
         })),
         dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
           ? userProvidedDueDate
-          : calculateTaskDueDate(task.week || 1),
+          : calculateDueDateTask(task.week || 1),
       };
     });
 
@@ -99,7 +99,7 @@ export const PATCH = withAuthSimple(
         status: subtask.status ?? StatusTask.TODO,
       })),
       notes: updates.notes,
-      dueDate: updates.week ? calculateTaskDueDate(updates.week) : undefined,
+      dueDate: updates.week ? calculateDueDateTask(updates.week) : undefined,
     } as Partial<typeof import('@/server/db/schema').tasks.$inferInsert> & { subtasks?: Partial<typeof import('@/server/db/schema').subtasks.$inferInsert>[] };
 
     const updatedTask = await updateUserTask(id, user.id, payload);

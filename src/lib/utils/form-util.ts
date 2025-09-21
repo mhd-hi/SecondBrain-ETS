@@ -1,8 +1,6 @@
 import type { ChangeEvent } from 'react';
 
-/**
- * Generic form change handler that updates a form state object
- */
+// Generic form change handler that updates a form state object
 export const handleFormChange = <T extends Record<string, string | number | boolean | Date | null | undefined>>(
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   setFormData: React.Dispatch<React.SetStateAction<T>>,
@@ -14,9 +12,7 @@ export const handleFormChange = <T extends Record<string, string | number | bool
   }));
 };
 
-/**
- * Generic form submit handler that updates a form state object with a timestamp
- */
+// Generic form submit handler that updates a form state object with a timestamp
 export const handleFormSubmit = async <T extends Record<string, string | number | boolean | Date | null | undefined>>(
   e: React.FormEvent,
   formData: T,

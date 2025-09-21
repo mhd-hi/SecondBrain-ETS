@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { withAuthSimple } from '@/lib/auth/api';
-import { buildTerm, getCurrentTerm, getNextTerm, isValidTermId, nextTerm, prevTerm } from '@/lib/term/util';
+import { buildTerm, getCurrentTerm, getNextTerm, isValidTermId, nextTerm, prevTerm } from '@/lib/utils/term-util';
 import { db } from '@/server/db';
 
 // Returns and ensures previous, current and next sessions exist in terms table.

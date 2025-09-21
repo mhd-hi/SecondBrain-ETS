@@ -1,7 +1,7 @@
 'use client';
 
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import type { TransitionState } from '@/lib/ui-transitions/util';
+import type { TransitionState } from '@/lib/utils/ui-transition-util';
 import type { DraggedTask, DropTargetData } from '@/types/drag-drop';
 import type { Task as TaskType } from '@/types/task';
 import {
@@ -18,14 +18,14 @@ import { toast } from 'sonner';
 import { Task } from '@/components/Task/Task';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { fetchWeeklyTasks, updateDueDateTask, updateStatusTask } from '@/hooks/use-task';
-import { getWeekDates, getWeekStart } from '@/lib/date/util';
+import { getWeekDates, getWeekStart } from '@/lib/utils/date-util';
 import {
   createTransitionState,
   getTransitionClasses,
   getTransitionDirection,
   getTransitionDirectionFromOffset,
   resetTransitionState,
-} from '@/lib/ui-transitions/util';
+} from '@/lib/utils/ui-transition-util';
 import { StatusTask } from '@/types/status-task';
 import { DayColumn } from './DayColumn';
 import { NavigationControls } from './NavigationControls';

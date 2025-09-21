@@ -14,10 +14,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
-import { api } from '@/lib/api/util';
-import { handleConfirm } from '@/lib/dialog/util';
-import { getOverdueTasks } from '@/lib/task/util';
-import { ErrorHandlers } from '@/lib/utils/error';
+import { api } from '@/lib/utils/api/api-util';
+import { handleConfirm } from '@/lib/utils/dialog-util';
+import { ErrorHandlers } from '@/lib/utils/errors/error';
+import { getOverdueTasks } from '@/lib/utils/task/task-util';
 import { StatusTask } from '@/types/status-task';
 
 type CoursePageProps = {

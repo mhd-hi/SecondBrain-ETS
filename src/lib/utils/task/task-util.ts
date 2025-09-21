@@ -1,9 +1,9 @@
 import type { Task } from '@/types/task';
 import type { TrimesterKey } from '@/types/term';
 
-import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/term/util';
+import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
-import { calculateWeeksBetweenDates } from '../date/util';
+import { calculateWeeksBetweenDates } from '../date-util';
 
 /**
  * Calculates the due date for a task based on the trimester, week number, and total course weeks
@@ -39,7 +39,7 @@ export function calculateDueDate(
   return dueDate;
 }
 
-export function calculateTaskDueDate(week: number, totalCourseWeeks = 15): Date {
+export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date {
   // Reuse existing helpers to avoid duplicating term-detection logic.
   // If currently inside a trimester, use that; otherwise use the next trimester.
   const trimester = getCurrentTerm() ?? getNextTerm();
@@ -215,3 +215,32 @@ export const getOverdueTasks = (tasks: Task[], excludeStatuses: StatusTask[] = [
     return dueDate < today;
   });
 };
+
+/**
+ * Formats effort hours to "1h 30min" format
+ * @param hours - The number of hours (can be decimal)
+ * @returns Formatted string like "1h 30min" or "30min" for less than 1 hour
+ */
+export function formatEffortTime(hours: number): string {
+  if (hours === 0) {
+    return '0min';
+  }
+
+  const wholeHours = Math.floor(hours);
+  const minutes = Math.round((hours - wholeHours) * 60);
+
+  // For very small values, show at least 1min
+  if (wholeHours === 0 && minutes === 0 && hours > 0) {
+    return '1min';
+  }
+
+  if (wholeHours === 0) {
+    return `${minutes}min`;
+  }
+
+  if (minutes === 0) {
+    return `${wholeHours}h`;
+  }
+
+  return `${wholeHours}h ${minutes}min`;
+}

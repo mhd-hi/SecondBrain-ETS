@@ -3,9 +3,9 @@ import type { AuthenticatedUser } from '@/lib/auth/api';
 import type { Task } from '@/types/task';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
-import { successResponse } from '@/lib/api/server-util';
 import { withAuthSimple } from '@/lib/auth/api';
-import { calculateTaskDueDate } from '@/lib/task/util';
+import { successResponse } from '@/lib/utils/api/server-util';
+import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';
@@ -55,7 +55,7 @@ async function handleBatchOperation(
 
         // If week is provided but dueDate is not, calculate dueDate from week
         if (taskUpdate.week && !taskUpdate.dueDate) {
-          processedUpdates.dueDate = calculateTaskDueDate(taskUpdate.week);
+          processedUpdates.dueDate = calculateDueDateTask(taskUpdate.week);
         }
 
         // Process subtasks if they exist
@@ -92,7 +92,7 @@ async function handleBatchOperation(
 
       // If week is provided but dueDate is not, calculate dueDate from week
       if (updates?.week && !updates?.dueDate) {
-        processedUpdates.dueDate = calculateTaskDueDate(updates.week);
+        processedUpdates.dueDate = calculateDueDateTask(updates.week);
       }
 
       // Process subtasks if they exist

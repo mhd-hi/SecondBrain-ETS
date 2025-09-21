@@ -7,8 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { getNextStatusTask, getStatusBgClass, getStatusTextClass, isValidStatusTask, TASK_STATUS_CONFIG } from '@/lib/task';
 import { cn } from '@/lib/utils';
+import { getNextStatusTask, getStatusBgClass, getStatusTextClass, isValidStatusTask, TASK_STATUS_CONFIG } from '@/lib/utils/task';
 import { StatusTask } from '@/types/status-task';
 
 type StatusTaskChangerProps = {

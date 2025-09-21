@@ -4,9 +4,9 @@ import CourseCard from '@/components/Boards/Course/CourseCard';
 import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
-import { api, handleApiSuccess } from '@/lib/api/util';
-import { handleConfirm } from '@/lib/dialog/util';
-import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/error';
+import { api, handleApiSuccess } from '@/lib/utils/api/api-util';
+import { handleConfirm } from '@/lib/utils/dialog-util';
+import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/errors/error';
 
 export function CourseListTile() {
   const { courses, isLoading, error, deleteCourse, refreshCourses } = useCoursesContext();

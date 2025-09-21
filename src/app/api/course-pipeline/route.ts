@@ -1,7 +1,7 @@
 import type { PipelineStepRequest, PipelineStepResult } from '@/types/pipeline';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { assertValidCourseCode } from '@/lib/course/util';
+import { assertValidCourseCode } from '@/lib/utils/course';
 import { OpenAIProcessor, PlanetsDataSource } from '@/pipelines/server-pipeline';
 
 // Endpoint for step-by-step course processing

@@ -2,18 +2,7 @@
 import type { Task } from '@/types/task';
 import { OpenAI } from 'openai';
 import { env } from '@/env';
-import { StatusTask } from '@/types/status-task';
-import { USE_MOCK_DATA } from '../../../../lib/config';
-import { setMockOpenAI } from '../../../../lib/mocks/helper';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';
-
-// Custom error class for mock data issues
-export class MockDataError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'MockDataError';
-  }
-}
 
 // Lazy initialization to avoid errors during build time
 let openaiInstance: OpenAI | null = null;
@@ -35,54 +24,13 @@ export type ParseAIResult = {
   logs: string[];
 };
 
-export async function parseContentWithAI(html: string, courseCode?: string): Promise<ParseAIResult> {
+export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
   const logs: string[] = [];
   const log = (...args: unknown[]) => {
     const message = args.join(' ');
     console.log(...args);
     logs.push(message);
   };
-
-  // Check if we should use mock data
-  if (USE_MOCK_DATA) {
-    log('Mock mode enabled - returning mock data');
-
-    if (!courseCode) {
-      throw new MockDataError('Course code is required when using mock data');
-    }
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    try {
-      const mockData = setMockOpenAI(courseCode);
-      log('Mock data returned successfully for', courseCode, '. Generated', mockData.tasks.length, 'tasks');
-      return {
-        tasks: mockData.tasks.map(task => ({
-          title: task.title,
-          notes: task.notes,
-          week: task.week,
-          type: task.type,
-          status: StatusTask.TODO,
-          estimatedEffort: task.estimatedEffort,
-          actualEffort: 0,
-          subtasks: task.subtasks?.map(subtask => ({
-            id: crypto.randomUUID(),
-            title: subtask.title,
-            status: StatusTask.TODO,
-            notes: subtask.notes,
-            estimatedEffort: subtask.estimatedEffort,
-          })),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          dueDate: new Date(), // This will be calculated properly later
-        })),
-        logs,
-      };
-    } catch (error) {
-      // Re-throw mock data errors with the MockDataError type
-      throw new MockDataError(error instanceof Error ? error.message : 'Failed to get mock data');
-    }
-  }
 
   // Real OpenAI processing
   // 1) Build the AI prompt

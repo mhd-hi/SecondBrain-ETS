@@ -1,6 +1,6 @@
 'use client';
 
-import type { ConfirmOptions } from '@/lib/dialog/util';
+import type { ConfirmOptions } from '@/lib/utils/dialog-util';
 import type { ConfirmDialogContextType, ConfirmFunction } from '@/types/dialog/confirmation-dialog';
 
 import { AlertTriangle } from 'lucide-react';
@@ -15,8 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { GlobalConfirmDialogContext } from '@/lib/dialog/hooks';
-import { setGlobalConfirmFunction } from '@/lib/dialog/util';
+import { GlobalConfirmDialogContext } from '@/contexts/confirmation-dialog-context';
+import { setGlobalConfirmFunction } from '@/lib/utils/dialog-util';
 
 type DialogState = {
   isOpen: boolean;

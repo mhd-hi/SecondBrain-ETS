@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatWeekRange } from '@/lib/date/util';
+import { formatWeekRange } from '@/lib/utils/date-util';
 
 type NavigationControlsProps = {
   weekDates: Date[];

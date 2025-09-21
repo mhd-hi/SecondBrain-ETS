@@ -7,7 +7,7 @@ import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { completePomodoroSession, fetchPomodoroStreak } from '@/hooks/use-pomodoro';
-import { playSelectedNotificationSound } from '@/lib/audio/util';
+import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 import { PomodoroContext } from './pomodoro-context';
 
 const DEFAULT_WORK_DURTION = 25;

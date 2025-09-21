@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
-import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserCourse, getUserCourse, getUserCourseTasks } from '@/lib/auth/db';
+import { successResponse } from '@/lib/utils/api/server-util';
 import { db } from '@/server/db';
 import { courses } from '@/server/db/schema';
 

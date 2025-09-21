@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import type { AuthenticatedUser } from '@/lib/auth/api';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { getTasksForWeek } from '@/lib/task/queries';
+import { getTasksForWeek } from '@/lib/utils/task/queries';
 
 async function handleGetWeeklyTasks(
   request: NextRequest,

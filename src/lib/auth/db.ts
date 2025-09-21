@@ -2,7 +2,7 @@ import type { SQL } from 'drizzle-orm';
 import type { Subtask } from '@/types/subtask';
 import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
-import { parseStatusTask } from '@/lib/task/util';
+import { parseStatusTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 

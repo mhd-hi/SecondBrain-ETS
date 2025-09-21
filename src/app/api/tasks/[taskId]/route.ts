@@ -2,10 +2,10 @@ import type { NextRequest } from 'next/server';
 import type { AuthenticatedUser } from '@/lib/auth/api';
 import type { Task } from '@/types/task';
 import { NextResponse } from 'next/server';
-import { successResponse } from '@/lib/api/server-util';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
-import { calculateTaskDueDate } from '@/lib/task/util';
+import { successResponse } from '@/lib/utils/api/server-util';
+import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { StatusTask } from '@/types/status-task';
 
 async function handlePatchTask(
@@ -27,7 +27,7 @@ async function handlePatchTask(
 
   // If week is provided but dueDate is not, calculate dueDate from week
   if (updates.week && !updates.dueDate) {
-    processedUpdates.dueDate = calculateTaskDueDate(updates.week);
+    processedUpdates.dueDate = calculateDueDateTask(updates.week);
   }
 
   // Process subtasks if they exist

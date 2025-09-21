@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserCourse, getUserCourses } from '@/lib/auth/db';
-import { generateRandomCourseColor } from '@/lib/utils';
+import { generateRandomCourseColor } from '@/lib/utils/colors-util';
 
 export const GET = withAuthSimple(
   async (request, user) => {

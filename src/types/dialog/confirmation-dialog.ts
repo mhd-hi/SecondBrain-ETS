@@ -1,4 +1,4 @@
-import type { ConfirmOptions } from '@/lib/dialog/util';
+import type { ConfirmOptions } from '@/lib/utils/dialog-util';
 
 type ConfirmFunction = (options: ConfirmOptions) => Promise<boolean>;
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { getUserCourses } from '@/lib/auth/db';
-import { assertValidCourseCode } from '@/lib/course/util';
+import { assertValidCourseCode } from '@/lib/utils/course';
 
 export const GET = withAuthSimple(
   async (request, user) => {

@@ -3,7 +3,7 @@ import type { Task } from '@/types/task';
 import { and, eq, gte, inArray, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { parseStatusTask } from '@/lib/task/util';
+import { parseStatusTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 

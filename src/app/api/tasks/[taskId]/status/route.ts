@@ -3,7 +3,7 @@ import type { AuthenticatedUser } from '@/lib/auth/api';
 import type { StatusTask } from '@/types/status-task';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
-import { updateStatusTask } from '@/lib/task/queries';
+import { updateStatusTask } from '@/lib/utils/task/queries';
 
 async function handleUpdateStatusTask(
   request: NextRequest,

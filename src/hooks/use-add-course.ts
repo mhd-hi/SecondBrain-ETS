@@ -4,8 +4,8 @@ import type { CourseAIResponse } from '@/types/api/ai';
 import type { PipelineStepResult } from '@/types/pipeline';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { assertValidCourseCode } from '@/lib/course/util';
-import { calculateTaskDueDate } from '@/lib/task';
+import { assertValidCourseCode } from '@/lib/utils/course';
+import { calculateDueDateTask } from '@/lib/utils/task';
 import { checkCourseExists } from './use-course';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
@@ -130,7 +130,7 @@ async function createTasks(courseId: string, parsedData: CourseAIResponse): Prom
       courseId,
       tasks: parsedData.tasks.map(task => ({
         ...task,
-        dueDate: calculateTaskDueDate(task.week).toISOString(),
+        dueDate: calculateDueDateTask(task.week).toISOString(),
       })),
     }),
   });

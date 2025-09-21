@@ -34,7 +34,7 @@ export class PlanetsDataSource implements DataSource {
 
 export class OpenAIProcessor {
   async process(combinedData: string, courseCode: string, term: string): Promise<CourseAIResponse> {
-    const result = await parseContentWithAI(combinedData, courseCode);
+    const result = await parseContentWithAI(combinedData);
 
     return {
       courseCode,
@@ -283,6 +283,3 @@ export async function processCourse(courseCode: string, term: string): Promise<C
   const result = await pipeline.process({ courseCode, term });
   return result.courseData;
 }
-
-// Export legacy name for backward compatibility
-export const UnifiedCourseProcessingPipeline = ServerCourseProcessingPipeline;
