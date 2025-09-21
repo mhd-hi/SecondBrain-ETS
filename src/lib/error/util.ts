@@ -33,13 +33,6 @@ export const ErrorHandlers = {
   },
 
   /**
-   * Network error handler
-   */
-  network: (error: unknown) => {
-    console.error('Network Error:', error);
-    toast.error('Network error. Please check your connection and try again.');
-  },
-  /**
    * Generic error handler with customizable message
    */
   generic: (error: unknown, userMessage = 'Something went wrong') => {

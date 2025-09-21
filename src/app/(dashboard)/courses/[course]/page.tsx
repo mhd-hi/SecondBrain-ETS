@@ -16,6 +16,7 @@ import { useCourse } from '@/hooks/use-course';
 import { updateSubtaskStatus } from '@/hooks/use-subtask';
 import { batchUpdateTaskStatus, deleteTask, updateTaskStatus } from '@/hooks/use-task';
 import { api } from '@/lib/api/util';
+import { handleConfirm } from '@/lib/dialog/util';
 import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task/util';
 import { TaskStatus } from '@/types/task-status';
@@ -130,7 +131,6 @@ export default function CoursePage({ params }: CoursePageProps) {
 
     try {
       // Confirm deletion using the existing dialog util
-      const { handleConfirm } = await import('@/lib/dialog/util');
       await handleConfirm(
         'Are you sure you want to delete this course? This action cannot be undone.',
         async () => {

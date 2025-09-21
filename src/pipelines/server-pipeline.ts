@@ -12,6 +12,8 @@ import type {
   SourceResult,
   StepStatus,
 } from '@/types/pipeline';
+import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai';
+import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
 
 // Server-side data source implementations
 export class PlanetsDataSource implements DataSource {
@@ -22,7 +24,6 @@ export class PlanetsDataSource implements DataSource {
     if (!term) {
       throw new Error('Term id is required for PlanETS fetch');
     }
-    const { fetchPlanETSContent } = await import('@/pipelines/add-course-data/steps/planets');
     const result = await fetchPlanETSContent(courseCode, term);
 
     if (!result.html || result.html.trim().length < 100) {
@@ -39,7 +40,6 @@ export class PlanetsDataSource implements DataSource {
 
 export class OpenAIProcessor {
   async process(combinedData: string, courseCode: string, term: string): Promise<CourseAIResponse> {
-    const { parseContentWithAI } = await import('@/pipelines/add-course-data/steps/ai/openai');
     const result = await parseContentWithAI(combinedData, courseCode);
 
     return {
