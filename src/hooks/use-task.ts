@@ -3,8 +3,8 @@ import type { FilterType } from '@/types/todays-focus';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api/util';
-import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingState } from '@/lib/loading/util';
+import { ErrorHandlers } from '@/lib/utils/error';
 import { StatusTask } from '@/types/status-task';
 
 export function useTask() {

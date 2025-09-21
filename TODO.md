@@ -2,8 +2,6 @@
 
 ## Technical Debt
 - Fix "Default to winter if between sessions" smell (should select the next session)
-    - Add a input session dropdown when creating a course and select the right session
-
 ---
 
 # Features

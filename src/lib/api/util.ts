@@ -1,12 +1,12 @@
 'use client';
 
-import { ErrorHandlers } from '@/lib/error/util';
+import { ErrorHandlers } from '@/lib/utils/error';
 
 export {
   CommonErrorMessages,
   ErrorHandlers,
   handleApiSuccess,
-} from '@/lib/error/util';
+} from '@/lib/utils/error';
 
 /**
  * Generic API request handler that handles loading state and errors

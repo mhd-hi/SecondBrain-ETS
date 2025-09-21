@@ -5,8 +5,8 @@ import type { CourseListItem } from '@/types/api/course';
 import type { Course } from '@/types/course';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/api/util';
-import { ErrorHandlers } from '@/lib/error/util';
 import { getOverdueTasks } from '@/lib/task';
+import { ErrorHandlers } from '@/lib/utils/error';
 
 type CoursesContextType = {
   courses: Course[];

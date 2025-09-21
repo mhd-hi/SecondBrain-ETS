@@ -6,8 +6,8 @@ import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/api/util';
-import { ErrorHandlers } from '@/lib/error/util';
 import { withLoadingAndErrorHandling } from '@/lib/loading/util';
+import { ErrorHandlers } from '@/lib/utils/error';
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
