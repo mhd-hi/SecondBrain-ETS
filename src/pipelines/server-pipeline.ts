@@ -20,7 +20,7 @@ export class PlanetsDataSource implements DataSource {
   name = 'planets';
   description = 'PlanETS Course Content';
 
-  async fetch(courseCode: string, term?: string): Promise<SourceResult> {
+  async fetch(courseCode: string, term: string): Promise<SourceResult> {
     if (!term) {
       throw new Error('Term id is required for PlanETS fetch');
     }
