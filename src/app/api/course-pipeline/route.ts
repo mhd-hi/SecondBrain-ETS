@@ -1,4 +1,4 @@
-import type { PipelineStepRequest, PipelineStepResult } from '@/types/pipeline';
+import type { PipelineStepRequest, PipelineStepResult } from '@/types/server-pipelines/pipelines';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { assertValidCourseCode } from '@/lib/utils/course';

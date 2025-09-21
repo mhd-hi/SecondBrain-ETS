@@ -1,8 +1,5 @@
 # Bugs
-
-## Technical Debt
-- Fix "Default to winter if between sessions" smell (should select the next session)
----
+- Add sentry (throw, log, error, debug, warning)
 
 # Features
 ## Stories:
@@ -19,24 +16,16 @@
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
 -  Add intra date information in description of intra task (cheerio).
--   Add an input dropdown for selecting session when fetching data from planets (e.g., current session, last sessions).
-
-### Story: PlanETS Integration Improvements
-- Enhance PlanETS error handling and session selection (5 points)
-    -   Handle cases where PlanETS doesn't have data in the current session or some sessions.
-    -   Pass the session parameter to the user so they can choose their session.
-    -   Add better error handling when PlanETS data is not found.
-    -   Check the response when the session is not valid.
-
-### Story: Kanban Board
-- Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
 
 ### Story: Integrations
+-   Add link to Quick actions in dashboard.
+-   Or if user not connected, maybe ask him to.
+
 - Add Google Calendar integration (5 points)
     -   Add Google Calendar in new Integrations page.
 
--   Add link to Quick actions in dashboard.
--   Or if user not connected, maybe ask him to.
+### Story: Kanban Board
+- Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
 
 ### Story: Roadmap Features
 - Implement Monthly roadmap for better task visualization and movement (3 points)

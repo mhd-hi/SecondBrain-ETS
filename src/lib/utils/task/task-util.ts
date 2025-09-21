@@ -1,17 +1,10 @@
 import type { Task } from '@/types/task';
+
 import type { TrimesterKey } from '@/types/term';
-
-import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils/term-util';
+import { calculateWeeksBetweenDates, getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
-import { calculateWeeksBetweenDates } from '../date-util';
 
-/**
- * Calculates the due date for a task based on the trimester, week number, and total course weeks
- * @param trimester The trimester (winter, summer, autumn)
- * @param week The week number of the task
- * @param totalCourseWeeks The total number of weeks in the course
- * @returns The calculated due date
- */
+// Calculates the due date for a task based on the trimester, week number, and total course weeks
 export function calculateDueDate(
   trimester: TrimesterKey,
   week: number,

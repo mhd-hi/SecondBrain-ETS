@@ -3,10 +3,6 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { auth } from '@/server/auth';
 
-/**
- * Enhanced authentication utilities for API routes
- */
-
 export type AuthenticatedUser = {
   id: string;
   email?: string;

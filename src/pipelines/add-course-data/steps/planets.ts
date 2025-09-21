@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/pipelines/planets-util';
 
 export type PlanETSContent = {
   html: string;
@@ -14,7 +15,7 @@ export async function fetchPlanETSContent(courseCode: string, term: string): Pro
   };
 
   // 1) Build PlanETS URL
-  const planUrl = `https://planets.etsmtl.ca/public/Contenu.aspx?session=${term}&sigle=${courseCode}&groupe=00`;
+  const planUrl = buildPlanETSURL(courseCode, term);
   log(`Fetching course plan from: ${planUrl}`);
 
   // 2) Fetch the PlanETS page

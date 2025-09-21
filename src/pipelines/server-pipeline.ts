@@ -6,7 +6,7 @@ import type {
   ProcessingStep,
   SourceResult,
   StepStatus,
-} from '@/types/pipeline';
+} from '@/types/server-pipelines/pipelines';
 import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai';
 import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
 
@@ -144,7 +144,7 @@ export class ServerCourseProcessingPipeline {
       return { stepStatus, logs };
     }
 
-    // Step 2: Process with OpenAI (only if planets succeeded)
+    // Step 2: Process with OpenAI
     if (htmlData) {
       stepStatus.openai = { ...stepStatus.openai, status: 'loading', startTime: new Date() };
 
@@ -272,14 +272,4 @@ export class ServerCourseProcessingPipeline {
   getLogs(): string[] {
     return [...this.logs];
   }
-}
-
-// Convenience function for simple usage
-export async function processCourse(courseCode: string, term: string): Promise<CourseAIResponse> {
-  if (!term) {
-    throw new Error('Term id is required');
-  }
-  const pipeline = new ServerCourseProcessingPipeline();
-  const result = await pipeline.process({ courseCode, term });
-  return result.courseData;
 }
