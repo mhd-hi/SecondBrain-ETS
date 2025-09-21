@@ -169,6 +169,7 @@ export const PipelineErrorHandlers = {
     // Course not found errors
     const courseNotFoundPatterns = [
       'failed to fetch course data',
+      'fetch course data',
       'course not found',
       'not available for the current term',
     ];
@@ -180,6 +181,7 @@ export const PipelineErrorHandlers = {
     // Parsing errors
     const parsingPatterns = [
       'failed to parse course content',
+      'parse course content',
       'parsing error',
       'unable to process',
     ];
