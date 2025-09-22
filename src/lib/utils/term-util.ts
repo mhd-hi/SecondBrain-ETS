@@ -60,18 +60,18 @@ const getTrimesterDates = (): TrimesterDates => {
 
     return {
         [TRIMESTER.WINTER]: {
-            start: new Date(currentYear, 0, 5),
-            end: new Date(currentYear, 3, 27),
+            start: new Date(currentYear, 0, 5), // January 5
+            end: new Date(currentYear, 3, 27), // April 27
             weeks: STANDARD_WEEKS_PER_TERM,
         },
         [TRIMESTER.SUMMER]: {
-            start: new Date(currentYear, 4, 1),
-            end: new Date(currentYear, 7, 16),
+            start: new Date(currentYear, 4, 1), // May 1
+            end: new Date(currentYear, 7, 15), // August 15
             weeks: STANDARD_WEEKS_PER_TERM,
         },
         [TRIMESTER.AUTUMN]: {
-            start: new Date(currentYear, 8, 2),
-            end: new Date(currentYear, 11, 18),
+            start: new Date(currentYear, 8, 2), // September 2
+            end: new Date(currentYear, 11, 18), // December 18
             weeks: STANDARD_WEEKS_PER_TERM,
         },
     };

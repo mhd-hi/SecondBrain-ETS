@@ -1,6 +1,6 @@
 import type { StatusTask } from '@/types/status-task';
 import type { Subtask } from '@/types/subtask';
-import { api } from '@/lib/utils/api/api-util';
+import { api } from '@/lib/utils/api/api-client-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 
 export async function createSubtask(taskId: string, payload: {

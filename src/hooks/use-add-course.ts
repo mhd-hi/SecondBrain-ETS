@@ -4,9 +4,10 @@ import type { CourseAIResponse } from '@/types/api/ai';
 import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { checkCourseExists } from '@/hooks/use-course';
+import { createPlanETSLink } from '@/hooks/use-link';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTask } from '@/lib/utils/task';
-import { checkCourseExists } from './use-course';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
@@ -231,6 +232,12 @@ export function useAddCourse(): UseAddCourseReturn {
       await createTasks(course.id, aiData);
       setStepStatus(prev => ({ ...prev, 'create-tasks': 'success' }));
 
+      // Create PlanETS Link in background (no UI step)
+      createPlanETSLink(course.id, courseCode.trim(), term).catch((err) => {
+        // Silently handle errors for background link creation
+        console.warn('Failed to create PlanETS link:', err);
+      });
+
       setCurrentStep('completed');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -241,7 +248,9 @@ export function useAddCourse(): UseAddCourseReturn {
         ? 'planets'
         : currentStep === 'openai'
           ? 'openai'
-          : currentStep === 'create-course' ? 'create-course' : 'create-tasks';
+          : currentStep === 'create-course'
+            ? 'create-course'
+            : 'create-tasks';
 
       setStepStatus(prev => ({
         ...prev,

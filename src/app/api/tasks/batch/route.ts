@@ -4,7 +4,7 @@ import type { Task } from '@/types/task';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { successResponse } from '@/lib/utils/api/api-util';
+import { successResponse } from '@/lib/utils/api/api-server-util';
 import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';

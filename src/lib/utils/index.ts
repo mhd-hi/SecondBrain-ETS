@@ -1,4 +1,4 @@
-export * from './api/api-util';
+export * from './api/api-client-util';
 export * from './api/loading-util';
 export * from './api/server-util';
 export * from './audio-util';

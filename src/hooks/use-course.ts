@@ -5,7 +5,7 @@ import type { Course } from '@/types/course';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { useCallback, useState } from 'react';
-import { api } from '@/lib/utils/api/api-util';
+import { api } from '@/lib/utils/api/api-client-util';
 import { withLoadingAndErrorHandling } from '@/lib/utils/api/loading-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 

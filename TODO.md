@@ -1,6 +1,5 @@
 # Bugs
 - Add sentry (throw, log, error, debug, warning)
-- Add les congés
 # Features
 ## Stories:
 

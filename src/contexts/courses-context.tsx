@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import type { CourseListItem } from '@/types/api/course';
 import type { Course } from '@/types/course';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import { api } from '@/lib/utils/api/api-util';
+import { api } from '@/lib/utils/api/api-client-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 import { getOverdueTasks } from '@/lib/utils/task';
 

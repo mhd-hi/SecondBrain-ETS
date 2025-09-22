@@ -5,16 +5,22 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import CourseLinks from '@/components/Links/CourseLinks';
 import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
+import AddLinkDialog from '@/components/shared/dialogs/AddLinkDialog';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskCard } from '@/components/Task/TaskCard';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
+
 import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
-import { api } from '@/lib/utils/api/api-util';
+
+import { api } from '@/lib/utils/api/api-client-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 import { getOverdueTasks } from '@/lib/utils/task/task-util';
@@ -31,12 +37,12 @@ export default function CoursePage({ params }: CoursePageProps) {
   const unwrappedParams = use(params);
   const courseId = unwrappedParams.course;
 
-  // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 
   useEffect(() => {
     void fetchCourses();
@@ -230,9 +236,25 @@ export default function CoursePage({ params }: CoursePageProps) {
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
             onDeleteCourse={handleDeleteCourse}
+            onAddLink={() => setLinkDialogOpen(true)}
+          />
+          <AddLinkDialog
+            courseId={course?.id}
+            open={linkDialogOpen}
+            onOpenChange={setLinkDialogOpen}
+            onLinkCreated={() => {
+              void fetchCourse();
+            }}
           />
         </div>
       </div>
+
+      {/* Course links panel */}
+      {course && (
+        <section className="mb-6">
+          <CourseLinks courseId={course.id} refresh={fetchCourse} />
+        </section>
+      )}
 
       <div className="flex items-center gap-4 mb-10">
         <SearchBar
@@ -317,3 +339,5 @@ export default function CoursePage({ params }: CoursePageProps) {
     </main>
   );
 }
+
+// CourseLinks moved to a dedicated client component at src/components/Links/CourseLinks.tsx
