@@ -1,3 +1,4 @@
+import type { CustomLinkItem } from './custom-link';
 import type { Task } from './task';
 
 export type Course = {
@@ -9,6 +10,7 @@ export type Course = {
   createdAt: Date;
   updatedAt: Date;
   tasks?: Task[];
+  links?: CustomLinkItem[];
 };
 
 export type CourseCreateRequest = {

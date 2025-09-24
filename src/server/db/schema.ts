@@ -2,6 +2,7 @@ import type { AdapterAccountType } from 'next-auth/adapters';
 import { relations, sql } from 'drizzle-orm';
 import {
   date,
+  index,
   integer,
   json,
   pgTable,
@@ -145,7 +146,14 @@ export const links = pgTable('links', {
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, table => ({
+  // Composite index for the main query: WHERE user_id = ? AND course_id = ?
+  userCourseIdx: index('idx_links_user_course').on(table.userId, table.courseId),
+  // Index for user-specific queries (dashboard links where course_id IS NULL)
+  userIdx: index('idx_links_user_id').on(table.userId),
+  // Index for course-specific queries
+  courseIdx: index('idx_links_course_id').on(table.courseId),
+}));
 
 export const coursesCache = pgTable('courses_cache', {
   id: uuid('id').primaryKey().defaultRandom(),

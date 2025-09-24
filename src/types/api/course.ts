@@ -1,3 +1,4 @@
+import type { CustomLinkItem } from '@/types/custom-link';
 import type { StatusTask } from '@/types/status-task';
 import type { TaskType } from '@/types/task';
 
@@ -23,6 +24,7 @@ export type CourseApiResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
+    links: CustomLinkItem[];
 };
 
 export type CourseListItem = {

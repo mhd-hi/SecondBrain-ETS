@@ -9,6 +9,7 @@ const protectedApiRoutes = [
   '/api/pomodoro',
   '/api/course-pipeline',
   '/api/parse-course',
+  '/api/links',
 ];
 
 // Define public API routes that should not be protected

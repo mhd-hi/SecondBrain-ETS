@@ -1,35 +1,29 @@
 'use client';
 
-import type { Link, LinkItem } from '@/types/link';
+import type { CustomLink, CustomLinkItem } from '@/types/custom-link';
+
 import { useCallback, useEffect, useState } from 'react';
+
 import { api } from '@/lib/utils/api/api-client-util';
-import { buildPlanETSUrl } from '@/lib/utils/link-util';
+import { buildPlanETSUrl, DEFAULT_IMAGES } from '@/lib/utils/url-util';
+import { LINK_TYPES } from '@/types/custom-link';
 
-const DEFAULT_IMAGES: Record<Link, string> = {
-    PlanETS: '/assets/logo_planets.png',
-    Moodle: '/assets/moodle.webp',
-    NotebookLM: '/assets/notebooklm.png',
-    Spotify: '/assets/spotify.png',
-    Youtube: '/assets/youtube.svg',
-    custom: '/assets/pochita.webp',
-};
-
-export function useLinks(courseId?: string) {
-    const [links, setLinks] = useState<LinkItem[]>([]);
+export function useCustomLink(courseId?: string) {
+    const [links, setCustomLinks] = useState<CustomLinkItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchLinks = useCallback(async () => {
+    const fetchCustomLinks = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
             const url = courseId ? `/api/links?courseId=${encodeURIComponent(courseId)}` : '/api/links';
-            const res = await api.get<{ success: boolean; links: LinkItem[] }>(url, 'Failed to load links');
+            const res = await api.get<{ success: boolean; links: CustomLinkItem[] }>(url, 'Failed to load links');
             const items = (res.links ?? []).map(l => ({
                 ...l,
-                imageUrl: l.imageUrl ?? DEFAULT_IMAGES[(l.type as Link) ?? 'custom'],
+                imageUrl: l.imageUrl ?? DEFAULT_IMAGES[(l.type as CustomLink) ?? LINK_TYPES.CUSTOM],
             }));
-            setLinks(items);
+            setCustomLinks(items);
         } catch (err) {
             setError((err as Error).message ?? 'Unknown error');
         } finally {
@@ -38,25 +32,25 @@ export function useLinks(courseId?: string) {
     }, [courseId]);
 
     useEffect(() => {
-        fetchLinks();
-    }, [fetchLinks]);
+        fetchCustomLinks();
+    }, [fetchCustomLinks]);
 
-    const createLink = useCallback(async (data: { title: string; url: string; type?: Link; imageUrl?: string | null; courseId?: string | null }) => {
+    const createCustomLink = useCallback(async (data: { title: string; url: string; type?: CustomLink; imageUrl?: string | null; courseId?: string | null }) => {
         setLoading(true);
         try {
             const payload = {
                 title: data.title,
                 url: data.url,
-                type: data.type ?? 'custom',
+                type: data.type ?? LINK_TYPES.CUSTOM,
                 imageUrl: data.imageUrl ?? null,
                 courseId: data.courseId ?? courseId ?? null,
             };
-            const created = await api.post<{ success: boolean; link: LinkItem }>('/api/links', payload, 'Failed to create link');
+            const created = await api.post<{ success: boolean; link: CustomLinkItem }>('/api/links', payload, 'Failed to create link');
             const item = {
                 ...created.link,
-                imageUrl: created.link.imageUrl ?? DEFAULT_IMAGES[(created.link.type as Link) ?? 'custom'],
+                imageUrl: created.link.imageUrl ?? DEFAULT_IMAGES[(created.link.type as CustomLink) ?? LINK_TYPES.CUSTOM],
             };
-            setLinks(prev => [item, ...prev]);
+            setCustomLinks(prev => [item, ...prev]);
             return item;
         } catch (err) {
             setError((err as Error).message ?? 'Unknown error');
@@ -66,11 +60,11 @@ export function useLinks(courseId?: string) {
         }
     }, [courseId]);
 
-    const deleteLink = useCallback(async (id: string) => {
+    const deleteCustomLink = useCallback(async (id: string) => {
         setLoading(true);
         try {
             await api.delete(`/api/links/${encodeURIComponent(id)}`, 'Failed to delete link');
-            setLinks(prev => prev.filter(l => l.id !== id));
+            setCustomLinks(prev => prev.filter(l => l.id !== id));
             return true;
         } catch (err) {
             setError((err as Error).message ?? 'Unknown error');
@@ -84,9 +78,9 @@ export function useLinks(courseId?: string) {
         links,
         loading,
         error,
-        fetchLinks,
-        createLink,
-        deleteLink,
+        fetchCustomLinks,
+        createCustomLink,
+        deleteCustomLink,
     };
 }
 
@@ -94,9 +88,9 @@ export async function createPlanETSLink(courseId: string, courseCode: string, te
     const planetsUrl = buildPlanETSUrl(courseCode, term);
 
     const payload = {
-        title: 'PlanETS',
+        title: LINK_TYPES.PLANETS,
         url: planetsUrl,
-        type: 'PlanETS',
+        type: LINK_TYPES.PLANETS,
         courseId,
     };
 

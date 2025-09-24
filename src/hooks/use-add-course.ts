@@ -5,7 +5,7 @@ import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { checkCourseExists } from '@/hooks/use-course';
-import { createPlanETSLink } from '@/hooks/use-link';
+import { createPlanETSLink } from '@/hooks/use-custom-link';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTask } from '@/lib/utils/task';
 

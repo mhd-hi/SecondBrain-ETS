@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/link-util';
+import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/url-util';
 
 export type PlanETSContent = {
   html: string;

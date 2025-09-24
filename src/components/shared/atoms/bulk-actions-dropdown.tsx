@@ -15,12 +15,12 @@ export function BulkActionsDropdown({
   overdueCount,
   onCompleteAll,
   onDeleteCourse,
-  onAddLink,
+  onAddCustomLink,
 }: {
   overdueCount: number;
   onCompleteAll: () => void;
   onDeleteCourse?: () => void;
-  onAddLink?: () => void;
+  onAddCustomLink?: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -34,7 +34,7 @@ export function BulkActionsDropdown({
     },
     {
       label: 'Add custom link',
-      onClick: () => onAddLink && onAddLink(),
+      onClick: () => onAddCustomLink && onAddCustomLink(),
     },
   ];
 

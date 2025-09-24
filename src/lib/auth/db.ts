@@ -14,6 +14,7 @@ export async function getUserCourses(userId: string) {
     where: eq(courses.userId, userId),
     with: {
       tasks: true,
+      links: true,
     },
   });
 }
@@ -26,6 +27,7 @@ export async function getUserCourse(courseId: string, userId: string) {
     where: and(eq(courses.id, courseId), eq(courses.userId, userId)),
     with: {
       tasks: true,
+      links: true,
     },
   });
 

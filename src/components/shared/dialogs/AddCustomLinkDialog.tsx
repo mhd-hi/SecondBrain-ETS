@@ -1,9 +1,9 @@
 'use client';
 
-import type { Link as LinkType } from '@/types/link';
+import type { CustomLink as LinkType } from '@/types/custom-link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import LinkForm from '@/components/Links/LinkForm';
+import CustomLinkForm from '@/components/Links/CustomLinkForm';
 import {
   Dialog,
   DialogContent,
@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useLinks } from '@/hooks/use-link';
+import { useCustomLink } from '@/hooks/use-custom-link';
 
-type AddLinkDialogProps = {
+type AddCustomLinkDialogProps = {
   courseId?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -22,7 +22,7 @@ type AddLinkDialogProps = {
   trigger?: React.ReactNode;
 };
 
-export const AddLinkDialog = ({ courseId, open, onOpenChange, onLinkCreated }: AddLinkDialogProps) => {
+export const AddCustomLinkDialog = ({ courseId, open, onOpenChange, onLinkCreated }: AddCustomLinkDialogProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const controlled = typeof open === 'boolean' && typeof onOpenChange === 'function';
   const dialogOpen = controlled ? open! : isOpen;
@@ -34,11 +34,11 @@ export const AddLinkDialog = ({ courseId, open, onOpenChange, onLinkCreated }: A
     }
   };
 
-  const { createLink } = useLinks(courseId);
+  const { createCustomLink } = useCustomLink(courseId);
 
   const handleCreate = async (data: { title: string; url: string; type: LinkType }) => {
     try {
-      await createLink({ title: data.title, url: data.url, type: data.type, courseId });
+      await createCustomLink({ title: data.title, url: data.url, type: data.type, courseId });
       toast.success('Link created');
       setDialogOpen(false);
       onLinkCreated?.();
@@ -57,7 +57,7 @@ export const AddLinkDialog = ({ courseId, open, onOpenChange, onLinkCreated }: A
           <DialogDescription>Add a custom link for this course</DialogDescription>
         </DialogHeader>
         <div className="py-2">
-          <LinkForm onCreate={handleCreate} initialCourseId={courseId} />
+          <CustomLinkForm onCreate={handleCreate} initialCourseId={courseId} />
         </div>
         <DialogFooter />
       </DialogContent>
@@ -65,4 +65,4 @@ export const AddLinkDialog = ({ courseId, open, onOpenChange, onLinkCreated }: A
   );
 };
 
-export default AddLinkDialog;
+export default AddCustomLinkDialog;

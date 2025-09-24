@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import CourseLinks from '@/components/Links/CourseLinks';
 import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
-import AddLinkDialog from '@/components/shared/dialogs/AddLinkDialog';
+import AddCustomLinkDialog from '@/components/shared/dialogs/AddCustomLinkDialog';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskCard } from '@/components/Task/TaskCard';
 
@@ -236,9 +236,9 @@ export default function CoursePage({ params }: CoursePageProps) {
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
             onDeleteCourse={handleDeleteCourse}
-            onAddLink={() => setLinkDialogOpen(true)}
+            onAddCustomLink={() => setLinkDialogOpen(true)}
           />
-          <AddLinkDialog
+          <AddCustomLinkDialog
             courseId={course?.id}
             open={linkDialogOpen}
             onOpenChange={setLinkDialogOpen}
@@ -252,7 +252,7 @@ export default function CoursePage({ params }: CoursePageProps) {
       {/* Course links panel */}
       {course && (
         <section className="mb-6">
-          <CourseLinks courseId={course.id} refresh={fetchCourse} />
+          <CourseLinks courseId={course.id} links={course.links} />
         </section>
       )}
 

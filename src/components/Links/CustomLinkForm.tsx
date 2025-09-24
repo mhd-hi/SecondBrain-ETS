@@ -1,6 +1,6 @@
 'use client';
 
-import type { Link as LinkType } from '@/types/link';
+import type { CustomLink as LinkType } from '@/types/custom-link';
 
 import Image from 'next/image';
 import React, { useState } from 'react';
@@ -12,40 +12,47 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { validateUrl } from '@/lib/utils/url-util';
+import { LINK_TYPES } from '@/types/custom-link';
 
 const PRESET_IMAGES: Record<LinkType, string> = {
-  PlanETS: '/assets/logo_planets.png',
-  Moodle: '/assets/moodle.png',
-  NotebookLM: '/assets/notebooklm.png',
-  Spotify: '/assets/spotify.png',
-  Youtube: '/assets/youtube.webp',
-  custom: '/assets/pochita.webp',
+  [LINK_TYPES.PLANETS]: '/assets/logo_planets.png',
+  [LINK_TYPES.MOODLE]: '/assets/moodle.png',
+  [LINK_TYPES.NOTEBOOK_LM]: '/assets/notebooklm.png',
+  [LINK_TYPES.SPOTIFY]: '/assets/spotify.png',
+  [LINK_TYPES.YOUTUBE]: '/assets/youtube.webp',
+  [LINK_TYPES.CUSTOM]: '/assets/pochita.webp',
 };
 
-export default function LinkForm({ onCreate, initialCourseId }: { onCreate: (data: { title: string; url: string; type: LinkType; imageUrl?: string | null; courseId?: string | null }) => Promise<void>; initialCourseId?: string }) {
-  const [title, setTitle] = useState('Moodle');
+export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate: (data: { title: string; url: string; type: LinkType; imageUrl?: string | null; courseId?: string | null }) => Promise<void>; initialCourseId?: string }) {
+  const [title, setTitle] = useState<string>(LINK_TYPES.MOODLE);
   const [url, setUrl] = useState('');
-  const [type, setType] = useState<LinkType>('Moodle');
-  const [imageUrl, setImageUrl] = useState<string | null>(PRESET_IMAGES.Moodle);
-  const [isTitleEdited, setIsTitleEdited] = useState(false);
+  const [type, setType] = useState<LinkType>(LINK_TYPES.MOODLE);
+  const [imageUrl, setImageUrl] = useState<string | null>(PRESET_IMAGES[LINK_TYPES.MOODLE]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
     if (!title || !url) {
       setError('Title and URL required');
       return;
     }
+
+    if (!validateUrl(url)) {
+      setError('Please enter a valid URL');
+      return;
+    }
+
     try {
       setLoading(true);
       await onCreate({ title, url, type, imageUrl: imageUrl ?? null, courseId: initialCourseId ?? null });
-      setTitle('Moodle');
-      setType('Moodle');
+      setTitle(LINK_TYPES.MOODLE);
+      setType(LINK_TYPES.MOODLE);
       setUrl('');
-      setImageUrl(PRESET_IMAGES.Moodle);
-      setIsTitleEdited(false);
+      setImageUrl(PRESET_IMAGES[LINK_TYPES.MOODLE]);
     } catch (err) {
       setError((err as Error).message ?? 'Failed');
     } finally {
@@ -56,14 +63,14 @@ export default function LinkForm({ onCreate, initialCourseId }: { onCreate: (dat
   const selectPreset = (t: LinkType) => {
     setType(t);
     setImageUrl(PRESET_IMAGES[t]);
-    // Auto-set title based on type unless user already edited it
-    if (!isTitleEdited) {
-      // For custom type leave title empty so user can enter one
-      if (t === 'custom') {
-        setTitle('');
-      } else {
-        setTitle(t);
-      }
+
+    // For recognized types, always set the title to the type name and disable editing
+    if (t === LINK_TYPES.CUSTOM) {
+      // For custom type, clear title and allow editing
+      setTitle('');
+    } else {
+      // For recognized types, set title to type name and mark as not user-edited
+      setTitle(t);
     }
   };
 
@@ -104,8 +111,9 @@ export default function LinkForm({ onCreate, initialCourseId }: { onCreate: (dat
                   value={title}
                   onChange={(e) => {
                     setTitle(e.target.value);
-                    setIsTitleEdited(true);
-                }}
+                  }}
+                  disabled={type !== LINK_TYPES.CUSTOM}
+                  className={type !== LINK_TYPES.CUSTOM ? 'text-muted-foreground bg-muted cursor-not-allowed' : ''}
                 />
             </div>
         </div>
