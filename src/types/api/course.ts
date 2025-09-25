@@ -24,7 +24,7 @@ export type CourseApiResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
-    links: CustomLinkItem[];
+    customLinks: CustomLinkItem[];
 };
 
 export type CourseListItem = {

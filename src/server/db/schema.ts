@@ -134,7 +134,7 @@ export const pomodoroDaily = pgTable('pomodoro_daily', {
   uniqUserDay: uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
 }));
 
-export const links = pgTable('links', {
+export const customLinks = pgTable('custom_links', {
   id: uuid('id').primaryKey().defaultRandom(),
   url: text('url').notNull(),
   title: text('title').notNull(),
@@ -148,11 +148,11 @@ export const links = pgTable('links', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, table => ({
   // Composite index for the main query: WHERE user_id = ? AND course_id = ?
-  userCourseIdx: index('idx_links_user_course').on(table.userId, table.courseId),
-  // Index for user-specific queries (dashboard links where course_id IS NULL)
-  userIdx: index('idx_links_user_id').on(table.userId),
+  userCourseIdx: index('idx_custom_links_user_course').on(table.userId, table.courseId),
+  // Index for user-specific queries (dashboard custom links where course_id IS NULL)
+  userIdx: index('idx_custom_links_user_id').on(table.userId),
   // Index for course-specific queries
-  courseIdx: index('idx_links_course_id').on(table.courseId),
+  courseIdx: index('idx_custom_links_course_id').on(table.courseId),
 }));
 
 export const coursesCache = pgTable('courses_cache', {
@@ -169,7 +169,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   courses: many(courses),
   tasks: many(tasks),
-  links: many(links),
+  customLinks: many(customLinks),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -183,12 +183,12 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
 export const coursesRelations = relations(courses, ({ one, many }) => ({
   user: one(users, { fields: [courses.userId], references: [users.id] }),
   tasks: many(tasks),
-  links: many(links),
+  customLinks: many(customLinks),
 }));
 
-export const linksRelations = relations(links, ({ one }) => ({
-  user: one(users, { fields: [links.userId], references: [users.id] }),
-  course: one(courses, { fields: [links.courseId], references: [courses.id] }),
+export const customLinksRelations = relations(customLinks, ({ one }) => ({
+  user: one(users, { fields: [customLinks.userId], references: [users.id] }),
+  course: one(courses, { fields: [customLinks.courseId], references: [courses.id] }),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({

@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import CourseLinks from '@/components/Links/CourseLinks';
+import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
 import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
 
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
@@ -162,11 +162,11 @@ export default function CoursePage({ params }: CoursePageProps) {
 
     try {
       await handleConfirm(
-        'Are you sure you want to delete all links for this course? This action cannot be undone.',
+        'Are you sure you want to delete all custom links for this course? This action cannot be undone.',
         async () => {
           const result = await deleteAllCourseLinks(course.id);
           toast.success(result.message);
-          // Refresh course to update the links
+          // Refresh course to update the custom links
           void fetchCourse();
         },
         undefined,
@@ -178,7 +178,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         },
       );
     } catch (error) {
-      ErrorHandlers.api(error, 'Failed to delete all links', 'CoursePage');
+      ErrorHandlers.api(error, 'Failed to delete all custom links', 'CoursePage');
     }
   };
 
@@ -273,10 +273,10 @@ export default function CoursePage({ params }: CoursePageProps) {
           <>
             {/* Course links panel */}
             <section className="mb-6">
-              <CourseLinks
+              <CourseCustomLinks
                 courseId={course.id}
-                links={course.links}
-                onLinksChange={fetchCourse}
+                customLinks={course.customLinks}
+                onCustomLinksChange={fetchCourse}
               />
             </section>
 
@@ -352,5 +352,3 @@ export default function CoursePage({ params }: CoursePageProps) {
     </main>
   );
 }
-
-// CourseLinks moved to a dedicated client component at src/components/Links/CourseLinks.tsx

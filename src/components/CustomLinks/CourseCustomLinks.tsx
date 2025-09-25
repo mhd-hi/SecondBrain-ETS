@@ -5,25 +5,25 @@ import type { CustomLinkItem } from '@/types/custom-link';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
-import CustomLinkTile from '@/components/Links/CustomLinkTile';
+import CustomLinkTile from '@/components/CustomLinks/CustomLinkTile';
 import AddCustomLinkDialog from '@/components/shared/dialogs/AddCustomLinkDialog';
 import { useCustomLink } from '@/hooks/use-custom-link';
 
-type CourseLinksProps = {
+type CourseCustomLinksProps = {
   courseId: string;
-  links?: CustomLinkItem[];
-  onLinksChange?: () => void; // Callback to refresh links from parent
+  customLinks?: CustomLinkItem[];
+  onCustomLinksChange?: () => void; // Callback to refresh links from parent
 };
 
-export default function CourseLinks({ courseId, links: propLinks, onLinksChange }: CourseLinksProps) {
+export default function CourseCustomLinks({ courseId, customLinks: propCustomLinks, onCustomLinksChange }: CourseCustomLinksProps) {
   // Only use the hook when no prop links are provided (fallback)
-  const { links: hookLinks } = useCustomLink(propLinks ? undefined : courseId);
+  const { customLinks: hookLinks } = useCustomLink(propCustomLinks ? undefined : courseId);
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Use prop links if provided, otherwise fall back to hook
-  const links = propLinks ?? hookLinks;
+  const customLinks = propCustomLinks ?? hookLinks;
 
-  const hasLinks = links.length > 0;
+  const hasLinks = customLinks.length > 0;
 
   return (
     <>
@@ -38,7 +38,7 @@ export default function CourseLinks({ courseId, links: propLinks, onLinksChange 
 
               {/* All links container with compact icon-only layout */}
               <div className="group/container flex flex-wrap gap-4 relative">
-                {links.map(l => (
+                {customLinks.map(l => (
                   <CustomLinkTile
                     key={l.id}
                     item={l}
@@ -70,8 +70,8 @@ export default function CourseLinks({ courseId, links: propLinks, onLinksChange 
         onLinkCreated={() => {
           setShowAddDialog(false);
           // If we have a callback to refresh, use it, otherwise the hook will handle it
-          if (onLinksChange) {
-            onLinksChange();
+          if (onCustomLinksChange) {
+            onCustomLinksChange();
           }
         }}
       />

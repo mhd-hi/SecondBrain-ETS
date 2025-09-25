@@ -28,7 +28,7 @@ export function useCourse(courseId: string) {
           updatedAt: new Date(task.updatedAt),
         }));
 
-        const linksWithImages = data.links.map(link => ({
+        const linksWithImages = data.customLinks.map(link => ({
           ...link,
           imageUrl: link.imageUrl ?? DEFAULT_IMAGES[link.type] ?? DEFAULT_IMAGES.custom,
         }));
@@ -38,7 +38,7 @@ export function useCourse(courseId: string) {
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
           tasks: tasksWithValidatedDates,
-          links: linksWithImages,
+          customLinks: linksWithImages,
         });
         setTasks(tasksWithValidatedDates);
       },

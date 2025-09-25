@@ -9,7 +9,7 @@ import { buildPlanETSUrl, DEFAULT_IMAGES } from '@/lib/utils/url-util';
 import { LINK_TYPES } from '@/types/custom-link';
 
 export function useCustomLink(courseId?: string) {
-    const [links, setCustomLinks] = useState<CustomLinkItem[]>([]);
+    const [customLinks, setCustomLinks] = useState<CustomLinkItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -17,9 +17,9 @@ export function useCustomLink(courseId?: string) {
         setLoading(true);
         setError(null);
         try {
-            const url = courseId ? `/api/links?courseId=${encodeURIComponent(courseId)}` : '/api/links';
-            const res = await api.get<{ success: boolean; links: CustomLinkItem[] }>(url, 'Failed to load links');
-            const items = (res.links ?? []).map(l => ({
+            const url = courseId ? `/api/custom-links?courseId=${encodeURIComponent(courseId)}` : '/api/custom-links';
+            const res = await api.get<{ success: boolean; customLinks: CustomLinkItem[] }>(url, 'Failed to load custom links');
+            const items = (res.customLinks ?? []).map(l => ({
                 ...l,
                 imageUrl: l.imageUrl ?? DEFAULT_IMAGES[(l.type as CustomLink) ?? LINK_TYPES.CUSTOM],
             }));
@@ -45,10 +45,10 @@ export function useCustomLink(courseId?: string) {
                 imageUrl: data.imageUrl ?? null,
                 courseId: data.courseId ?? courseId ?? null,
             };
-            const created = await api.post<{ success: boolean; link: CustomLinkItem }>('/api/links', payload, 'Failed to create link');
+            const created = await api.post<{ success: boolean; customLink: CustomLinkItem }>('/api/custom-links', payload, 'Failed to create link');
             const item = {
-                ...created.link,
-                imageUrl: created.link.imageUrl ?? DEFAULT_IMAGES[(created.link.type as CustomLink) ?? LINK_TYPES.CUSTOM],
+                ...created.customLink,
+                imageUrl: created.customLink.imageUrl ?? DEFAULT_IMAGES[(created.customLink.type as CustomLink) ?? LINK_TYPES.CUSTOM],
             };
             setCustomLinks(prev => [item, ...prev]);
             return item;
@@ -63,7 +63,7 @@ export function useCustomLink(courseId?: string) {
     const deleteCustomLink = useCallback(async (id: string) => {
         setLoading(true);
         try {
-            await api.delete(`/api/links/${encodeURIComponent(id)}`, 'Failed to delete link');
+            await api.delete(`/api/custom-links/${encodeURIComponent(id)}`, 'Failed to delete link');
             setCustomLinks(prev => prev.filter(l => l.id !== id));
             return true;
         } catch (err) {
@@ -78,7 +78,7 @@ export function useCustomLink(courseId?: string) {
         setLoading(true);
         try {
             const result = await api.delete<{ success: boolean; deletedCount: number; message: string }>(
-                `/api/links?courseId=${encodeURIComponent(courseId)}`,
+                `/api/custom-links?courseId=${encodeURIComponent(courseId)}`,
                 'Failed to delete all course links',
             );
             setCustomLinks(prev => prev.filter(l => l.courseId !== courseId));
@@ -92,7 +92,7 @@ export function useCustomLink(courseId?: string) {
     }, []);
 
     return {
-        links,
+        customLinks,
         loading,
         error,
         fetchCustomLinks,
@@ -112,12 +112,12 @@ export async function createPlanETSLink(courseId: string, courseCode: string, te
         courseId,
     };
 
-    await api.post('/api/links', payload, 'Failed to create PlanETS link');
+    await api.post('/api/custom-links', payload, 'Failed to create PlanETS link');
 }
 
 export const deleteAllCourseLinks = async (courseId: string) => {
     const result = await api.delete<{ success: boolean; deletedCount: number; message: string }>(
-        `/api/links?courseId=${encodeURIComponent(courseId)}`,
+        `/api/custom-links?courseId=${encodeURIComponent(courseId)}`,
         'Failed to delete all course links',
     );
     return result;

@@ -13,7 +13,7 @@ export function CourseSkeleton() {
         </div>
       </div>
 
-      {/* Course links skeleton */}
+      {/* Course custom links skeleton */}
       <section className="mb-6">
         <div className="rounded-lg flex flex-col">
           <div className="flex-1">

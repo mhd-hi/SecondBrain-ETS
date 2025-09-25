@@ -10,7 +10,7 @@ export type Course = {
   createdAt: Date;
   updatedAt: Date;
   tasks?: Task[];
-  links?: CustomLinkItem[];
+  customLinks?: CustomLinkItem[];
 };
 
 export type CourseCreateRequest = {

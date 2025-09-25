@@ -3,7 +3,7 @@
 import type { CustomLink as LinkType } from '@/types/custom-link';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import CustomLinkForm from '@/components/Links/CustomLinkForm';
+import CustomLinkForm from '@/components/CustomLinks/CustomLinkForm';
 import {
   Dialog,
   DialogContent,

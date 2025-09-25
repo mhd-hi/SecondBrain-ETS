@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { successResponse } from '@/lib/utils/api/api-server-util';
 import { db } from '@/server/db';
-import { links } from '@/server/db/schema';
+import { customLinks } from '@/server/db/schema';
 import { LINK_TYPES } from '@/types/custom-link';
 
 function validateAndNormalizeUrl(raw: unknown) {
@@ -32,13 +32,13 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
 
         let rows;
         if (courseId) {
-            rows = await db.select().from(links).where(and(eq(links.courseId, courseId), eq(links.userId, user.id)));
+            rows = await db.select().from(customLinks).where(and(eq(customLinks.courseId, courseId), eq(customLinks.userId, user.id)));
         } else {
             // dashboard/global links belong to the user and have null courseId
-            rows = await db.select().from(links).where(and(eq(links.userId, user.id), sql`${links.courseId} IS NULL`));
+            rows = await db.select().from(customLinks).where(and(eq(customLinks.userId, user.id), sql`${customLinks.courseId} IS NULL`));
         }
 
-        const response = successResponse({ success: true, links: rows });
+        const response = successResponse({ success: true, customLinks: rows });
 
         return response;
     } catch (err) {
@@ -65,7 +65,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
             return NextResponse.json({ success: false, error: msg }, { status: 400 });
         }
 
-        const inserted = await db.insert(links).values({
+        const inserted = await db.insert(customLinks).values({
             title,
             url: normalizedUrl,
             type,
@@ -93,8 +93,8 @@ export const DELETE = withAuth(async (req: NextRequest, { user }) => {
         }
 
         // Delete all links belonging to the user for this course
-        const deletedLinks = await db.delete(links)
-            .where(and(eq(links.courseId, courseId), eq(links.userId, user.id)))
+        const deletedLinks = await db.delete(customLinks)
+            .where(and(eq(customLinks.courseId, courseId), eq(customLinks.userId, user.id)))
             .returning();
 
         return successResponse({
