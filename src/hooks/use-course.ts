@@ -8,7 +8,8 @@ import { useCallback, useState } from 'react';
 import { api } from '@/lib/utils/api/api-client-util';
 import { withLoadingAndErrorHandling } from '@/lib/utils/api/loading-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
-import { DEFAULT_IMAGES } from '@/lib/utils/url-util';
+import { getDefaultImageFor } from '@/lib/utils/url-util';
+import { LINK_TYPES } from '@/types/custom-link';
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
@@ -30,7 +31,7 @@ export function useCourse(courseId: string) {
 
         const linksWithImages = data.customLinks.map(link => ({
           ...link,
-          imageUrl: link.imageUrl ?? DEFAULT_IMAGES[link.type] ?? DEFAULT_IMAGES.custom,
+          imageUrl: link.imageUrl ?? getDefaultImageFor(link.type ?? LINK_TYPES.CUSTOM),
         }));
 
         setCourse({

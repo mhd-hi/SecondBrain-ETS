@@ -5,7 +5,7 @@ import type { CustomLink, CustomLinkItem } from '@/types/custom-link';
 import { useCallback, useEffect, useState } from 'react';
 
 import { api } from '@/lib/utils/api/api-client-util';
-import { buildPlanETSUrl, DEFAULT_IMAGES } from '@/lib/utils/url-util';
+import { buildPlanETSUrl, getDefaultImageFor } from '@/lib/utils/url-util';
 import { LINK_TYPES } from '@/types/custom-link';
 
 export function useCustomLink(courseId?: string) {
@@ -21,7 +21,7 @@ export function useCustomLink(courseId?: string) {
             const res = await api.get<{ success: boolean; customLinks: CustomLinkItem[] }>(url, 'Failed to load custom links');
             const items = (res.customLinks ?? []).map(l => ({
                 ...l,
-                imageUrl: l.imageUrl ?? DEFAULT_IMAGES[(l.type as CustomLink) ?? LINK_TYPES.CUSTOM],
+                imageUrl: l.imageUrl ?? getDefaultImageFor(l.type ?? LINK_TYPES.CUSTOM),
             }));
             setCustomLinks(items);
         } catch (err) {
@@ -48,7 +48,7 @@ export function useCustomLink(courseId?: string) {
             const created = await api.post<{ success: boolean; customLink: CustomLinkItem }>('/api/custom-links', payload, 'Failed to create link');
             const item = {
                 ...created.customLink,
-                imageUrl: created.customLink.imageUrl ?? DEFAULT_IMAGES[(created.customLink.type as CustomLink) ?? LINK_TYPES.CUSTOM],
+                imageUrl: created.customLink.imageUrl ?? getDefaultImageFor(created.customLink.type ?? LINK_TYPES.CUSTOM),
             };
             setCustomLinks(prev => [item, ...prev]);
             return item;

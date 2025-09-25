@@ -12,14 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { DEFAULT_IMAGES, validateUrl } from '@/lib/utils/url-util';
+import { getDefaultImageFor, validateUrl } from '@/lib/utils/url-util';
 import { LINK_TYPES } from '@/types/custom-link';
 
 export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate: (data: { title: string; url: string; type: LinkType; imageUrl?: string | null; courseId?: string | null }) => Promise<void>; initialCourseId?: string }) {
   const [title, setTitle] = useState<string>(LINK_TYPES.MOODLE);
   const [url, setUrl] = useState('');
   const [type, setType] = useState<LinkType>(LINK_TYPES.MOODLE);
-  const [imageUrl, setImageUrl] = useState<string | null>(DEFAULT_IMAGES[LINK_TYPES.MOODLE]);
+  const [imageUrl, setImageUrl] = useState<string | null>(() => getDefaultImageFor(LINK_TYPES.MOODLE));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +43,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
       setTitle(LINK_TYPES.MOODLE);
       setType(LINK_TYPES.MOODLE);
       setUrl('');
-      setImageUrl(DEFAULT_IMAGES[LINK_TYPES.MOODLE]);
+  setImageUrl(getDefaultImageFor(LINK_TYPES.MOODLE));
     } catch (err) {
       setError((err as Error).message ?? 'Failed');
     } finally {
@@ -53,7 +53,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
 
   const selectPreset = (t: LinkType) => {
     setType(t);
-    setImageUrl(DEFAULT_IMAGES[t]);
+  setImageUrl(getDefaultImageFor(t));
 
     // For recognized types, always set the title to the type name and disable editing
     if (t === LINK_TYPES.CUSTOM) {
@@ -74,19 +74,19 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
                     <DropdownMenuTrigger asChild>
                     <Button variant="secondary" type="button" id="link-type-trigger" className="inline-flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                         <span className="flex items-center gap-2">
-                          <Image src={DEFAULT_IMAGES[type]} alt={type} width={20} height={20} className="rounded" />
+                          <Image src={getDefaultImageFor(type)} alt={type} width={20} height={20} className="rounded" />
                         </span>
                     </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                    {(Object.keys(DEFAULT_IMAGES) as LinkType[]).map((t) => {
+                    {(Object.values(LINK_TYPES) as LinkType[]).map((t) => {
                         return (
                         <DropdownMenuItem
                           key={t}
                           onClick={() => selectPreset(t)}
                           className="flex items-center gap-2"
                         >
-                            <Image src={DEFAULT_IMAGES[t]} alt={t} width={20} height={20} className="rounded" />
+                            <Image src={getDefaultImageFor(t)} alt={t} width={20} height={20} className="rounded" />
                             <span className="capitalize">{t}</span>
                         </DropdownMenuItem>
                         );
