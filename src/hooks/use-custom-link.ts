@@ -74,6 +74,23 @@ export function useCustomLink(courseId?: string) {
         }
     }, []);
 
+    const deleteAllCourseLinks = useCallback(async (courseId: string) => {
+        setLoading(true);
+        try {
+            const result = await api.delete<{ success: boolean; deletedCount: number; message: string }>(
+                `/api/links?courseId=${encodeURIComponent(courseId)}`,
+                'Failed to delete all course links',
+            );
+            setCustomLinks(prev => prev.filter(l => l.courseId !== courseId));
+            return result;
+        } catch (err) {
+            setError((err as Error).message ?? 'Unknown error');
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         links,
         loading,
@@ -81,6 +98,7 @@ export function useCustomLink(courseId?: string) {
         fetchCustomLinks,
         createCustomLink,
         deleteCustomLink,
+        deleteAllCourseLinks,
     };
 }
 
@@ -96,3 +114,11 @@ export async function createPlanETSLink(courseId: string, courseCode: string, te
 
     await api.post('/api/links', payload, 'Failed to create PlanETS link');
 }
+
+export const deleteAllCourseLinks = async (courseId: string) => {
+    const result = await api.delete<{ success: boolean; deletedCount: number; message: string }>(
+        `/api/links?courseId=${encodeURIComponent(courseId)}`,
+        'Failed to delete all course links',
+    );
+    return result;
+};

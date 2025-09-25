@@ -7,19 +7,20 @@ import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import CourseLinks from '@/components/Links/CourseLinks';
 import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
+
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
-import AddCustomLinkDialog from '@/components/shared/dialogs/AddCustomLinkDialog';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
+
+import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 import { TaskCard } from '@/components/Task/TaskCard';
 
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
-
+import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
-
 import { api } from '@/lib/utils/api/api-client-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
@@ -42,7 +43,6 @@ export default function CoursePage({ params }: CoursePageProps) {
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
   const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
 
   useEffect(() => {
     void fetchCourses();
@@ -155,6 +155,33 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
+  const handleDeleteAllLinks = async () => {
+    if (!course) {
+      return;
+    }
+
+    try {
+      await handleConfirm(
+        'Are you sure you want to delete all links for this course? This action cannot be undone.',
+        async () => {
+          const result = await deleteAllCourseLinks(course.id);
+          toast.success(result.message);
+          // Refresh course to update the links
+          void fetchCourse();
+        },
+        undefined,
+        {
+          title: 'Delete All Links',
+          confirmText: 'Delete All',
+          cancelText: 'Cancel',
+          variant: 'destructive',
+        },
+      );
+    } catch (error) {
+      ErrorHandlers.api(error, 'Failed to delete all links', 'CoursePage');
+    }
+  };
+
   const overdueTasks = getOverdueTasks(filteredTasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
 
   const handleCompleteOverdueTasks = async () => {
@@ -209,15 +236,8 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   if (!course) {
     return (
-      <main className="container mx-auto px-8 flex min-h-screen flex-col gap-6 mt-2 mb-3.5">
-        <div className="space-y-2.5">
-          <Skeleton className="h-8 w-1/4" />
-          <div className="space-y-2">
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-        </div>
+      <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
+        <CourseSkeleton />
       </main>
     );
   }
@@ -227,115 +247,108 @@ export default function CoursePage({ params }: CoursePageProps) {
 
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          {!isLoading && course && (
-            <h2 className="text-3xl font-bold">{course.code}</h2>
-          )}
+          {isLoading
+            ? (
+              <Skeleton className="h-9 w-24" />
+            )
+            : course && (
+              <h2 className="text-3xl font-bold">{course.code}</h2>
+            )}
         </div>
         <div>
           <BulkActionsDropdown
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
             onDeleteCourse={handleDeleteCourse}
-            onAddCustomLink={() => setLinkDialogOpen(true)}
-          />
-          <AddCustomLinkDialog
-            courseId={course?.id}
-            open={linkDialogOpen}
-            onOpenChange={setLinkDialogOpen}
-            onLinkCreated={() => {
-              void fetchCourse();
-            }}
+            onDeleteAllLinks={handleDeleteAllLinks}
           />
         </div>
       </div>
 
-      {/* Course links panel */}
-      {course && (
-        <section className="mb-6">
-          <CourseLinks courseId={course.id} links={course.links} />
-        </section>
-      )}
-
-      <div className="flex items-center gap-4 mb-10">
-        <SearchBar
-          placeholder="Search tasks by title, notes, or subtasks..."
-          value={searchQuery}
-          onChange={setSearchQuery}
-          className="flex-1"
-        />
-        {course && (
-          <AddTaskDialog
-            courseId={course.id}
-            courseCode={course.code}
-            onTaskAdded={fetchCourse}
-            courses={courses}
-            trigger={(
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Task
-              </Button>
-            )}
-          />
-        )}
-      </div>
-
       {isLoading
         ? (
-          <div className="space-y-2.5">
-            <div className="text-center text-muted-foreground mb-4">
-              Loading tasks...
-            </div>
-            <div className="grid gap-4">
-              {[1, 2, 3].map(i => (
-                <Skeleton key={i} className="h-24" />
-              ))}
-            </div>
-          </div>
+          <CourseSkeleton />
         )
-        : filteredTasks.length > 0
-          ? (
-            <div className="space-y-5 will-change-scroll">
-              {Object.entries(tasksByWeek)
-                .sort(([a], [b]) => Number(a) - Number(b))
-                .map(([week, weekTasks]) => (
-                  <div key={week} className="space-y-2.5">
-                    <h3 className="font-semibold mb-1.5">
-                      {'Week '}
-                      {week}
-                    </h3>
-                    <div className="space-y-2">
-                      {weekTasks.map(task => (
-                        <div
-                          id={`task-${task.id}`}
-                          key={task.id}
-                          className="transform-gpu transition-all duration-200 rounded-lg"
-                        >
-                          <TaskCard
-                            task={task}
-                            onDeleteTask={handleDeleteTask}
-                            onUpdateStatusTask={handleUpdateStatusTask}
-                            onTaskAdded={fetchCourse}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+        : (
+          <>
+            {/* Course links panel */}
+            <section className="mb-6">
+              <CourseLinks
+                courseId={course.id}
+                links={course.links}
+                onLinksChange={fetchCourse}
+              />
+            </section>
+
+            {/* Search and add task */}
+            <div className="flex items-center gap-4 mb-10">
+              <SearchBar
+                placeholder="Search tasks by title, notes, or subtasks..."
+                value={searchQuery}
+                onChange={setSearchQuery}
+                className="flex-1"
+              />
+              <AddTaskDialog
+                courseId={course.id}
+                courseCode={course.code}
+                onTaskAdded={fetchCourse}
+                courses={courses}
+                trigger={(
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Task
+                  </Button>
+                )}
+              />
             </div>
-          )
-          : searchQuery.trim()
-            ? (
-              <div className="text-center text-muted-foreground">
-                No tasks found matching &quot;
-                {searchQuery}
-                &quot;. Try a different search term.
-              </div>
-            )
-            : (
-              <div className="text-center text-muted-foreground">
-                No tasks found. Add a task to get started.
-              </div>
-            )}
+
+            {/* Tasks content */}
+            {filteredTasks.length > 0
+              ? (
+                <div className="space-y-5 will-change-scroll">
+                  {Object.entries(tasksByWeek)
+                    .sort(([a], [b]) => Number(a) - Number(b))
+                    .map(([week, weekTasks]) => (
+                      <div key={week} className="space-y-2.5">
+                        <h3 className="font-semibold mb-1.5">
+                          {'Week '}
+                          {week}
+                        </h3>
+                        <div className="space-y-2">
+                          {weekTasks.map(task => (
+                            <div
+                              id={`task-${task.id}`}
+                              key={task.id}
+                              className="transform-gpu transition-all duration-200 rounded-lg"
+                            >
+                              <TaskCard
+                                task={task}
+                                onDeleteTask={handleDeleteTask}
+                                onUpdateStatusTask={handleUpdateStatusTask}
+                                onTaskAdded={fetchCourse}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )
+              : searchQuery.trim()
+                ? (
+                  <div className="text-center text-muted-foreground">
+                    No tasks found matching &quot;
+                    {searchQuery}
+                    &quot;. Try a different search term.
+                  </div>
+                )
+                : (
+                  <div className="text-center text-muted-foreground">
+                    No tasks found. Add a task to get started.
+                  </div>
+                )}
+          </>
+        )}
     </main>
   );
 }

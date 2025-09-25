@@ -82,3 +82,28 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
         return NextResponse.json({ success: false, error: msg }, { status: 400 });
     }
 });
+
+export const DELETE = withAuth(async (req: NextRequest, { user }) => {
+    try {
+        const url = new URL(req.url);
+        const courseId = url.searchParams.get('courseId');
+
+        if (!courseId) {
+            return NextResponse.json({ success: false, error: 'Missing courseId' }, { status: 400 });
+        }
+
+        // Delete all links belonging to the user for this course
+        const deletedLinks = await db.delete(links)
+            .where(and(eq(links.courseId, courseId), eq(links.userId, user.id)))
+            .returning();
+
+        return successResponse({
+            success: true,
+            deletedCount: deletedLinks.length,
+            message: `Deleted ${deletedLinks.length} link${deletedLinks.length !== 1 ? 's' : ''}`,
+        });
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        return NextResponse.json({ success: false, error: msg }, { status: 400 });
+    }
+});

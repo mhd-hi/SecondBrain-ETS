@@ -15,12 +15,12 @@ export function BulkActionsDropdown({
   overdueCount,
   onCompleteAll,
   onDeleteCourse,
-  onAddCustomLink,
+  onDeleteAllLinks,
 }: {
   overdueCount: number;
   onCompleteAll: () => void;
   onDeleteCourse?: () => void;
-  onAddCustomLink?: () => void;
+  onDeleteAllLinks?: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -32,13 +32,16 @@ export function BulkActionsDropdown({
       disabled: overdueCount === 0,
       title: overdueCount === 0 ? 'No overdue tasks to complete' : undefined,
     },
-    {
-      label: 'Add custom link',
-      onClick: () => onAddCustomLink && onAddCustomLink(),
-    },
   ];
 
-  // Add delete action if a handler was provided
+  if (onDeleteAllLinks) {
+    actions.push({
+      label: 'Delete all links',
+      onClick: onDeleteAllLinks,
+      destructive: true,
+    });
+  }
+
   const fullActions: DropdownAction[] = onDeleteCourse
     ? [
         ...actions,
