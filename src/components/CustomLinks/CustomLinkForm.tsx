@@ -12,23 +12,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { validateUrl } from '@/lib/utils/url-util';
+import { DEFAULT_IMAGES, validateUrl } from '@/lib/utils/url-util';
 import { LINK_TYPES } from '@/types/custom-link';
-
-const PRESET_IMAGES: Record<LinkType, string> = {
-  [LINK_TYPES.PLANETS]: '/assets/logo_planets.png',
-  [LINK_TYPES.MOODLE]: '/assets/moodle.png',
-  [LINK_TYPES.NOTEBOOK_LM]: '/assets/notebooklm.png',
-  [LINK_TYPES.SPOTIFY]: '/assets/spotify.png',
-  [LINK_TYPES.YOUTUBE]: '/assets/youtube.webp',
-  [LINK_TYPES.CUSTOM]: '/assets/pochita.webp',
-};
 
 export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate: (data: { title: string; url: string; type: LinkType; imageUrl?: string | null; courseId?: string | null }) => Promise<void>; initialCourseId?: string }) {
   const [title, setTitle] = useState<string>(LINK_TYPES.MOODLE);
   const [url, setUrl] = useState('');
   const [type, setType] = useState<LinkType>(LINK_TYPES.MOODLE);
-  const [imageUrl, setImageUrl] = useState<string | null>(PRESET_IMAGES[LINK_TYPES.MOODLE]);
+  const [imageUrl, setImageUrl] = useState<string | null>(DEFAULT_IMAGES[LINK_TYPES.MOODLE]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +43,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
       setTitle(LINK_TYPES.MOODLE);
       setType(LINK_TYPES.MOODLE);
       setUrl('');
-      setImageUrl(PRESET_IMAGES[LINK_TYPES.MOODLE]);
+      setImageUrl(DEFAULT_IMAGES[LINK_TYPES.MOODLE]);
     } catch (err) {
       setError((err as Error).message ?? 'Failed');
     } finally {
@@ -62,7 +53,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
 
   const selectPreset = (t: LinkType) => {
     setType(t);
-    setImageUrl(PRESET_IMAGES[t]);
+    setImageUrl(DEFAULT_IMAGES[t]);
 
     // For recognized types, always set the title to the type name and disable editing
     if (t === LINK_TYPES.CUSTOM) {
@@ -83,19 +74,19 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
                     <DropdownMenuTrigger asChild>
                     <Button variant="secondary" type="button" id="link-type-trigger" className="inline-flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                         <span className="flex items-center gap-2">
-                          <Image src={PRESET_IMAGES[type]} alt={type} width={20} height={20} className="rounded" />
+                          <Image src={DEFAULT_IMAGES[type]} alt={type} width={20} height={20} className="rounded" />
                         </span>
                     </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
-                    {(Object.keys(PRESET_IMAGES) as LinkType[]).map((t) => {
+                    {(Object.keys(DEFAULT_IMAGES) as LinkType[]).map((t) => {
                         return (
                         <DropdownMenuItem
                           key={t}
                           onClick={() => selectPreset(t)}
                           className="flex items-center gap-2"
                         >
-                            <Image src={PRESET_IMAGES[t]} alt={t} width={20} height={20} className="rounded" />
+                            <Image src={DEFAULT_IMAGES[t]} alt={t} width={20} height={20} className="rounded" />
                             <span className="capitalize">{t}</span>
                         </DropdownMenuItem>
                         );

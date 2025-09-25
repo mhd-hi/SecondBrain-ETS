@@ -232,10 +232,8 @@ export function useAddCourse(): UseAddCourseReturn {
       await createTasks(course.id, aiData);
       setStepStatus(prev => ({ ...prev, 'create-tasks': 'success' }));
 
-      // Create PlanETS Link in background (no UI step)
       createPlanETSLink(course.id, courseCode.trim(), term).catch((err) => {
-        // Silently handle errors for background link creation
-        console.warn('Failed to create PlanETS link:', err);
+        console.error('Failed to create PlanETS link:', err);
       });
 
       setCurrentStep('completed');
