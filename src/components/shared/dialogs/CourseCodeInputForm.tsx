@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function CourseInputForm({
+export function CourseCodeInputForm({
   courseCode,
   setCourseCode,
   term,

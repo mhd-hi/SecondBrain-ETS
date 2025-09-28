@@ -4,9 +4,10 @@ import type { CourseAIResponse } from '@/types/api/ai';
 import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { checkCourseExists } from '@/hooks/use-course';
+import { createPlanETSLink } from '@/hooks/use-custom-link';
 import { assertValidCourseCode } from '@/lib/utils/course';
-import { calculateDueDateTask } from '@/lib/utils/task';
-import { checkCourseExists } from './use-course';
+import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
@@ -122,7 +123,7 @@ async function createCourse(courseCode: string, courseName: string, term: string
   return course;
 }
 
-async function createTasks(courseId: string, parsedData: CourseAIResponse): Promise<void> {
+async function createTasks(courseId: string, parsedData: CourseAIResponse, term: string): Promise<void> {
   const response = await fetch('/api/tasks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -130,7 +131,7 @@ async function createTasks(courseId: string, parsedData: CourseAIResponse): Prom
       courseId,
       tasks: parsedData.tasks.map(task => ({
         ...task,
-        dueDate: calculateDueDateTask(task.week).toISOString(),
+        dueDate: calculateDueDateTaskForTerm(term, task.week).toISOString(),
       })),
     }),
   });
@@ -228,12 +229,14 @@ export function useAddCourse(): UseAddCourseReturn {
       setCurrentStep('create-tasks');
       setStepStatus(prev => ({ ...prev, 'create-tasks': 'loading' }));
 
-      await createTasks(course.id, aiData);
+      await createTasks(course.id, aiData, term);
       setStepStatus(prev => ({ ...prev, 'create-tasks': 'success' }));
 
-      setCurrentStep('completed');
+      createPlanETSLink(course.id, courseCode.trim(), term).catch((err) => {
+        console.error('Failed to create PlanETS link:', err);
+      });
 
-      toast.success('Course and tasks created successfully!');
+      setCurrentStep('completed');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
@@ -243,7 +246,9 @@ export function useAddCourse(): UseAddCourseReturn {
         ? 'planets'
         : currentStep === 'openai'
           ? 'openai'
-          : currentStep === 'create-course' ? 'create-course' : 'create-tasks';
+          : currentStep === 'create-course'
+            ? 'create-course'
+            : 'create-tasks';
 
       setStepStatus(prev => ({
         ...prev,

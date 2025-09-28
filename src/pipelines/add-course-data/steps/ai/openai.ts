@@ -1,23 +1,9 @@
-/* eslint-disable no-console */
+import type { AITask } from '@/types/api/ai';
 import type { Task } from '@/types/task';
-import { OpenAI } from 'openai';
-import { env } from '@/env';
-import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompts';
-
-// Lazy initialization to avoid errors during build time
-let openaiInstance: OpenAI | null = null;
-
-function getOpenAIClient(): OpenAI {
-  if (!openaiInstance) {
-    if (!env.OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY environment variable is required for AI processing');
-    }
-    openaiInstance = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-    });
-  }
-  return openaiInstance;
-}
+import { callOpenAI } from './call';
+import normalizeTasks from './normalize';
+import { extractJsonArrayFromText } from './parse';
+import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompt';
 
 export type ParseAIResult = {
   tasks: Array<Omit<Task, 'id' | 'courseId'>>;
@@ -27,64 +13,41 @@ export type ParseAIResult = {
 export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
   const logs: string[] = [];
   const log = (...args: unknown[]) => {
-    const message = args.join(' ');
-    console.log(...args);
-    logs.push(message);
+    logs.push(args.join(' '));
   };
 
-  // Real OpenAI processing
-  // 1) Build the AI prompt
   const prompt = buildCoursePlanParsePrompt(html);
   log('Built prompt. Length:', prompt.length, 'characters');
 
-  // 2) Call OpenAI
   try {
     log('Starting OpenAI API call...');
-
-    const openai = getOpenAIClient();
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: COURSE_PLAN_PARSER_SYSTEM_PROMPT,
-        },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0,
-    });
+    const callResult = await callOpenAI([
+      { role: 'system', content: COURSE_PLAN_PARSER_SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ]);
 
     log('OpenAI API call completed');
-    log('Response status:', completion.choices[0]?.finish_reason);
-    log('Model used:', completion.model);
-    log('Total tokens:', completion.usage?.total_tokens);
-    log('Prompt tokens:', completion.usage?.prompt_tokens);
-    log('Completion tokens:', completion.usage?.completion_tokens);
+    log('Model used:', callResult.model);
+    log('Total tokens:', callResult.usage?.total_tokens);
 
-    const aiText = completion.choices[0]?.message?.content;
-    if (!aiText) {
+    const aiText = callResult.text;
+    if (!aiText || !aiText.trim()) {
       log('OpenAI response is empty');
       throw new Error('No response from OpenAI');
     }
 
     log('AI response length:', aiText.length, 'characters');
-    log('Full AI response:', aiText);
-    log('Response type:', typeof aiText);
-    log('Is response valid JSON?', (() => {
-      try {
-        JSON.parse(aiText);
-        return true;
-      } catch (e) {
-        console.log('JSON parse error:', e);
-        return false;
-      }
-    })());
+    log('AI response snapshot:', aiText.substring(0, 1000));
 
-    // 3) Parse the JSON array
-    log('Attempting to parse JSON response...');
-    const tasks = JSON.parse(aiText) as Array<Omit<Task, 'id' | 'courseId'>>;
-    log('Successfully parsed JSON. Number of tasks:', tasks.length);
-    console.log('OpenAI response:', JSON.stringify(tasks, null, 2));
+    // Parse JSON array from text
+    const rawTasks: AITask[] = extractJsonArrayFromText(aiText);
+    log('Parsed JSON array. Items:', rawTasks.length);
+
+    const tasks = normalizeTasks(rawTasks);
+    log('Normalized tasks. Count:', tasks.length);
+
+    // Include call logs for debugging
+    logs.push(`AI usage: total_tokens=${callResult.usage?.total_tokens ?? 'unknown'}`);
 
     return { tasks, logs };
   } catch (error) {

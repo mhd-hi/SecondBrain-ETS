@@ -1,38 +1,32 @@
 import type { Task } from '@/types/task';
 
-import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM, TRIMESTER_DATES } from '@/lib/utils';
+import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM } from '@/lib/utils';
+import { getDatesForTerm } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 
 export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date {
-  // Reuse existing helpers to avoid duplicating term-detection logic.
-  // If currently inside a trimester, use that; otherwise use the next trimester.
-  const trimester = getCurrentTerm() ?? getNextTerm();
-
-  const termDates = TRIMESTER_DATES[trimester];
-
-  // Calculate the adjusted week based on the course's total weeks
-  const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_TERM;
-
-  // Calculate the due date by adding the adjusted weeks to the term start date
-  const dueDate = new Date(termDates.start);
-  dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
-  // Check if the calculated date is valid
-  if (Number.isNaN(dueDate.getTime())) {
-    console.error('Invalid date calculated for term:', trimester, 'week:', week, 'totalCourseWeeks:', totalCourseWeeks);
-    return termDates.end; // Return term end date as a fallback
-  }
-
-  // Ensure the due date doesn't exceed the term end date
-  if (dueDate > termDates.end) {
-    return termDates.end;
-  }
-
-  return dueDate;
+  // Preserve legacy behavior: if no explicit term, choose current or next trimester this year,
+  // and synthesize a term id so we can delegate to the term-based calculator.
+  const tri = getCurrentTerm() ?? getNextTerm();
+  const year = new Date().getFullYear();
+  const digit = tri === 'winter' ? '1' : tri === 'summer' ? '2' : '3';
+  const termId = `${year}${digit}`;
+  return calculateDueDateTaskForTerm(termId, week, totalCourseWeeks);
 }
 
-/**
- * Sorts tasks by due date and filters out completed tasks
- */
+export function calculateDueDateTaskForTerm(termId: string, week: number, totalCourseWeeks = 15): Date {
+  const termDates = getDatesForTerm(termId);
+  const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_TERM;
+  const dueDate = new Date(termDates.start);
+  dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
+  if (Number.isNaN(dueDate.getTime())) {
+    console.error('Invalid date for term:', termId, 'week:', week, 'totalCourseWeeks:', totalCourseWeeks);
+    return termDates.end;
+  }
+  return dueDate > termDates.end ? termDates.end : dueDate;
+}
+
+// Sorts tasks by due date and filters out completed tasks
 export const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
     .filter(task => task.status !== StatusTask.COMPLETED && task.dueDate != null)
@@ -48,17 +42,13 @@ export const getTasksByDueDate = (tasks: Task[]) => {
     });
 };
 
-/**
- * Gets the next task from a list of tasks
- */
+// Gets the next task from a list of tasks
 export const getNextTask = (tasks: Task[]) => {
   const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.length > 0 ? sortedTasks[0] : null;
 };
 
-/**
- * Gets the upcoming task (exam or homework) from a list of tasks
- */
+// Gets the upcoming task (exam or homework) from a list of tasks
 export const getUpcomingTask = (tasks: Task[]) => {
   const sortedTasks = getTasksByDueDate(tasks);
   return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
@@ -159,11 +149,7 @@ export const getOverdueTasks = (tasks: Task[], excludeStatuses: StatusTask[] = [
   });
 };
 
-/**
- * Formats effort hours to "1h 30min" format
- * @param hours - The number of hours (can be decimal)
- * @returns Formatted string like "1h 30min" or "30min" for less than 1 hour
- */
+// Formats effort hours to "1h 30min" format
 export function formatEffortTime(hours: number): string {
   if (hours === 0) {
     return '0min';

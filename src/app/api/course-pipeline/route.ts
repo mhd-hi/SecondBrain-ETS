@@ -94,11 +94,7 @@ export const POST = withAuthSimple(
           const aiProcessor = new OpenAIProcessor();
           const result = await aiProcessor.process(htmlData, cleanCode, term);
           const endTime = new Date().toISOString();
-          const courseData = {
-            courseCode: cleanCode,
-            term,
-            tasks: result.tasks,
-          };
+          const courseData = result.courseData;
 
           return NextResponse.json({
             step: {
@@ -107,9 +103,9 @@ export const POST = withAuthSimple(
               status: 'success',
               startTime,
               endTime,
-              data: { tasksCount: result.tasks.length },
+              data: { tasksCount: result.courseData.tasks.length },
             },
-            logs: ['AI processing completed successfully'],
+            logs: result.logs && result.logs.length ? result.logs : ['AI processing completed successfully'],
             data: courseData,
           } as PipelineStepResult);
         } catch (error) {

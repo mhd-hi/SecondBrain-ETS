@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Analytics } from '@vercel/analytics/next';
 import { SessionProvider } from 'next-auth/react';
 import { Geist, Inter } from 'next/font/google';
 import { GlobalConfirmDialogProvider } from '@/components/shared/dialogs/ConfirmDialogProvider';
@@ -28,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${geist.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${geist.variable}`} data-scroll-behavior="smooth">
       <body className={cn(inter.className, 'min-h-screen bg-background')}>
         <SessionProvider>
           <GlobalConfirmDialogProvider>
@@ -41,7 +40,6 @@ export default function RootLayout({
               <PomodoroProvider>
                 {children}
                 <Toaster />
-                <Analytics />
               </PomodoroProvider>
             </ThemeProvider>
           </GlobalConfirmDialogProvider>

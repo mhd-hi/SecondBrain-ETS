@@ -2,7 +2,7 @@ import { sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { withAuthSimple } from '@/lib/auth/api';
-import { buildTerm, getCurrentTerm, getNextTerm, isValidTermId, nextTerm, prevTerm } from '@/lib/utils/term-util';
+import { buildTerm, getCurrentTerm, getNextTerm, getPrevTerm, isValidTermId, nextTerm } from '@/lib/utils/term-util';
 import { db } from '@/server/db';
 
 // Returns and ensures previous, current and next sessions exist in terms table.
@@ -14,7 +14,7 @@ export const GET = withAuthSimple(async (_request, _user) => {
   const currentTerm = getCurrentTerm() ?? getNextTerm();
 
   // Build previous, current, next
-  const prevInfo = prevTerm(currentTerm, year);
+  const prevInfo = getPrevTerm(currentTerm, year);
   const currentInfo = { trimester: currentTerm, year };
   const nextInfo = nextTerm(currentTerm, year);
 

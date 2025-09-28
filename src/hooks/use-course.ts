@@ -5,9 +5,11 @@ import type { Course } from '@/types/course';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { useCallback, useState } from 'react';
-import { api } from '@/lib/utils/api/api-util';
+import { api } from '@/lib/utils/api/api-client-util';
 import { withLoadingAndErrorHandling } from '@/lib/utils/api/loading-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
+import { getDefaultImageFor } from '@/lib/utils/url-util';
+import { LINK_TYPES } from '@/types/custom-link';
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
@@ -19,13 +21,17 @@ export function useCourse(courseId: string) {
       async () => {
         const data = await api.get<CourseApiResponse>(`/api/courses/${courseId}`);
 
-        // Convert dueDate strings to Date objects and handle invalid dates
         const tasksWithValidatedDates: Task[] = data.tasks.map(task => ({
           ...task,
           actualEffort: task.actualEffort ?? 0,
-          dueDate: task.dueDate ? new Date(task.dueDate) : new Date(), // Fallback to current date if dueDate is missing
+          dueDate: task.dueDate ? new Date(task.dueDate) : new Date(),
           createdAt: new Date(task.createdAt),
           updatedAt: new Date(task.updatedAt),
+        }));
+
+        const linksWithImages = data.customLinks.map(link => ({
+          ...link,
+          imageUrl: link.imageUrl ?? getDefaultImageFor(link.type ?? LINK_TYPES.CUSTOM),
         }));
 
         setCourse({
@@ -33,6 +39,7 @@ export function useCourse(courseId: string) {
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
           tasks: tasksWithValidatedDates,
+          customLinks: linksWithImages,
         });
         setTasks(tasksWithValidatedDates);
       },

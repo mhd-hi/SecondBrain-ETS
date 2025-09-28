@@ -5,7 +5,7 @@ import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { handleApiSuccess } from '@/lib/utils';
-import { api } from '@/lib/utils/api/api-util';
+import { api } from '@/lib/utils/api/api-client-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/errors/error';
 

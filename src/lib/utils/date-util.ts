@@ -79,12 +79,3 @@ export const formatDueDate = (date: Date | string) => {
     return `Due in ${diffInDays} days`;
   }
 };
-
-/**
- * Calculates the actual number of weeks between two dates
- */
-export function calculateWeeksBetweenDates(start: Date, end: Date): number {
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.ceil(diffDays / 7);
-}

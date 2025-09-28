@@ -21,7 +21,7 @@ import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
 import { isValidTermId } from '@/lib/utils/term-util';
 import { ActionButtons } from './ActionButtons';
-import { CourseInputForm } from './CourseInputForm';
+import { CourseCodeInputForm } from './CourseCodeInputForm';
 import { ProcessingSteps } from './ProcessingSteps';
 
 type AddCourseDialogProps = {
@@ -173,8 +173,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          {/* Course Code Input */}
-          <CourseInputForm
+          <CourseCodeInputForm
             courseCode={courseCode}
             setCourseCode={setCourseCode}
             term={term}
@@ -185,7 +184,6 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             onSubmit={handleStartParsing}
           />
 
-          {/* Processing Steps */}
           <ProcessingSteps currentStep={currentStep} stepStatus={stepStatus} />
 
           {/* Success Display */}

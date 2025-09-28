@@ -19,13 +19,6 @@ export const TRIMESTER_DIGIT: Record<TrimesterKey, '1' | '2' | '3'> = {
     [TRIMESTER.AUTUMN]: '3',
 };
 
-// Localized labels for trimesters (fr)
-export const TRIMESTER_LABEL: Record<TrimesterKey, string> = {
-    [TRIMESTER.WINTER]: 'Hiver',
-    [TRIMESTER.SUMMER]: 'Été',
-    [TRIMESTER.AUTUMN]: 'Automne',
-};
-
 export type TermBuildInput = { trimester: TrimesterKey; year: number };
 
 export type TrimesterDates = Record<TrimesterKey, { start: Date; end: Date; weeks: number }>;

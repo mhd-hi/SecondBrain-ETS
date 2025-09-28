@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/pipelines/planets-util';
+import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/url-util';
 
 export type PlanETSContent = {
   html: string;
@@ -9,8 +9,6 @@ export type PlanETSContent = {
 export async function fetchPlanETSContent(courseCode: string, term: string): Promise<PlanETSContent> {
   const logs: string[] = [];
   const log = (message: string) => {
-    // eslint-disable-next-line no-console
-    console.log(message);
     logs.push(message);
   };
 

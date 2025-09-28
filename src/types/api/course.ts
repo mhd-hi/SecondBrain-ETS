@@ -1,5 +1,6 @@
+import type { CustomLinkItem } from '@/types/custom-link';
 import type { StatusTask } from '@/types/status-task';
-import type { Task, TaskType } from '@/types/task';
+import type { TaskType } from '@/types/task';
 
 export type CourseApiResponse = {
     id: string;
@@ -23,21 +24,7 @@ export type CourseApiResponse = {
         createdAt: string;
         updatedAt: string;
     }>;
-};
-
-export type TaskResponse = {
-    data: Task;
-    error?: string;
-};
-
-export type TasksResponse = {
-    data: Task[];
-    error?: string;
-};
-
-// Error Types
-export type ApiError = {
-    error: string;
+    customLinks: CustomLinkItem[];
 };
 
 export type CourseListItem = {

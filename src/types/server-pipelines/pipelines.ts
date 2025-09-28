@@ -45,8 +45,3 @@ export type ProcessingStep = {
   endTime?: Date | string;
   data?: unknown;
 };
-
-export type StepStatus = {
-  planets: ProcessingStep;
-  openai: ProcessingStep;
-};

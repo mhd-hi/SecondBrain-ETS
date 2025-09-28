@@ -14,6 +14,7 @@ export async function getUserCourses(userId: string) {
     where: eq(courses.userId, userId),
     with: {
       tasks: true,
+      customLinks: true,
     },
   });
 }
@@ -26,6 +27,7 @@ export async function getUserCourse(courseId: string, userId: string) {
     where: and(eq(courses.id, courseId), eq(courses.userId, userId)),
     with: {
       tasks: true,
+      customLinks: true,
     },
   });
 
@@ -97,21 +99,6 @@ export async function getUserTask(taskId: string, userId: string) {
   // Attach subtasks
   const subs = await db.select().from(subtasks).where(eq(subtasks.taskId, t.id));
   return { ...t, subtasks: subs };
-}
-
-/**
- * Get tasks with additional filtering (but always include user filter)
- */
-export async function getUserTasksWhere(userId: string, additionalWhere?: SQL) {
-  const whereClause = additionalWhere
-    ? and(eq(tasks.userId, userId), additionalWhere)
-    : eq(tasks.userId, userId);
-
-  return db
-    .select()
-    .from(tasks)
-    .where(whereClause)
-    .orderBy(tasks.week);
 }
 
 /**

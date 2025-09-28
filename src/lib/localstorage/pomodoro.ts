@@ -35,20 +35,3 @@ export function savePomodoroSettings(settings: PomodoroSettings) {
     localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
   }
 }
-
-export function getPomodoroDurations(settings?: PomodoroSettings) {
-  const s = settings || loadPomodoroSettings();
-  return {
-    work: typeof s.workDuration === 'number' ? s.workDuration : DEFAULT_POMODORO_SETTINGS.workDuration,
-    shortBreak: typeof s.shortBreakDuration === 'number' ? s.shortBreakDuration : DEFAULT_POMODORO_SETTINGS.shortBreakDuration,
-    longBreak: typeof s.longBreakDuration === 'number' ? s.longBreakDuration : DEFAULT_POMODORO_SETTINGS.longBreakDuration,
-  };
-}
-
-export function getPomodoroSoundSettings(settings?: PomodoroSettings) {
-  const s = settings || loadPomodoroSettings();
-  return {
-    notificationSound: s.notificationSound || DEFAULT_POMODORO_SETTINGS.notificationSound,
-    soundVolume: typeof s.soundVolume === 'number' ? Math.max(0, Math.min(1, s.soundVolume / 100)) : 0.5,
-  };
-}
