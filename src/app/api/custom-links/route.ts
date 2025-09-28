@@ -4,13 +4,14 @@ import { NextResponse } from 'next/server';
 
 import { withAuth } from '@/lib/auth/api';
 import { successResponse } from '@/lib/utils/api/api-server-util';
+import { validateUrl } from '@/lib/utils/url-util';
 import { db } from '@/server/db';
 import { customLinks } from '@/server/db/schema';
 import { LINK_TYPES } from '@/types/custom-link';
 
 function validateAndNormalizeUrl(raw: unknown) {
     if (typeof raw !== 'string') {
-        throw new TypeError('Invalid url');
+        throw new TypeError('Invalid url, should be a string');
     }
 
     const s = raw.trim();
@@ -18,8 +19,8 @@ function validateAndNormalizeUrl(raw: unknown) {
         throw new TypeError('Empty url');
     }
 
-    if (!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*(?:\/.*)?$/i.test(s)) {
-        throw new TypeError('Invalid url');
+    if (!validateUrl(s)) {
+        throw new TypeError('Invalid url format, should contain at least one dot');
     }
 
     return s;
@@ -76,7 +77,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
             updatedAt: new Date(),
         }).returning();
 
-        return successResponse({ success: true, link: inserted[0] });
+        return successResponse({ success: true, customLink: inserted[0] });
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         return NextResponse.json({ success: false, error: msg }, { status: 400 });
