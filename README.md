@@ -2,8 +2,6 @@
 
 [![CI](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml/badge.svg)](https://github.com/mhd-hi/second-brain/actions/workflows/ci.yml)
 
-A Next.js application that helps students manage their course workload by intelligently parsing course plans and creating manageable tasks.
-
 ## Project Overview
 
 SecondBrain uses AI to parse ETS course plans and break them down into manageable tasks, helping students stay organized and on track with their studies.
