@@ -7,7 +7,6 @@ export type AISubtask = {
 };
 
 export type AITask = {
-  week: number;
   type: TaskType;
   title: string;
   notes?: string;

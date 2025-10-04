@@ -1,3 +1,5 @@
+import { calculateWeekFromDueDate } from '@/lib/utils/term-util';
+
 // Formats a date for display in a short format (e.g., "Jan 15")
 export const formatDate = (date: Date | null | undefined): string => {
   if (!date) {
@@ -77,5 +79,22 @@ export const formatDueDate = (date: Date | string) => {
     return 'Due tomorrow';
   } else {
     return `Due in ${diffInDays} days`;
+  }
+};
+
+// Calculate a week number based on due date for grouping purposes
+// Uses the term system to calculate the correct week within the academic term
+export const getWeekNumberFromDueDate = (dueDate: Date, totalCourseWeeks = 15): number => {
+  const dueDateObj = dueDate instanceof Date ? dueDate : new Date(dueDate);
+
+  if (Number.isNaN(dueDateObj.getTime())) {
+    return 1; // Default to week 1 if invalid date
+  }
+
+  try {
+    return calculateWeekFromDueDate(dueDateObj, totalCourseWeeks);
+  } catch (error) {
+    console.error('Error calculating week from due date:', error);
+    return 1; // Fallback to week 1 if calculation fails
   }
 };

@@ -1,11 +1,11 @@
 import type { AITask } from '@/types/api/ai';
 import type { Subtask } from '@/types/subtask';
 import type { Task, TaskType } from '@/types/task';
+import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { StatusTask } from '@/types/status-task';
 
 export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId'>> {
-    return raw.map((item) => {
-        const week = Number(item.week ?? 0) || 0;
+    return raw.map((item, index) => {
         const type = (item.type ?? 'theorie') as TaskType;
         const title = String(item.title ?? '').trim();
         const notes = item.notes ? String(item.notes) : undefined;
@@ -23,7 +23,6 @@ export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId
         const task: Omit<Task, 'id' | 'courseId'> = {
             title,
             notes,
-            week,
             type,
             status: StatusTask.TODO,
             estimatedEffort,
@@ -31,7 +30,7 @@ export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId
             subtasks,
             createdAt: new Date(),
             updatedAt: new Date(),
-            dueDate: new Date(),
+            dueDate: calculateDueDateTask(index + 1), // Use index to spread tasks across weeks
         };
 
         return task;

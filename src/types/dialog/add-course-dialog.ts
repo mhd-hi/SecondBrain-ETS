@@ -29,6 +29,8 @@ export type CourseInputFormProps = {
     term: string;
     setTerm: (term: string) => void;
     availableTerms: Array<{ id: string; label: string }>;
+    firstDayOfClass: Date | undefined;
+    setFirstDayOfClass: (date: Date | undefined) => void;
     isProcessing: boolean;
     currentStep: UseAddCourseReturn['currentStep'];
     onSubmit: () => Promise<void>;

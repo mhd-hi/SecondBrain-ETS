@@ -49,7 +49,7 @@ export async function getUserCourseTasks(courseId: string, userId: string) {
     .select()
     .from(tasks)
     .where(and(eq(tasks.courseId, courseId), eq(tasks.userId, userId)))
-    .orderBy(tasks.week);
+    .orderBy(tasks.dueDate);
   // Fetch subtasks for these tasks and attach
   const taskIds = rows.map(r => r.id);
   if (taskIds.length === 0) {
@@ -307,7 +307,7 @@ export async function getUserTasksWithCourseInfo(userId: string) {
     .from(tasks)
     .innerJoin(courses, eq(tasks.courseId, courses.id))
     .where(and(eq(tasks.userId, userId), eq(courses.userId, userId)))
-    .orderBy(tasks.week);
+    .orderBy(tasks.dueDate);
 }
 
 /**
@@ -333,5 +333,5 @@ export async function getUserTasksInDateRange(
     .from(tasks)
     .innerJoin(courses, eq(tasks.courseId, courses.id))
     .where(whereClause)
-    .orderBy(tasks.week);
+    .orderBy(tasks.dueDate);
 }

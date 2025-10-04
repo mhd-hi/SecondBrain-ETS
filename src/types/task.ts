@@ -9,7 +9,6 @@ export type Task = {
   courseId: string;
   title: string;
   notes?: string;
-  week: number;
   type: TaskType;
   status: StatusTask;
   estimatedEffort: number;

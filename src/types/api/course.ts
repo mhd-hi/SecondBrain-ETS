@@ -15,7 +15,6 @@ export type CourseApiResponse = {
         title: string;
         notes?: string;
         dueDate?: string;
-        week: number;
         type: TaskType;
         status: StatusTask;
         estimatedEffort: number;

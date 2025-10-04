@@ -57,6 +57,13 @@
       "when": 1758780439320,
       "tag": "0007_short_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1759547061710,
+      "tag": "0008_public_impossible_man",
+      "breakpoints": true
     }
   ]
 }

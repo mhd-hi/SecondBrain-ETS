@@ -12,7 +12,6 @@ type TaskRow = {
     courseId: string;
     title: string;
     notes?: string | null;
-    week: number;
     type: string;
     status: StatusTask;
     estimatedEffort: number;
@@ -93,7 +92,6 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
         courseId: t.courseId,
         title: t.title,
         notes: t.notes ?? undefined,
-        week: t.week,
         type: t.type as Task['type'],
         status: t.status,
         estimatedEffort: t.estimatedEffort,

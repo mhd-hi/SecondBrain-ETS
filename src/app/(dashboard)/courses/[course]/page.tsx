@@ -22,6 +22,7 @@ import { useCourse } from '@/hooks/use-course';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
 import { api } from '@/lib/utils/api/api-client-util';
+import { getWeekNumberFromDueDate } from '@/lib/utils/date-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 import { getOverdueTasks } from '@/lib/utils/task/task-util';
@@ -208,13 +209,20 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  // Group tasks by week
+  // Group tasks by week calculated from dueDate
   const tasksByWeek = filteredTasks.reduce((acc, task) => {
-    const week = task.week;
+    const week = getWeekNumberFromDueDate(task.dueDate);
     acc[week] ??= [];
     acc[week]?.push(task);
     return acc;
   }, {} as Record<number, Task[]>);
+
+  // Sort tasks within each week by dueDate
+  Object.keys(tasksByWeek).forEach((week) => {
+    tasksByWeek[Number(week)]?.sort((a, b) =>
+      new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+    );
+  });
 
   if (error) {
     return (

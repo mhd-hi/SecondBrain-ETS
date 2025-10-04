@@ -129,9 +129,9 @@ async function createTasks(courseId: string, parsedData: CourseAIResponse, term:
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       courseId,
-      tasks: parsedData.tasks.map(task => ({
+      tasks: parsedData.tasks.map((task, index) => ({
         ...task,
-        dueDate: calculateDueDateTaskForTerm(term, task.week).toISOString(),
+        dueDate: calculateDueDateTaskForTerm(term, index + 1).toISOString(), // Spread tasks across weeks
       })),
     }),
   });

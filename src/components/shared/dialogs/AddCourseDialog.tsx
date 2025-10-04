@@ -19,7 +19,7 @@ import { useAddCourse } from '@/hooks/use-add-course';
 import { useTerms } from '@/hooks/use-terms';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
-import { isValidTermId } from '@/lib/utils/term-util';
+import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
 import { ActionButtons } from './ActionButtons';
 import { CourseCodeInputForm } from './CourseCodeInputForm';
 import { ProcessingSteps } from './ProcessingSteps';
@@ -33,6 +33,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   const [isOpen, setIsOpen] = useState(false);
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
+  const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(undefined);
   const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
   const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
 
@@ -53,6 +54,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
 
   const resetDialog = useCallback(() => {
     setCourseCode('');
+    setFirstDayOfClass(undefined);
     reset();
   }, [reset]);
 
@@ -67,6 +69,23 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       }
     }
   }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
+
+  useEffect(() => {
+    if (term) {
+      try {
+        const termDates = getDatesForTerm(term);
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+        setFirstDayOfClass(termDates.start);
+      } catch (error) {
+        console.error('Failed to get dates for term:', error);
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+        setFirstDayOfClass(undefined);
+      }
+    } else {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setFirstDayOfClass(undefined);
+    }
+  }, [term]);
 
   const handleDialogClose = (open: boolean) => {
     setIsOpen(open);
@@ -179,6 +198,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             term={term}
             setTerm={setTerm}
             availableTerms={availableTerms}
+            firstDayOfClass={firstDayOfClass}
+            setFirstDayOfClass={setFirstDayOfClass}
             isProcessing={isProcessing}
             currentStep={currentStep}
             onSubmit={handleStartParsing}

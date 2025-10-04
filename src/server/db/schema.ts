@@ -99,7 +99,6 @@ export const tasks = pgTable('tasks', {
   courseId: uuid('course_id').references(() => courses.id, { onDelete: 'cascade' }).notNull(),
   title: text('title').notNull(),
   notes: text('notes'),
-  week: integer('week').notNull(),
   type: text('type', { enum: ['theorie', 'pratique', 'exam', 'homework', 'lab'] }).notNull().default('theorie'),
   status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] }).default('TODO').notNull(),
   estimatedEffort: real('estimated_effort').notNull().default(1),

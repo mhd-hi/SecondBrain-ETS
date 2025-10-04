@@ -2,8 +2,6 @@ import type { NewTaskInput, UpdateTaskInput } from '@/types/api/task';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserTask, deleteUserTask, getUserCourse, getUserCourseTasks, updateUserTask } from '@/lib/auth/db';
-import { calculateDueDateTask } from '@/lib/utils/task/task-util';
-import { calculateWeekFromDueDate } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 
 export const GET = withAuthSimple(
@@ -45,34 +43,43 @@ export const POST = withAuthSimple(
     // Verify course ownership first
     await getUserCourse(courseId, user.id);
 
-    // Create tasks with secure function
-    const tasksToCreate = newTasks.map((task) => {
-      const userProvidedDueDate = task.dueDate ? new Date(task.dueDate) : null;
+    try {
+      // Create tasks with secure function
+      const tasksToCreate = newTasks.map((task) => {
+        const userProvidedDueDate = task.dueDate ? new Date(task.dueDate) : null;
 
-      return {
-        ...task,
-        courseId,
-        week: task.week ?? (userProvidedDueDate ? calculateWeekFromDueDate(userProvidedDueDate) : 1),
-        status: task.status ?? StatusTask.TODO,
-        subtasks: task.subtasks?.map(subtask => ({
-          ...subtask,
-          id: crypto.randomUUID(),
-          status: subtask.status ?? StatusTask.TODO,
-        })),
-        dueDate: userProvidedDueDate && !Number.isNaN(userProvidedDueDate.getTime())
-          ? userProvidedDueDate
-          : calculateDueDateTask(task.week || 1),
-      };
-    });
+        // Validate that dueDate is provided and valid
+        if (!userProvidedDueDate || Number.isNaN(userProvidedDueDate.getTime())) {
+          throw new Error(`Task "${task.title}" must have a valid dueDate`);
+        }
 
-    // Use secure bulk insert
-    const createdTasks = [];
-    for (const taskData of tasksToCreate) {
-      const task = await createUserTask(user.id, taskData);
-      createdTasks.push(task);
+        return {
+          ...task,
+          courseId,
+          status: task.status ?? StatusTask.TODO,
+          subtasks: task.subtasks?.map(subtask => ({
+            ...subtask,
+            id: crypto.randomUUID(),
+            status: subtask.status ?? StatusTask.TODO,
+          })),
+          dueDate: userProvidedDueDate,
+        };
+      });
+
+      // Use secure bulk insert
+      const createdTasks = [];
+      for (const taskData of tasksToCreate) {
+        const task = await createUserTask(user.id, taskData);
+        createdTasks.push(task);
+      }
+
+      return NextResponse.json(createdTasks);
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Invalid task data', code: 'VALIDATION_ERROR' },
+        { status: 400 },
+      );
     }
-
-    return NextResponse.json(createdTasks);
   },
 );
 
@@ -91,7 +98,6 @@ export const PATCH = withAuthSimple(
     const updates = await request.json() as UpdateTaskInput;
 
     const payload = {
-      ...updates,
       status: updates.status ?? StatusTask.TODO,
       subtasks: updates.subtasks?.map(subtask => ({
         ...subtask,
@@ -99,7 +105,7 @@ export const PATCH = withAuthSimple(
         status: subtask.status ?? StatusTask.TODO,
       })),
       notes: updates.notes,
-      dueDate: updates.week ? calculateDueDateTask(updates.week) : undefined,
+      ...updates,
     } as Partial<typeof import('@/server/db/schema').tasks.$inferInsert> & { subtasks?: Partial<typeof import('@/server/db/schema').subtasks.$inferInsert>[] };
 
     const updatedTask = await updateUserTask(id, user.id, payload);
