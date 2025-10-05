@@ -1,6 +1,5 @@
 'use client';
 
-import { NextResponse } from 'next/server';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 
 export const validateApiResponse = async <T>(response: Response): Promise<T> => {
@@ -57,8 +56,4 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: data ? JSON.stringify(data) : undefined,
     }, errorMessage),
-};
-
-export const successResponse = <T>(data: T, statusCode = 200) => {
-  return NextResponse.json(data, { status: statusCode });
 };
