@@ -42,7 +42,7 @@ function SignInContent() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <SignInCard
-        title="Welcome to Second Brain"
+        title="Welcome to SecondBrain ETS"
         className="shadow-lg border-0"
         callbackUrl={callbackUrl}
       />

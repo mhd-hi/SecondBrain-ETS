@@ -26,7 +26,7 @@ export function AppLogo({ className }: AppLogoProps) {
           priority={true}
           className="object-contain flex-shrink-0"
         />
-        {!isCollapsed && <span>Second Brain</span>}
+        {!isCollapsed && <span>SecondBrain ETS</span>}
       </Link>
     </Button>
   );

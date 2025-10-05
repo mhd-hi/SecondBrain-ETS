@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Second Brain',
-  description: 'SecondBrain: Your AI-powered course management assistant. Helps students manage workload by parsing course plans and creating tasks.',
+  title: 'SecondBrain ETS',
+  description: 'SecondBrain ETS: Your AI-powered course management assistant for ETS university students. Helps manage academic workload by parsing course plans and creating tasks.',
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 

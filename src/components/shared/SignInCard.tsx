@@ -13,7 +13,7 @@ type SignInCardProps = {
 };
 
 export function SignInCard({
-  title = 'Welcome to Second Brain',
+  title = 'Welcome to SecondBrain ETS',
   description = 'Sign in to manage your courses and tasks',
   callbackUrl = '/',
   className = '',

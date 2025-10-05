@@ -1,12 +1,12 @@
 # Bugs
-- Add sentry (throw, log, error, debug, warning)
+- in courseCard, three-dot is always highlighted even when not clicked
+- add a proper state manager to avoid prop drilling shenanigans
+
 # Features
+
 ## Stories:
 
-### Onboarding course
--  Ask user for course periods (session periods) to better determine task due dates (2 points)
-    - Ex: whats ur first and second course date, on a normal week (for better task date accuracy)
-    - Due dates should always be delayed by 1 week (7 days), thats the deadline to study the current week's subjects.
+- Add sentry (throw, log, error, debug, warning)
 
 ### Story: AI
 -  Cache OpenAI tasks response in DB (5 points)
@@ -14,14 +14,6 @@
     -   Benefits:
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
--  Add intra date information in description of intra task (cheerio).
-
-### Story: Integrations
--   Add link to Quick actions in dashboard.
--   Or if user not connected, maybe ask him to.
-
-- Add Google Calendar integration (5 points)
-    -   Add Google Calendar in new Integrations page.
 
 ### Story: Kanban Board
 - Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
@@ -32,21 +24,12 @@
 #### Pomodoro
 - we should be able to select a task in pomdoro page, it should be on top of pomodoroContainer, having a sort of select where its searchable to find our task. We should show a dropdown with CourseCodeBadge on the left (as a optional input), and show the title of the task on the right on a different searchable input select (if CourseCodeBadge not selected, we search on all the tasks of the user). We can either select the course code, then the task, OR the task directly. CourseCode should take smaller space then task.
 Once we selected a task, and completed a pomdoro, we can call the pomodoro complete endpoint and passing the task id.
-- pomodoro page should be able to receive duration and task id in query params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
+    - pomodoro page should be able to receive duration and task id in query params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
 - Add github-like calendar to track pomdoro activity
-    - might need to refactor db to create new pomodoro table
-- pomodoro sort of contribution github
-    - migrate pomodoro single attribute to pomodoro table
-
-### Custom links
-- Add custom links table
-    - Be able to add custom links in a course
 
 #### Progress Tracking:
 -  Add semester progress Board and dashboard page (progressbar for all courses) (3 points)
 -  Add course progress Board inside the course page (progressBar for courses tasks) (2 points)
-#### Dashboard Enhancements
-- Add quick actions container in dashboard (add course, add task, start pomodoro) (2 points)
 
 ---
 
