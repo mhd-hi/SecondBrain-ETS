@@ -1,82 +1,79 @@
-export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are a specialized ETS course plan parser. Your ONLY task is to extract course information from HTML tables or elements and return it as a JSON array. You MUST:
-1. NEVER include any explanations or disclaimers
-2. NEVER include any text outside the JSON array
-3. ALWAYS return a valid JSON array of objects
-4. ALWAYS follow the exact format specified in the prompt
-5. NEVER modify or add to the format
-6. NEVER include any markdown formatting or code blocks
-7. ALWAYS start your response with [ and end with ]
-8. ALWAYS return ONLY the JSON array, nothing else
-9. ALWAYS group related tasks into subtasks when they share the same week, type, and main topic
-10. ALWAYS assign weeks sequentially when not explicitly provided
-11. NEVER add any fields not explicitly shown in the example object`;
+export const COURSE_PLAN_PARSER_SYSTEM_PROMPT = `You are an ETS course plan parser. 
+Your ONLY job is to extract course data from HTML or ASCII tables and output a valid JSON array of objects. Follow these strict rules:
+
+1. NEVER include anything outside the JSON array.
+2. ALWAYS return only a valid JSON array of objects.
+3. DO NOT include markdown, code blocks, or explanations.
+4. ALWAYS begin with [ and end with ].
+5. Group tasks by week/type/topic when applicable.
+6. Assign weeks sequentially if not provided.
+7. NEVER add or modify fields beyond those shown in the format.
+8. Exams must be separate objects (type: "exam"), not subtasks.
+9. Recognize these French terms: "Séance", "Semaine", "Examen", "Intra", "Mi-session", "Devoir", "Travail", "TP", "Laboratoire", "Cours", "Théorie", "Pratique".
+10. NEVER let an exam overwrite or rename following content.
+11. If an exam row lacks a week, assign it to the most recent week.
+
+ALWAYS FOLLOW the example format exactly.`;
 
 export function buildCoursePlanParsePrompt(pageHtml: string) {
   return `
-You are receiving the complete HTML code (or raw text) of an ETS course plan page that contains one or more tables describing week(s) and content(s). Apply these STRICT rules to extract only a JSON array of objects, without any additional annotation or explanation:
+You will receive the full HTML (or raw ASCII) content of a university course plan page, typically structured as tables. Extract ONLY the course plan JSON array, strictly following these steps:
 
-1. **Table Identification**
-   - Identify all <table> ... </table> blocks in the HTML, or any ASCII segment that looks like a table (lines delimited by "|", "—", etc.).
-   - Among the headers (first row), detect the column corresponding to "Week" (keyword "Semaine", "Sem",  or an integer "1", "2", ...).
-   - Then, identify the "Content" column (or any header containing "Contenu", "Cours", "Sujet", "Théorie", "Pratique", "Examen", "Devoir", etc.).
-   - If multiple tables exist, keep only the one whose header clearly contains "Week" or a plausible row number.
+1. **Table Detection**
+   - Identify all <table> tags or ASCII-style tables (|, —, etc.).
+   - Locate headers indicating week: "Week", "Semaine", "Séance", "Sem", or numbers.
+   - Locate content headers: "Contenu", "Cours", "Cours X", "Sujet", "Théorie", "TP", etc.
+   - Choose the most complete table with a valid "Semaine"-like column.
 
-2. **Line-by-Line Extraction**
-   For each line (except header):
-   a. Read the "Week" cell:
-      - If it contains a single integer X (1 ≤ X ≤ 20), then \`week = X\`.
-      - If it contains "Y to Z" or "Y and Z" (e.g., "2 to 4", "5 and 6"), consider each intermediate week number: create an object for each week Y, Y+1, ..., Z.
-      - If the cell is empty or non-numeric:
-        * If it's the first item in a logical sequence, assign \`week = 1\`
-        * If it's part of a sequence, increment the week number from the previous item
-        * If it's a major topic change, increment the week number
-        * If it's a subtopic of the previous item, use the same week number
-      - If it's a final exam, ALWAYS place it in the last week of the course
-   b. Read the "Content" cell(s) (or "Subject" / "Course"):
-      - Split by bullets (\`•\`), line breaks, or indented lists to get one or more text fragments.
+2. **Week Assignment**
+   - Week = integer if cell says "1"-"20".
+   - "2 to 4" → weeks 2, 3, 4.
+   - Empty cells: assign week sequentially or infer from context.
+   - Exam-only rows without week → assign to most recent prior week.
+   - Final exams → always placed in the last week.
 
-3. **Type Classification**
-   For each extracted content fragment:
-   - If the text contains "Théorie", "Lecture", "Fonctions", "Graphes", etc., then \`type = "theorie"\`.
-   - If the text contains "Pratique", "Exercices", "TP", "Travail", then \`type = "pratique"\`.
-   - If the text contains "Examen", "Intra", "Test", "Quiz", then \`type = "exam"\`.
-   - If the text contains "Devoir", "Projet", "TP", then \`type = "homework"\`.
-   - If it's a final exam, ALWAYS set \`type = "exam"\` and place it in the last week
+3. **Content Fragmentation**
+   - Split content by bullets, breaks, or indentation.
+   - Handle each fragment separately.
 
-4. **Content Grouping**
-   - If multiple fragments in the same week and type are related (e.g., different algorithms, different parts of the same topic), group them as subtasks
-   - The main task should have a general title that encompasses all subtasks
-   - Each subtask should have its specific title and details
-   - The total estimated effort should be distributed among subtasks
-   - When grouping items without explicit weeks:
-     * Group related items under the same week
-     * Use logical progression to determine week numbers
-     * Consider topic changes as week boundaries
-     * Maintain consistent week numbering across the course
-     * ALWAYS place final exams in the last week
+4. **Type Detection**
+   - Keywords map to types:
+     - "Theory", "Fonctions" → "theorie"
+     - "Pratique", "TP" → "pratique"
+     - "Exam", "Intra", "Final", "Test" → "exam"
+     - "Devoir", "Projet" → "homework"
+   - Mixed-type content → split into multiple objects with shared week.
+   - Exams are never subtasks.
+   
+   ⚠️ Constraint: Only ONE "theorie" (course) object is allowed per week. Merge multiple theory-related entries into one "theorie" object with subtasks.
 
-5. **JSON Object Construction**
-   For each main task (with optional subtasks), generate an object with EXACTLY these fields:
-   \`\`\`jsonc
+5. **Grouping & Structuring**
+   - Group related fragments by week and type into one object with subtasks.
+   - Generalize a main topic as 'title', list subtasks under 'subtasks'.
+   - Distribute estimated effort among subtasks.
+   - DO NOT let exam rows interfere with adjacent rows.
+
+6. **JSON Format (STRICT)**
+   Output a JSON array of objects like this:
+
    {
      "week": <integer>,
      "type": "<theorie|pratique|exam|homework|lab>",
-     "title": "<main topic or general description>",
-     "estimatedEffort": <total hours for all subtasks>,
-     "notes": "<short tip in French, 15-25 words max>",
+     "title": "<main topic>",
+     "estimatedEffort": <hours>,
+     "notes": "<short French tip>",
      "subtasks": [
        {
-         "title": "<specific subtask title>",
-         "estimatedEffort": <hours for this subtask>,
-         "notes": "<specific tip for this subtask>"
+         "title": "<subtask title>",
+         "estimatedEffort": <hours>,
+         "notes": "<French tip>"
        }
      ]
    }
-   \`\`\`
 
-Here is the **RAW_HTML** of the course plan to parse:
+ONLY return the JSON array. No explanations. No formatting. Start with "[" and end with "]".
+
+Here is the RAW_HTML to parse:
 \n\n${pageHtml}\n\n
-
-**The AI must respond ONLY** with this **JSON array** printed (strict), without any other explanation or tag.
 `;
 }

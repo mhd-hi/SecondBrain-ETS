@@ -1,27 +1,30 @@
 import type { Task } from '@/types/task';
 
-import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM } from '@/lib/utils';
+import { getCurrentTerm, getNextTerm } from '@/lib/utils';
 import { getDatesForTerm } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
-export function calculateDueDateTask(week: number, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): Date {
+export function calculateDueDateTask(week: number, firstDayOfClass?: Date): Date {
   // Preserve legacy behavior: if no explicit term, choose current or next trimester this year,
   // and synthesize a term id so we can delegate to the term-based calculator.
   const tri = getCurrentTerm() ?? getNextTerm();
   const year = new Date().getFullYear();
   const digit = tri === 'winter' ? '1' : tri === 'summer' ? '2' : '3';
   const termId = `${year}${digit}`;
-  return calculateDueDateTaskForTerm(termId, week, totalCourseWeeks);
+  return calculateDueDateTaskForTerm(termId, week, firstDayOfClass);
 }
 
-export function calculateDueDateTaskForTerm(termId: string, week: number, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): Date {
+export function calculateDueDateTaskForTerm(termId: string, week: number, firstDayOfClass?: Date): Date {
   const termDates = getDatesForTerm(termId);
-  const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_TERM;
-  const dueDate = new Date(termDates.start);
-  dueDate.setDate(dueDate.getDate() + Math.round(adjustedWeek * 7));
+  // Use firstDayOfClass as base if provided, otherwise fall back to term start
+  const baseDate = firstDayOfClass || termDates.start;
+  const dueDate = new Date(baseDate);
+  // Calculate due date based on the AI-provided week number directly
+  // Week 1 = first day of class, Week 2 = first day of class + 7 days, etc.
+  dueDate.setDate(dueDate.getDate() + (week - 1) * 7);
   if (Number.isNaN(dueDate.getTime())) {
-    console.error('Invalid date for term:', termId, 'week:', week, 'totalCourseWeeks:', totalCourseWeeks);
+    console.error('Invalid date for term:', termId, 'week:', week, 'firstDayOfClass:', firstDayOfClass);
     return termDates.end;
   }
   return dueDate > termDates.end ? termDates.end : dueDate;

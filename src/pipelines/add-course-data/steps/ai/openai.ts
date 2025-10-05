@@ -1,12 +1,10 @@
 import type { AITask } from '@/types/api/ai';
-import type { Task } from '@/types/task';
 import { callOpenAI } from './call';
-import normalizeTasks from './normalize';
 import { extractJsonArrayFromText } from './parse';
 import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompt';
 
 export type ParseAIResult = {
-  tasks: Array<Omit<Task, 'id' | 'courseId'>>;
+  tasks: AITask[];
   logs: string[];
 };
 
@@ -43,13 +41,13 @@ export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
     const rawTasks: AITask[] = extractJsonArrayFromText(aiText);
     log('Parsed JSON array. Items:', rawTasks.length);
 
-    const tasks = normalizeTasks(rawTasks);
-    log('Normalized tasks. Count:', tasks.length);
+    // Return raw AI tasks - normalization will happen when creating database tasks
+    log('Returning raw AI tasks. Count:', rawTasks.length);
 
     // Include call logs for debugging
     logs.push(`AI usage: total_tokens=${callResult.usage?.total_tokens ?? 'unknown'}`);
 
-    return { tasks, logs };
+    return { tasks: rawTasks, logs };
   } catch (error) {
     log('Error in parseContentWithAI:', error instanceof Error ? error.message : 'Unknown error');
     throw error;

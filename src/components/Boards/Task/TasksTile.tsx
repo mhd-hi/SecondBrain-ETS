@@ -370,7 +370,6 @@ export const TodaysFocusTile = () => {
               <div className="text-center py-8 text-muted-foreground">
                 <p>No tasks require your focus right now!</p>
                 <p className="text-sm mt-1">
-
                 {'🌤️ '}
                 {filter === 'week' ? 'This week' : filter === 'month' ? 'This month' : 'Next quarter'}
                   {' '}

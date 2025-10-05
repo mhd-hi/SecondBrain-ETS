@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 import { checkCourseExists } from '@/hooks/use-course';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
 import { assertValidCourseCode } from '@/lib/utils/course';
-import { calculateDueDateWithCustomStartDate } from '@/lib/utils/task';
+import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
+import normalizeTasks from '@/pipelines/add-course-data/steps/ai/normalize';
 
 export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
 
@@ -129,20 +130,27 @@ async function createTasks(
   term: string,
   firstDayOfClass: Date,
 ): Promise<void> {
+  // First normalize the AI tasks (validation, sanitization, subtask creation, etc.)
+  const normalizedTasks = normalizeTasks(parsedData.tasks);
+
+  // Then apply due dates based on AI-provided week numbers and firstDayOfClass
+  const tasksWithDueDates = normalizedTasks.map((task, index) => {
+    const aiTask = parsedData.tasks[index];
+    const week = typeof aiTask?.week === 'number' ? aiTask.week : 1;
+    const dueDate = calculateDueDateTaskForTerm(term, week, firstDayOfClass);
+
+    return {
+      ...task,
+      dueDate: dueDate.toISOString(),
+    };
+  });
+
   const response = await fetch('/api/tasks', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       courseId,
-      tasks: parsedData.tasks.map((task, index) => {
-        const taskNumber = index + 1;
-        const dueDate = calculateDueDateWithCustomStartDate(firstDayOfClass, taskNumber, term);
-
-        return {
-          ...task,
-          dueDate: dueDate.toISOString(),
-        };
-      }),
+      tasks: tasksWithDueDates,
     }),
   });
 
