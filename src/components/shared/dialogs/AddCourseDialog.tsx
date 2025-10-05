@@ -71,31 +71,18 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
 
   useEffect(() => {
-    if (term) {
-      try {
-        const termDates = getDatesForTerm(term);
-        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-        setFirstDayOfClass(termDates.start);
-      } catch (error) {
-        console.error('Failed to get dates for term:', error);
-        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-        setFirstDayOfClass(undefined);
-      }
-    } else {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setFirstDayOfClass(undefined);
+    // Only run this effect when the dialog is open and term is set
+    if ((!isOpen || !term) && !isValidTermId(term)) {
+      return;
     }
-  }, [term]);
 
-  const handleDialogClose = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      // Small delay to ensure dialog is properly closed before reset
-      setTimeout(() => {
-        resetDialog();
-      }, 100);
+    const termDateStart = getDatesForTerm(term).start;
+
+    if (termDateStart) {
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+        setFirstDayOfClass(termDateStart);
     }
-  };
+  }, [term, isOpen]);
 
   const handleStartParsing = async () => {
     if (!courseCode.trim()) {
@@ -117,9 +104,13 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       return;
     }
 
+    if (!firstDayOfClass) {
+      toast.error('Please select a first day of class.');
+      return;
+    }
+
     let termToUse = term;
     if (!isValidTermId(termToUse)) {
-      // Try light normalization: remove leading zeros and test again
       const cleaned = termToUse.replace(/^0+/, '');
       if (isValidTermId(cleaned)) {
         termToUse = cleaned;
@@ -129,7 +120,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       }
     }
 
-    await startProcessing(cleanCode, termToUse);
+    await startProcessing(cleanCode, termToUse, firstDayOfClass);
   };
 
   const handleRetry = () => {
@@ -141,7 +132,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
 
   const handleGoToCourse = () => {
     const courseId = createdCourseId;
-    handleDialogClose(false);
+    setIsOpen(false);
     // Use setTimeout to ensure dialog state is reset before navigation
     setTimeout(() => {
       router.push(`/courses/${courseId}`);
@@ -152,6 +143,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
+        setIsOpen(open);
         if (open) {
           // Reset dialog state when opening
           resetDialog();
@@ -169,8 +161,12 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
               console.error('Failed to fetch terms:', err);
             }
           })();
+        } else {
+          // Small delay to ensure dialog is properly closed before reset
+          setTimeout(() => {
+            resetDialog();
+          }, 100);
         }
-        handleDialogClose(open);
       }}
     >
       <DialogTrigger asChild>
@@ -242,7 +238,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             onRetry={handleRetry}
             onTryDifferentCourse={handleTryDifferentCourse}
             onGoToExistingCourse={() => {}} // No longer needed since existence check is in pipeline
-            onDialogClose={handleDialogClose}
+            onDialogClose={() => setIsOpen(false)}
             onGoToCourse={handleGoToCourse}
           />
         </div>

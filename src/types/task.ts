@@ -4,6 +4,14 @@ import type { Subtask } from './subtask';
 
 export type TaskType = 'theorie' | 'pratique' | 'exam' | 'homework' | 'lab';
 
+export const TASK_TYPES = {
+  THEORIE: 'theorie',
+  PRATIQUE: 'pratique',
+  EXAM: 'exam',
+  HOMEWORK: 'homework',
+  LAB: 'lab',
+} as const;
+
 export type Task = {
   id: string;
   courseId: string;

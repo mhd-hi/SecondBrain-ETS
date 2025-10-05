@@ -10,6 +10,7 @@ import { useTask } from '@/hooks/use-task';
 import { useUpdateField } from '@/hooks/use-update-field';
 import { cn } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
+import { TASK_TYPES } from '@/types/task';
 import { EditableField } from '../shared/EditableField';
 
 type SubtasksListProps = {
@@ -204,7 +205,7 @@ const SubtasksList = ({
                                   notes: subtask.notes ?? '',
                                   estimatedEffort: subtask.estimatedEffort ?? 0,
                                   dueDate: newDueDate,
-                                  type: 'theorie',
+                                  type: TASK_TYPES.THEORIE,
                                   status: StatusTask.TODO,
                                 },
                               });

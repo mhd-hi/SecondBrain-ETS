@@ -1,6 +1,9 @@
 import type { Term, TermBuildInput, TrimesterDates, TrimesterKey } from '@/types/term';
 import { TRIMESTER, TRIMESTER_DIGIT } from '@/types/term';
 
+// Canonical term helpers used across the app.
+export const STANDARD_WEEKS_PER_TERM = 13;
+
 // Term ID validation regex - expects format YYYY[1-3]
 const TERM_ID_REGEX = /^\d{4}[1-3]$/;
 
@@ -51,9 +54,6 @@ export const buildTerm = (term: TermBuildInput): Term => {
     const id = `${term.year}${digit}`;
     return { id, label: convertTermCodeToLabel(id) };
 };
-
-// Canonical term helpers used across the app.
-export const STANDARD_WEEKS_PER_TERM = 15;
 
 // Resolve the concrete date window for a given term id like '20252'
 export function getDatesForTerm(termId: string): { start: Date; end: Date; weeks: number } {
@@ -174,7 +174,7 @@ export const nextTerm = (trimester: TrimesterKey, year: number) => {
     return { trimester: TRIMESTER.AUTUMN, year };
 };
 
-export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = 15): number {
+export function calculateWeekFromDueDate(dueDate: Date, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): number {
     // Determine which term the due date falls into, using the due date's year ranges
     let trimester: TrimesterKey;
     let termDates: { start: Date; end: Date; weeks: number };

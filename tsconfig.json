@@ -10,7 +10,6 @@
       "ES2022"
     ],
     "moduleDetection": "force",
-    "baseUrl": ".",
     /* Path Aliases */
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -29,7 +28,6 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-
     "plugins": [
       {
         "name": "next"

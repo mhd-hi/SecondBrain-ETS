@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useTask } from '@/hooks/use-task';
 import { StatusTask } from '@/types/status-task';
+import { TASK_TYPES } from '@/types/task';
 
 type AddTaskDialogProps = {
   courseId?: string;
@@ -46,7 +47,7 @@ export const AddTaskDialog = ({
     notes: '',
     estimatedEffort: 1,
     dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
-    type: 'theorie' as TaskType,
+    type: TASK_TYPES.THEORIE as TaskType,
     status: StatusTask.TODO,
   }));
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
@@ -73,7 +74,7 @@ export const AddTaskDialog = ({
         notes: '',
         estimatedEffort: 1,
         dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
-        type: 'theorie' as TaskType,
+        type: TASK_TYPES.THEORIE,
         status: StatusTask.TODO,
       });
       onTaskAdded();
@@ -146,11 +147,11 @@ export const AddTaskDialog = ({
                 onChange={e => setNewTask({ ...newTask, type: e.target.value as TaskType })}
                 required
               >
-                <option value="theorie">Theory</option>
-                <option value="pratique">Practice</option>
-                <option value="exam">Exam</option>
-                <option value="homework">Homework</option>
-                <option value="lab">Lab</option>
+                <option value={TASK_TYPES.THEORIE}>Théorie</option>
+                <option value={TASK_TYPES.PRATIQUE}>Pratique</option>
+                <option value={TASK_TYPES.EXAM}>Examen</option>
+                <option value={TASK_TYPES.HOMEWORK}>Devoir</option>
+                <option value={TASK_TYPES.LAB}>Laboratoire</option>
               </select>
             </div>
             <div className="grid gap-2">

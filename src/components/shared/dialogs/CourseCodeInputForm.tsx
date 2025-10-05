@@ -1,4 +1,4 @@
-import type { CourseInputFormProps } from '@/types/dialog/add-course-dialog';
+import type { AddCourseInputFormProps } from '@/types/dialog/add-course-dialog';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ export function CourseCodeInputForm({
   isProcessing,
   currentStep,
   onSubmit,
-}: CourseInputFormProps) {
+}: AddCourseInputFormProps) {
   return (
     <form
       onSubmit={(e) => {

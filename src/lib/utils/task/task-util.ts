@@ -3,8 +3,9 @@ import type { Task } from '@/types/task';
 import { getCurrentTerm, getNextTerm, STANDARD_WEEKS_PER_TERM } from '@/lib/utils';
 import { getDatesForTerm } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
+import { TASK_TYPES } from '@/types/task';
 
-export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date {
+export function calculateDueDateTask(week: number, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): Date {
   // Preserve legacy behavior: if no explicit term, choose current or next trimester this year,
   // and synthesize a term id so we can delegate to the term-based calculator.
   const tri = getCurrentTerm() ?? getNextTerm();
@@ -14,7 +15,7 @@ export function calculateDueDateTask(week: number, totalCourseWeeks = 15): Date 
   return calculateDueDateTaskForTerm(termId, week, totalCourseWeeks);
 }
 
-export function calculateDueDateTaskForTerm(termId: string, week: number, totalCourseWeeks = 15): Date {
+export function calculateDueDateTaskForTerm(termId: string, week: number, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): Date {
   const termDates = getDatesForTerm(termId);
   const adjustedWeek = (week / totalCourseWeeks) * STANDARD_WEEKS_PER_TERM;
   const dueDate = new Date(termDates.start);
@@ -24,6 +25,33 @@ export function calculateDueDateTaskForTerm(termId: string, week: number, totalC
     return termDates.end;
   }
   return dueDate > termDates.end ? termDates.end : dueDate;
+}
+
+// Task 1 starts on the first day of class
+// Task 2 is due 7 days later (week 2)
+// Task N is due (N-1) * 7 days after the first day
+export function calculateDueDateWithCustomStartDate(
+  startDate: Date,
+  taskNumber: number,
+  term: string,
+): Date {
+  // Calculate the due date based on custom start date
+  const daysToAdd = (taskNumber - 1) * 7; // Task 1 = 0 days, Task 2 = 7 days, etc.
+  const dueDate = new Date(startDate);
+  dueDate.setDate(dueDate.getDate() + daysToAdd);
+
+  // Try to get term end date for validation, but don't fail if term is invalid
+  try {
+    const termDates = getDatesForTerm(term);
+    if (termDates.end && dueDate > termDates.end) {
+      console.warn(`Task ${taskNumber} due date (${dueDate.toISOString()}) extends beyond term end date (${termDates.end.toISOString()}). Using term end date instead.`);
+      return termDates.end;
+    }
+  } catch (error) {
+    console.warn(`Could not validate against term end date for term "${term}":`, error);
+  }
+
+  return dueDate;
 }
 
 // Sorts tasks by due date and filters out completed tasks
@@ -48,10 +76,10 @@ export const getNextTask = (tasks: Task[]) => {
   return sortedTasks.length > 0 ? sortedTasks[0] : null;
 };
 
-// Gets the upcoming task (exam or homework) from a list of tasks
+// Gets the upcoming task from a list of tasks
 export const getUpcomingTask = (tasks: Task[]) => {
   const sortedTasks = getTasksByDueDate(tasks);
-  return sortedTasks.find(task => task.type === 'exam' || task.type === 'homework');
+  return sortedTasks.find(task => task.type === TASK_TYPES.EXAM || task.type === TASK_TYPES.HOMEWORK);
 };
 
 export const calculateProgress = (tasks: Task[]) => {

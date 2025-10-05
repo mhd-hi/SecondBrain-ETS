@@ -17,8 +17,8 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
 
 1. **Table Identification**
    - Identify all <table> ... </table> blocks in the HTML, or any ASCII segment that looks like a table (lines delimited by "|", "—", etc.).
-   - Among the headers (first row), detect the column corresponding to "Week" (keyword "Week", "Sem", or an integer "1", "2", ...).
-   - Then, identify the "Content" column (or any header containing "Content", "Course", "Subject", "Theory", "Practice", "Exam", "Homework", etc.).
+   - Among the headers (first row), detect the column corresponding to "Week" (keyword "Semaine", "Sem",  or an integer "1", "2", ...).
+   - Then, identify the "Content" column (or any header containing "Contenu", "Cours", "Sujet", "Théorie", "Pratique", "Examen", "Devoir", etc.).
    - If multiple tables exist, keep only the one whose header clearly contains "Week" or a plausible row number.
 
 2. **Line-by-Line Extraction**
@@ -37,11 +37,10 @@ You are receiving the complete HTML code (or raw text) of an ETS course plan pag
 
 3. **Type Classification**
    For each extracted content fragment:
-   - If the text contains "Theory", "Reading", "Functions", "Graphs", etc., then \`type = "theorie"\`.
-   - If the text contains "Practice", "Exercises", "TP", "Work", then \`type = "pratique"\`.
-   - If the text contains "Exam", "Midterm", "Test", "Quiz", then \`type = "exam"\`.
-   - If the text contains "Homework", "Project", "TP to submit", then \`type = "homework"\`.
-   - If multiple different keywords appear in the same fragment (e.g., "Midterm exam + Practical work"), create two distinct objects (one \`exam\`, one \`pratique\`) with the same \`week\`.
+   - If the text contains "Théorie", "Lecture", "Fonctions", "Graphes", etc., then \`type = "theorie"\`.
+   - If the text contains "Pratique", "Exercices", "TP", "Travail", then \`type = "pratique"\`.
+   - If the text contains "Examen", "Intra", "Test", "Quiz", then \`type = "exam"\`.
+   - If the text contains "Devoir", "Projet", "TP", then \`type = "homework"\`.
    - If it's a final exam, ALWAYS set \`type = "exam"\` and place it in the last week
 
 4. **Content Grouping**

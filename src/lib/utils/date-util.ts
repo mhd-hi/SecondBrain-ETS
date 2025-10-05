@@ -1,4 +1,4 @@
-import { calculateWeekFromDueDate } from '@/lib/utils/term-util';
+import { calculateWeekFromDueDate, STANDARD_WEEKS_PER_TERM } from '@/lib/utils/term-util';
 
 // Formats a date for display in a short format (e.g., "Jan 15")
 export const formatDate = (date: Date | null | undefined): string => {
@@ -84,7 +84,7 @@ export const formatDueDate = (date: Date | string) => {
 
 // Calculate a week number based on due date for grouping purposes
 // Uses the term system to calculate the correct week within the academic term
-export const getWeekNumberFromDueDate = (dueDate: Date, totalCourseWeeks = 15): number => {
+export const getWeekNumberFromDueDate = (dueDate: Date, totalCourseWeeks = STANDARD_WEEKS_PER_TERM): number => {
   const dueDateObj = dueDate instanceof Date ? dueDate : new Date(dueDate);
 
   if (Number.isNaN(dueDateObj.getTime())) {

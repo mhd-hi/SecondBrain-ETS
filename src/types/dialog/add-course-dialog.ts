@@ -23,7 +23,7 @@ export type ActionButtonsProps = {
     onGoToCourse: () => void;
 };
 
-export type CourseInputFormProps = {
+export type AddCourseInputFormProps = {
     courseCode: string;
     setCourseCode: (code: string) => void;
     term: string;

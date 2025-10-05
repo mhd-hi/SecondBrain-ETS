@@ -1,9 +1,11 @@
 import type { NextRequest } from 'next/server';
+import type { TaskType } from '@/types/task';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { getUserTask } from '@/lib/auth/db';
 import { db } from '@/server/db';
 import { subtasks } from '@/server/db/schema';
+import { TASK_TYPES } from '@/types/task';
 
 export const POST = withAuth<{ taskId: string }>(
     async (request: NextRequest, { params, user }) => {
@@ -25,7 +27,7 @@ export const POST = withAuth<{ taskId: string }>(
             notes: body.notes ?? null,
             status: (body.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
             estimatedEffort: typeof body.estimatedEffort === 'number' ? body.estimatedEffort : 0,
-            type: (body.type as unknown as typeof subtasks.$inferInsert['type']) ?? 'theorie',
+            type: (body.type as unknown as TaskType) ?? TASK_TYPES.THEORIE,
             dueDate: body.dueDate ? new Date(String(body.dueDate)) : undefined,
             createdAt: new Date(),
             updatedAt: new Date(),

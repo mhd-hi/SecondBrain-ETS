@@ -1,6 +1,6 @@
 'use client';
 
-import type { Task as TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 import type { FilterType, GroupConfig, GroupedTasks, TodaysFocusGroup } from '@/types/todays-focus';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -24,7 +24,7 @@ const GroupSection = ({
   removingTaskIds,
 }: {
   title: string;
-  tasks: TaskType[];
+  tasks: Task[];
   sectionKey: TodaysFocusGroup;
   expandedSections: Set<TodaysFocusGroup>;
   toggleSectionExpanded: (sectionKey: TodaysFocusGroup) => void;
@@ -126,7 +126,7 @@ const GroupSection = ({
 };
 
 export const TodaysFocusTile = () => {
-  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [filter, setFilter] = useState<FilterType>('week');
   const [expandedSections, setExpandedSections] = useState<Set<TodaysFocusGroup>>(() => new Set());
@@ -255,7 +255,7 @@ export const TodaysFocusTile = () => {
     });
   };
 
-  const sortTasksByPriority = (tasks: TaskType[]): TaskType[] => {
+  const sortTasksByPriority = (tasks: Task[]): Task[] => {
     const priorityOrder = {
       [StatusTask.IN_PROGRESS]: 1,
       [StatusTask.TODO]: 2,
@@ -269,7 +269,7 @@ export const TodaysFocusTile = () => {
     });
   };
 
-  const groupTasksByDate = (tasks: TaskType[]): GroupedTasks => {
+  const groupTasksByDate = (tasks: Task[]): GroupedTasks => {
     const now = new Date();
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
