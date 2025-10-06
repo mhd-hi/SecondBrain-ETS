@@ -1,6 +1,6 @@
 # Bugs
 - add a proper state manager to avoid prop drilling shenanigans
-- color the course svg icon in the sidebar with the course color 
+- ~~color the course svg icon in the sidebar with the course color~~ ✅
 # Features
 
 ## Stories:

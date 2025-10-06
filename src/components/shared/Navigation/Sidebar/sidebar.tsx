@@ -92,7 +92,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                         <SidebarMenuItem key={course.id}>
                           <SidebarMenuButton asChild isActive={isActive}>
                             <Link href={`/courses/${course.id}`}>
-                              <NotebookText className="size-4" />
+                              <NotebookText className="size-4" style={{ color: course.color }} />
                               <span>{course.code}</span>
                               <div className="ml-auto flex items-center gap-1">
                                 {course.overdueCount > 0 && (

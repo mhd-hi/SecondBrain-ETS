@@ -29,5 +29,6 @@ export type CourseApiResponse = {
 export type CourseListItem = {
     id: string;
     code: string;
+    color: string;
     overdueCount: number;
 };

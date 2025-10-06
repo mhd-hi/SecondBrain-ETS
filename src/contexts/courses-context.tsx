@@ -33,12 +33,15 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const coursesListItems: CourseListItem[] = useMemo(
-    () => courses.map(course => ({
-      id: course.id,
-      code: course.code,
-      name: course.name,
-      overdueCount: getOverdueTasks(course.tasks ?? []).length,
-    })),
+    () => courses
+      .map(course => ({
+        id: course.id,
+        code: course.code,
+        name: course.name,
+        color: course.color,
+        overdueCount: getOverdueTasks(course.tasks ?? []).length,
+      }))
+      .sort((a, b) => a.code.localeCompare(b.code)),
     [courses],
   );
   const fetchCourses = useCallback(async () => {
