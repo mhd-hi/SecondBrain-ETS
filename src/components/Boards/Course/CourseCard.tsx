@@ -105,7 +105,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       <div className="absolute -top-[10px] -right-[10px] z-10">
         <MoreActionsDropdown
           actions={dropdownActions}
-          triggerClassName=""
+          triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         />
         <Dialog open={showColorDialog} onOpenChange={setShowColorDialog}>
           <DialogContent>

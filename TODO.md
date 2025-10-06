@@ -1,7 +1,6 @@
 # Bugs
-- in courseCard, three-dot is always highlighted even when not clicked
 - add a proper state manager to avoid prop drilling shenanigans
-
+- color the course svg icon in the sidebar with the course color 
 # Features
 
 ## Stories:
