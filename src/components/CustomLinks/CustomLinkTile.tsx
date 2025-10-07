@@ -27,8 +27,6 @@ export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLink
           <div className="relative w-8 h-8">
             {/* Skeleton - always present to maintain layout */}
             <div className={`absolute inset-0 bg-muted/50 rounded transition-opacity duration-200 ${imageLoading ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
-
-            {/* Image - positioned absolutely to prevent layout shift */}
             <Image
               src={item.imageUrl}
               alt={`${item.title} icon`}

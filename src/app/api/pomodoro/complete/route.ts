@@ -49,14 +49,50 @@ export const POST = withAuthSimple(
         taskUpdateResult = taskUpdate[0];
       }
 
-      // Update the lastCompletedPomodoroDate
+      // Update the lastCompletedPomodoroDate and streak
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
+      // Get current user data to calculate new streak
+      const currentUserData = await db
+        .select({
+          streakDays: users.streakDays,
+          lastCompletedPomodoroDate: users.lastCompletedPomodoroDate,
+        })
+        .from(users)
+        .where(eq(users.id, user.id))
+        .limit(1);
+
+      let newStreakDays = 1; // Default for first completion
+
+      if (currentUserData.length > 0 && currentUserData[0]) {
+        const userData = currentUserData[0];
+
+        if (userData.lastCompletedPomodoroDate) {
+          const lastCompletedDate = new Date(userData.lastCompletedPomodoroDate);
+          lastCompletedDate.setHours(0, 0, 0, 0);
+
+          const timeDiff = today.getTime() - lastCompletedDate.getTime();
+          const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+          if (daysDiff === 0) {
+            // Already completed today - keep current streak
+            newStreakDays = userData.streakDays ?? 1;
+          } else if (daysDiff === 1) {
+            // Completed yesterday - increment streak
+            newStreakDays = (userData.streakDays ?? 0) + 1;
+          } else {
+            // More than 1 day gap - reset streak to 1
+            newStreakDays = 1;
+          }
+        }
+      }
 
       await db
         .update(users)
         .set({
           lastCompletedPomodoroDate: today,
+          streakDays: newStreakDays,
         })
         .where(eq(users.id, user.id));
 

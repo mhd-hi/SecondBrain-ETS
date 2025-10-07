@@ -43,7 +43,7 @@ export function StatusBadge({
         <TooltipTrigger asChild>
           <span
             className={cn(
-              'rounded-full px-2 py-0.5 text-xs inline-flex items-center justify-center mt-[-1px]',
+              'rounded-full px-2 py-0.5 text-s inline-flex items-center justify-center mt-[-1px] min-[]:h-[20px] min-w-[25px] font-medium',
               badgeColorClass,
               className,
             )}
