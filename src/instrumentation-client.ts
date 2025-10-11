@@ -12,12 +12,30 @@ if (process.env.NODE_ENV === 'production') {
     // Add optional integrations for additional features
     integrations: [
       Sentry.replayIntegration(),
+      Sentry.browserTracingIntegration(),
+      Sentry.browserProfilingIntegration(),
       // send console.log, console.error, and console.warn calls as logs to Sentry
       Sentry.consoleLoggingIntegration({ levels: ['log', 'error', 'warn'] }),
     ],
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
     tracesSampleRate: 0.1,
+
+    // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+    tracePropagationTargets: [
+      'localhost',
+      /^https:\/\/.*\.vercel\.app/,
+      // Add your self-hosted domain here when deploying
+      ...(process.env.NEXT_PUBLIC_APP_URL ? [process.env.NEXT_PUBLIC_APP_URL] : []),
+      // Fallback: enable for any HTTPS API calls from same origin
+      /^https:\/\/[^/]*\/api/,
+    ],
+
+    // Set profilesSampleRate to 0.1 to profile 10% of transactions.
+    // Since profilesSampleRate is relative to tracesSampleRate,
+    // the final profiling rate is tracesSampleRate * profilesSampleRate
+    // For example, 0.1 * 0.1 = 0.01 (1% of transactions being profiled)
+    profilesSampleRate: 0.5,
     // Enable logs to be sent to Sentry
     enableLogs: true,
 

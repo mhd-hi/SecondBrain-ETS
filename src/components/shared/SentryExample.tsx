@@ -1,5 +1,5 @@
 import React from 'react';
-import { captureException, createAPISpan, createUISpan, logger } from '@/lib/sentry-utils';
+import { captureException, createAPISpan, createProfiledSpan, createUISpan, logger } from '@/lib/sentry-utils';
 
 type SentryExampleProps = {
   userId?: string;
@@ -90,6 +90,35 @@ export function SentryExampleComponent({ userId }: SentryExampleProps) {
     }
   };
 
+  const handleProfilingDemo = () => {
+    // This will be profiled when running on the server side
+    createProfiledSpan(
+      'cpu.intensive',
+      'CPU Intensive Operation',
+      {
+        userId: userId || 'anonymous',
+        operation: 'profiling-demo',
+      },
+      () => {
+        // Simulate CPU intensive work
+        const start = Date.now();
+        let result = 0;
+        for (let i = 0; i < 1000000; i++) {
+          result += Math.random();
+        }
+        const duration = Date.now() - start;
+
+        logger.info('CPU intensive operation completed', {
+          userId,
+          duration,
+          result: result.toFixed(2),
+        });
+
+        return result;
+      },
+    );
+  };
+
   return (
     <div className="space-y-4 p-4 border rounded-lg">
       <h3 className="text-lg font-semibold">Sentry Integration Examples</h3>
@@ -118,6 +147,14 @@ export function SentryExampleComponent({ userId }: SentryExampleProps) {
         >
           Test Error Capture
         </button>
+
+        <button
+          type="button"
+          onClick={handleProfilingDemo}
+          className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
+        >
+          Test CPU Profiling
+        </button>
       </div>
 
       <div className="text-sm text-gray-600">
@@ -126,6 +163,7 @@ export function SentryExampleComponent({ userId }: SentryExampleProps) {
           <li>UI interaction tracking with spans</li>
           <li>API call performance monitoring</li>
           <li>Error capture with context</li>
+          <li>CPU profiling for performance analysis</li>
           <li>Structured logging</li>
         </ul>
       </div>

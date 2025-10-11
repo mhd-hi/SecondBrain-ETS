@@ -75,3 +75,58 @@ export async function createAPISpan<T>(
         },
     );
 }
+
+/**
+ * Create a profiled span for server-side operations
+ * This will automatically include profiling data when profiling is enabled
+ */
+export function createProfiledSpan<T>(
+    operation: string,
+    name: string,
+    attributes: Record<string, string | number | boolean> = {},
+    callback: () => T,
+): T {
+    return Sentry.startSpan(
+        {
+            op: operation,
+            name,
+        },
+        (span) => {
+            // Add attributes to the span
+            Object.entries(attributes).forEach(([key, value]) => {
+                span.setAttribute(key, value);
+            });
+            return callback();
+        },
+    );
+}
+
+/**
+ * Create a profiled span for async server-side operations
+ * This will automatically include profiling data when profiling is enabled
+ */
+export async function createProfiledAsyncSpan<T>(
+    operation: string,
+    name: string,
+    attributes: Record<string, string | number | boolean> = {},
+    callback: () => Promise<T>,
+): Promise<T> {
+    return Sentry.startSpan(
+        {
+            op: operation,
+            name,
+        },
+        async (span) => {
+            // Add attributes to the span
+            Object.entries(attributes).forEach(([key, value]) => {
+                span.setAttribute(key, value);
+            });
+            try {
+                return await callback();
+            } catch (error) {
+                span.setStatus({ code: 2, message: 'Error' });
+                throw error;
+            }
+        },
+    );
+}

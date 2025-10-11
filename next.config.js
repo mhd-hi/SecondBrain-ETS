@@ -44,7 +44,22 @@ const config = {
 };
 
 export default withSentryConfig(
-  config,
+  {
+    ...config,
+    async headers() {
+      return [
+        {
+          source: '/:path*',
+          headers: [
+            {
+              key: 'Document-Policy',
+              value: 'js-profiling',
+            },
+          ],
+        },
+      ];
+    },
+  },
   {
     // For all available options, see:
     // https://www.npmjs.com/package/@sentry/webpack-plugin#options
