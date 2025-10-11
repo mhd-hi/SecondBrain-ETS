@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { formatDueDate } from '@/lib/utils/date-util';
+import { formatBadgeDate, formatDueDate } from '@/lib/utils/date-util';
 
 type DueDateDisplayProps = {
   date: Date | string | null; // Accept Date, string, or null
@@ -78,11 +78,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
   const dueDateText = formatDueDate(displayedDate);
 
   // formatted date for the badge (e.g. "Wed 12 Sep")
-  const formattedBadgeDate = displayedDate
-    ? new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).format(
-        displayedDate,
-      )
-    : '';
+  const formattedBadgeDate = formatBadgeDate(displayedDate);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

@@ -1,12 +1,8 @@
 # Bugs
-- fix the status task changer breaking to new line when text is too big (on desktop view, maybe fix a max width to the text and add ellipsis)
+- in complete all overdue tasks, we should list all the affected tasks in the dialog to let user know the affected tasks
 - add a proper state manager to avoid prop drilling shenanigans
+
 # Features
-
-## Stories:
-
-- Add sentry (throw, log, error, debug, warning)
-
 ### Cache AI
 -  Cache OpenAI tasks response in DB (5 points)
     -   If course is not in the `courses_cache` db, add it.
@@ -14,15 +10,8 @@
         -   Cross-user sharing: Multiple users can benefit from the same cached response
         -   Cost optimization: Significant reduction in OpenAI API calls
 
-### Kanban Board
-- Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
-
-### Roadmap Features
-- Implement Monthly roadmap for better task visualization and movement (3 points)
-
-
 ### Progress Tracking:
--  Add semester progress Board and dashboard page (progressbar for all courses) (3 points)
+-  Add trimester progress Board and dashboard page (progressbar for all courses) (3 points)
 -  Add course progress Board inside the course page (progressBar for courses tasks) (2 points)
 
 ### Pomodoro
@@ -31,6 +20,11 @@ Once we selected a task, and completed a pomdoro, we can call the pomodoro compl
     - pomodoro page should be able to receive duration and task id in query params. Add task title in the UI on top of pomodoroContainer. We should be able to change task from there and uncheck task to not count in the pomodoro.
 - Add github-like calendar to track pomdoro activity
 
+### Roadmap Features
+- Implement Monthly roadmap for better task visualization and movement (3 points)
+
+### Kanban Board
+- Implement GitHub-like Kanban board (TODO, IN PROGRESS, COMPLETED) (5 points)
 
 ---
 

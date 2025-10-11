@@ -52,7 +52,7 @@ export function CourseListTile() {
         <h2 className="text-2xl font-semibold">Courses</h2>
         <AddCourseDialog onCourseAdded={refreshCourses} />
       </div>
-  <div className="grid w-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+      <div className="grid w-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
         {isLoading
           ? (
             Array.from({ length: 6 }).map((_, index) => (
@@ -75,7 +75,7 @@ export function CourseListTile() {
                 No courses found. Add a new course to get started!
               </div>
             )}
-  </div>
+      </div>
     </div>
   );
 }
