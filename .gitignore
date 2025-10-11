@@ -62,3 +62,6 @@ sprints.md
 .gdn/msdo.sarif
 .gdn/internal.gdnhistory
 .gdn/r/
+
+# Sentry Config File
+.env.sentry-build-plugin

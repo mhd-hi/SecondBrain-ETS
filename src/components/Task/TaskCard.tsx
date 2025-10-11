@@ -75,6 +75,12 @@ export function TaskCard({
 
   // Handler for saving due date (used by DueDateDisplay onChange)
   const handleSaveDueDate = async (newDate: Date | undefined | null) => {
+    // eslint-disable-next-line no-console
+    console.log('(LOG) Saving due dateeee', newDate);
+    // eslint-disable-next-line no-console
+    console.debug('(DEBUG) Saving due dateeee', newDate);
+    console.error('(ERROR) Saving due dateeee', newDate);
+    console.warn('(WARN) Saving due dateeee', newDate);
     const dateToStore = newDate instanceof Date && !Number.isNaN(newDate.getTime()) ? newDate : undefined;
     setEditedDueDate(dateToStore);
     if (dateToStore) {
