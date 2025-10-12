@@ -194,6 +194,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
         setStreak(streakDays);
       } catch (error) {
         console.error('Failed to fetch streak:', error);
+        console.error('pomodoro-provider: failed to load streak', error);
       }
     };
 

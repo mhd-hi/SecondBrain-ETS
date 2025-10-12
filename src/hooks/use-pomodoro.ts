@@ -29,12 +29,35 @@ export const completePomodoroSession = async (durationHours: number, taskId?: st
 };
 
 export const fetchPomodoroStreak = async (): Promise<number> => {
-    const response = await fetch('/api/pomodoro/streak');
+    try {
+        const response = await fetch('/api/pomodoro/streak');
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch streak');
+        if (!response.ok) {
+            // If user is unauthenticated or forbidden, just return 0 silently
+            if (response.status === 401 || response.status === 403) {
+                return 0;
+            }
+
+            // Attempt to read the response body for debugging, but don't throw ambiguous errors
+            let body: unknown;
+            try {
+                body = await response.json();
+            } catch {
+                try {
+                    body = await response.text();
+                } catch {
+                    body = undefined;
+                }
+            }
+
+            throw new Error(`Failed to fetch streak: ${response.status} ${response.statusText}${body ? ` - ${JSON.stringify(body)}` : ''}`);
+        }
+
+        const data = await response.json() as { streakDays?: number } | null;
+        return (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
+    } catch (error) {
+        // Network errors or other unexpected issues: log and return 0 to avoid noisy exceptions
+        console.error('Error fetching pomodoro streak (client):', error);
+        return 0;
     }
-
-    const data = await response.json() as { streakDays: number };
-    return data.streakDays ?? 0;
 };

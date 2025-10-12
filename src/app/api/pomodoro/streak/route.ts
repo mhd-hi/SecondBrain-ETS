@@ -65,7 +65,7 @@ export const GET = withAuthSimple(
         lastCompletedPomodoroDate: userData.lastCompletedPomodoroDate,
       });
     } catch (error) {
-      console.error('Failed to fetch user streak:', error);
+      console.error('Failed to fetch user streak:', { error, userId: user?.id, endpoint: '/api/pomodoro/streak' });
       return NextResponse.json(
         { error: 'Failed to fetch streak information' },
         { status: 500 },
