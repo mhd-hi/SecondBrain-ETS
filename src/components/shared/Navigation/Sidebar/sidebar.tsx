@@ -34,6 +34,7 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 type SidebarProps = {
   courses: CourseListItem[];
@@ -149,6 +150,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                       sideOffset={8}
                       className="w-56"
                     >
+                      <ThemeToggle />
                       <DropdownMenuItem asChild>
                         <Link href="/preferences">
                           <Settings className="size-4 mr-2" />
