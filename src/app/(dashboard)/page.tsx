@@ -11,11 +11,11 @@ export default function Home() {
         🎯 Dashboard
       </h1>
 
-      <section className="space-y-6">
-        <CourseListTile />
-      </section>
       <section>
         <DashboardProgressTile />
+      </section>
+      <section className="space-y-6">
+        <CourseListTile />
       </section>
       <section>
         <TodaysFocusTile />

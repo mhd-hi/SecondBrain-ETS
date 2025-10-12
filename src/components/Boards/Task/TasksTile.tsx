@@ -328,7 +328,7 @@ export const TodaysFocusTile = () => {
     <div className="border rounded-lg bg-muted/30 min-h-[320px] flex flex-col">
       <div className="p-6 pb-4 flex-1">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Today&apos;s Focus</h2>
+          <h2 className="text-xl font-semibold">Today&apos;s Focus</h2>
           <div className="flex items-center gap-2">
             {[
               {

@@ -49,7 +49,7 @@ export function CourseListTile() {
   return (
     <div className="border rounded-lg bg-muted/30 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Courses</h2>
+        <h2 className="text-xl font-semibold">Courses</h2>
         <AddCourseDialog onCourseAdded={refreshCourses} />
       </div>
       <div className="grid w-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>

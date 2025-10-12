@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, GraduationCap } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTrimesterProgress } from '@/hooks/use-trimester-progress';
@@ -16,7 +16,6 @@ function TrimesterTimelineBar({ weekOfTrimester, totalWeeks }: { weekOfTrimester
         className="absolute left-0 top-0 h-full bg-primary/30 transition-all"
         style={{ width: `${currentPosition}%` }}
       />
-      {/* Current date indicator - dot */}
       <div
         className="absolute top-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background transform -translate-y-1/2 -translate-x-1/2 z-10 shadow-sm"
         style={{ left: `${Math.min(Math.max(currentPosition, 3), 97)}%` }}
@@ -33,9 +32,8 @@ export function DashboardProgressTile() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5" />
-            Trimester Progress
+          <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+            Progress
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -58,9 +56,8 @@ export function DashboardProgressTile() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <GraduationCap className="h-5 w-5" />
-          Trimester Progress
+        <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+          Progress
         </CardTitle>
         <CardDescription className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
@@ -72,17 +69,6 @@ export function DashboardProgressTile() {
       <CardContent className="space-y-6">
         {/* Trimester Timeline */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">
-              Week
-              {' '}
-              {currentSession.weekOfTrimester}
-              {' '}
-              of
-              {' '}
-              {currentSession.totalWeeks}
-            </span>
-          </div>
           <TrimesterTimelineBar
             weekOfTrimester={currentSession.weekOfTrimester}
             totalWeeks={currentSession.totalWeeks}
