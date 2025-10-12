@@ -62,7 +62,6 @@ async function fetchCourseFromPlanETS(courseCode: string, term: string) {
 
   return {
     html: result.data as string,
-    logs: result.logs,
   };
 }
 

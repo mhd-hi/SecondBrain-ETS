@@ -11,7 +11,6 @@ export class ServerCourseProcessingPipeline {
     private dataSources: DataSource[] = [];
     private processor = new OpenAIProcessor();
     private steps: ProcessingStep[] = [];
-    private logs: string[] = [];
     private onStepUpdate?: (steps: ProcessingStep[]) => void;
 
     constructor(onStepUpdate?: (steps: ProcessingStep[]) => void) {
@@ -40,12 +39,6 @@ export class ServerCourseProcessingPipeline {
         }
     }
 
-    private log(message: string) {
-        // eslint-disable-next-line no-console
-        console.log(message);
-        this.logs.push(`[${new Date().toISOString()}] ${message}`);
-    }
-
     async process(options: PipelineOptions): Promise<PipelineResult> {
         const { courseCode, term } = options;
         if (!term) {
@@ -53,9 +46,8 @@ export class ServerCourseProcessingPipeline {
         }
 
         this.steps = [];
-        this.logs = [];
 
-        this.log(`Starting course processing pipeline for ${courseCode}`);
+        console.log(`Starting course processing pipeline for ${courseCode}`);
 
         // Create steps for each data source + processing
         for (const source of this.dataSources) {
@@ -71,11 +63,10 @@ export class ServerCourseProcessingPipeline {
                 this.updateStep(stepId, { status: 'loading', startTime: new Date() });
 
                 try {
-                    this.log(`Fetching data from ${source.description}...`);
+                    console.log(`Fetching data from ${source.description}...`);
                     const result = await source.fetch(courseCode, term);
 
                     sourceResults.push(result);
-                    this.logs.push(...result.logs);
 
                     this.updateStep(stepId, {
                         status: 'success',
@@ -83,7 +74,7 @@ export class ServerCourseProcessingPipeline {
                         data: { metadata: result.metadata },
                     });
 
-                    this.log(`Successfully fetched data from ${source.description}`);
+                    console.log(`Successfully fetched data from ${source.description}`);
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
                     this.updateStep(stepId, {
@@ -92,23 +83,19 @@ export class ServerCourseProcessingPipeline {
                         error: errorMessage,
                     });
 
-                    this.log(`Failed to fetch data from ${source.description}: ${errorMessage}`);
+                    console.log(`Failed to fetch data from ${source.description}: ${errorMessage}`);
                     throw error;
                 }
             }
 
             const combinedData = sourceResults.map(r => r.data).join('\n\n');
-            this.log(`Combined data from ${sourceResults.length} source(s)`);
+            console.log(`Combined data from ${sourceResults.length} source(s)`);
 
             this.updateStep('ai_processing', { status: 'loading', startTime: new Date() });
 
             try {
-                this.log('Starting AI Content Parsing...');
+                console.log('Starting AI Content Parsing...');
                 const aiResult = await this.processor.process(combinedData, courseCode, term);
-
-                if (Array.isArray(aiResult.logs) && aiResult.logs.length) {
-                    this.logs.push(...aiResult.logs.map(l => `[AI] ${l}`));
-                }
 
                 this.updateStep('ai_processing', {
                     status: 'success',
@@ -116,12 +103,11 @@ export class ServerCourseProcessingPipeline {
                     data: { tasksCount: aiResult.courseData.tasks.length },
                 });
 
-                this.log(`AI processing completed successfully. Generated ${aiResult.courseData.tasks.length} tasks`);
+                console.log(`AI processing completed successfully. Generated ${aiResult.courseData.tasks.length} tasks`);
 
                 return {
                     courseData: aiResult.courseData,
                     steps: this.steps,
-                    logs: this.logs,
                 };
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -131,21 +117,17 @@ export class ServerCourseProcessingPipeline {
                     error: errorMessage,
                 });
 
-                this.log(`AI processing failed: ${errorMessage}`);
+                console.log(`AI processing failed: ${errorMessage}`);
                 throw error;
             }
         } catch (error) {
-            this.log(`Pipeline failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            console.log(`Pipeline failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
             throw error;
         }
     }
 
     getSteps(): ProcessingStep[] {
         return [...this.steps];
-    }
-
-    getLogs(): string[] {
-        return [...this.logs];
     }
 }
 

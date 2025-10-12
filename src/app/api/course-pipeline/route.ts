@@ -59,7 +59,6 @@ export const POST = withAuthSimple(
                 term,
               },
             },
-            logs: result.logs,
             data: result.data,
           } as PipelineStepResult);
         } catch (error) {
@@ -75,7 +74,6 @@ export const POST = withAuthSimple(
               error: errorMessage,
               endTime: new Date().toISOString(),
             },
-            logs: [errorMessage],
             data: null,
           } as PipelineStepResult, { status: 500 });
         }
@@ -105,7 +103,6 @@ export const POST = withAuthSimple(
               endTime,
               data: { tasksCount: result.courseData.tasks.length },
             },
-            logs: result.logs && result.logs.length ? result.logs : ['AI processing completed successfully'],
             data: courseData,
           } as PipelineStepResult);
         } catch (error) {
@@ -121,7 +118,6 @@ export const POST = withAuthSimple(
               error: errorMessage,
               endTime: new Date().toISOString(),
             },
-            logs: [errorMessage],
             data: null,
           } as PipelineStepResult, { status: 500 });
         }
@@ -136,7 +132,6 @@ export const POST = withAuthSimple(
       return NextResponse.json(
         {
           error: error instanceof Error ? error.message : 'Unknown error occurred',
-          logs: [],
         },
         { status: 500 },
       );

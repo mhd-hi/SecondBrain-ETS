@@ -17,7 +17,6 @@ export class PlanetsDataSource implements DataSource {
 
         return {
             data: result.html,
-            logs: result.logs,
             metadata: { source: 'planets', courseCode, term },
         };
     }

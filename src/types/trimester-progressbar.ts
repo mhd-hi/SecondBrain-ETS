@@ -1,3 +1,11 @@
+export type ProgressMetrics = {
+    total: number;
+    completed: number;
+    inProgress: number;
+    todo: number;
+    completionPercentage: number;
+};
+
 export type TrimesterProgressBar = {
     totalCourses: number;
     completedCourses: number;

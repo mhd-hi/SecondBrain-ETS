@@ -103,8 +103,8 @@ export function playNotificationSound(volume?: number): void {
       duration: 0.3,
       volume: v,
     });
-  } catch (error) {
-    console.warn('Could not play notification sound:', error);
+  } catch {
+    // Audio playback failed - continue silently
   }
 }
 
@@ -121,7 +121,7 @@ export function playAlertSound(volume?: number): void {
     const v = typeof volume === 'number' ? volume : 0.2;
     createBeep(audioContext, { frequency: 587, startTime: 0, duration: 0.2, volume: v });
     createBeep(audioContext, { frequency: 659, startTime: 0.3, duration: 0.2, volume: v });
-  } catch (error) {
-    console.warn('Could not play alert sound:', error);
+  } catch {
+    // Audio playback failed - continue silently
   }
 }

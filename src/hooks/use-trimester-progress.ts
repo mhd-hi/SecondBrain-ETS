@@ -4,6 +4,7 @@ import type { CourseProgressBar, StatsProgressBar, TrimesterProgressBar } from '
 import { useMemo } from 'react';
 
 import { useCoursesContext } from '@/contexts/use-courses';
+import { calculateCourseProgressMetrics, calculateProgressMetrics } from '@/lib/utils/progress-util';
 import { getCurrentTrimesterInfo } from '@/lib/utils/trimester-util';
 import { StatusTask } from '@/types/status-task';
 
@@ -22,10 +23,7 @@ export function useTrimesterProgress(): StatsProgressBar | null {
         // Calculate course progress
         const courseProgresses: CourseProgressBar[] = courses.map((course) => {
             const tasks = course.tasks || [];
-            const totalTasks = tasks.length;
-            const completedTasks = tasks.filter(task => task.status === StatusTask.COMPLETED).length;
-            const inProgressTasks = tasks.filter(task => task.status === StatusTask.IN_PROGRESS).length;
-            const todoTasks = tasks.filter(task => task.status === StatusTask.TODO).length;
+            const progress = calculateProgressMetrics(tasks);
 
             // Tasks due within the next week
             const nextWeek = new Date();
@@ -35,35 +33,29 @@ export function useTrimesterProgress(): StatsProgressBar | null {
                 && new Date(task.dueDate) <= nextWeek,
             ).length;
 
-            const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-
             return {
                 courseId: course.id,
                 courseName: course.name,
                 courseCode: course.code,
                 color: course.color,
-                totalTasks,
-                completedTasks,
-                inProgressTasks,
-                todoTasks,
-                completionPercentage,
+                totalTasks: progress.total,
+                completedTasks: progress.completed,
+                inProgressTasks: progress.inProgress,
+                todoTasks: progress.todo,
+                completionPercentage: progress.completionPercentage,
                 dueTasksCount,
             };
         });
 
         // Calculate trimester progress based on completion percentages
-        const totalCourses = courses.length;
-        const completedCourses = courseProgresses.filter(cp => cp.completionPercentage === 100).length;
-        const inProgressCourses = courseProgresses.filter(cp => cp.completionPercentage > 0 && cp.completionPercentage < 100).length;
-        const todoCourses = courseProgresses.filter(cp => cp.completionPercentage === 0).length;
-        const completionPercentage = totalCourses > 0 ? Math.round((completedCourses / totalCourses) * 100) : 0;
+        const trimesterMetrics = calculateCourseProgressMetrics(courseProgresses);
 
         const trimesterProgress: TrimesterProgressBar = {
-            totalCourses,
-            completedCourses,
-            inProgressCourses,
-            todoCourses,
-            completionPercentage,
+            totalCourses: trimesterMetrics.total,
+            completedCourses: trimesterMetrics.completed,
+            inProgressCourses: trimesterMetrics.inProgress,
+            todoCourses: trimesterMetrics.todo,
+            completionPercentage: trimesterMetrics.completionPercentage,
         };
 
         return {

@@ -107,12 +107,12 @@ export const STATUS_ORDER = [
 
 export const TASK_STATUS_CONFIG = {
   [StatusTask.TODO]: {
-    label: 'TODO',
+    label: StatusTask.TODO,
     bgColor: 'bg-blue-500',
     textColor: 'text-blue-100',
   },
   [StatusTask.IN_PROGRESS]: {
-    label: 'DOING',
+    label: StatusTask.IN_PROGRESS,
     bgColor: 'bg-amber-500',
     textColor: 'text-gray-800',
   },

@@ -4,6 +4,7 @@ import { Target } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBadgeDate } from '@/lib/utils/date-util';
+import { calculateProgressMetrics } from '@/lib/utils/progress-util';
 import { getCurrentTrimesterInfo, getCurrentTrimesterPosition } from '@/lib/utils/trimester-util';
 
 function TaskProgressBar({ completed, inProgress, total }: { completed: number; inProgress: number; total: number }) {
@@ -53,10 +54,8 @@ type CourseProgressTileProps = {
 
 export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
   // Calculate progress stats
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.status === 'COMPLETED').length;
-  const inProgressTasks = tasks.filter(task => task.status === 'IN_PROGRESS').length;
-  const todoTasks = tasks.filter(task => task.status === 'TODO').length;
+  const progress = calculateProgressMetrics(tasks);
+  const { total: totalTasks, completed: completedTasks, inProgress: inProgressTasks, todo: todoTasks } = progress;
 
   // Tasks due within the next week
   const nextWeek = new Date();

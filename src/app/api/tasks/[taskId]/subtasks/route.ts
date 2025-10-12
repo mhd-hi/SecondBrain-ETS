@@ -5,6 +5,7 @@ import { withAuth } from '@/lib/auth/api';
 import { getUserTask } from '@/lib/auth/db';
 import { db } from '@/server/db';
 import { subtasks } from '@/server/db/schema';
+import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
 export const POST = withAuth<{ taskId: string }>(
@@ -25,7 +26,7 @@ export const POST = withAuth<{ taskId: string }>(
             taskId,
             title: body.title ?? '',
             notes: body.notes ?? null,
-            status: (body.status as unknown as typeof subtasks.$inferInsert['status']) ?? 'TODO',
+            status: (body.status as unknown as typeof subtasks.$inferInsert['status']) ?? StatusTask.TODO,
             estimatedEffort: typeof body.estimatedEffort === 'number' ? body.estimatedEffort : 0,
             type: (body.type as unknown as TaskType) ?? TASK_TYPES.THEORIE,
             dueDate: body.dueDate ? new Date(String(body.dueDate)) : undefined,

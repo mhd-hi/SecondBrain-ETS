@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
+import { StatusTask } from '@/types/status-task';
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -24,8 +25,8 @@ export const GET = withAuthSimple(
             eq(tasks.userId, user.id),
             lt(tasks.dueDate, now), // Overdue tasks only
             or(
-              eq(tasks.status, 'IN_PROGRESS'),
-              eq(tasks.status, 'TODO'),
+              eq(tasks.status, StatusTask.IN_PROGRESS),
+              eq(tasks.status, StatusTask.TODO),
             ),
           ),
         )
@@ -46,8 +47,8 @@ export const GET = withAuthSimple(
             and(
               eq(tasks.userId, user.id),
               or(
-                eq(tasks.status, 'IN_PROGRESS'),
-                eq(tasks.status, 'TODO'),
+                eq(tasks.status, StatusTask.IN_PROGRESS),
+                eq(tasks.status, StatusTask.TODO),
               ),
             ),
           )
@@ -63,7 +64,7 @@ export const GET = withAuthSimple(
       }
 
       // Prioritize IN_PROGRESS tasks over TODO tasks
-      const inProgressTask = suggestedTasks.find(task => task.status === 'IN_PROGRESS');
+      const inProgressTask = suggestedTasks.find(task => task.status === StatusTask.IN_PROGRESS);
       const suggestedTask = inProgressTask ?? suggestedTasks[0];
 
       return NextResponse.json(suggestedTask);

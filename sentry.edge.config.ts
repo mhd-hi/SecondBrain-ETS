@@ -4,6 +4,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs';
+import { consoleLoggingConfig } from '@/lib/sentry-utils';
 
 // Only initialize Sentry in production
 if (process.env.NODE_ENV === 'production') {
@@ -12,8 +13,7 @@ if (process.env.NODE_ENV === 'production') {
 
     // Add optional integrations for additional features
     integrations: [
-      // send console.log, console.error, and console.warn calls as logs to Sentry
-      Sentry.consoleLoggingIntegration({ levels: ['log', 'error', 'warn'] }),
+      consoleLoggingConfig,
     ],
 
     // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.

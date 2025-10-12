@@ -6,6 +6,7 @@ import { withAuthSimple } from '@/lib/auth/api';
 import { parseStatusTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
+import { StatusTask } from '@/types/status-task';
 
 export const GET = withAuthSimple(
   async (request, user) => {
@@ -43,15 +44,15 @@ export const GET = withAuthSimple(
           // Overdue tasks (not completed)
           and(
             lt(tasks.dueDate, now),
-            ne(tasks.status, 'COMPLETED'),
+            ne(tasks.status, StatusTask.COMPLETED),
           ),
           // Tasks due within filter range that are actionable (IN_PROGRESS or TODO)
           and(
             gte(tasks.dueDate, now),
             lt(tasks.dueDate, endDate),
             or(
-              eq(tasks.status, 'IN_PROGRESS'),
-              eq(tasks.status, 'TODO'),
+              eq(tasks.status, StatusTask.IN_PROGRESS),
+              eq(tasks.status, StatusTask.TODO),
             ),
           ),
         ),
