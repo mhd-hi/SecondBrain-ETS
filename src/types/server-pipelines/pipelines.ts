@@ -2,7 +2,6 @@ import type { CourseAIResponse } from '@/types/api/ai';
 
 export type SourceResult = {
   data: string;
-  logs: string[];
   metadata?: Record<string, unknown>;
 };
 
@@ -20,7 +19,6 @@ export type PipelineOptions = {
 export type PipelineResult = {
   courseData: CourseAIResponse;
   steps: ProcessingStep[];
-  logs: string[];
 };
 
 export type PipelineStepRequest = {
@@ -32,7 +30,6 @@ export type PipelineStepRequest = {
 
 export type PipelineStepResult = {
   step: ProcessingStep;
-  logs: string[];
   data?: unknown;
 };
 

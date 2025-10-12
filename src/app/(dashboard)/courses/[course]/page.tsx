@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
 import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
 
@@ -251,9 +252,9 @@ export default function CoursePage({ params }: CoursePageProps) {
   }
 
   return (
-    <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
+    <main className="container mx-auto px-8 flex min-h-screen flex-col mt-6 mb-8">
 
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-4">
           {isLoading
             ? (
@@ -278,9 +279,9 @@ export default function CoursePage({ params }: CoursePageProps) {
           <CourseSkeleton />
         )
         : (
-          <>
-            {/* Course links panel */}
-            <section className="mb-6">
+          <div className="space-y-8">
+
+            <section>
               <CourseCustomLinks
                 courseId={course.id}
                 customLinks={course.customLinks}
@@ -288,8 +289,11 @@ export default function CoursePage({ params }: CoursePageProps) {
               />
             </section>
 
-            {/* Search and add task */}
-            <div className="flex items-center gap-4 mb-10">
+            <section>
+              <CourseProgressTile tasks={tasks} />
+            </section>
+
+            <div className="flex items-center gap-4 mb-2">
               <SearchBar
                 placeholder="Search tasks by title, notes, or subtasks..."
                 value={searchQuery}
@@ -313,16 +317,16 @@ export default function CoursePage({ params }: CoursePageProps) {
             {/* Tasks content */}
             {filteredTasks.length > 0
               ? (
-                <div className="space-y-5 will-change-scroll">
+                <div className="space-y-8 will-change-scroll">
                   {Object.entries(tasksByWeek)
                     .sort(([a], [b]) => Number(a) - Number(b))
                     .map(([week, weekTasks]) => (
-                      <div key={week} className="space-y-2.5">
-                        <h3 className="font-semibold mb-1.5">
+                      <div key={week} className="space-y-4">
+                        <h3 className="font-semibold text-lg mb-3">
                           {'Week '}
                           {week}
                         </h3>
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           {weekTasks.map(task => (
                             <div
                               id={`task-${task.id}`}
@@ -344,18 +348,18 @@ export default function CoursePage({ params }: CoursePageProps) {
               )
               : searchQuery.trim()
                 ? (
-                  <div className="text-center text-muted-foreground">
+                  <div className="text-center text-muted-foreground py-12">
                     No tasks found matching &quot;
                     {searchQuery}
                     &quot;. Try a different search term.
                   </div>
                 )
                 : (
-                  <div className="text-center text-muted-foreground">
+                  <div className="text-center text-muted-foreground py-12">
                     No tasks found. Add a task to get started.
                   </div>
                 )}
-          </>
+          </div>
         )}
     </main>
   );

@@ -53,6 +53,7 @@ export default antfu(
       'test/padding-around-all': 'error', // Add padding in test files
       'test/prefer-lowercase-title': 'off', // Allow using uppercase titles in test titles
       'react/no-context-provider': 'off', // Disable to prevent false positives with Radix UI components
+      'no-console': 'off', // Allow console statements since they're handled by Sentry integration
     },
   },
   {

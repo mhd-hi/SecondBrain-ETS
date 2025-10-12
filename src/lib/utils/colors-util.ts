@@ -20,9 +20,9 @@ const COURSE_COLORS = [
     '#f43f5e', // Rose
     '#22c55e', // Green
     '#d946ef', // Fuchsia
-    '#06b6d4', // Cyan variant
     '#fb7185', // Pink variant
     '#34d399', // Emerald variant
+    '#6b7280', // Gray
 ] as const;
 
 export function cn(...inputs: ClassValue[]): string {
@@ -30,7 +30,7 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 export function generateRandomCourseColor(): string {
-    // Get a random color from our predefined palette (excluding duplicates)
+    // Get a random color from our predefined palette
     const randomIndex = Math.floor(Math.random() * COURSE_COLORS.length);
     return COURSE_COLORS[randomIndex] as string;
 }

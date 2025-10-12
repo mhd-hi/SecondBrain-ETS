@@ -1,6 +1,7 @@
 'use client';
 
 import { CourseListTile } from '@/components/Boards/Course/CourseListTile';
+import { DashboardProgressTile } from '@/components/Boards/Progress/DashboardProgressTile';
 import { TodaysFocusTile } from '@/components/Boards/Task/TasksTile';
 
 export default function Home() {
@@ -14,11 +15,10 @@ export default function Home() {
         <CourseListTile />
       </section>
       <section>
-        <div className="flex gap-6">
-          <div className="flex-1">
-            <TodaysFocusTile />
-          </div>
-        </div>
+        <DashboardProgressTile />
+      </section>
+      <section>
+        <TodaysFocusTile />
       </section>
     </main>
   );

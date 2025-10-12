@@ -1,5 +1,9 @@
 import * as Sentry from '@sentry/nextjs';
 
+export const consoleLoggingConfig = Sentry.consoleLoggingIntegration({
+    levels: ['log', 'warn', 'error'],
+});
+
 // Logger instance
 export const { logger } = Sentry;
 

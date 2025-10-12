@@ -6,7 +6,7 @@ export class OpenAIProcessor {
         combinedData: string,
         courseCode: string,
         term: string,
-    ): Promise<{ courseData: CourseAIResponse; logs: string[] }> {
+    ): Promise<{ courseData: CourseAIResponse }> {
         const result = await parseContentWithAI(combinedData);
 
         const courseData: CourseAIResponse = {
@@ -15,7 +15,7 @@ export class OpenAIProcessor {
             tasks: result.tasks,
         };
 
-        return { courseData, logs: result.logs };
+        return { courseData };
     }
 }
 

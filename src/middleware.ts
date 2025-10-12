@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from './middleware/auth';
+import { auth } from '@/middleware/auth';
 
 // Define routes that require authentication with more comprehensive patterns
 const protectedApiRoutes = [

@@ -27,7 +27,7 @@ export function CourseCodeInputForm({
     >
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="courseCode">Course code: </Label>
+          <Label htmlFor="courseCode">Course code :</Label>
           <div className="flex gap-2">
             <Input
               id="courseCode"
@@ -71,7 +71,7 @@ export function CourseCodeInputForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="firstDayOfClass">First day of class (cours, pas TP):</Label>
+          <Label htmlFor="firstDayOfClass">First day of class :</Label>
           <div className={isProcessing ? 'pointer-events-none opacity-50' : ''}>
             <DatePicker
               date={firstDayOfClass}

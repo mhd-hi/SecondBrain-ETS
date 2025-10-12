@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 /**
  * Database seeding for development and initial setup
  * This runs automatically during deployment to ensure required data exists

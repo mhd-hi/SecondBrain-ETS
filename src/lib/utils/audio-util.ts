@@ -104,7 +104,7 @@ export function playNotificationSound(volume?: number): void {
       volume: v,
     });
   } catch (error) {
-    console.warn('Could not play notification sound:', error);
+    console.warn('Could not play alert sound:', error);
   }
 }
 
