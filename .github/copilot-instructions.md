@@ -29,7 +29,7 @@ function TestComponent() {
     );
   };
   return (
-    <button type='button' onClick={handleTestButtonClick}>
+    <button type="button" onClick={handleTestButtonClick}>
       Test Sentry
     </button>
   );
