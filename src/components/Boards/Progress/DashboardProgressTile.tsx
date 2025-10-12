@@ -11,13 +11,12 @@ function TrimesterTimelineBar({ weekOfTrimester, totalWeeks }: { weekOfTrimester
 
   return (
     <div className="relative h-4 w-full bg-muted rounded-full overflow-hidden">
-      {/* Timeline progress */}
       <div
-        className="absolute left-0 top-0 h-full bg-primary/30 transition-all"
+        className="absolute left-0 top-0 h-full bg-emerald-700/40 transition-all"
         style={{ width: `${currentPosition}%` }}
       />
       <div
-        className="absolute top-1/2 w-4 h-4 bg-primary rounded-full border-2 border-background transform -translate-y-1/2 -translate-x-1/2 z-10 shadow-sm"
+        className="absolute top-1/2 w-4 h-4 bg-emerald-600 rounded-full border-1 border-background transform -translate-y-1/2 -translate-x-1/2 z-10 shadow-sm"
         style={{ left: `${Math.min(Math.max(currentPosition, 3), 97)}%` }}
         title={`Week ${weekOfTrimester} of ${totalWeeks}`}
       />

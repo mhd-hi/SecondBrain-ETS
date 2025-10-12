@@ -1,5 +1,5 @@
 export enum StatusTask {
     TODO = 'TODO',
-    IN_PROGRESS = 'DOING',
+    IN_PROGRESS = 'IN_PROGRESS',
     COMPLETED = 'COMPLETED',
 }

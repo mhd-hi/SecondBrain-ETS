@@ -5,6 +5,30 @@ import { getDatesForTerm } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
+export const STATUS_ORDER = [
+  StatusTask.TODO,
+  StatusTask.IN_PROGRESS,
+  StatusTask.COMPLETED,
+] as const;
+
+export const TASK_STATUS_CONFIG = {
+  [StatusTask.TODO]: {
+    label: StatusTask.TODO,
+    bgColor: 'bg-blue-500',
+    textColor: 'text-blue-100',
+  },
+  [StatusTask.IN_PROGRESS]: {
+    label: 'DOING',
+    bgColor: 'bg-amber-500',
+    textColor: 'text-gray-800',
+  },
+  [StatusTask.COMPLETED]: {
+    label: 'DONE',
+    bgColor: 'bg-green-600',
+    textColor: 'text-green-100',
+  },
+} as const;
+
 export function calculateDueDateTask(week: number, firstDayOfClass?: Date): Date {
   // Preserve legacy behavior: if no explicit term, choose current or next trimester this year,
   // and synthesize a term id so we can delegate to the term-based calculator.
@@ -98,30 +122,6 @@ export const getCompletedTasksCount = (tasks: Task[]): number => {
 export const getTotalTasksCount = (tasks: Task[]): number => {
   return tasks.length;
 };
-
-export const STATUS_ORDER = [
-  StatusTask.TODO,
-  StatusTask.IN_PROGRESS,
-  StatusTask.COMPLETED,
-] as const;
-
-export const TASK_STATUS_CONFIG = {
-  [StatusTask.TODO]: {
-    label: StatusTask.TODO,
-    bgColor: 'bg-blue-500',
-    textColor: 'text-blue-100',
-  },
-  [StatusTask.IN_PROGRESS]: {
-    label: StatusTask.IN_PROGRESS,
-    bgColor: 'bg-amber-500',
-    textColor: 'text-gray-800',
-  },
-  [StatusTask.COMPLETED]: {
-    label: 'DONE',
-    bgColor: 'bg-green-600',
-    textColor: 'text-green-100',
-  },
-} as const;
 
 export const getNextStatusTask = (currentStatus: StatusTask): StatusTask => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus as typeof STATUS_ORDER[number]);
