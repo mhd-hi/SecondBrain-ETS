@@ -3,6 +3,7 @@
 import { Calendar } from 'lucide-react';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useTrimesterProgress } from '@/hooks/use-trimester-progress';
 import { formatBadgeDate } from '@/lib/utils/date-util';
 
@@ -31,19 +32,14 @@ export function DashboardProgressTile() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
             Progress
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4" />
-            <div className="h-4 bg-muted rounded" />
-            <div className="grid grid-cols-3 gap-4">
-              <div className="h-12 bg-muted rounded" />
-              <div className="h-12 bg-muted rounded" />
-              <div className="h-12 bg-muted rounded" />
-            </div>
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-4" />
           </div>
         </CardContent>
       </Card>
@@ -66,7 +62,6 @@ export function DashboardProgressTile() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Trimester Timeline */}
         <div className="space-y-3">
           <TrimesterTimelineBar
             weekOfTrimester={currentSession.weekOfTrimester}

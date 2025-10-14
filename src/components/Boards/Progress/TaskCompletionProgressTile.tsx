@@ -1,7 +1,5 @@
 'use client';
 
-import { Target } from 'lucide-react';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBadgeDate } from '@/lib/utils/date-util';
 import { calculateProgressMetrics } from '@/lib/utils/progress-util';
@@ -67,7 +65,6 @@ export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
               Task Completion
             </CardTitle>
           </div>
@@ -76,8 +73,27 @@ export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
       <CardContent className="space-y-6">
         {/* Task Progress Visualization */}
         <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium"></span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                {completedTasks}
+                {' '}
+                DONE
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                {inProgressTasks}
+                {' '}
+                DOING
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-gray-300 rounded-full" />
+                {todoTasks}
+                {' '}
+                TODO
+              </div>
+            </div>
             <span className="text-sm text-muted-foreground">
               {completedTasks + inProgressTasks}
               /
@@ -86,32 +102,12 @@ export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
               tasks
             </span>
           </div>
+
           <TaskProgressBar
             completed={completedTasks}
             inProgress={inProgressTasks}
             total={totalTasks}
           />
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              {completedTasks}
-              {' '}
-              DONE
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-
-              {inProgressTasks}
-              {' '}
-              DOING
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-gray-300 rounded-full" />
-              {todoTasks}
-              {' '}
-              TODO
-            </div>
-          </div>
         </div>
       </CardContent>
     </Card>

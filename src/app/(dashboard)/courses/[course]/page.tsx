@@ -245,7 +245,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   if (!course) {
     return (
-      <main className="container mx-auto px-8 flex min-h-screen flex-col mt-2 mb-3.5">
+      <main className="container mx-auto px-8 flex min-h-screen flex-col mt-6 mb-8">
         <CourseSkeleton />
       </main>
     );
@@ -258,7 +258,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         <div className="flex items-center gap-4">
           {isLoading
             ? (
-              <Skeleton className="h-9 w-24" />
+              <Skeleton className="h-10 w-24" />
             )
             : course && (
               <h2 className="text-3xl font-bold">{course.code}</h2>
@@ -280,7 +280,9 @@ export default function CoursePage({ params }: CoursePageProps) {
         )
         : (
           <div className="space-y-8">
-
+            <section>
+              <CourseProgressTile tasks={tasks} />
+            </section>
             <section>
               <CourseCustomLinks
                 courseId={course.id}
@@ -288,11 +290,6 @@ export default function CoursePage({ params }: CoursePageProps) {
                 onCustomLinksChange={fetchCourse}
               />
             </section>
-
-            <section>
-              <CourseProgressTile tasks={tasks} />
-            </section>
-
             <div className="flex items-center gap-4 mb-2">
               <SearchBar
                 placeholder="Search tasks by title, notes, or subtasks..."

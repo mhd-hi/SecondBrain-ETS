@@ -30,13 +30,6 @@ export default function CourseCustomLinks({ courseId, customLinks: propCustomLin
       <div className="rounded-lg flex flex-col">
         <div className="flex-1">
           <div className="space-y-4">
-            <div className="space-y-3">
-              {/* Header */}
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Links</h3>
-              </div>
-
-              {/* All links container with compact icon-only layout */}
               <div className="group/container flex flex-wrap gap-4 relative">
                 {customLinks.map(l => (
                   <CustomLinkTile
@@ -57,7 +50,6 @@ export default function CourseCustomLinks({ courseId, customLinks: propCustomLin
                   <Plus size={20} />
                 </button>
               </div>
-            </div>
           </div>
         </div>
       </div>

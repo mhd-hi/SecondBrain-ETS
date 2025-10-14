@@ -1,3 +1,4 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export function CourseSkeleton() {
@@ -12,6 +13,21 @@ export function CourseSkeleton() {
           <Skeleton className="h-10 w-32" />
         </div>
       </div>
+
+      {/* Course progress skeleton */}
+      <section className="mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">Task Completion</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-1/4" />
+              <Skeleton className="h-4" />
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
       {/* Course custom links skeleton */}
       <section className="mb-6">
