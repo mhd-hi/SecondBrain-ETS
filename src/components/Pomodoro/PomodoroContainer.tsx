@@ -2,10 +2,12 @@
 
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePomodoro } from '@/contexts/use-pomodoro';
+import { fetchPomodoroStreak } from '@/hooks/use-pomodoro';
 import { StreakBadge } from '../shared/atoms/StreakBadge';
 import { DurationSelector } from './DurationSelector';
 
@@ -16,7 +18,6 @@ export function PomodoroContainer() {
     totalTimeSec,
     pomodoroType,
     currentTask,
-    streak,
     currentDuration,
     isPomodoroActive,
     toggleTimer,
@@ -25,6 +26,16 @@ export function PomodoroContainer() {
     switchToPomodoroType,
     updateDuration,
   } = usePomodoro();
+
+  const [streak, setStreak] = useState<number | null>(null);
+  const _streakCalledRef = useRef(false);
+  if (!_streakCalledRef.current) {
+    _streakCalledRef.current = true;
+      (async () => {
+          const streakDays = await fetchPomodoroStreak();
+          setStreak(streakDays);
+      })();
+  }
 
   const getProgress = () => {
     return ((totalTimeSec - timeLeftSec) / totalTimeSec) * 100;
@@ -170,7 +181,7 @@ export function PomodoroContainer() {
             </div>
           </div>
 
-          <StreakBadge streak={streak} />
+          <StreakBadge streak={streak ?? 0} />
         </CardContent>
       </Card>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import type { CourseApiResponse } from '@/types/api/course';
-import type { Course } from '@/types/course';
+import type { Course, Daypart } from '@/types/course';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { useCallback, useState } from 'react';
@@ -85,6 +85,31 @@ export function useCourse(courseId: string) {
     );
   }, [courseId]);
 
+  const updateCourseDaypart = useCallback(async (daypart: Daypart) => {
+    await withLoadingAndErrorHandling(
+      async () => {
+        const res = await fetch(`/api/courses/${courseId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ daypart }),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to update course daypart');
+        }
+
+        // Update the local course state with the new daypart
+        setCourse(prevCourse => prevCourse ? { ...prevCourse, daypart } : prevCourse);
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to update course daypart');
+        ErrorHandlers.api(error, 'Failed to update course daypart');
+      },
+    );
+  }, [courseId]);
+
   return {
     course,
     tasks,
@@ -95,6 +120,7 @@ export function useCourse(courseId: string) {
     setCourse,
     setTasks,
     updateCourseColor,
+    updateCourseDaypart,
   };
 }
 

@@ -1,10 +1,13 @@
 import type { CustomLinkItem } from './custom-link';
 import type { Task } from './task';
 
+export type Daypart = 'EVEN' | 'AM' | 'PM';
+
 export type Course = {
   id: string;
   code: string;
   name: string;
+  daypart: Daypart;
   color: string;
   description?: string;
   createdAt: Date;
@@ -17,4 +20,5 @@ export type CourseCreateRequest = {
   code: string;
   name: string;
   description: string;
+  daypart: Daypart;
 };

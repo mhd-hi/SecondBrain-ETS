@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
+import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -33,6 +34,7 @@ type CourseCardProps = {
 
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   const [showColorDialog, setShowColorDialog] = useState(false);
+    const [showDaypartDialog, setShowDaypartDialog] = useState(false);
   const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
   const [pendingColor, setPendingColor] = useState(selectedColor);
   const { updateCourseColor } = useCourse(course.id);
@@ -81,6 +83,10 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
     {
       label: 'Change color',
       onClick: handleChangeColorClick,
+    },
+    {
+      label: 'Change daypart',
+      onClick: () => setShowDaypartDialog(true),
     },
     {
       label: 'Delete',
@@ -142,6 +148,12 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
             </div>
           </DialogContent>
         </Dialog>
+        <ChangeCourseDaypartDialog
+          courseId={course.id}
+          open={showDaypartDialog}
+          onOpenChange={setShowDaypartDialog}
+          currentDaypart={course.daypart}
+        />
       </div>
 
       <div className="flex justify-between items-start">

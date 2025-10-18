@@ -1,6 +1,4 @@
 # Bugs
-- Be able to edit tasks in TaskBox weekly roadmap.
-- Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. This can cause accessibility issues. Please add a description or aria-describedby attribute to improve accessibility. (2 points)
 
 # Features
 

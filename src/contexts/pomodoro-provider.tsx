@@ -6,7 +6,7 @@ import type { PomodoroContextType, PomodoroType } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { completePomodoroSession, fetchPomodoroStreak } from '@/hooks/use-pomodoro';
+import { completePomodoroSession } from '@/hooks/use-pomodoro';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 import { PomodoroContext } from './pomodoro-context';
 
@@ -26,10 +26,10 @@ type PomodoroProviderProps = {
 export function PomodoroProvider({ children }: PomodoroProviderProps) {
   // SSR-safe: always use defaults for initial state
   const [currentTask, setCurrentTask] = useState<Task | null>(null);
-  const [streak, setStreak] = useState(0);
   const [pomodoroType, setPomodoroType] = useState<PomodoroType>('work');
   const [isPomodoroActive, setIsPomodoroActive] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
+  const streak = 0;
   const [sessionDurations, setSessionDurations] = useState<SessionDurations>({
     work: DEFAULT_WORK_DURTION,
     shortBreak: DEFAULT_WORK_DURTION * 0.2,
@@ -186,20 +186,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     };
   }, [isRunning, timeLeftSec]);
 
-  // Fetch user streak on mount
-  useEffect(() => {
-    const loadStreak = async () => {
-      try {
-        const streakDays = await fetchPomodoroStreak();
-        setStreak(streakDays);
-      } catch (error) {
-        console.error('Failed to fetch streak:', error);
-        console.error('pomodoro-provider: failed to load streak', error);
-      }
-    };
-
-    void loadStreak();
-  }, []);
+  // `loadStreak` removed — fetching streak is intentionally static/client-only in the Pomodoro page.
 
   // Handle auto-completion when timer reaches 0
   useEffect(() => {
@@ -261,10 +248,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     addFiveMinutes,
     switchToPomodoroType,
     updateDuration,
+
   }), [
     startPomodoro,
     currentTask,
-    streak,
     isPomodoroActive,
     isRunning,
     timeLeftSec,
@@ -276,6 +263,7 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     addFiveMinutes,
     switchToPomodoroType,
     updateDuration,
+
   ]);
 
   // Only render children when timer is loaded

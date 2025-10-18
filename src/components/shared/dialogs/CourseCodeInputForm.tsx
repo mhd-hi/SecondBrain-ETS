@@ -1,3 +1,4 @@
+import type { Daypart } from '@/types/course';
 import type { AddCourseInputFormProps } from '@/types/dialog/add-course-dialog';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,8 @@ export function CourseCodeInputForm({
   availableTerms,
   firstDayOfClass,
   setFirstDayOfClass,
+  daypart,
+  setDaypart,
   isProcessing,
   currentStep,
   onSubmit,
@@ -73,11 +76,31 @@ export function CourseCodeInputForm({
         <div className="space-y-2">
           <Label htmlFor="firstDayOfClass">First day of class :</Label>
           <div className={isProcessing ? 'pointer-events-none opacity-50' : ''}>
-            <DatePicker
-              date={firstDayOfClass}
-              onDateChange={setFirstDayOfClass}
-              className="w-full"
-            />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">
+                <DatePicker
+                  date={firstDayOfClass}
+                  onDateChange={setFirstDayOfClass}
+                  className="w-full"
+                />
+              </div>
+              <div className="w-max">
+                <Select
+                  value={daypart}
+                  onValueChange={(v: Daypart | '') => setDaypart(v)}
+                  disabled={isProcessing}
+                >
+                  <SelectTrigger aria-label="Daypart">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AM">AM</SelectItem>
+                    <SelectItem value="PM">PM</SelectItem>
+                    <SelectItem value="EVEN">Evening</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
       </div>

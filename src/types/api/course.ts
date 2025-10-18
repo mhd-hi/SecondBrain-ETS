@@ -1,3 +1,4 @@
+import type { Daypart } from '@/types/course';
 import type { CustomLinkItem } from '@/types/custom-link';
 import type { StatusTask } from '@/types/status-task';
 import type { TaskType } from '@/types/task';
@@ -10,6 +11,7 @@ export type CourseApiResponse = {
     description?: string;
     createdAt: string;
     updatedAt: string;
+    daypart: Daypart;
     tasks: Array<{
         id: string;
         title: string;

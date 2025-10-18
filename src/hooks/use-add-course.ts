@@ -1,6 +1,7 @@
 'use client';
 
 import type { CourseAIResponse } from '@/types/api/ai';
+import type { Daypart } from '@/types/course';
 import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -27,7 +28,7 @@ export type UseAddCourseReturn = {
   error: string | null;
   isProcessing: boolean;
   // courseCode is the code like MAT145. term is PlanETS numeric format like '20252'
-  startProcessing: (courseCode: string, term: string, firstDayOfClass: Date) => Promise<void>;
+  startProcessing: (courseCode: string, term: string, firstDayOfClass: Date, daypart: Daypart) => Promise<void>;
   retry: () => void;
   reset: () => void;
 };
@@ -95,7 +96,7 @@ async function parseCourseWithAI(html: string, courseCode: string, term: string)
   return result.data as CourseAIResponse;
 }
 
-async function createCourse(courseCode: string, courseName: string, term: string): Promise<{ id: string }> {
+async function createCourse(courseCode: string, courseName: string, term: string, daypart: Daypart): Promise<{ id: string }> {
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -106,6 +107,7 @@ async function createCourse(courseCode: string, courseName: string, term: string
       code: cleanCode,
       name: courseName,
       term,
+      daypart,
     }),
   });
 
@@ -197,7 +199,7 @@ export function useAddCourse(): UseAddCourseReturn {
     setError(null);
   }, []);
 
-  const startProcessing = useCallback(async (courseCode: string, term: string, firstDayOfClass: Date) => {
+  const startProcessing = useCallback(async (courseCode: string, term: string, firstDayOfClass: Date, daypart: Daypart) => {
     if (!courseCode.trim()) {
       toast.error('Please enter a course code');
       return;
@@ -238,7 +240,7 @@ export function useAddCourse(): UseAddCourseReturn {
       setCurrentStep('create-course');
       setStepStatus(prev => ({ ...prev, 'create-course': 'loading' }));
 
-      const course = await createCourse(courseCode.trim(), aiData.courseCode, term);
+      const course = await createCourse(courseCode.trim(), aiData.courseCode, term, daypart);
       setStepStatus(prev => ({ ...prev, 'create-course': 'success' }));
       setCreatedCourseId(course.id);
 

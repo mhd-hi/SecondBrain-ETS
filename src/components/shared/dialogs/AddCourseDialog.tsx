@@ -1,5 +1,6 @@
 'use client';
 
+import type { Daypart } from '@/types/course';
 import { AlertCircle, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -34,6 +35,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
   const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(undefined);
+  // start with empty string until user selects a daypart
+  const [daypart, setDaypart] = useState<Daypart | ''>('');
   const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
   const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
 
@@ -55,6 +58,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
   const resetDialog = useCallback(() => {
     setCourseCode('');
     setFirstDayOfClass(undefined);
+    setDaypart('');
     reset();
   }, [reset]);
 
@@ -109,6 +113,11 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       return;
     }
 
+    if (!daypart) {
+      toast.error('Please select a daypart for the lecture.');
+      return;
+    }
+
     let termToUse = term;
     if (!isValidTermId(termToUse)) {
       const cleaned = termToUse.replace(/^0+/, '');
@@ -120,7 +129,7 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       }
     }
 
-    await startProcessing(cleanCode, termToUse, firstDayOfClass);
+    await startProcessing(cleanCode, termToUse, firstDayOfClass, daypart);
   };
 
   const handleRetry = () => {
@@ -196,6 +205,8 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
             availableTerms={availableTerms}
             firstDayOfClass={firstDayOfClass}
             setFirstDayOfClass={setFirstDayOfClass}
+            daypart={daypart}
+            setDaypart={setDaypart}
             isProcessing={isProcessing}
             currentStep={currentStep}
             onSubmit={handleStartParsing}

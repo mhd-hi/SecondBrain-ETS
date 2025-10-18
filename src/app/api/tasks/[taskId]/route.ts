@@ -4,7 +4,7 @@ import type { Task } from '@/types/task';
 import { NextResponse } from 'next/server';
 import { withAuth } from '@/lib/auth/api';
 import { deleteUserTask, getUserTask, updateUserTask } from '@/lib/auth/db';
-import { successResponse } from '@/lib/utils/api/api-server-util';
+import { statusResponse } from '@/lib/utils/api/api-server-util';
 import { StatusTask } from '@/types/status-task';
 
 async function handlePatchTask(
@@ -36,7 +36,7 @@ async function handlePatchTask(
   // Use secure update function with automatic ownership verification
   const updatedTask = await updateUserTask(taskId, context.user.id, processedUpdates);
 
-  return successResponse(updatedTask);
+  return statusResponse(updatedTask);
 }
 
 async function handleDeleteTask(
@@ -48,7 +48,7 @@ async function handleDeleteTask(
   // Use secure delete function with automatic ownership verification
   await deleteUserTask(taskId, context.user.id);
 
-  return successResponse({ success: true });
+  return statusResponse({ success: true });
 }
 
 // Export the wrapped handlers

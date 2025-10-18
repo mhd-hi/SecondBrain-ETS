@@ -87,6 +87,7 @@ export const courses = pgTable('courses', {
   code: text('code').notNull(),
   term: text('term').notNull().references(() => terms.id, { onDelete: 'restrict' }),
   color: text('color').notNull(),
+  daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull().default('AM'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

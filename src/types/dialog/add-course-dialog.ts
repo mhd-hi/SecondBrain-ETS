@@ -1,4 +1,5 @@
 import type { UseAddCourseReturn } from '@/hooks/use-add-course';
+import type { Daypart } from '@/types/course';
 
 export type StepName = 'planets' | 'openai' | 'create-course' | 'create-tasks';
 
@@ -31,6 +32,8 @@ export type AddCourseInputFormProps = {
     availableTerms: Array<{ id: string; label: string }>;
     firstDayOfClass: Date | undefined;
     setFirstDayOfClass: (date: Date | undefined) => void;
+    daypart: Daypart | '';
+    setDaypart: (daypart: Daypart | '') => void;
     isProcessing: boolean;
     currentStep: UseAddCourseReturn['currentStep'];
     onSubmit: () => Promise<void>;

@@ -3,7 +3,7 @@ import type { AuthenticatedUser } from '@/lib/auth/api';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { successResponse } from '@/lib/utils/api/api-server-util';
+import { statusResponse } from '@/lib/utils/api/api-server-util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';
@@ -51,7 +51,7 @@ async function handleBatchStatusUpdate(
     .where(and(inArray(tasks.id, taskIds), eq(tasks.userId, user.id)))
     .returning();
 
-  return successResponse({
+  return statusResponse({
     updatedCount: updatedTasks.length,
     status,
     updatedTasks,

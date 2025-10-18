@@ -4,7 +4,7 @@ import type { Task } from '@/types/task';
 import { and, eq, inArray } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
-import { successResponse } from '@/lib/utils/api/api-server-util';
+import { statusResponse } from '@/lib/utils/api/api-server-util';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';
@@ -119,7 +119,7 @@ async function handleBatchOperation(
     );
   }
 
-  return successResponse({
+  return statusResponse({
     action,
     affectedCount: action === 'update' ? (result as unknown[]).length : (result as { deletedCount: number }).deletedCount,
     result,

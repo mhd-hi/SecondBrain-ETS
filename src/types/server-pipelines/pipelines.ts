@@ -13,7 +13,7 @@ export type DataSource = {
 
 export type PipelineOptions = {
   courseCode: string;
-  term?: string;
+  term: string;
 };
 
 export type PipelineResult = {
@@ -23,7 +23,7 @@ export type PipelineResult = {
 
 export type PipelineStepRequest = {
   courseCode: string;
-  term?: string;
+  term: string;
   step: 'planets' | 'openai';
   htmlData?: string;
 };

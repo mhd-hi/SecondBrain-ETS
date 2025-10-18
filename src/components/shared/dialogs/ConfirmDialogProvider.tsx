@@ -85,7 +85,7 @@ export function GlobalConfirmDialogProvider({ children }: { children: React.Reac
               )}
               {dialogState.title}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="confirm-dialog-description">
               {dialogState.message}
             </DialogDescription>
           </DialogHeader>

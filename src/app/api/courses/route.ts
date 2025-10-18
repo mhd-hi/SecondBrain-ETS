@@ -1,3 +1,4 @@
+import type { Daypart } from '@/types/course';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { createUserCourse, getUserCourses } from '@/lib/auth/db';
@@ -13,7 +14,7 @@ export const GET = withAuthSimple(
 
 export const POST = withAuthSimple(
   async (request, user) => {
-    const data = await request.json() as { code: string; name: string; term?: string };
+    const data = await request.json() as { code: string; name: string; term: string; daypart: Daypart };
 
     if (!data.code || !data.name) {
       return NextResponse.json(
@@ -22,7 +23,7 @@ export const POST = withAuthSimple(
       );
     }
 
-    const { code, name, term } = data;
+    const { code, name, term, daypart } = data;
 
     if (!term) {
       return NextResponse.json(
@@ -44,6 +45,7 @@ export const POST = withAuthSimple(
       code,
       name,
       term,
+      daypart,
       color: generateRandomCourseColor(),
     });
 

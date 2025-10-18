@@ -3,7 +3,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
 import { withAuth } from '@/lib/auth/api';
-import { successResponse } from '@/lib/utils/api/api-server-util';
+import { statusResponse } from '@/lib/utils/api/api-server-util';
 import { validateUrl } from '@/lib/utils/url-util';
 import { db } from '@/server/db';
 import { customLinks } from '@/server/db/schema';
@@ -39,7 +39,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
             rows = await db.select().from(customLinks).where(and(eq(customLinks.userId, user.id), sql`${customLinks.courseId} IS NULL`));
         }
 
-        const response = successResponse({ success: true, customLinks: rows });
+        const response = statusResponse({ success: true, customLinks: rows });
 
         return response;
     } catch (err) {
@@ -77,7 +77,7 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
             updatedAt: new Date(),
         }).returning();
 
-        return successResponse({ success: true, customLink: inserted[0] });
+        return statusResponse({ success: true, customLink: inserted[0] });
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         return NextResponse.json({ success: false, error: msg }, { status: 400 });
@@ -98,7 +98,7 @@ export const DELETE = withAuth(async (req: NextRequest, { user }) => {
             .where(and(eq(customLinks.courseId, courseId), eq(customLinks.userId, user.id)))
             .returning();
 
-        return successResponse({
+        return statusResponse({
             success: true,
             deletedCount: deletedLinks.length,
             message: `Deleted ${deletedLinks.length} link${deletedLinks.length !== 1 ? 's' : ''}`,
