@@ -1,10 +1,11 @@
 import type { NextRequest } from 'next/server';
-import { sql } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { withAuthSimple } from '@/lib/auth/api';
 import { db } from '@/server/db';
 import { tasks } from '@/server/db/schema';
 
-export async function POST(req: NextRequest) {
+export const POST = withAuthSimple(async (req: NextRequest, user) => {
   try {
     const { taskId, input, value } = await req.json();
     const allowedFields = ['title', 'notes', 'status', 'estimatedEffort', 'actualEffort', 'dueDate', 'week', 'type'];
@@ -32,8 +33,13 @@ export async function POST(req: NextRequest) {
     try {
       const result = await db.update(tasks)
         .set(updateObj as Partial<typeof tasks.$inferInsert>)
-        .where(sql`id = ${taskId}`)
+        .where(and(eq(tasks.id, taskId), eq(tasks.userId, user.id)))
         .returning();
+
+      if (!result.length) {
+        return NextResponse.json({ success: false, error: 'Task not found or access denied' }, { status: 404 });
+      }
+
       return NextResponse.json({ success: true, taskId, input, value, updated: result });
     } catch (dbErr) {
       console.error('DB update error:', dbErr);
@@ -45,4 +51,4 @@ export async function POST(req: NextRequest) {
     const errMsg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ success: false, error: errMsg || 'Unknown error' }, { status: 400 });
   }
-}
+});

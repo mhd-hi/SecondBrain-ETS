@@ -48,11 +48,9 @@ export const accounts = pgTable('account', {
   scope: text('scope'),
   id_token: text('id_token'),
   session_state: text('session_state'),
-}, account => ({
-  compoundKey: primaryKey({
-    columns: [account.provider, account.providerAccountId],
-  }),
-}));
+}, account => [
+  primaryKey({ columns: [account.provider, account.providerAccountId] }),
+]);
 
 export const sessions = pgTable('session', {
   sessionToken: text('sessionToken').primaryKey(),
@@ -66,11 +64,9 @@ export const verificationTokens = pgTable('verificationToken', {
   identifier: text('identifier').notNull(),
   token: text('token').notNull(),
   expires: timestamp('expires', { mode: 'date' }).notNull(),
-}, verificationToken => ({
-  compositePk: primaryKey({
-    columns: [verificationToken.identifier, verificationToken.token],
-  }),
-}));
+}, verificationToken => [
+  primaryKey({ columns: [verificationToken.identifier, verificationToken.token] }),
+]);
 
 export const terms = pgTable('terms', {
   id: text('id').primaryKey(), // '20253'
@@ -130,9 +126,9 @@ export const pomodoroDaily = pgTable('pomodoro_daily', {
   day: date('day', { mode: 'date' }).notNull(),
   totalMinutes: integer('total_minutes').notNull().default(0),
   taskIds: uuid('task_ids').array().notNull().default(sql`ARRAY[]::uuid[]`),
-}, t => ({
-  uniqUserDay: uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
-}));
+}, t => [
+  uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
+]);
 
 export const customLinks = pgTable('custom_links', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -146,14 +142,14 @@ export const customLinks = pgTable('custom_links', {
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, table => ({
+}, table => [
   // Composite index for the main query: WHERE user_id = ? AND course_id = ?
-  userCourseIdx: index('idx_custom_links_user_course').on(table.userId, table.courseId),
+  index('idx_custom_links_user_course').on(table.userId, table.courseId),
   // Index for user-specific queries (dashboard custom links where course_id IS NULL)
-  userIdx: index('idx_custom_links_user_id').on(table.userId),
+  index('idx_custom_links_user_id').on(table.userId),
   // Index for course-specific queries
-  courseIdx: index('idx_custom_links_course_id').on(table.courseId),
-}));
+  index('idx_custom_links_course_id').on(table.courseId),
+]);
 
 export const coursesCache = pgTable('courses_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
