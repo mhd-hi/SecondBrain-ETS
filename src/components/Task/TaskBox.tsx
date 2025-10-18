@@ -7,7 +7,7 @@ import type { Task as TaskType } from '@/types/task';
 import { useDraggable } from '@dnd-kit/core';
 import React, { useState } from 'react';
 
-import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import { EditTaskDialog } from '@/components/shared/dialogs/EditTaskDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
@@ -61,7 +61,7 @@ export const TaskBox = ({
     >
   {/* More actions button - visible on hover, positioned on the corner */}
   <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
-        <MoreActionsDropdown
+        <ActionsDropdown
           actions={[
             {
               label: 'Edit',

@@ -7,7 +7,7 @@ import { use, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
-import { BulkActionsDropdown } from '@/components/shared/atoms/bulk-actions-dropdown';
+import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
@@ -265,11 +265,39 @@ export default function CoursePage({ params }: CoursePageProps) {
             )}
         </div>
         <div>
-          <BulkActionsDropdown
+          <ActionsDropdown
+            actions={[
+              {
+                label: 'Complete overdue tasks',
+                onClick: () => {
+                  // Open overdue tasks dialog handled by ActionsDropdown via onCompleteAll
+                },
+                disabled: overdueTasks.length === 0,
+                title: overdueTasks.length === 0 ? 'No overdue tasks to complete' : undefined,
+              },
+              ...(handleDeleteAllLinks
+                ? [
+                    {
+                      label: 'Delete all links',
+                      onClick: handleDeleteAllLinks,
+                      destructive: true,
+                    },
+                  ]
+                : []),
+              ...(handleDeleteCourse
+                ? [
+                    {
+                      label: 'Delete course',
+                      onClick: handleDeleteCourse,
+                      destructive: true,
+                    },
+                  ]
+                : []),
+            ]}
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
-            onDeleteCourse={handleDeleteCourse}
-            onDeleteAllLinks={handleDeleteAllLinks}
+            triggerText="Actions"
+            contentAlign="end"
           />
         </div>
       </div>
@@ -292,6 +320,8 @@ export default function CoursePage({ params }: CoursePageProps) {
             </section>
             <div className="flex items-center gap-4 mb-2">
               <SearchBar
+                id="course-tasks-search-bar"
+                name="course-tasks-search-bar"
                 placeholder="Search tasks by title, notes, or subtasks..."
                 value={searchQuery}
                 onChange={setSearchQuery}

@@ -5,8 +5,8 @@ import { Palette } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
-import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
 import { Button } from '@/components/ui/button';
@@ -109,7 +109,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       style={cardStyle}
     >
       <div className="absolute -top-[10px] -right-[10px] z-10">
-        <MoreActionsDropdown
+        <ActionsDropdown
           actions={dropdownActions}
           triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         />

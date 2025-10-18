@@ -17,7 +17,8 @@
 
 ### Batch-edit tasks
 - Add the button in actions dropdown in Course page
-- In a modal, allow user to paste a list of tasks in a textarea, and parse it with AI to create multiple tasks at once 
+- In a modal, allow user to paste a list of tasks in a textarea, and parse it with AI to
+    create multiple tasks at once
 
 ### Cache AI
 -  Cache OpenAI tasks response in DB (5 points)
