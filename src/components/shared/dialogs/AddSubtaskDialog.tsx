@@ -67,10 +67,10 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby="add-subtask-description">
         <DialogHeader>
           <DialogTitle>Add Subtask</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="add-subtask-description">
             Add a new subtask to this task
           </DialogDescription>
         </DialogHeader>

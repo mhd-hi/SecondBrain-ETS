@@ -65,7 +65,7 @@ export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              Task Completion
+              Completion
             </CardTitle>
           </div>
         </div>

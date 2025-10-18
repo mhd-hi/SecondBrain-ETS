@@ -15,7 +15,7 @@ import {
 } from '@dnd-kit/core';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Task } from '@/components/Task/Task';
+import { TaskBox } from '@/components/Task/TaskBox';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { fetchWeeklyTasks, updateDueDateTask, updateStatusTask } from '@/hooks/use-task';
 import { getWeekDates, getWeekStart } from '@/lib/utils/date-util';
@@ -236,7 +236,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full">
+      <div className="bg-card w-full rounded-lg">
         {/* Navigation Controls */}
         <NavigationControls
           weekDates={weekDates}
@@ -246,8 +246,8 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
         />
 
         {/* Calendar Container */}
-        <div className={`
-          bg-card rounded-lg transition-all duration-300 py-5
+        <div className={`bg-card 
+          rounded-lg transition-all duration-300 py-5 
           ${isDragActive ? 'bg-muted/50 shadow-lg' : ''}
         `}
         >
@@ -259,6 +259,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
                 tasks={tasksByDate[date.toDateString()] ?? []}
                 onStatusChange={handleStatusChange}
                 onTaskAdded={handleTaskAdded}
+                onTaskUpdated={handleTaskAdded}
                 courses={courses}
                 isToday={isToday(date)}
                 isSticky={true}
@@ -271,7 +272,7 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       <DragOverlay dropAnimation={null}>
         {activeTask
           ? (
-            <Task
+            <TaskBox
               task={activeTask.task}
               sourceDate={activeTask.sourceDate}
               onStatusChange={() => { /* No-op for overlay */ }}

@@ -77,7 +77,7 @@ export function GlobalConfirmDialogProvider({ children }: { children: React.Reac
     <GlobalConfirmDialogContext.Provider value={contextValue}>
       {children}
       <Dialog open={dialogState.isOpen} onOpenChange={dialogState.onClose}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent aria-describedby="confirm-dialog-description" className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {dialogState.variant === 'destructive' && (

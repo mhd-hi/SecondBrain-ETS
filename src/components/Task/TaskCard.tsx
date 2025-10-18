@@ -24,6 +24,7 @@ type TaskCardProps = {
   task: Task;
   onDeleteTask: (taskId: string) => void;
   onUpdateStatusTask: (taskId: string, newStatus: StatusTask) => void;
+  className?: string;
   onTaskAdded?: () => void;
   showCourseBadge?: boolean;
   isSubtasksExpanded?: boolean;
@@ -39,6 +40,7 @@ export function TaskCard({
   task,
   onDeleteTask,
   onUpdateStatusTask,
+  className,
   showCourseBadge = false,
   isSubtasksExpanded: controlledSubtasksExpanded,
   onToggleSubtasksExpanded,
@@ -152,6 +154,7 @@ export function TaskCard({
     <div className={cn(
       'relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm transition-colors',
       isCompleted && 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
+      className,
     )}
     >
       <MoreActionsDropdown

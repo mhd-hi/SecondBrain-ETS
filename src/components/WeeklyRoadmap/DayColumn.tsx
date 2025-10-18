@@ -7,13 +7,14 @@ import type { Task as TaskType } from '@/types/task';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-import { Task } from '@/components/Task/Task';
+import { TaskBox } from '@/components/Task/TaskBox';
 
 type DayColumnProps = {
   date: Date;
   tasks: TaskType[];
   onStatusChange: (taskId: string, newStatus: StatusTask) => void;
   onTaskAdded: () => void;
+  onTaskUpdated?: () => void;
   courses: Course[];
   isToday: boolean;
   isSticky?: boolean;
@@ -25,6 +26,7 @@ export const DayColumn = ({
   tasks,
   onStatusChange,
   onTaskAdded,
+  onTaskUpdated,
   courses,
   isToday,
   isSticky = false,
@@ -86,11 +88,12 @@ export const DayColumn = ({
         )}
 
         {tasks.map(task => (
-          <Task
+          <TaskBox
             key={task.id}
             task={task}
             sourceDate={date}
             onStatusChange={onStatusChange}
+            onTaskUpdated={onTaskUpdated}
           />
         ))}
 

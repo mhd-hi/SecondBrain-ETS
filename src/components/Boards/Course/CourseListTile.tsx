@@ -72,7 +72,9 @@ export function CourseListTile() {
             )
             : (
               <div className="text-muted-foreground col-span-full text-center">
-                No courses found. Add a new course to get started!
+                No courses found!
+                <br />
+                📚 Add a new course to get started!
               </div>
             )}
       </div>

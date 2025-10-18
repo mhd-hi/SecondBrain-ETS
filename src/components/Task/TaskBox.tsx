@@ -3,24 +3,33 @@
 import type { DraggedTask } from '@/types/drag-drop';
 import type { StatusTask } from '@/types/status-task';
 import type { Task as TaskType } from '@/types/task';
+
 import { useDraggable } from '@dnd-kit/core';
+import React, { useState } from 'react';
+
+import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
+import { EditTaskDialog } from '@/components/shared/dialogs/EditTaskDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { Badge } from '@/components/ui/badge';
+import { deleteTask } from '@/hooks/use-task';
 
 type TaskProps = {
   task: TaskType;
   sourceDate: Date;
   onStatusChange: (taskId: string, newStatus: StatusTask) => void;
   isDragOverlay?: boolean;
+  onTaskUpdated?: () => void;
 };
 
-export const Task = ({
+export const TaskBox = ({
   task,
   sourceDate,
   onStatusChange,
   isDragOverlay = false,
+  onTaskUpdated,
 }: TaskProps) => {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const dragData: DraggedTask = {
     id: task.id,
     task,
@@ -50,7 +59,33 @@ export const Task = ({
       {...(!isDragOverlay ? attributes : {})}
       {...(!isDragOverlay ? listeners : {})}
     >
-      <div>
+  {/* More actions button - visible on hover, positioned on the corner */}
+  <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+        <MoreActionsDropdown
+          actions={[
+            {
+              label: 'Edit',
+              onClick: () => setIsEditDialogOpen(true),
+            },
+            {
+              label: 'Delete',
+              destructive: true,
+              onClick: async () => {
+                await deleteTask(
+                  task.id,
+                  onTaskUpdated
+                    ? async () => {
+                        onTaskUpdated();
+                      }
+                    : undefined,
+                );
+              },
+            },
+          ]}
+          triggerClassName="p-1"
+        />
+  </div>
+      <div className="text-left w-full">
         <div className="flex items-center justify-between gap-2">
           {task.course?.code && (
             <p className="text-sm text-muted-foreground truncate">{task.course.code}</p>
@@ -76,6 +111,15 @@ export const Task = ({
           />
         </div>
       </div>
+      <EditTaskDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        task={task}
+        onSaved={() => {
+          setIsEditDialogOpen(false);
+          onTaskUpdated?.();
+        }}
+      />
     </div>
   );
 };

@@ -9,7 +9,7 @@ import { consoleLoggingConfig } from '@/lib/sentry-utils';
 // Only initialize Sentry in production
 if (process.env.NODE_ENV === 'production') {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN || 'https://84a35e8c25e5f711b2f3bb4937f821d5@o4510168702451712.ingest.de.sentry.io/4510168702845008',
+    dsn: process.env.SENTRY_DSN || 'null',
 
     // Add optional integrations for additional features
     integrations: [

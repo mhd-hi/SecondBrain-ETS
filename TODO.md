@@ -1,6 +1,26 @@
 # Bugs
+- Be able to edit tasks in TaskBox weekly roadmap.
+- Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}. This can cause accessibility issues. Please add a description or aria-describedby attribute to improve accessibility. (2 points)
 
 # Features
+
+### Study blocks
+- Add study block page
+- Allow user to create, edit, delete study blocks
+- Generate study blocks based on course and tasks data
+
+### Shortcut cheatsheet
+- Add a small modal listing all shortcuts (place it in the sidebar at the bottom, in dropdown menu)
+- Go to Roadmap page
+- Go to Dashboard page
+- Go to course page
+- Add a course
+- Add a task
+
+### Batch-edit tasks
+- Add the button in actions dropdown in Course page
+- In a modal, allow user to paste a list of tasks in a textarea, and parse it with AI to create multiple tasks at once 
+
 ### Cache AI
 -  Cache OpenAI tasks response in DB (5 points)
     -   If course is not in the `courses_cache` db, add it.

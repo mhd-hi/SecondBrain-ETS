@@ -108,8 +108,8 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
           triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
         />
         <Dialog open={showColorDialog} onOpenChange={setShowColorDialog}>
-          <DialogContent>
-            <DialogDescription>
+          <DialogContent aria-describedby="color-course-description">
+            <DialogDescription id="color-course-description">
               Pick a color for this course. This helps visually distinguish it in your dashboard.
             </DialogDescription>
             <DialogHeader>
