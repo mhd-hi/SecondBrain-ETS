@@ -8,9 +8,12 @@ import { toast } from 'sonner';
 import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
-
+import getCourseActions from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
+
+import ChangeCourseColorDialog from '@/components/shared/dialogs/ChangeCourseColorDialog';
+import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
 
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 import { TaskCard } from '@/components/Task/TaskCard';
@@ -22,7 +25,6 @@ import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
-import { api } from '@/lib/utils/api/api-client-util';
 import { getWeekNumberFromDueDate } from '@/lib/utils/date-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
@@ -44,7 +46,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
-  const { course, tasks, isLoading, error, fetchCourse, setTasks } = useCourse(courseId);
+  const { course, tasks, isLoading, error, fetchCourse, setTasks, deleteCourse: deleteCourseApi } = useCourse(courseId);
 
   useEffect(() => {
     void fetchCourses();
@@ -135,7 +137,7 @@ export default function CoursePage({ params }: CoursePageProps) {
       await handleConfirm(
         'Are you sure you want to delete this course? This action cannot be undone.',
         async () => {
-          await api.delete(`/api/courses/${course.id}`, 'Failed to delete course');
+          await deleteCourseApi();
           // Remove from local courses context
           deleteCourse(course.id);
           // Redirect to root
@@ -185,6 +187,9 @@ export default function CoursePage({ params }: CoursePageProps) {
   };
 
   const overdueTasks = getOverdueTasks(filteredTasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
+
+  const [showColorDialog, setShowColorDialog] = useState(false);
+  const [showDaypartDialog, setShowDaypartDialog] = useState(false);
 
   const handleCompleteOverdueTasks = async () => {
     try {
@@ -266,39 +271,20 @@ export default function CoursePage({ params }: CoursePageProps) {
         </div>
         <div>
           <ActionsDropdown
-            actions={[
-              {
-                label: 'Complete overdue tasks',
-                onClick: () => {
-                  // Open overdue tasks dialog handled by ActionsDropdown via onCompleteAll
-                },
-                disabled: overdueTasks.length === 0,
-                title: overdueTasks.length === 0 ? 'No overdue tasks to complete' : undefined,
-              },
-              ...(handleDeleteAllLinks
-                ? [
-                    {
-                      label: 'Delete all links',
-                      onClick: handleDeleteAllLinks,
-                      destructive: true,
-                    },
-                  ]
-                : []),
-              ...(handleDeleteCourse
-                ? [
-                    {
-                      label: 'Delete course',
-                      onClick: handleDeleteCourse,
-                      destructive: true,
-                    },
-                  ]
-                : []),
-            ]}
+            actions={getCourseActions({
+              onDeleteCourse: handleDeleteCourse,
+              onDeleteAllLinks: handleDeleteAllLinks,
+              onOpenColor: () => setShowColorDialog(true),
+              onOpenDaypart: () => setShowDaypartDialog(true),
+              overdueCount: overdueTasks.length,
+            })}
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
             triggerText="Actions"
             contentAlign="end"
           />
+          <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={course.color} onUpdated={() => fetchCourse()} />
+          <ChangeCourseDaypartDialog courseId={course.id} open={showDaypartDialog} onOpenChange={setShowDaypartDialog} currentDaypart={course.daypart} onUpdated={() => fetchCourse()} />
         </div>
       </div>
 

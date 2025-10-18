@@ -3,7 +3,7 @@ import type { Subtask } from '@/types/subtask';
 import { CheckCircle2, ChevronDown, ChevronRight, Circle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
+import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { Badge } from '@/components/ui/badge';
 import { deleteSubtask } from '@/hooks/use-subtask';
 import { useTask } from '@/hooks/use-task';
@@ -178,7 +178,7 @@ const SubtasksList = ({
                   )
                   : (
                     // Hover-only actions dropdown
-                    <MoreActionsDropdown
+                    <ActionsDropdown
                       actions={[
                         {
                           label: 'Convert to task',

@@ -4,8 +4,8 @@ import type { Task } from '@/types/task';
 import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
+import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
-import { MoreActionsDropdown } from '@/components/shared/atoms/more-actions-dropdown';
 import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { SubtasksList } from '@/components/Task/SubtasksList';
@@ -157,7 +157,7 @@ export function TaskCard({
       className,
     )}
     >
-      <MoreActionsDropdown
+      <ActionsDropdown
         actions={cardActions}
         triggerClassName="absolute -top-[10px] -right-[10px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
       />

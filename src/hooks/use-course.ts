@@ -110,6 +110,19 @@ export function useCourse(courseId: string) {
     );
   }, [courseId]);
 
+  const deleteCourse = useCallback(async () => {
+    await withLoadingAndErrorHandling(
+      async () => {
+        await api.delete(`/api/courses/${courseId}`, 'Failed to delete course');
+      },
+      setIsLoading,
+      (error) => {
+        setError('Failed to delete course');
+        ErrorHandlers.api(error, 'Failed to delete course');
+      },
+    );
+  }, [courseId]);
+
   return {
     course,
     tasks,
@@ -121,6 +134,7 @@ export function useCourse(courseId: string) {
     setTasks,
     updateCourseColor,
     updateCourseDaypart,
+    deleteCourse,
   };
 }
 
@@ -139,3 +153,7 @@ export const checkCourseExists = async (code: string, term: string): Promise<{
     course?: { id: string; code: string; name: string };
   }>;
 };
+
+export async function deleteCourseById(courseId: string) {
+  return api.delete(`/api/courses/${courseId}`, 'Failed to delete course');
+}

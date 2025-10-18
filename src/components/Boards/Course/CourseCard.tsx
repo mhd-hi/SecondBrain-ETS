@@ -1,23 +1,15 @@
 'use client';
 
 import type { Course } from '@/types/course';
-import { Palette } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { toast } from 'sonner';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
+import getCourseActions from '@/components/shared/atoms/get-course-actions';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
+import ChangeCourseColorDialog from '@/components/shared/dialogs/ChangeCourseColorDialog';
 import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useCourse } from '@/hooks/use-course';
 import {
   calculateProgress,
   getCompletedTasksCount,
@@ -36,8 +28,6 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const [showColorDialog, setShowColorDialog] = useState(false);
     const [showDaypartDialog, setShowDaypartDialog] = useState(false);
   const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
-  const [pendingColor, setPendingColor] = useState(selectedColor);
-  const { updateCourseColor } = useCourse(course.id);
   const tasks = course.tasks ?? [];
   const displayColor = selectedColor || course.color || '#3b82f6';
 
@@ -50,50 +40,26 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   const nextTask = getNextTask(tasks);
   const upcomingTask = getUpcomingTask(tasks);
 
-  const handleDeleteClick = () => {
-    onDeleteCourse(course.id);
-  };
-
   const handleChangeColorClick = () => {
     setShowColorDialog(true);
-    setPendingColor(selectedColor);
   };
 
-  const handleColorInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPendingColor(e.target.value);
-  };
+  const router = useRouter();
 
-  const handleConfirmColor = async () => {
-    try {
-      await updateCourseColor(pendingColor);
-      setSelectedColor(pendingColor);
-      setShowColorDialog(false);
-      toast.success('Course color updated');
-    } catch {
-      toast.error('Failed to update course color');
+  const baseActions = getCourseActions({
+    onDeleteCourse: () => onDeleteCourse(course.id),
+    onDeleteAllLinks: undefined,
+    onOpenColor: handleChangeColorClick,
+    onOpenDaypart: () => setShowDaypartDialog(true),
+  });
+
+  const dropdownActions = baseActions.map((a) => {
+    if (a.label === 'Complete overdue tasks') {
+      return { ...a, onClick: () => router.push(`/courses/${course.id}`) };
     }
-  };
 
-  const handleCancelColor = () => {
-    setShowColorDialog(false);
-    setPendingColor(selectedColor);
-  };
-
-  const dropdownActions = [
-    {
-      label: 'Change color',
-      onClick: handleChangeColorClick,
-    },
-    {
-      label: 'Change daypart',
-      onClick: () => setShowDaypartDialog(true),
-    },
-    {
-      label: 'Delete',
-      onClick: handleDeleteClick,
-      destructive: true,
-    },
-  ];
+    return a;
+  });
 
   const rawStyle: Record<string, string> = {
     'borderLeft': `4px solid ${selectedColor}`,
@@ -109,45 +75,10 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
       style={cardStyle}
     >
       <div className="absolute -top-[10px] -right-[10px] z-10">
-        <ActionsDropdown
-          actions={dropdownActions}
-          triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity"
-        />
-        <Dialog open={showColorDialog} onOpenChange={setShowColorDialog}>
-          <DialogContent aria-describedby="color-course-description">
-            <DialogDescription id="color-course-description">
-              Pick a color for this course. This helps visually distinguish it in your dashboard.
-            </DialogDescription>
-            <DialogHeader>
-              <DialogTitle>
-                <span className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-muted-foreground" />
-                  Change Course Color
-                </span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 mt-2">
-              <span className="text-xs">
+        <ActionsDropdown actions={dropdownActions} triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={selectedColor} onUpdated={c => setSelectedColor(c)} />
+        {/* legacy inline dialog removed in favor of shared ChangeCourseColorDialog */}
 
-                {'Color: '}
-                {pendingColor}
-              </span>
-              <input
-                type="color"
-                value={pendingColor}
-                onChange={handleColorInput}
-                className="w-8 h-8 border-none cursor-pointer"
-                aria-label="Pick course color"
-                style={{ background: 'none' }}
-              />
-
-              <div className="flex gap-2 justify-end mt-4">
-                <Button size="sm" variant="outline" onClick={handleCancelColor}>Cancel</Button>
-                <Button size="sm" onClick={handleConfirmColor}>Confirm</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
         <ChangeCourseDaypartDialog
           courseId={course.id}
           open={showDaypartDialog}
