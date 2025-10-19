@@ -1,11 +1,11 @@
 'use client';
-
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ROUTES } from '@/lib/routes';
 
 const errorMessages: Record<string, string> = {
   configuration: 'There is a problem with the server configuration.',
@@ -40,10 +40,10 @@ function AuthErrorContent() {
           )}
           <div className="flex flex-col gap-2">
             <Button asChild>
-              <Link href="/api/auth/signin">Try Again</Link>
+              <Link href={ROUTES.SIGNIN}>Try Again</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/">Go Home</Link>
+              <Link href={ROUTES.HOME}>Go Home</Link>
             </Button>
           </div>
         </CardContent>

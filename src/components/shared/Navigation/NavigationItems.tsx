@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { navigationItems } from '@/lib/navigation/constants';
+import { navbarItems } from '@/lib/navigation/constants';
 import { cn } from '@/lib/utils';
 
 type NavigationItemsProps = {
@@ -23,7 +23,7 @@ export function NavigationItems({ variant, className }: NavigationItemsProps) {
   if (variant === 'horizontal') {
     return (
       <div className={cn('flex items-center gap-1', className)}>
-        {navigationItems.map(item => (
+        {navbarItems.map(item => (
           <Button key={item.title} variant="ghost" asChild>
             <Link href={item.url} className={navigationMenuTriggerStyle()}>
               <span className="text-base">{item.icon}</span>
@@ -37,7 +37,7 @@ export function NavigationItems({ variant, className }: NavigationItemsProps) {
 
   return (
     <SidebarMenu className={className}>
-      {navigationItems.map(item => (
+      {navbarItems.map(item => (
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild isActive={pathname === item.url}>
             <Link href={item.url}>

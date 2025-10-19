@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
+import { ROUTES } from '@/lib/routes';
 
 type AppLogoProps = {
   className?: string;
@@ -17,7 +18,7 @@ export function AppLogo({ className }: AppLogoProps) {
       asChild
       className={`font-bold text-xl ${className} ${isCollapsed ? 'w-8 h-8 p-0 justify-center' : ''}`}
     >
-      <Link href="/" className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'}`}>
+      <Link href={ROUTES.HOME} className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'}`}>
         <Image
           src="/assets/pochita-bread.png"
           alt="Favicon"

@@ -1,17 +1,19 @@
-export const navigationItems = [
+import { ROUTES } from '@/lib/routes';
+
+export const navbarItems = [
   {
     title: 'Dashboard',
-    url: '/',
+    url: ROUTES.DASHBOARD,
     icon: '🎯',
   },
   {
     title: 'Pomodoro',
-    url: '/pomodoro',
+    url: ROUTES.POMODORO,
     icon: '🍅',
   },
   {
     title: 'Weekly Roadmap',
-    url: '/weekly-roadmap',
+    url: ROUTES.WEEKLY_ROADMAP,
     icon: '🗺️',
   },
 ];
