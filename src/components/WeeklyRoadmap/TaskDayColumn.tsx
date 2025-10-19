@@ -9,29 +9,27 @@ import { Plus } from 'lucide-react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { TaskBox } from '@/components/Task/TaskBox';
 
-type DayColumnProps = {
+type TaskDayColumnProps = {
   date: Date;
-  tasks: TaskType[];
-  onStatusChange: (taskId: string, newStatus: StatusTask) => void;
-  onTaskAdded: () => void;
-  onTaskUpdated?: () => void;
-  courses: Course[];
+  items: TaskType[];
   isToday: boolean;
   isSticky?: boolean;
   isDragActive?: boolean;
+  onStatusChange: (taskId: string, newStatus: StatusTask) => void;
+  courses: Course[];
+  onItemsChange?: (items: TaskType[]) => void;
 };
 
-export const DayColumn = ({
+export const TaskDayColumn = ({
   date,
-  tasks,
-  onStatusChange,
-  onTaskAdded,
-  onTaskUpdated,
-  courses,
+  items: tasks,
   isToday,
   isSticky = false,
   isDragActive = false,
-}: DayColumnProps) => {
+  onStatusChange,
+  courses,
+  onItemsChange,
+}: TaskDayColumnProps) => {
   const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
   const dayDate = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
   const dayKey = date.toDateString();
@@ -49,6 +47,22 @@ export const DayColumn = ({
     data: dropData,
   });
 
+  const handleTaskAdded = () => {
+    // Trigger a reload by calling the parent's onItemsChange
+    // This is a simplified approach - in a real app you might want to be more specific
+    if (onItemsChange) {
+      // Force a reload by passing current tasks back
+      onItemsChange(tasks);
+    }
+  };
+
+  const handleTaskUpdated = () => {
+    // Same as handleTaskAdded
+    if (onItemsChange) {
+      onItemsChange(tasks);
+    }
+  };
+
   return (
     <div
       ref={setDropRef}
@@ -62,25 +76,23 @@ export const DayColumn = ({
         ${isSticky ? 'sticky top-0 z-10' : ''}
         rounded-lg p-3 text-center border mb-2
         ${isToday
-      ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-      : 'bg-card text-card-foreground border-border'
-    }
+          ? 'bg-primary text-primary-foreground shadow-md border-primary'
+          : 'bg-card border-border'
+        }
       `}
       >
-        <div className="font-semibold text-sm">{dayName}</div>
-        <div className="text-xs opacity-75">{dayDate}</div>
+        <div className="font-semibold text-sm">
+          {dayName}
+        </div>
+        <div className="text-xs opacity-80">
+          {dayDate}
+        </div>
       </div>
-      <div className={`
-        flex flex-col space-y-2 flex-1 p-2 rounded-lg relative
-        ${isOver ? 'bg-primary/5 ring-2 ring-primary/20 ring-inset' : ''}
-        ${isDragActive ? 'bg-muted/30' : ''}
-      `}
-      >
-        {/* Drop indicator when dragging over */}
-        {isOver && (
-          <div className="border-2 border-dashed border-primary/50 rounded-lg p-4 text-center text-primary/70 text-sm animate-pulse bg-primary/5">
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"></div>
+
+      <div className="flex-1 space-y-2">
+        {isDragActive && tasks.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-primary/30 rounded-lg bg-primary/5">
+            <div className="flex items-center gap-2 text-primary/70 text-sm">
               <span>Drop task here</span>
               <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
             </div>
@@ -93,13 +105,13 @@ export const DayColumn = ({
             task={task}
             sourceDate={date}
             onStatusChange={onStatusChange}
-            onTaskUpdated={onTaskUpdated}
+            onTaskUpdated={handleTaskUpdated}
           />
         ))}
 
         <AddTaskDialog
           selectedDate={date}
-          onTaskAdded={onTaskAdded}
+          onTaskAdded={handleTaskAdded}
           courses={courses}
           trigger={(
             <button
