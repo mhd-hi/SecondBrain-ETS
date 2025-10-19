@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { ROUTES } from './routes';
 
 type Dialog = 'add-course' | 'add-task';
@@ -89,6 +89,13 @@ export type ShortcutHandlers = {
 };
 
 export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
+  const handlersRef = useRef(handlers);
+
+  // Keep the ref up to date with the latest handlers
+  useEffect(() => {
+    handlersRef.current = handlers;
+  }, [handlers]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -104,30 +111,34 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
       if (matchingShortcut) {
         e.preventDefault();
 
+        // Use the current handlers from the ref
+        const currentHandlers = handlersRef.current;
+
         switch (matchingShortcut.action.type) {
           case 'navigate':
-            handlers.onNavigate(matchingShortcut.action.path);
+            currentHandlers.onNavigate(matchingShortcut.action.path);
             break;
           case 'dialog':
             switch (matchingShortcut.action.dialog) {
               case 'add-course':
-                handlers.onOpenAddCourseDialog();
+                currentHandlers.onOpenAddCourseDialog();
                 break;
               case 'add-task':
-                handlers.onOpenAddTaskDialog();
+                currentHandlers.onOpenAddTaskDialog();
                 break;
             }
             break;
           case 'toggle':
-            handlers.onToggleCommandPalette();
+            currentHandlers.onToggleCommandPalette();
             break;
         }
       }
     };
 
+    // Attach the event listener only once
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handlers]);
+  }, []); // Empty dependency array - listener is attached only once
 }
 
 export function getShortcutDisplayText(shortcut: KeyboardShortcut): string {

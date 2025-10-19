@@ -13,6 +13,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
+  CommandShortcut,
 } from '@/components/ui/command';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { getShortcutDisplayText, getShortcutForDialog, getShortcutForPath, useKeyboardShortcuts } from '@/lib/keyboard-shortcuts';
@@ -35,9 +36,18 @@ export default function CommandPalette() {
 
   useKeyboardShortcuts({
     onToggleCommandPalette: () => setOpen(o => !o),
-    onOpenAddCourseDialog: () => setAddCourseDialogOpen(true),
-    onOpenAddTaskDialog: () => setAddTaskDialogOpen(true),
-    onNavigate: (path: string) => router.push(path),
+    onOpenAddCourseDialog: () => {
+      setOpen(false);
+      setAddCourseDialogOpen(true);
+    },
+    onOpenAddTaskDialog: () => {
+      setOpen(false);
+      setAddTaskDialogOpen(true);
+    },
+    onNavigate: (path: string) => {
+      setOpen(false);
+      router.push(path);
+    },
   });
   const pages: PageItem[] = useMemo(() => (
     [
@@ -128,9 +138,7 @@ export default function CommandPalette() {
                 <div className="flex items-center justify-between w-full">
                   <span>{page.title}</span>
                   {shortcut && (
-                    <span className="text-xs text-muted-foreground">
-                      {getShortcutDisplayText(shortcut)}
-                    </span>
+                      <CommandShortcut>{getShortcutDisplayText(shortcut)}</CommandShortcut>
                   )}
                 </div>
               </CommandItem>
@@ -158,12 +166,14 @@ export default function CommandPalette() {
       open={addCourseDialogOpen}
       onOpenChange={setAddCourseDialogOpen}
       onCourseAdded={refreshCourses}
+      trigger={<div style={{ display: 'none' }} />}
     />
     <AddTaskDialog
       open={addTaskDialogOpen}
       onOpenChange={setAddTaskDialogOpen}
       onTaskAdded={() => {}}
       courses={courses}
+      trigger={<div style={{ display: 'none' }} />}
     />
     </>
   );

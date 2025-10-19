@@ -48,7 +48,15 @@ export const AddTaskDialog = ({
 
   // Use external state if provided, otherwise use internal state
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setIsOpen = externalOnOpenChange || setInternalOpen;
+  const setIsOpen = (open: boolean) => {
+    if (externalOnOpenChange) {
+      // Controlled mode: delegate to external handler
+      externalOnOpenChange(open);
+    } else {
+      // Uncontrolled mode: update internal state
+      setInternalOpen(open);
+    }
+  };
   const { addTask, isLoading } = useTask();
   const [newTask, setNewTask] = useState(() => ({
     title: '',

@@ -37,7 +37,15 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
 
   // Use external state if provided, otherwise use internal state
   const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
-  const setIsOpen = externalOnOpenChange || setInternalOpen;
+  const setIsOpen = (open: boolean) => {
+    if (externalOnOpenChange) {
+      // Controlled mode: delegate to external handler
+      externalOnOpenChange(open);
+    } else {
+      // Uncontrolled mode: update internal state
+      setInternalOpen(open);
+    }
+  };
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
   const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(undefined);
@@ -181,20 +189,6 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
         if (open) {
           // Reset dialog state when opening
           resetDialog();
-          // Fetch available terms (previous, current, next) so we can populate the dropdown
-          (async () => {
-            try {
-              const got = await fetchTerms();
-              setAvailableTerms(got);
-              // default term to current session (middle item) if present (prev/current/next)
-              const middle = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
-              if (middle) {
-                setTerm(middle.id);
-              }
-            } catch (err) {
-              console.error('Failed to fetch terms:', err);
-            }
-          })();
         } else {
           // Small delay to ensure dialog is properly closed before reset
           setTimeout(() => {
