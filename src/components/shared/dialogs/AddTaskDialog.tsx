@@ -30,6 +30,8 @@ type AddTaskDialogProps = {
   onTaskAdded: () => void;
   trigger?: React.ReactNode;
   courses?: Course[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export const AddTaskDialog = ({
@@ -39,8 +41,14 @@ export const AddTaskDialog = ({
   onTaskAdded,
   trigger,
   courses,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: AddTaskDialogProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = externalOnOpenChange || setInternalOpen;
   const { addTask, isLoading } = useTask();
   const [newTask, setNewTask] = useState(() => ({
     title: '',

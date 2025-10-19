@@ -42,7 +42,7 @@ export function CourseCodeInputForm({
                   setCourseCode(value);
                 }
               }}
-              placeholder="(e.g. MAT145, LOG210)"
+              placeholder="e.g. MAT145, LOG210"
               disabled={isProcessing}
               maxLength={10}
               onKeyDown={(e) => {

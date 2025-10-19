@@ -28,10 +28,16 @@ import { ProcessingSteps } from './ProcessingSteps';
 type AddCourseDialogProps = {
   onCourseAdded?: () => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddCourseDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = externalOnOpenChange || setInternalOpen;
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
   const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(undefined);
@@ -73,6 +79,25 @@ export function AddCourseDialog({ onCourseAdded, trigger }: AddCourseDialogProps
       }
     }
   }, [currentStep, createdCourseId, refreshCourses, onCourseAdded]);
+
+  // Fetch terms when dialog opens (both internally and externally)
+  useEffect(() => {
+    if (isOpen && availableTerms.length === 0) {
+      (async () => {
+        try {
+          const got = await fetchTerms();
+          setAvailableTerms(got);
+          // default term to current session (middle item) if present (prev/current/next)
+          const middle = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+          if (middle) {
+            setTerm(middle.id);
+          }
+        } catch (err) {
+          console.error('Failed to fetch terms:', err);
+        }
+      })();
+    }
+  }, [isOpen, availableTerms.length, fetchTerms]);
 
   useEffect(() => {
     // Only run this effect when the dialog is open and term is set

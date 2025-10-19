@@ -10,6 +10,7 @@ import getCourseActions from '@/components/shared/atoms/get-course-actions';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import ChangeCourseColorDialog from '@/components/shared/dialogs/ChangeCourseColorDialog';
 import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
+import { getCoursePath } from '@/lib/routes';
 import {
   calculateProgress,
   getCompletedTasksCount,
@@ -55,7 +56,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const dropdownActions = baseActions.map((a) => {
     if (a.label === 'Complete overdue tasks') {
-      return { ...a, onClick: () => router.push(`/courses/${course.id}`) };
+      return { ...a, onClick: () => router.push(getCoursePath(course.id)) };
     }
 
     return a;
@@ -89,7 +90,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       <div className="flex justify-between items-start">
         <h2 className="text-lg font-bold">
-          <Link href={`/courses/${course.id}`} className="hover:underline transition-colors">
+          <Link href={getCoursePath(course.id)} className="hover:underline transition-colors">
             {course.code}
           </Link>
         </h2>
@@ -120,7 +121,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
             <div className="flex items-center gap-1">
               <span className="text-xs font-bold text-foreground">Next:</span>
               <Link
-                href={`/courses/${course.id}#task-${nextTask.id}`}
+                href={`${getCoursePath(course.id)}#task-${nextTask.id}`}
                 className="flex-1 hover:underline transition-colors"
               >
                 <TruncatedTextWithTooltip
@@ -146,7 +147,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
             <div className="flex items-center gap-1 mt-1 pt-1 border-t border-border">
               <span className="text-xs font-bold text-foreground">Upcoming:</span>
               <Link
-                href={`/courses/${course.id}#task-${upcomingTask.id}`}
+                href={`${getCoursePath(course.id)}#task-${upcomingTask.id}`}
                 className="flex-1 hover:underline transition-colors"
               >
                 <TruncatedTextWithTooltip
@@ -181,7 +182,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
       <div className="flex justify-end mt-auto">
         <Link
-          href={`/courses/${course.id}`}
+          href={getCoursePath(course.id)}
           className="text-xs text-muted-foreground hover:text-accent-foreground transition-colors hover:underline"
           style={{ color: displayColor }}
         >

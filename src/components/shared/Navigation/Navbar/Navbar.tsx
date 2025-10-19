@@ -1,7 +1,9 @@
 'use client';
 
+import { Search } from 'lucide-react';
 import { AppLogo } from '@/components/shared/atoms/AppLogo';
 import { NavigationItems } from '@/components/shared/Navigation/NavigationItems';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
   NavigationMenu,
@@ -15,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { openCommandPalette } from '@/lib/command-palette';
 
 export default function Navbar() {
   return (
@@ -44,7 +47,11 @@ export default function Navbar() {
 
         {/* User authentication and theme toggle moved to sidebar footer */}
         <div className="flex items-center gap-2">
-          {/* Empty space for future navbar items */}
+          <Button variant="outline" size="sm" className="ml-auto" onClick={() => openCommandPalette()}>
+            <Search className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Search</span>
+            <span className="ml-2 text-xs text-muted-foreground">⌘K</span>
+          </Button>
         </div>
       </div>
     </Card>

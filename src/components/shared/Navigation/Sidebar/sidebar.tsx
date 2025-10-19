@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { getCoursePath, ROUTES } from '@/lib/routes';
 
 type SidebarProps = {
   courses: CourseListItem[];
@@ -51,7 +52,6 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
       <SidebarHeader>
         <AppLogo />
       </SidebarHeader>
-
       <SidebarContent>
         {/* Navigation Group - Mobile only */}
         <SidebarGroup className="md:hidden">
@@ -92,7 +92,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                       return (
                         <SidebarMenuItem key={course.id}>
                           <SidebarMenuButton asChild isActive={isActive}>
-                            <Link href={`/courses/${course.id}`}>
+                            <Link href={getCoursePath(course.id)}>
                               <NotebookText className="size-4" style={{ color: course.color }} />
                               <span>{course.code}</span>
                               <div className="ml-auto flex items-center gap-1">
@@ -152,7 +152,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                     >
                       <ThemeToggle />
                       <DropdownMenuItem asChild>
-                        <Link href="/preferences">
+                        <Link href={ROUTES.PREFERENCES}>
                           <Settings className="size-4 mr-2" />
                           Preferences
                         </Link>
@@ -176,7 +176,6 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-
       <SidebarRail />
     </Sidebar>
   );
