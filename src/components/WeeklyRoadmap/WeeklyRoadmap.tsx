@@ -5,6 +5,8 @@ import type { StatusTask } from '@/types/status-task';
 import type { Task as TaskType } from '@/types/task';
 import { toast } from 'sonner';
 import { TaskBox } from '@/components/Task/TaskBox';
+import TimeBlockCalendarDemo from '@/components/ui/time-block-calendar-demo';
+// keep TimeBlockCalendar import removed; demo renders the calendar for testing
 import { WeeklyCalendar } from '@/components/ui/weekly-calendar';
 import { TaskDayColumn } from '@/components/WeeklyRoadmap/TaskDayColumn';
 import { useCoursesContext } from '@/contexts/use-courses';
@@ -73,19 +75,29 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
   };
 
   return (
-    <WeeklyCalendar<TaskType>
-      initialItems={initialTasks}
-      fetchItems={fetchTasks}
-      onItemMoved={handleTaskMoved}
-      renderDayColumn={props => (
-        <TaskDayColumn
-          {...props}
-          onStatusChange={handleStatusChange}
-          courses={courses}
-        />
-      )}
-      renderDragOverlay={renderDragOverlay}
-      enableDragDrop={true}
-    />
+    <>
+      <WeeklyCalendar<TaskType>
+        initialItems={initialTasks}
+        fetchItems={fetchTasks}
+        onItemMoved={handleTaskMoved}
+        renderDayColumn={props => (
+          <TaskDayColumn
+            {...props}
+            onStatusChange={handleStatusChange}
+            courses={courses}
+          />
+        )}
+        renderDragOverlay={renderDragOverlay}
+        enableDragDrop={true}
+      />
+      {/* Demo calendar for testing */}
+      <div className="mt-8">
+        <h2 className="text-lg font-bold mb-2">Time Block Calendar Demo</h2>
+        <div className="border rounded-lg p-4 bg-background">
+          {/* Demo component renders the calendar with mock data */}
+          <TimeBlockCalendarDemo />
+        </div>
+      </div>
+    </>
   );
 };
