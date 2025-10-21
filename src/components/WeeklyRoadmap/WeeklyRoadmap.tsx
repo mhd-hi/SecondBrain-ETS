@@ -93,10 +93,8 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
       {/* Demo calendar for testing */}
       <div className="mt-8">
         <h2 className="text-lg font-bold mb-2">Time Block Calendar Demo</h2>
-        <div className="border rounded-lg p-4 bg-background">
           {/* Demo component renders the calendar with mock data */}
           <TimeBlockCalendarDemo />
-        </div>
       </div>
     </>
   );
