@@ -14,9 +14,6 @@ import {
   endOfYear,
   format,
   isSameDay,
-  isSameMonth,
-  isSameWeek,
-  isSameYear,
   isWithinInterval,
   startOfDay,
   startOfMonth,
@@ -64,27 +61,20 @@ export function rangeText(view: TCalendarView, date: Date) {
 }
 
 export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
-  const operations = {
-    agenda: direction === 'next' ? addMonths : subMonths,
-    year: direction === 'next' ? addYears : subYears,
-    month: direction === 'next' ? addMonths : subMonths,
-    week: direction === 'next' ? addWeeks : subWeeks,
-    day: direction === 'next' ? addDays : subDays,
-  };
-
-  return operations[view](date, 1);
-}
-
-export function getEventsCount(events: IEvent[], date: Date, view: TCalendarView): number {
-  const compareFns = {
-    agenda: isSameMonth,
-    year: isSameYear,
-    day: isSameDay,
-    week: (eventDate: Date, compareDate: Date) => isSameWeek(eventDate, compareDate, { weekStartsOn: 1 }),
-    month: isSameMonth,
-  };
-
-  return events.filter(event => compareFns[view](getEventStart(event), date)).length;
+  switch (view) {
+    case 'agenda':
+      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
+    case 'year':
+      return direction === 'next' ? addYears(date, 1) : subYears(date, 1);
+    case 'month':
+      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
+    case 'week':
+      return direction === 'next' ? addWeeks(date, 1) : subWeeks(date, 1);
+    case 'day':
+      return direction === 'next' ? addDays(date, 1) : subDays(date, 1);
+    default:
+      return date;
+  }
 }
 
 // ================ Week and day view helper functions ================ //

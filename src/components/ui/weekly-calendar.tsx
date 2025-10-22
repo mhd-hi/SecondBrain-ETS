@@ -302,9 +302,17 @@ export function WeeklyCalendar<T extends CalendarItem>({
     const itemWithDate = item as T & { dueDate?: Date | string; date?: Date | string };
     const dateValue = itemWithDate.dueDate || itemWithDate.date;
     if (dateValue) {
-      const dateKey = new Date(dateValue).toDateString();
-      acc[dateKey] ??= [];
-      acc[dateKey].push(item);
+      try {
+        const parsedDate = new Date(dateValue);
+        // Validate that the date is valid
+        if (!Number.isNaN(parsedDate.getTime())) {
+          const dateKey = parsedDate.toDateString();
+          acc[dateKey] ??= [];
+          acc[dateKey].push(item);
+        }
+      } catch {
+        // Skip invalid dates
+      }
     }
     return acc;
   }, {});
