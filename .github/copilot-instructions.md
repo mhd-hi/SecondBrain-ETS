@@ -7,7 +7,7 @@ This is an AI-powered course management system for ETS university students that 
 ### Core Data Flow
 - **Course Processing Pipeline** (`src/pipelines/`): AI-driven course plan parsing workflow
   - `ServerCourseProcessingPipeline` orchestrates step-by-step processing
-  - `OpenAIProcessor` handles AI text analysis 
+  - `OpenAIProcessor` handles AI text analysis
   - `PlanetsDataSource` fetches ETS course data
   - Pipeline communicates via `/api/course-pipeline` with real-time step updates
 

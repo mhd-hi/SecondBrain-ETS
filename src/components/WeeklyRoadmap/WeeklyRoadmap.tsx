@@ -4,8 +4,8 @@ import type { DraggedTask } from '@/types/drag-drop';
 import type { StatusTask } from '@/types/status-task';
 import type { Task as TaskType } from '@/types/task';
 import { toast } from 'sonner';
+import { ClientContainer } from '@/calendar/components/client-container';
 import { TaskBox } from '@/components/Task/TaskBox';
-import TimeBlockCalendarDemo from '@/components/ui/time-block-calendar-demo';
 // keep TimeBlockCalendar import removed; demo renders the calendar for testing
 import { WeeklyCalendar } from '@/components/ui/weekly-calendar';
 import { TaskDayColumn } from '@/components/WeeklyRoadmap/TaskDayColumn';
@@ -90,12 +90,13 @@ export const WeeklyRoadmap = ({ initialTasks = DEFAULT_INITIAL_TASKS }: WeeklyRo
         renderDragOverlay={renderDragOverlay}
         enableDragDrop={true}
       />
-      {/* Demo calendar for testing */}
+
       <div className="mt-8">
         <h2 className="text-lg font-bold mb-2">Time Block Calendar Demo</h2>
           {/* Demo component renders the calendar with mock data */}
-          <TimeBlockCalendarDemo />
+          <ClientContainer view="week" />
       </div>
+
     </>
   );
 };
