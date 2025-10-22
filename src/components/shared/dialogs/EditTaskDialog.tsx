@@ -1,6 +1,6 @@
  'use client';
 
-import type { Task as TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -22,14 +22,14 @@ import { TASK_TYPES } from '@/types/task';
 type EditTaskDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task: TaskType;
+  task: Task;
   onSaved?: () => void;
 };
 
 type FormState = {
   title: string;
   notes: string;
-  type: TaskType['type'];
+  type: Task['type'];
   dueDate: Date;
   estimatedEffort: number;
   status: StatusTask;
@@ -40,7 +40,7 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
   const [form, setForm] = useState<FormState>(() => ({
     title: task.title ?? '',
     notes: task.notes ?? '',
-    type: (task.type ?? TASK_TYPES.THEORIE) as TaskType['type'],
+    type: (task.type ?? TASK_TYPES.THEORIE) as Task['type'],
     dueDate: task.dueDate ? new Date(task.dueDate) : new Date(),
     estimatedEffort: task.estimatedEffort ?? 1,
     status: task.status ?? StatusTask.TODO,
@@ -54,11 +54,11 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
     setIsSaving(true);
 
     try {
-      const payload: Partial<TaskType> = {
+      const payload: Partial<Task> = {
         title: form.title,
         notes: form.notes,
         type: form.type,
-        dueDate: form.dueDate.toISOString() as unknown as TaskType['dueDate'],
+        dueDate: form.dueDate.toISOString() as unknown as Task['dueDate'],
         estimatedEffort: form.estimatedEffort,
         status: form.status,
       };
@@ -121,7 +121,7 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
                 id="type"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={form.type}
-                onChange={e => setForm(prev => ({ ...prev, type: e.target.value as TaskType['type'] }))}
+                onChange={e => setForm(prev => ({ ...prev, type: e.target.value as Task['type'] }))}
                 required
               >
                 <option value={TASK_TYPES.THEORIE}>Théorie</option>

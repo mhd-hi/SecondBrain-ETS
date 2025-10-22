@@ -2,7 +2,7 @@
 
 import type { DraggedTask } from '@/types/drag-drop';
 import type { StatusTask } from '@/types/status-task';
-import type { Task as TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 
 import { useDraggable } from '@dnd-kit/core';
 import React, { useState } from 'react';
@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { deleteTask } from '@/hooks/use-task';
 
 type TaskProps = {
-  task: TaskType;
+  task: Task;
   sourceDate: Date;
   onStatusChange: (taskId: string, newStatus: StatusTask) => void;
   isDragOverlay?: boolean;

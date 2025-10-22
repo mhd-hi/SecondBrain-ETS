@@ -3,7 +3,7 @@
 import type { DraggedTask } from '@/types/drag-drop';
 
 import type { StatusTask } from '@/types/status-task';
-import type { Task as TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 import React, { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { ClientContainer } from '@/calendar/components/client-container';
@@ -18,10 +18,10 @@ import { fetchWeeklyTasks, updateDueDateTask, updateStatusTask } from '@/hooks/u
 import { getWeekDates } from '@/lib/utils/date-util';
 
 type WeeklyRoadmapProps = {
-  initialTasks?: TaskType[];
+  initialTasks?: Task[];
 };
 
-const DEFAULT_INITIAL_TASKS: TaskType[] = [];
+const DEFAULT_INITIAL_TASKS: Task[] = [];
 
 export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DEFAULT_INITIAL_TASKS }) => {
   // Use global courses context
@@ -47,7 +47,7 @@ export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DE
     }
   }, []);
 
-  const handleTaskMoved = useCallback(async (task: TaskType, sourceDate: Date, targetDate: Date): Promise<TaskType> => {
+  const handleTaskMoved = useCallback(async (task: Task, sourceDate: Date, targetDate: Date): Promise<Task> => {
     try {
       await updateDueDateTask(task.id, targetDate);
       return { ...task, dueDate: targetDate };
@@ -58,7 +58,7 @@ export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DE
     }
   }, []);
 
-  const fetchTasks = useCallback(async (weekStart: Date, weekEnd: Date): Promise<TaskType[]> => {
+  const fetchTasks = useCallback(async (weekStart: Date, weekEnd: Date): Promise<Task[]> => {
     try {
       return await fetchWeeklyTasks(weekStart, weekEnd);
     } catch (error) {
@@ -103,7 +103,7 @@ export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DE
 
   return (
     <>
-      <WeeklyCalendar<TaskType>
+      <WeeklyCalendar<Task>
         initialItems={initialTasks}
         fetchItems={fetchTasks}
         onItemMoved={handleTaskMoved}
@@ -134,7 +134,6 @@ export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DE
           </SelectedDateProvider>
         </div>
       </div>
-
     </>
   );
 });

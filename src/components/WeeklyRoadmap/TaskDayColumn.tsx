@@ -3,7 +3,7 @@
 import type { Course } from '@/types/course';
 import type { DropTargetData } from '@/types/drag-drop';
 import type { StatusTask } from '@/types/status-task';
-import type { Task as TaskType } from '@/types/task';
+import type { Task } from '@/types/task';
 import { useDroppable } from '@dnd-kit/core';
 import { Plus } from 'lucide-react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
@@ -11,13 +11,13 @@ import { TaskBox } from '@/components/Task/TaskBox';
 
 type TaskDayColumnProps = {
   date: Date;
-  items: TaskType[];
+  items: Task[];
   isToday: boolean;
   isSticky?: boolean;
   isDragActive?: boolean;
   onStatusChange: (taskId: string, newStatus: StatusTask) => void;
   courses: Course[];
-  onItemsChange?: (items: TaskType[]) => void;
+  onItemsChange?: (items: Task[]) => void;
 };
 
 export const TaskDayColumn = ({
