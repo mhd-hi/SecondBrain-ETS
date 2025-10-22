@@ -1,30 +1,5 @@
-import type { IEvent, IUser } from '@/calendar/interfaces';
+import type { IEvent } from '@/calendar/interfaces';
 import type { TEventColor } from '@/calendar/types';
-
-// ================================== //
-
-export const USERS_MOCK: IUser[] = [
-  {
-    id: 'dd503cf9-6c38-43cf-94cc-0d4032e2f77a',
-    name: 'Leonardo Ramos',
-    picturePath: null,
-  },
-  {
-    id: 'f3b035ac-49f7-4e92-a715-35680bf63175',
-    name: 'Michael Doe',
-    picturePath: null,
-  },
-  {
-    id: '3e36ea6e-78f3-40dd-ab8c-a6c737c3c422',
-    name: 'Alice Johnson',
-    picturePath: null,
-  },
-  {
-    id: 'a7aff6bd-a50a-4d6a-ab57-76f76bb27cf5',
-    name: 'Robert Smith',
-    picturePath: null,
-  },
-];
 
 const COLORS: TEventColor[] = ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'];
 
@@ -126,13 +101,10 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
       endDate: new Date('2025-09-20T23:59:00-03:00').toISOString(),
       title: 'My wedding :)',
       color: 'red',
-      user: USERS_MOCK[0]!,
     },
   ];
 
   let currentId = 1;
-
-  const randomUser = USERS_MOCK[Math.floor(Math.random() * USERS_MOCK.length)] ?? USERS_MOCK[0]!;
 
   // Date range: 30 days before and after now
   const now = new Date();
@@ -148,7 +120,6 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
     endDate: new Date(now.getTime() + 30 * 60000).toISOString(),
     title: EVENTS[Math.floor(Math.random() * EVENTS.length)] ?? 'Untitled event',
     color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? 'gray',
-    user: randomUser!,
   };
 
   // Only add the current event if it's not on September 20th
@@ -211,7 +182,6 @@ const mockGenerator = (numberOfEvents: number): IEvent[] => {
       endDate: endDate.toISOString(),
       title: EVENTS[Math.floor(Math.random() * EVENTS.length)] ?? 'Untitled event',
       color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? 'gray',
-      user: USERS_MOCK[Math.floor(Math.random() * USERS_MOCK.length)] ?? USERS_MOCK[0]!,
     });
 
     i++;

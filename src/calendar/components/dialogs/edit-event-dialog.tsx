@@ -51,11 +51,8 @@ export function EditEventDialog({ children, event }: IProps) {
 
     updateEvent({
       ...event,
-      // keep the original event.user (current user)
-      user: event.user,
       title: values.title,
       color: values.color,
-      // description removed intentionally
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
     });

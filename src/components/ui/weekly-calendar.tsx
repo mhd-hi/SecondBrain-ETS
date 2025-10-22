@@ -174,15 +174,11 @@ export function WeeklyCalendar<T extends CalendarItem>({
 
         const weekItems = await fetchItems(weekStart, weekEnd);
 
-        const timeoutId = setTimeout(() => {
-          setItems(weekItems);
-          if (externalIsLoading === undefined) {
-            setInternalIsLoading(false);
-          }
-          setTransitionState(resetTransitionState());
-        }, 100);
-
-        return () => clearTimeout(timeoutId);
+        setItems(weekItems);
+        if (externalIsLoading === undefined) {
+          setInternalIsLoading(false);
+        }
+        setTransitionState(resetTransitionState());
       } catch (error) {
         console.error('Failed to load items:', error);
         if (externalIsLoading === undefined) {

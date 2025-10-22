@@ -1,6 +1,6 @@
 import type { IEvent } from '@/calendar/interfaces';
 
-import { areIntervalsOverlapping, format, isSameDay, startOfWeek } from 'date-fns';
+import { format, isSameDay, startOfWeek } from 'date-fns';
 import React, { useMemo } from 'react';
 
 import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
@@ -17,6 +17,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { cn } from '@/lib/utils';
 
+const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN((d as Date).getTime());
+
 type IProps = {
   singleDayEvents: IEvent[];
   multiDayEvents: IEvent[];
@@ -26,7 +28,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   const { visibleHours } = useCalendar();
   const { selectedDate } = useSelectedDate();
 
-  const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
+  const { hours, earliestEventHour, latestEventHour } = useMemo(
+    () => getVisibleHours(visibleHours, singleDayEvents),
+    [visibleHours, singleDayEvents],
+  );
 
   const weekDays = useMemo(() => {
     const safeDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
@@ -37,8 +42,6 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
       return day;
     });
   }, [selectedDate]);
-
-  const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN((d as Date).getTime());
 
   // Precompute dayEvents and groupedEvents for each day to avoid repeated work in the render loop
   type DayGroup = { day: Date; dayEvents: IEvent[]; groupedEvents: IEvent[][] };
@@ -66,20 +69,11 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
         group.forEach((event) => {
           const style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
 
-          const hasOverlap = groupedEvents.some(
-            (otherGroup, otherIndex) =>
-              otherIndex !== groupIndex
-              && otherGroup.some(otherEvent =>
-                areIntervalsOverlapping(
-                  { start: getEventStart(event), end: getEventEnd(event) },
-                  { start: getEventStart(otherEvent), end: getEventEnd(otherEvent) },
-                ),
-              ),
-          );
-
-          if (!hasOverlap) {
+          // If only one group, no overlaps, use full width
+          if (groupedEvents.length === 1) {
             result[event.id] = { style: { ...style, width: '100%', left: '0%' }, hasOverlap: false };
           } else {
+            // Multiple groups, assume overlaps and use divided width
             result[event.id] = { style, hasOverlap: true };
           }
         });

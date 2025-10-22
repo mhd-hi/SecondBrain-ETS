@@ -105,7 +105,10 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   dueDate: timestamp('due_date').notNull(),
-});
+}, table => [
+  index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
+  index('idx_tasks_user_id').on(table.userId),
+]);
 
 export const subtasks = pgTable('subtasks', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -118,7 +121,10 @@ export const subtasks = pgTable('subtasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   dueDate: timestamp('due_date'),
-});
+}, table => [
+  // Index for subtasks queries: WHERE task_id IN (taskIds)
+  index('idx_subtasks_task_id').on(table.taskId),
+]);
 
 export const pomodoroDaily = pgTable('pomodoro_daily', {
   id: uuid('id').primaryKey().defaultRandom(),

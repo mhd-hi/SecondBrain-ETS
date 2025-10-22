@@ -78,6 +78,13 @@
       "when": 1761121433074,
       "tag": "0010_premium_darkhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1761131177843,
+      "tag": "0011_sharp_squadron_supreme",
+      "breakpoints": true
     }
   ]
 }

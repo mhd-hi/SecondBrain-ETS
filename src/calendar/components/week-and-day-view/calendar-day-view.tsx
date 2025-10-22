@@ -1,7 +1,7 @@
 import type { IEvent } from '@/calendar/interfaces';
 import { areIntervalsOverlapping, format, parseISO } from 'date-fns';
 
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 
 import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
 import { DroppableTimeBlock } from '@/calendar/components/dnd/droppable-time-block';
@@ -167,12 +167,6 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                 {currentEvents.map(event => (
                   <div key={event.id} className="space-y-1.5">
                     <p className="line-clamp-2 text-sm font-semibold">{event.title}</p>
-
-                    <div className="flex items-center gap-1.5 text-muted-foreground">
-                      <User className="size-3.5" />
-                      <span className="text-sm">{event.user.name}</span>
-                    </div>
-
                     <div className="flex items-center gap-1.5 text-muted-foreground">
                       <Calendar className="size-3.5" />
                       <span className="text-sm">{format(new Date(), 'MMM d, yyyy')}</span>
