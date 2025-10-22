@@ -9,7 +9,6 @@ import { parseISO } from 'date-fns';
 import { AlertTriangle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
 import { useUpdateEvent } from '@/calendar/hooks/use-update-event';
 import { eventSchema } from '@/calendar/schemas';
 import { Button } from '@/components/ui/button';
@@ -31,15 +30,11 @@ type IProps = {
 
 export function EditEventDialog({ children, event }: IProps) {
   const { isOpen, onClose, onToggle } = useDisclosure();
-
-  const { users } = useCalendar();
-
   const { updateEvent } = useUpdateEvent();
 
   const form = useForm<TEventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      user: event.user.id,
       title: event.title,
       description: event.description,
       startDate: parseISO(event.startDate),
@@ -51,12 +46,6 @@ export function EditEventDialog({ children, event }: IProps) {
   });
 
   const onSubmit = (values: TEventFormData) => {
-    const user = users.find(user => user.id === values.user);
-
-    if (!user) {
- throw new Error('User not found');
-}
-
     const startDateTime = new Date(values.startDate);
     startDateTime.setHours(values.startTime.hour, values.startTime.minute);
 
@@ -65,7 +54,8 @@ export function EditEventDialog({ children, event }: IProps) {
 
     updateEvent({
       ...event,
-      user,
+      // keep the original event.user (current user)
+      user: event.user,
       title: values.title,
       color: values.color,
       description: values.description,
@@ -92,37 +82,7 @@ export function EditEventDialog({ children, event }: IProps) {
 
         <Form {...form}>
           <form id="event-form" onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
-            <FormField
-              control={form.control}
-              name="user"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Responsible</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger data-invalid={fieldState.invalid}>
-                        <SelectValue placeholder="Select an option" />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        {users.map(user => (
-                          <SelectItem key={user.id} value={user.id} className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span>
-                                {user.name[0]}
-                              </span>
-
-                              <p className="truncate">{user.name}</p>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* user selection removed */}
 
             <FormField
               control={form.control}

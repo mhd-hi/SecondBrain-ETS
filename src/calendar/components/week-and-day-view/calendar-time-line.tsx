@@ -6,7 +6,7 @@ type IProps = {
 };
 
 export function CalendarTimeline({ firstVisibleHour, lastVisibleHour }: IProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(() => new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60 * 1000);

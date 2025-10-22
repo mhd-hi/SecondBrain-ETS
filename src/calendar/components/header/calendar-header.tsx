@@ -8,7 +8,6 @@ import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
 import { DateNavigator } from '@/calendar/components/header/date-navigator';
 import { TodayButton } from '@/calendar/components/header/today-button';
 
-import { UserSelect } from '@/calendar/components/header/user-select';
 import { Button } from '@/components/ui/button';
 
 type IProps = {
@@ -81,8 +80,6 @@ export function CalendarHeader({ view, events }: IProps) {
               </Link>
             </Button>
           </div>
-
-          <UserSelect />
         </div>
 
         <AddEventDialog>

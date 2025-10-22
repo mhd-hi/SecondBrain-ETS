@@ -23,7 +23,7 @@ type IProps = {
 };
 
 export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate, setSelectedDate, users, visibleHours } = useCalendar();
+  const { selectedDate, setSelectedDate, visibleHours } = useCalendar();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 
@@ -162,37 +162,31 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
           {currentEvents.length > 0 && (
             <ScrollArea className="h-[422px] px-4" type="always">
               <div className="space-y-6 pb-4">
-                {currentEvents.map((event) => {
-                  const user = users.find(user => user.id === event.user.id);
+                {currentEvents.map(event => (
+                  <div key={event.id} className="space-y-1.5">
+                    <p className="line-clamp-2 text-sm font-semibold">{event.title}</p>
 
-                  return (
-                    <div key={event.id} className="space-y-1.5">
-                      <p className="line-clamp-2 text-sm font-semibold">{event.title}</p>
-
-                      {user && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <User className="size-3.5" />
-                          <span className="text-sm">{user.name}</span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Calendar className="size-3.5" />
-                        <span className="text-sm">{format(new Date(), 'MMM d, yyyy')}</span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="size-3.5" />
-                        <span className="text-sm">
-                          {format(parseISO(event.startDate), 'h:mm a')}
-{' '}
--
-{format(parseISO(event.endDate), 'h:mm a')}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <User className="size-3.5" />
+                      <span className="text-sm">{event.user.name}</span>
                     </div>
-                  );
-                })}
+
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Calendar className="size-3.5" />
+                      <span className="text-sm">{format(new Date(), 'MMM d, yyyy')}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="size-3.5" />
+                      <span className="text-sm">
+                        {format(parseISO(event.startDate), 'h:mm a')}
+                        {' '}
+                        -
+                        {format(parseISO(event.endDate), 'h:mm a')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </ScrollArea>
           )}
