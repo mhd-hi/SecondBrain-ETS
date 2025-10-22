@@ -37,7 +37,7 @@ const TimeInput = ({ ref, className, dateInputClassName, segmentClassName, disab
             <DateSegment
               segment={segment}
               className={cn(
-                'inline rounded p-0.5 caret-transparent outline outline-0',
+                'inline rounded p-0.5 caret-transparent outline-0',
                 'data-[focused]:bg-foreground/10 data-[focused]:text-foreground',
                 'data-[placeholder]:text-muted-foreground',
                 'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
