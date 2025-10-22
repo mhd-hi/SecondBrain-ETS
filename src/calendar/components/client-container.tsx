@@ -1,7 +1,6 @@
 'use client';
 
-import type { IEvent } from '@/calendar/interfaces';
-import type { TCalendarView } from '@/calendar/types';
+import type { TCalendarView, TEvent } from '@/calendar/types';
 import { isSameDay } from 'date-fns';
 import { useMemo } from 'react';
 
@@ -27,14 +26,14 @@ export function ClientContainer({ view }: IProps) {
   const { events } = useEvents();
 
   // Pre-parse dates once per event to avoid repeated parseISO calls on every render
-  type ParsedEvent = IEvent & { startDateObj: Date; endDateObj: Date };
+  type ParsedEvent = TEvent & { startDateObj: Date; endDateObj: Date };
 
   const parsedEvents = useMemo(() => {
     return (events ?? []).map((evt) => {
-      const e = { ...evt } as Partial<ParsedEvent> & IEvent;
+      const e = { ...evt } as Partial<ParsedEvent> & TEvent;
       try {
-        e.startDateObj = getEventStart(e as IEvent);
-        e.endDateObj = getEventEnd(e as IEvent);
+        e.startDateObj = getEventStart(e as TEvent);
+        e.endDateObj = getEventEnd(e as TEvent);
       } catch {
         e.startDateObj = new Date(e.startDate as string);
         e.endDateObj = new Date(e.endDate as string);

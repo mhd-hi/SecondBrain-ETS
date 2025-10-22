@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { addDays, differenceInDays, endOfWeek, isAfter, isBefore, startOfDay, startOfWeek } from 'date-fns';
 
 import React, { useMemo } from 'react';
@@ -7,7 +7,7 @@ import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
 type IProps = {
   selectedDate: Date;
-  multiDayEvents: IEvent[];
+  multiDayEvents: TEvent[];
 };
 
 function WeekViewMultiDayEventsRowImpl({ selectedDate, multiDayEvents }: IProps) {
@@ -42,7 +42,7 @@ function WeekViewMultiDayEventsRowImpl({ selectedDate, multiDayEvents }: IProps)
       });
   }, [multiDayEvents, weekStart, weekEnd]);
 
-  type ProcessedEvent = IEvent & { adjustedStart: Date; adjustedEnd: Date; startIndex: number; endIndex: number };
+  type ProcessedEvent = TEvent & { adjustedStart: Date; adjustedEnd: Date; startIndex: number; endIndex: number };
 
   const eventRows = useMemo(() => {
     const rows: ProcessedEvent[][] = [];

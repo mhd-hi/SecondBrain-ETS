@@ -1,5 +1,5 @@
 import type { VariantProps } from 'class-variance-authority';
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { cva } from 'class-variance-authority';
 
@@ -48,7 +48,7 @@ const eventBadgeVariants = cva(
 );
 
 type IProps = {
-  event: IEvent;
+  event: TEvent;
   cellDate: Date;
   eventCurrentDay?: number;
   eventTotalDays?: number;

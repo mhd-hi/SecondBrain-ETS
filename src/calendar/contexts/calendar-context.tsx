@@ -3,8 +3,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 
-import type { IEvent } from '@/calendar/interfaces';
-import type { TBadgeVariant, TVisibleHours } from '@/calendar/types';
+import type { TBadgeVariant, TEvent, TVisibleHours } from '@/calendar/types';
 import { createContext, use, useMemo, useState } from 'react';
 import { EventsProvider } from '@/calendar/contexts/events-context';
 import { SelectedDateProvider } from '@/calendar/contexts/selected-date-context';
@@ -17,8 +16,8 @@ type ICalendarContext = {
   setBadgeVariant: (variant: TBadgeVariant) => void;
   visibleHours: TVisibleHours;
   setVisibleHours: Dispatch<SetStateAction<TVisibleHours>>;
-  events: IEvent[];
-  setLocalEvents: Dispatch<SetStateAction<IEvent[]>>;
+  events: TEvent[];
+  setLocalEvents: Dispatch<SetStateAction<TEvent[]>>;
 };
 
 const CalendarContext = createContext<ICalendarContext>({
@@ -32,7 +31,7 @@ const CalendarContext = createContext<ICalendarContext>({
   setLocalEvents: () => {},
 });
 
-export function CalendarProvider({ children, events }: { children: React.ReactNode; events: IEvent[] }) {
+export function CalendarProvider({ children, events }: { children: React.ReactNode; events: TEvent[] }) {
   const [badgeVariant, setBadgeVariant] = useState<TBadgeVariant>('colored');
   const [visibleHours, setVisibleHours] = useState<TVisibleHours>(VISIBLE_HOURS);
 
@@ -42,7 +41,7 @@ export function CalendarProvider({ children, events }: { children: React.ReactNo
   // It's used here just to simulate the update of the events.
   // In a real scenario, the events would be updated in the backend
   // and the request that fetches the events should be refetched
-  const [localEvents, setLocalEvents] = useState<IEvent[]>(events);
+  const [localEvents, setLocalEvents] = useState<TEvent[]>(events);
 
   const handleSelectDate = (date: Date | undefined) => {
     if (!date) {

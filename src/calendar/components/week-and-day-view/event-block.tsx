@@ -1,7 +1,7 @@
 import type { VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
 
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { cva } from 'class-variance-authority';
 import { differenceInMinutes, format } from 'date-fns';
@@ -43,7 +43,7 @@ const calendarWeekEventCardVariants = cva(
 );
 
 type IProps = {
-  event: IEvent;
+  event: TEvent;
 } & HTMLAttributes<HTMLDivElement> & Omit<VariantProps<typeof calendarWeekEventCardVariants>, 'color'>;
 
 function EventBlockImpl({ event, className }: IProps) {

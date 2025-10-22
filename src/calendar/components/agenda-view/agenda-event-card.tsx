@@ -1,7 +1,7 @@
 'use client';
 
 import type { VariantProps } from 'class-variance-authority';
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { cva } from 'class-variance-authority';
 
 import { format, parseISO } from 'date-fns';
@@ -42,7 +42,7 @@ const agendaEventCardVariants = cva(
 );
 
 type IProps = {
-  event: IEvent;
+  event: TEvent;
   eventCurrentDay?: number;
   eventTotalDays?: number;
 };

@@ -1,4 +1,4 @@
-import type { ICalendarCell, IEvent } from '@/calendar/interfaces';
+import type { TCalendarCell, TEvent } from '@/calendar/types';
 import { isToday, startOfDay } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
@@ -14,8 +14,8 @@ import { getMonthCellEvents } from '@/calendar/helpers';
 import { cn } from '@/lib/utils';
 
 type IProps = {
-  cell: ICalendarCell;
-  events: IEvent[];
+  cell: TCalendarCell;
+  events: TEvent[];
   eventPositions: Record<string, number>;
 };
 

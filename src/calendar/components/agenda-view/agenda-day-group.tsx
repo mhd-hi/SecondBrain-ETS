@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { differenceInDays, format, parseISO, startOfDay } from 'date-fns';
 
@@ -6,8 +6,8 @@ import { AgendaEventCard } from '@/calendar/components/agenda-view/agenda-event-
 
 type IProps = {
   date: Date;
-  events: IEvent[];
-  multiDayEvents: IEvent[];
+  events: TEvent[];
+  multiDayEvents: TEvent[];
 };
 
 export function AgendaDayGroup({ date, events, multiDayEvents }: IProps) {

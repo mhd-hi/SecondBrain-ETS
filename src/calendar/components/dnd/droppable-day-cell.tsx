@@ -1,6 +1,6 @@
 'use client';
 
-import type { ICalendarCell, IEvent } from '@/calendar/interfaces';
+import type { TCalendarCell, TEvent } from '@/calendar/types';
 import { differenceInMilliseconds, parseISO } from 'date-fns';
 
 import { useDrop } from 'react-dnd';
@@ -11,7 +11,7 @@ import { useUpdateEvent } from '@/calendar/hooks/use-update-event';
 import { cn } from '@/lib/utils';
 
 type DroppableDayCellProps = {
-  cell: ICalendarCell;
+  cell: TCalendarCell;
   children: React.ReactNode;
 };
 
@@ -21,7 +21,7 @@ export function DroppableDayCell({ cell, children }: DroppableDayCellProps) {
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.EVENT,
-      drop: (item: { event: IEvent }) => {
+      drop: (item: { event: TEvent }) => {
         const droppedEvent = item.event;
 
         const eventStartDate = parseISO(droppedEvent.startDate);

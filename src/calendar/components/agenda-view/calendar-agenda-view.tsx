@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { endOfDay, format, isSameMonth, parseISO, startOfDay } from 'date-fns';
 import { CalendarX2 } from 'lucide-react';
 
@@ -10,15 +10,15 @@ import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 type IProps = {
-  singleDayEvents: IEvent[];
-  multiDayEvents: IEvent[];
+  singleDayEvents: TEvent[];
+  multiDayEvents: TEvent[];
 };
 
 export function CalendarAgendaView({ singleDayEvents, multiDayEvents }: IProps) {
   const { selectedDate } = useSelectedDate();
 
   const eventsByDay = useMemo(() => {
-    const allDates = new Map<string, { date: Date; events: IEvent[]; multiDayEvents: IEvent[] }>();
+    const allDates = new Map<string, { date: Date; events: TEvent[]; multiDayEvents: TEvent[] }>();
 
     singleDayEvents.forEach((event) => {
       const eventDate = parseISO(event.startDate);

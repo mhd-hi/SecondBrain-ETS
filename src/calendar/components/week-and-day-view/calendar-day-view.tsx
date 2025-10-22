@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { areIntervalsOverlapping, format, parseISO } from 'date-fns';
 
 import { Calendar, Clock } from 'lucide-react';
@@ -19,8 +19,8 @@ import { SingleCalendar } from '@/components/ui/single-calendar';
 import { cn } from '@/lib/utils';
 
 type IProps = {
-  singleDayEvents: IEvent[];
-  multiDayEvents: IEvent[];
+  singleDayEvents: TEvent[];
+  multiDayEvents: TEvent[];
 };
 
 export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {

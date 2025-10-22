@@ -23,12 +23,12 @@ import {
 } from '@/lib/utils/ui-transition-util';
 
 // Generic types for the calendar items
-export type CalendarItem = {
+export type CalendarItemOld = {
   id: string;
 } & Record<string, unknown>;
 
 export type DragData = {
-  item: CalendarItem;
+  item: CalendarItemOld;
   sourceDate: Date;
 } & Record<string, unknown>;
 
@@ -37,7 +37,7 @@ export type DropData = {
   dayKey: string;
 } & Record<string, unknown>;
 
-type DayColumnProps<T extends CalendarItem> = {
+type DayColumnPropsOld<T extends CalendarItemOld> = {
   date: Date;
   items: T[];
   isToday: boolean;
@@ -46,7 +46,7 @@ type DayColumnProps<T extends CalendarItem> = {
   onItemsChange?: (items: T[]) => void;
 } & Record<string, unknown>;
 
-type WeeklyCalendarProps<T extends CalendarItem> = {
+type WeeklyCalendarPropsOld<T extends CalendarItemOld> = {
   /**
    * Initial items to display in the calendar
    */
@@ -65,7 +65,7 @@ type WeeklyCalendarProps<T extends CalendarItem> = {
   /**
    * Render function for each day column
    */
-  renderDayColumn: (props: DayColumnProps<T>) => React.ReactNode;
+  renderDayColumn: (props: DayColumnPropsOld<T>) => React.ReactNode;
 
   /**
    * Render function for the drag overlay
@@ -103,10 +103,10 @@ type WeeklyCalendarProps<T extends CalendarItem> = {
   className?: string;
 };
 
-const DEFAULT_INITIAL_ITEMS: CalendarItem[] = [];
+const DEFAULT_INITIAL_ITEMS: CalendarItemOld[] = [];
 const DEFAULT_DAY_COLUMN_PROPS: Record<string, unknown> = {};
 
-export function WeeklyCalendar<T extends CalendarItem>({
+export function WeeklyCalendarOld<T extends CalendarItemOld>({
   initialItems = DEFAULT_INITIAL_ITEMS as T[],
   fetchItems,
   onItemMoved,
@@ -118,7 +118,7 @@ export function WeeklyCalendar<T extends CalendarItem>({
   onItemsChange,
   enableDragDrop = true,
   className = '',
-}: WeeklyCalendarProps<T>) {
+}: WeeklyCalendarPropsOld<T>) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [items, setItems] = useState<T[]>(initialItems);
   const [internalIsLoading, setInternalIsLoading] = useState(false);

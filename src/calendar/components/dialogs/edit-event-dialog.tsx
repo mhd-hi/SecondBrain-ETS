@@ -1,8 +1,8 @@
 'use client';
 
 import type { TimeValue } from 'react-aria-components';
-import type { IEvent } from '@/calendar/interfaces';
 import type { TEventFormData } from '@/calendar/schemas';
+import type { TEvent } from '@/calendar/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { parseISO } from 'date-fns';
@@ -23,7 +23,7 @@ import { useDisclosure } from '@/hooks/use-disclosure';
 
 type IProps = {
   children: React.ReactNode;
-  event: IEvent;
+  event: TEvent;
 };
 
 export function EditEventDialog({ children, event }: IProps) {

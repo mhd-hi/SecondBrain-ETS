@@ -1,6 +1,6 @@
 'use client';
 
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { differenceInMilliseconds, parseISO } from 'date-fns';
 import React from 'react';
 
@@ -22,7 +22,7 @@ function DroppableTimeBlockImpl({ date, hour, minute, children }: DroppableTimeB
   const [{ isOver, canDrop }, drop] = useDrop(
     () => ({
       accept: ItemTypes.EVENT,
-      drop: (item: { event: IEvent }) => {
+      drop: (item: { event: TEvent }) => {
         const droppedEvent = item.event;
 
         const eventStartDate = parseISO(droppedEvent.startDate);

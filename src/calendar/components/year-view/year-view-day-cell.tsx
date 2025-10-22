@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { isToday } from 'date-fns';
 
 import { useRouter } from 'next/navigation';
@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 type IProps = {
   day: number;
   date: Date;
-  events: IEvent[];
+  events: TEvent[];
 };
 
 export function YearViewDayCell({ day, date, events }: IProps) {

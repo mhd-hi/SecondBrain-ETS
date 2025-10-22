@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { differenceInDays, endOfDay, isWithinInterval, parseISO, startOfDay } from 'date-fns';
 
@@ -6,7 +6,7 @@ import { MonthEventBadge } from '@/calendar/components/month-view/month-event-ba
 
 type IProps = {
   selectedDate: Date;
-  multiDayEvents: IEvent[];
+  multiDayEvents: TEvent[];
 };
 
 export function DayViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IProps) {

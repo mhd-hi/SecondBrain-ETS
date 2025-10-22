@@ -1,6 +1,6 @@
 'use client';
 
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { format, parseISO } from 'date-fns';
 
 import { Calendar, Clock } from 'lucide-react';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 type IProps = {
-  event: IEvent;
+  event: TEvent;
   children: React.ReactNode;
 };
 

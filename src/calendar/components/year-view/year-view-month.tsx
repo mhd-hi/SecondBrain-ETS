@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { format, getDaysInMonth, isSameDay, startOfMonth } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
@@ -11,7 +11,7 @@ import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
 type IProps = {
   month: Date;
-  events: IEvent[];
+  events: TEvent[];
 };
 
 export function YearViewMonth({ month, events }: IProps) {

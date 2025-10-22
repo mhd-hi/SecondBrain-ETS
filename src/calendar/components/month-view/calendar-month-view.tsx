@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { useMemo } from 'react';
 
@@ -9,8 +9,8 @@ import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 import { calculateMonthEventPositions, getCalendarCells } from '@/calendar/helpers';
 
 type IProps = {
-  singleDayEvents: IEvent[];
-  multiDayEvents: IEvent[];
+  singleDayEvents: TEvent[];
+  multiDayEvents: TEvent[];
 };
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

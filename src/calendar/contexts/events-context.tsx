@@ -1,18 +1,18 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { createContext, use, useMemo } from 'react';
 
 type EventsContextType = {
-  events: IEvent[];
-  setLocalEvents: React.Dispatch<React.SetStateAction<IEvent[]>>;
+  events: TEvent[];
+  setLocalEvents: React.Dispatch<React.SetStateAction<TEvent[]>>;
 };
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
 
 type EventsProviderProps = {
   children: React.ReactNode;
-  events: IEvent[];
-  setLocalEvents: React.Dispatch<React.SetStateAction<IEvent[]>>;
+  events: TEvent[];
+  setLocalEvents: React.Dispatch<React.SetStateAction<TEvent[]>>;
 };
 
 export function EventsProvider({ children, events, setLocalEvents }: EventsProviderProps) {

@@ -1,3 +1,4 @@
+import type { TEvent } from '@/calendar/types';
 import type { Task, TaskType } from '@/types/task';
 import type { FilterType } from '@/types/todays-focus';
 import { useState } from 'react';
@@ -67,6 +68,16 @@ export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<
   return response.json() as Promise<Task[]>;
 };
 
+export const fetchCalendarTasks = async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
+  const response = await fetch(`/api/tasks/calendar?start=${startDate.toISOString()}&end=${endDate.toISOString()}`);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch calendar tasks');
+  }
+
+  return response.json() as Promise<TEvent[]>;
+};
+
 export const updateStatusTask = async (taskId: string, status: StatusTask): Promise<void> => {
   const response = await fetch(`/api/tasks/${taskId}/status`, {
     method: 'PATCH',
@@ -126,3 +137,23 @@ export async function deleteTask(taskId: string, fetchCourse?: () => Promise<voi
     ErrorHandlers.api(error, 'Failed to delete task');
   }
 }
+
+export const useCalendarTasks = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const getCalendarTasks = async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
+    setError(null);
+    return withLoadingState(async () => {
+      try {
+        return await fetchCalendarTasks(startDate, endDate);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch calendar tasks';
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      }
+    }, setIsLoading);
+  };
+
+  return { getCalendarTasks, isLoading, error };
+};

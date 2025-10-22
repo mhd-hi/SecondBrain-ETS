@@ -1,6 +1,6 @@
 'use client';
 
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { useEffect, useRef } from 'react';
 import { useDrag } from 'react-dnd';
 
@@ -10,7 +10,7 @@ import { ItemTypes } from '@/calendar/components/dnd/item-types';
 import { cn } from '@/lib/utils';
 
 type DraggableEventProps = {
-  event: IEvent;
+  event: TEvent;
   children: React.ReactNode;
 };
 

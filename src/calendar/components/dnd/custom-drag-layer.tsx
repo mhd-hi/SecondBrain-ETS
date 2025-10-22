@@ -1,11 +1,11 @@
 'use client';
 
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { useDragLayer } from 'react-dnd';
 
 type IDragItem = {
-  event: IEvent;
+  event: TEvent;
   children: React.ReactNode;
   width: number;
   height: number;

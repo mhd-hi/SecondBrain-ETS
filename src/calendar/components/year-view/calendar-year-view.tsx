@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 import { addMonths, startOfYear } from 'date-fns';
 
 import { useMemo } from 'react';
@@ -8,7 +8,7 @@ import { YearViewMonth } from '@/calendar/components/year-view/year-view-month';
 import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 type IProps = {
-  allEvents: IEvent[];
+  allEvents: TEvent[];
 };
 
 export function CalendarYearView({ allEvents }: IProps) {

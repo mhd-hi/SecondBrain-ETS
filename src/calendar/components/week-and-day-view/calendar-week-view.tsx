@@ -1,4 +1,4 @@
-import type { IEvent } from '@/calendar/interfaces';
+import type { TEvent } from '@/calendar/types';
 
 import { format, isSameDay, startOfWeek } from 'date-fns';
 import React, { useMemo } from 'react';
@@ -20,8 +20,8 @@ import { cn } from '@/lib/utils';
 const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN((d as Date).getTime());
 
 type IProps = {
-  singleDayEvents: IEvent[];
-  multiDayEvents: IEvent[];
+  singleDayEvents: TEvent[];
+  multiDayEvents: TEvent[];
 };
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
@@ -44,7 +44,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
   }, [selectedDate]);
 
   // Precompute dayEvents and groupedEvents for each day to avoid repeated work in the render loop
-  type DayGroup = { day: Date; dayEvents: IEvent[]; groupedEvents: IEvent[][] };
+  type DayGroup = { day: Date; dayEvents: TEvent[]; groupedEvents: TEvent[][] };
 
   const dayGroups = useMemo<DayGroup[]>(() => {
     return weekDays.map((day) => {

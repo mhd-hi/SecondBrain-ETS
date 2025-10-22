@@ -10,7 +10,7 @@ import { ClientContainer } from '@/calendar/components/client-container';
 import { CalendarProvider } from '@/calendar/contexts/calendar-context';
 import { SelectedDateProvider } from '@/calendar/contexts/selected-date-context';
 import { TaskBox } from '@/components/Task/TaskBox';
-import { WeeklyCalendar } from '@/components/ui/weekly-calendar';
+import { WeeklyCalendarOld } from '@/components/ui/weekly-calendar-old';
 import { NavigationControls } from '@/components/WeeklyRoadmap/NavigationControls';
 import { TaskDayColumn } from '@/components/WeeklyRoadmap/TaskDayColumn';
 import { useCoursesContext } from '@/contexts/use-courses';
@@ -103,7 +103,7 @@ export const WeeklyRoadmap = React.memo<WeeklyRoadmapProps>(({ initialTasks = DE
 
   return (
     <>
-      <WeeklyCalendar<Task>
+      <WeeklyCalendarOld<Task>
         initialItems={initialTasks}
         fetchItems={fetchTasks}
         onItemMoved={handleTaskMoved}
