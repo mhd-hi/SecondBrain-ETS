@@ -33,14 +33,16 @@ export function DateNavigator({ view, events }: IProps) {
     if (!safeDate) {
       return;
     }
-    setSelectedDate(navigateDate(safeDate, view, 'previous'));
+    const newDate = navigateDate(safeDate, view, 'previous');
+    setSelectedDate(newDate);
   };
 
   const handleNext = () => {
     if (!safeDate) {
       return;
     }
-    setSelectedDate(navigateDate(safeDate, view, 'next'));
+    const newDate = navigateDate(safeDate, view, 'next');
+    setSelectedDate(newDate);
   };
 
   return (

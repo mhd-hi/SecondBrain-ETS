@@ -16,9 +16,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SingleDayPicker } from '@/components/ui/single-day-picker';
-
-import { Textarea } from '@/components/ui/textarea';
-
 import { TimeInput } from '@/components/ui/time-input';
 import { useDisclosure } from '@/hooks/use-disclosure';
 
@@ -37,7 +34,6 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: '',
-      description: '',
       startDate: typeof startDate !== 'undefined' ? startDate : undefined,
       startTime: typeof startTime !== 'undefined' ? startTime : undefined,
     },
@@ -242,27 +238,6 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-
-                  <FormControl>
-                    <Textarea
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      data-invalid={fieldState.invalid}
-                    />
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </form>
         </Form>
 

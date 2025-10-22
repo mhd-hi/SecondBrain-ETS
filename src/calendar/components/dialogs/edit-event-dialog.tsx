@@ -18,8 +18,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { SingleDayPicker } from '@/components/ui/single-day-picker';
-
-import { Textarea } from '@/components/ui/textarea';
 import { TimeInput } from '@/components/ui/time-input';
 import { useDisclosure } from '@/hooks/use-disclosure';
 
@@ -36,7 +34,6 @@ export function EditEventDialog({ children, event }: IProps) {
     resolver: zodResolver(eventSchema),
     defaultValues: {
       title: event.title,
-      description: event.description,
       startDate: parseISO(event.startDate),
       startTime: { hour: parseISO(event.startDate).getHours(), minute: parseISO(event.startDate).getMinutes() },
       endDate: parseISO(event.endDate),
@@ -58,7 +55,7 @@ export function EditEventDialog({ children, event }: IProps) {
       user: event.user,
       title: values.title,
       color: values.color,
-      description: values.description,
+      // description removed intentionally
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
     });
@@ -252,32 +249,6 @@ export function EditEventDialog({ children, event }: IProps) {
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field, fieldState }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-
-                    <FormControl>
-                      {(() => {
-                        return (
-                          <Textarea
-                            value={field.value as string}
-                            data-invalid={fieldState.invalid}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                            name={field.name}
-                          />
-                        );
-                      })()}
-                    </FormControl>
-
                   <FormMessage />
                 </FormItem>
               )}

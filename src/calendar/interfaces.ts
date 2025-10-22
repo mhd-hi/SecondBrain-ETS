@@ -12,7 +12,6 @@ export type IEvent = {
   endDate: string;
   title: string;
   color: TEventColor;
-  description: string;
   user: IUser;
 };
 

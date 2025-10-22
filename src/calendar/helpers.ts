@@ -28,7 +28,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
-import { VISIBLE_HOURS } from './contexts/calendar-context';
+import { VISIBLE_HOURS } from '@/lib/calendar/constants';
 
 // ================ Header helper functions ================ //
 
@@ -148,7 +148,7 @@ export function getEventBlockStyle(event: IEvent, day: Date, groupIndex: number,
 }
 
 export function getVisibleHours(visibleHours: TVisibleHours | undefined, singleDayEvents: IEvent[]) {
-  const defaultVisible = VISIBLE_HOURS as TVisibleHours;
+  const defaultVisible = VISIBLE_HOURS;
   const vh = visibleHours ?? defaultVisible;
 
   let earliestEventHour = typeof vh.from === 'number' ? vh.from : defaultVisible.from;

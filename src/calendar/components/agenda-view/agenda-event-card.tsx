@@ -6,7 +6,7 @@ import { cva } from 'class-variance-authority';
 
 import { format, parseISO } from 'date-fns';
 
-import { Clock, Text, User } from 'lucide-react';
+import { Clock, User } from 'lucide-react';
 
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
@@ -111,10 +111,6 @@ of
             </p>
           </div>
 
-          <div className="flex items-center gap-1">
-            <Text className="size-3 shrink-0" />
-            <p className="text-xs text-foreground">{event.description}</p>
-          </div>
         </div>
       </div>
     </EventDetailsDialog>
