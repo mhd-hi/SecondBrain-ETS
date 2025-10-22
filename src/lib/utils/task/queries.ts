@@ -2,7 +2,8 @@ import type { TEvent } from '@/calendar/types';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { and, eq, gte, lt } from 'drizzle-orm';
-import { taskToEvent } from '@/calendar/event-utils';
+import { studyBlockToEvent, taskToEvent } from '@/calendar/event-utils';
+import { getStudyBlocksForDateRange } from '@/lib/utils/study-block/queries';
 import { db } from '@/server/db';
 import { courses, tasks } from '@/server/db/schema';
 
@@ -110,29 +111,57 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
     const taskResults = await db
       .select({
         id: tasks.id,
+        courseId: tasks.courseId,
         title: tasks.title,
         notes: tasks.notes,
+        type: tasks.type,
         status: tasks.status,
+        estimatedEffort: tasks.estimatedEffort,
+        actualEffort: tasks.actualEffort,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
         dueDate: tasks.dueDate,
+        course: {
+          id: courses.id,
+          color: courses.color,
+          daypart: courses.daypart,
+        },
       })
       .from(tasks)
+      .innerJoin(courses, eq(tasks.courseId, courses.id))
       .where(and(...taskConditions));
 
+    // Convert tasks to events using the utility function
     const taskEvents = taskResults.map((row) => {
-      const task = {
+      const task: Task = {
         id: row.id,
+        courseId: row.courseId,
         title: row.title,
-        notes: row.notes,
-        status: row.status,
+        notes: row.notes ?? undefined,
+        type: row.type as Task['type'],
+        status: row.status as StatusTask,
+        estimatedEffort: row.estimatedEffort,
+        actualEffort: row.actualEffort,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
         dueDate: row.dueDate,
-      } as Pick<Task, 'id' | 'title' | 'notes' | 'status' | 'dueDate'>;
-
-      return taskToEvent(task as Task);
+        course: {
+          id: row.course.id,
+          color: row.course.color,
+          daypart: row.course.daypart,
+          code: '', // Not needed for event conversion
+          name: '', // Not needed for event conversion
+          createdAt: new Date(), // Not needed for event conversion
+          updatedAt: new Date(), // Not needed for event conversion
+        },
+      };
+      return taskToEvent(task);
     });
 
-    // TODO: Fetch study blocks when API is implemented
-    // For now, study blocks are not available
-    const studyBlockEvents: TEvent[] = [];
+    // Fetch study blocks
+    const studyBlocks = await getStudyBlocksForDateRange(startDate, endDate, userId);
+    // Convert study blocks to events
+    const studyBlockEvents = studyBlocks.map(studyBlockToEvent);
 
     return [...taskEvents, ...studyBlockEvents];
   } catch (error) {

@@ -3,6 +3,7 @@
 import type { TimeValue } from 'react-aria-components';
 import type { TEventFormData } from '@/calendar/schemas';
 import type { TEvent } from '@/calendar/types';
+import type { TCourseColor } from '@/types/colors';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { parseISO } from 'date-fns';
@@ -38,7 +39,7 @@ export function EditEventDialog({ children, event }: IProps) {
       startTime: { hour: parseISO(event.startDate).getHours(), minute: parseISO(event.startDate).getMinutes() },
       endDate: parseISO(event.endDate),
       endTime: { hour: parseISO(event.endDate).getHours(), minute: parseISO(event.endDate).getMinutes() },
-      color: event.color,
+      color: event.color as TCourseColor,
     },
   });
 
@@ -52,7 +53,7 @@ export function EditEventDialog({ children, event }: IProps) {
     updateEvent({
       ...event,
       title: values.title,
-      color: values.color,
+      color: values.color as TCourseColor,
       startDate: startDateTime.toISOString(),
       endDate: endDateTime.toISOString(),
     });

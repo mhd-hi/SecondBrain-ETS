@@ -3,7 +3,7 @@
 import type { TEvent } from '@/calendar/types';
 import { format, parseISO } from 'date-fns';
 
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, FileText } from 'lucide-react';
 import { EditEventDialog } from '@/calendar/components/dialogs/edit-event-dialog';
 import { Button } from '@/components/ui/button';
 
@@ -44,6 +44,16 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 <p className="text-sm text-muted-foreground">{format(endDate, 'MMM d, yyyy h:mm a')}</p>
               </div>
             </div>
+
+            {event.description && (
+              <div className="flex items-start gap-2">
+                <FileText className="mt-1 size-4 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Description</p>
+                  <p className="text-sm text-muted-foreground">{event.description}</p>
+                </div>
+              </div>
+            )}
 
           </div>
 

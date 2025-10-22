@@ -1,3 +1,4 @@
+import type { TCourseColor } from '@/types/colors';
 import type { Daypart } from '@/types/course';
 import { and, eq } from 'drizzle-orm';
 import { AuthenticationError, AuthorizationError, withAuth } from '@/lib/auth/api';
@@ -44,7 +45,7 @@ export const PATCH = withAuth<{ courseId: string }>(
       }
 
       // Build the update object conditionally
-      const updatePayload: Partial<{ color: string; daypart: Daypart }> = {};
+      const updatePayload: Partial<{ color: TCourseColor; daypart: Daypart }> = {};
       if (color) {
         updatePayload.color = color;
       }

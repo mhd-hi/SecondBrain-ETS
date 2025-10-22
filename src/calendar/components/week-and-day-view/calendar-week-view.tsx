@@ -113,7 +113,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </div>
 
-        <ScrollArea className="h-[736px]" type="always">
+        <ScrollArea className="h-full" type="always">
           <div className="flex overflow-hidden">
             {/* Hours column */}
             <div className="relative w-18">

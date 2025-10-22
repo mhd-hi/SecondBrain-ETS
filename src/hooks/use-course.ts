@@ -1,6 +1,7 @@
 'use client';
 
 import type { CourseApiResponse } from '@/types/api/course';
+import type { TCourseColor } from '@/types/colors';
 import type { Course, Daypart } from '@/types/course';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
@@ -27,6 +28,15 @@ export function useCourse(courseId: string) {
           dueDate: task.dueDate ? new Date(task.dueDate) : new Date(),
           createdAt: new Date(task.createdAt),
           updatedAt: new Date(task.updatedAt),
+          course: {
+            id: data.id,
+            code: data.code,
+            name: data.name,
+            color: data.color as TCourseColor,
+            daypart: data.daypart,
+            createdAt: new Date(data.createdAt),
+            updatedAt: new Date(data.updatedAt),
+          },
         }));
 
         const linksWithImages = data.customLinks.map(link => ({
@@ -36,6 +46,7 @@ export function useCourse(courseId: string) {
 
         setCourse({
           ...data,
+          color: data.color as TCourseColor,
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
           tasks: tasksWithValidatedDates,
@@ -58,7 +69,7 @@ export function useCourse(courseId: string) {
     return tasks.filter(task => task.status === status);
   }, [tasks]);
 
-  const updateCourseColor = useCallback(async (color: string) => {
+  const updateCourseColor = useCallback(async (color: TCourseColor) => {
     await withLoadingAndErrorHandling(
       async () => {
         const res = await fetch(`/api/courses/${courseId}`, {

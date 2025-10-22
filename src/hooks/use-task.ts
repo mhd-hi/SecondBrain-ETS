@@ -1,7 +1,7 @@
 import type { TEvent } from '@/calendar/types';
 import type { Task, TaskType } from '@/types/task';
 import type { FilterType } from '@/types/todays-focus';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/utils/api/api-client-util';
 import { withLoadingState } from '@/lib/utils/api/loading-util';
@@ -142,7 +142,7 @@ export const useCalendarTasks = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getCalendarTasks = async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
+  const getCalendarTasks = useCallback(async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
     setError(null);
     return withLoadingState(async () => {
       try {
@@ -153,7 +153,7 @@ export const useCalendarTasks = () => {
         throw new Error(errorMessage);
       }
     }, setIsLoading);
-  };
+  }, []);
 
   return { getCalendarTasks, isLoading, error };
 };

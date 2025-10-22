@@ -19,5 +19,5 @@ export type StudyBlockItem = {
     studyBlockId: string;
     courseId: string;
     order: number;
-    course?: Course;
+    course: Course;
 };

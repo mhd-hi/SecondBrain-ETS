@@ -1,5 +1,6 @@
 'use client';
 
+import type { TCourseColor } from '@/types/colors';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -10,12 +11,12 @@ type Props = {
   courseId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentColor?: string;
-  onUpdated?: (newColor: string) => void;
+  currentColor: TCourseColor;
+  onUpdated?: (newColor: TCourseColor) => void;
 };
 
 export const ChangeCourseColorDialog = ({ courseId, open, onOpenChange, currentColor, onUpdated }: Props) => {
-  const [pendingColor, setPendingColor] = useState<string>(currentColor ?? '#3b82f6');
+  const [pendingColor, setPendingColor] = useState<TCourseColor>(currentColor ?? 'blue');
   const [isSaving, setIsSaving] = useState(false);
 
   const { updateCourseColor } = useCourse(courseId);
@@ -43,13 +44,13 @@ export const ChangeCourseColorDialog = ({ courseId, open, onOpenChange, currentC
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-2">
           <span className="text-xs">
-{'Color: '}
-{pendingColor}
+            {'Color: '}
+            {pendingColor}
           </span>
           <input
             type="color"
             value={pendingColor}
-            onChange={e => setPendingColor(e.target.value)}
+            onChange={e => setPendingColor(e.target.value as TCourseColor)}
             className="w-8 h-8 border-none cursor-pointer"
             aria-label="Pick course color"
             style={{ background: 'none' }}

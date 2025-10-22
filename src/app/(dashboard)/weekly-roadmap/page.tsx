@@ -1,7 +1,5 @@
 'use client';
 
-import { WeeklyRoadmap } from '@/components/WeeklyRoadmap/WeeklyRoadmap';
-
 export default function WeeklyRoadmapPage() {
   return (
     <main className="container mx-auto px-8 flex flex-col gap-6 mt-2">
@@ -17,7 +15,7 @@ export default function WeeklyRoadmapPage() {
       </div>
 
       <section className="flex-1">
-        <WeeklyRoadmap />
+        {/* <WeeklyRoadmap /> */}
       </section>
     </main>
   );

@@ -93,16 +93,18 @@ export function ClientContainer({ view }: IProps) {
   const eventStartDates = useMemo(() => filteredEvents.map(event => ({ ...event, endDate: event.startDate })), [filteredEvents]);
 
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-xl border h-full flex flex-col">
       <CalendarHeader view={view} />
 
-      <DndProviderWrapper>
-        {view === 'day' && <CalendarDayView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
-        {view === 'month' && <CalendarMonthView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
-        {view === 'week' && <CalendarWeekView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
-        {view === 'year' && <CalendarYearView allEvents={eventStartDates} />}
-        {view === 'agenda' && <CalendarAgendaView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
-      </DndProviderWrapper>
+      <div className="flex-1 min-h-0">
+        <DndProviderWrapper>
+          {view === 'day' && <CalendarDayView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
+          {view === 'month' && <CalendarMonthView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
+          {view === 'week' && <CalendarWeekView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
+          {view === 'year' && <CalendarYearView allEvents={eventStartDates} />}
+          {view === 'agenda' && <CalendarAgendaView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
+        </DndProviderWrapper>
+      </div>
     </div>
   );
 }
