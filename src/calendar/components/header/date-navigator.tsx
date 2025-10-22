@@ -4,12 +4,10 @@ import { format } from 'date-fns';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { useMemo } from 'react';
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
-import { getEventsCount, navigateDate, rangeText } from '@/calendar/helpers';
+import { navigateDate, rangeText } from '@/calendar/helpers';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 type IProps = {
@@ -18,16 +16,12 @@ type IProps = {
 };
 
 export function DateNavigator({ view, events }: IProps) {
-  const { selectedDate, setSelectedDate } = useCalendar();
+  const { selectedDate, setSelectedDate } = useSelectedDate();
   const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN(d.getTime());
   const safeDate = isValidDate(selectedDate) ? selectedDate : null;
 
   const month = safeDate ? format(safeDate, 'MMMM') : '—';
   const year = safeDate ? String(safeDate.getFullYear()) : '';
-
-  const eventCount = useMemo(() => {
-    return safeDate ? getEventsCount(events, safeDate, view) : 0;
-  }, [events, view, safeDate]);
 
   const handlePrevious = () => {
     if (!safeDate) {
@@ -50,23 +44,17 @@ export function DateNavigator({ view, events }: IProps) {
       <div className="flex items-center gap-2">
         <span className="text-lg font-semibold">
           {month}
-{' '}
-{year}
+          {' '}
+          {year}
         </span>
-        <Badge variant="outline" className="px-1.5">
-          {eventCount}
-{' '}
-events
-        </Badge>
       </div>
-
       <div className="flex items-center gap-2">
         <Button variant="outline" className="size-6.5 px-0 [&_svg]:size-4.5" onClick={handlePrevious}>
           <ChevronLeft />
         </Button>
-
-  <p className="text-sm text-muted-foreground">{safeDate ? rangeText(view, safeDate) : '—'}</p>
-
+        <p className="text-sm text-muted-foreground">
+          {safeDate ? rangeText(view, safeDate) : '—'}
+        </p>
         <Button variant="outline" className="size-6.5 px-0 [&_svg]:size-4.5" onClick={handleNext}>
           <ChevronRight />
         </Button>

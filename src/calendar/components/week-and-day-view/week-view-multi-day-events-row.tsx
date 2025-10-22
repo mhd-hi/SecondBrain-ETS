@@ -1,16 +1,16 @@
 import type { IEvent } from '@/calendar/interfaces';
-import { addDays, differenceInDays, endOfWeek, isAfter, isBefore, parseISO, startOfDay, startOfWeek } from 'date-fns';
+import { addDays, differenceInDays, endOfWeek, isAfter, isBefore, startOfDay, startOfWeek } from 'date-fns';
 
-import { useMemo } from 'react';
-
+import React, { useMemo } from 'react';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
 type IProps = {
   selectedDate: Date;
   multiDayEvents: IEvent[];
 };
 
-export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IProps) {
+function WeekViewMultiDayEventsRowImpl({ selectedDate, multiDayEvents }: IProps) {
   const weekStart = startOfWeek(selectedDate);
   const weekEnd = endOfWeek(selectedDate);
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
@@ -18,8 +18,8 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
   const processedEvents = useMemo(() => {
     return multiDayEvents
       .map((event) => {
-        const start = parseISO(event.startDate);
-        const end = parseISO(event.endDate);
+        const start = getEventStart(event);
+        const end = getEventEnd(event);
         const adjustedStart = isBefore(start, weekStart) ? weekStart : start;
         const adjustedEnd = isAfter(end, weekEnd) ? weekEnd : end;
         const startIndex = differenceInDays(adjustedStart, weekStart);
@@ -36,8 +36,8 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
       .sort((a, b) => {
         const startDiff = a.adjustedStart.getTime() - b.adjustedStart.getTime();
         if (startDiff !== 0) {
- return startDiff;
-}
+          return startDiff;
+        }
         return b.endIndex - b.startIndex - (a.endIndex - a.startIndex);
       });
   }, [multiDayEvents, weekStart, weekEnd]);
@@ -64,8 +64,8 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
 
   const hasEventsInWeek = useMemo(() => {
     return multiDayEvents.some((event) => {
-      const start = parseISO(event.startDate);
-      const end = parseISO(event.endDate);
+      const start = getEventStart(event);
+      const end = getEventEnd(event);
 
       return (
         // Event starts within the week
@@ -115,3 +115,5 @@ export function WeekViewMultiDayEventsRow({ selectedDate, multiDayEvents }: IPro
     </div>
   );
 }
+
+export const WeekViewMultiDayEventsRow = React.memo(WeekViewMultiDayEventsRowImpl);

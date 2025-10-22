@@ -4,12 +4,12 @@ import type { HTMLAttributes } from 'react';
 import type { IEvent } from '@/calendar/interfaces';
 
 import { cva } from 'class-variance-authority';
-import { differenceInMinutes, format, parseISO } from 'date-fns';
-
+import { differenceInMinutes, format } from 'date-fns';
+import React from 'react';
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
-
 import { DraggableEvent } from '@/calendar/components/dnd/draggable-event';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { cn } from '@/lib/utils';
 
 const calendarWeekEventCardVariants = cva(
@@ -46,11 +46,11 @@ type IProps = {
   event: IEvent;
 } & HTMLAttributes<HTMLDivElement> & Omit<VariantProps<typeof calendarWeekEventCardVariants>, 'color'>;
 
-export function EventBlock({ event, className }: IProps) {
+function EventBlockImpl({ event, className }: IProps) {
   const { badgeVariant } = useCalendar();
 
-  const start = parseISO(event.startDate);
-  const end = parseISO(event.endDate);
+  const start = getEventStart(event);
+  const end = getEventEnd(event);
   const durationInMinutes = differenceInMinutes(end, start);
   const heightInPixels = (durationInMinutes / 60) * 96 - 8;
 
@@ -84,7 +84,7 @@ export function EventBlock({ event, className }: IProps) {
           {durationInMinutes > 25 && (
             <p>
               {format(start, 'h:mm a')}
-{' '}
+              {' '}
 -
 {format(end, 'h:mm a')}
             </p>
@@ -94,3 +94,5 @@ export function EventBlock({ event, className }: IProps) {
     </DraggableEvent>
   );
 }
+
+export const EventBlock = React.memo(EventBlockImpl);

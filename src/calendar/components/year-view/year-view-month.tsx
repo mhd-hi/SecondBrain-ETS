@@ -1,12 +1,13 @@
 import type { IEvent } from '@/calendar/interfaces';
-import { format, getDaysInMonth, isSameDay, parseISO, startOfMonth } from 'date-fns';
+import { format, getDaysInMonth, isSameDay, startOfMonth } from 'date-fns';
 import { useRouter } from 'next/navigation';
-
 import { useMemo } from 'react';
 
 import { YearViewDayCell } from '@/calendar/components/year-view/year-view-day-cell';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
+
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
 type IProps = {
   month: Date;
@@ -15,7 +16,7 @@ type IProps = {
 
 export function YearViewMonth({ month, events }: IProps) {
   const { push } = useRouter();
-  const { setSelectedDate } = useCalendar();
+  const { setSelectedDate } = useSelectedDate();
 
   const monthName = format(month, 'MMMM');
 
@@ -23,8 +24,8 @@ export function YearViewMonth({ month, events }: IProps) {
     const totalDays = getDaysInMonth(month);
     const firstDay = startOfMonth(month).getDay();
 
-    const days = Array.from({ length: totalDays }, (_, i) => i + 1);
-    const blanks = new Array(firstDay).fill(null);
+    const blanks = Array.from({ length: firstDay }, (_, i) => ({ type: 'blank' as const, id: `blank-${i}` }));
+    const days = Array.from({ length: totalDays }, (_, i) => ({ type: 'day' as const, day: i + 1, id: `day-${i + 1}` }));
 
     return [...blanks, ...days];
   }, [month]);
@@ -48,23 +49,23 @@ export function YearViewMonth({ month, events }: IProps) {
 
       <div className="flex-1 space-y-2 rounded-b-lg border border-t-0 p-3">
         <div className="grid grid-cols-7 gap-x-0.5 text-center">
-          {weekDays.map((day, index) => (
-            <div key={index} className="text-xs font-medium text-muted-foreground">
+          {weekDays.map(day => (
+            <div key={day} className="text-xs font-medium text-muted-foreground">
               {day}
             </div>
           ))}
         </div>
 
         <div className="grid grid-cols-7 gap-x-0.5 gap-y-2">
-          {daysInMonth.map((day, index) => {
-            if (day === null) {
- return <div key={`blank-${index}`} className="h-10" />;
-}
+          {daysInMonth.map((item) => {
+            if (item.type === 'blank') {
+              return <div key={item.id} className="h-10" />;
+            }
 
-            const date = new Date(month.getFullYear(), month.getMonth(), day);
-            const dayEvents = events.filter(event => isSameDay(parseISO(event.startDate), date) || isSameDay(parseISO(event.endDate), date));
+            const date = new Date(month.getFullYear(), month.getMonth(), item.day);
+            const dayEvents = events.filter(event => isSameDay(getEventStart(event), date) || isSameDay(getEventEnd(event), date));
 
-            return <YearViewDayCell key={`day-${day}`} day={day} date={date} events={dayEvents} />;
+            return <YearViewDayCell key={item.id} day={item.day} date={date} events={dayEvents} />;
           })}
         </div>
       </div>

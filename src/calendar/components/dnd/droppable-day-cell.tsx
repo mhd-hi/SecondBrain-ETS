@@ -5,7 +5,7 @@ import { differenceInMilliseconds, parseISO } from 'date-fns';
 
 import { useDrop } from 'react-dnd';
 
-import { ItemTypes } from '@/calendar/components/dnd/draggable-event';
+import { ItemTypes } from '@/calendar/components/dnd/item-types';
 import { useUpdateEvent } from '@/calendar/hooks/use-update-event';
 
 import { cn } from '@/lib/utils';

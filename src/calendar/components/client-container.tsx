@@ -1,8 +1,8 @@
 'use client';
 
+import type { IEvent } from '@/calendar/interfaces';
 import type { TCalendarView } from '@/calendar/types';
-import { isSameDay, parseISO } from 'date-fns';
-
+import { isSameDay } from 'date-fns';
 import { useMemo } from 'react';
 
 import { CalendarAgendaView } from '@/calendar/components/agenda-view/calendar-agenda-view';
@@ -15,80 +15,83 @@ import { CalendarWeekView } from '@/calendar/components/week-and-day-view/calend
 import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-view';
 
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useEvents } from '@/calendar/contexts/events-context';
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
 type IProps = {
   view: TCalendarView;
 };
 
 export function ClientContainer({ view }: IProps) {
-  const { selectedDate, events } = useCalendar();
+  const { selectedDate } = useCalendar();
+  const { events } = useEvents();
+
+  // Pre-parse dates once per event to avoid repeated parseISO calls on every render
+  type ParsedEvent = IEvent & { startDateObj: Date; endDateObj: Date };
+
+  const parsedEvents = useMemo(() => {
+    return (events ?? []).map((evt) => {
+      const e = { ...evt } as Partial<ParsedEvent> & IEvent;
+      try {
+        e.startDateObj = getEventStart(e as IEvent);
+        e.endDateObj = getEventEnd(e as IEvent);
+      } catch {
+        e.startDateObj = new Date(e.startDate as string);
+        e.endDateObj = new Date(e.endDate as string);
+      }
+      return e as ParsedEvent;
+    });
+  }, [events]);
 
   const filteredEvents = useMemo(() => {
-    const evts = events ?? [];
+    const evts = parsedEvents as ParsedEvent[] ?? [];
 
+    // For WeeklyRoadmap, we only care about week view - simplified 7-day view
+    if (view === 'week') {
+      // Simple approach: show events for the next 7 days starting from selected date
+      const weekStart = new Date(selectedDate);
+      weekStart.setHours(0, 0, 0, 0);
+
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+
+      return evts.filter((event) => {
+        const eventStartDate = event.startDateObj;
+        return eventStartDate >= weekStart && eventStartDate < weekEnd;
+      });
+    }
+
+    // Fallback for other views (simplified)
     return evts.filter((event) => {
-      const eventStartDate = parseISO(event.startDate);
-      const eventEndDate = parseISO(event.endDate);
+      const eventStartDate = event.startDateObj;
 
-      if (view === 'year') {
-        const yearStart = new Date(selectedDate.getFullYear(), 0, 1);
-        const yearEnd = new Date(selectedDate.getFullYear(), 11, 31, 23, 59, 59, 999);
-        const isInSelectedYear = eventStartDate <= yearEnd && eventEndDate >= yearStart;
-        return isInSelectedYear;
+      switch (view) {
+        case 'day':
+          return eventStartDate.toDateString() === selectedDate.toDateString();
+        case 'month':
+        case 'agenda':
+          return eventStartDate.getMonth() === selectedDate.getMonth()
+            && eventStartDate.getFullYear() === selectedDate.getFullYear();
+        case 'year':
+          return eventStartDate.getFullYear() === selectedDate.getFullYear();
+        default:
+          return false;
       }
-
-      if (view === 'month' || view === 'agenda') {
-        const monthStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-        const monthEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0, 23, 59, 59, 999);
-        const isInSelectedMonth = eventStartDate <= monthEnd && eventEndDate >= monthStart;
-        return isInSelectedMonth;
-      }
-
-      if (view === 'week') {
-        const dayOfWeek = selectedDate.getDay();
-
-        const weekStart = new Date(selectedDate);
-        weekStart.setDate(selectedDate.getDate() - dayOfWeek);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-
-        const isInSelectedWeek = eventStartDate <= weekEnd && eventEndDate >= weekStart;
-        return isInSelectedWeek;
-      }
-
-      if (view === 'day') {
-        const dayStart = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 0, 0, 0);
-        const dayEnd = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), 23, 59, 59);
-        const isInSelectedDay = eventStartDate <= dayEnd && eventEndDate >= dayStart;
-        return isInSelectedDay;
-      }
-
-      console.warn(`Unhandled calendar view: ${view}`);
-      return false;
     });
-  }, [selectedDate, events, view]);
+  }, [selectedDate, parsedEvents, view]);
 
   const singleDayEvents = filteredEvents.filter((event) => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return isSameDay(startDate, endDate);
+    return isSameDay(event.startDateObj, event.endDateObj);
   });
 
   const multiDayEvents = filteredEvents.filter((event) => {
-    const startDate = parseISO(event.startDate);
-    const endDate = parseISO(event.endDate);
-    return !isSameDay(startDate, endDate);
+    return !isSameDay(event.startDateObj, event.endDateObj);
   });
 
   // For year view, we only care about the start date
   // by using the same date for both start and end,
   // we ensure only the start day will show a dot
-  const eventStartDates = useMemo(() => {
-    return filteredEvents.map(event => ({ ...event, endDate: event.startDate }));
-  }, [filteredEvents]);
+  const eventStartDates = useMemo(() => filteredEvents.map(event => ({ ...event, endDate: event.startDate })), [filteredEvents]);
 
   return (
     <div className="overflow-hidden rounded-xl border">

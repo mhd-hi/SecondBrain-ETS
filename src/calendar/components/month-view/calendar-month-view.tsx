@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { DayCell } from '@/calendar/components/month-view/day-cell';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 import { calculateMonthEventPositions, getCalendarCells } from '@/calendar/helpers';
 
@@ -16,7 +16,7 @@ type IProps = {
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate } = useCalendar();
+  const { selectedDate } = useSelectedDate();
 
   const allEvents = [...multiDayEvents, ...singleDayEvents];
 

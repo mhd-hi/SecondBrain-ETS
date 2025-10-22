@@ -3,7 +3,7 @@ import { isToday } from 'date-fns';
 
 import { useRouter } from 'next/navigation';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 import { cn } from '@/lib/utils';
 
@@ -15,7 +15,7 @@ type IProps = {
 
 export function YearViewDayCell({ day, date, events }: IProps) {
   const { push } = useRouter();
-  const { setSelectedDate } = useCalendar();
+  const { setSelectedDate } = useSelectedDate();
 
   const maxIndicators = 3;
   const eventCount = events.length;

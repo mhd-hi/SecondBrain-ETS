@@ -10,6 +10,9 @@ import { buttonVariants } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
 
+const IconLeft = ({ className, ...props }: { className?: string }) => <ChevronLeft className={cn('h-4 w-4', className)} {...props} />;
+const IconRight = ({ className, ...props }: { className?: string }) => <ChevronRight className={cn('h-4 w-4', className)} {...props} />;
+
 function SingleCalendar({ className, classNames, showOutsideDays = true, selected, ...props }: DayPickerSingleProps) {
   const [currentMonth, setCurrentMonth] = React.useState<Date | undefined>(selected instanceof Date ? selected : undefined);
 
@@ -49,8 +52,8 @@ function SingleCalendar({ className, classNames, showOutsideDays = true, selecte
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => <ChevronLeft className={cn('h-4 w-4', className)} {...props} />,
-        IconRight: ({ className, ...props }) => <ChevronRight className={cn('h-4 w-4', className)} {...props} />,
+        IconLeft,
+        IconRight,
       }}
       {...props}
     />

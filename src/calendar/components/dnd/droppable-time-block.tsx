@@ -2,12 +2,11 @@
 
 import type { IEvent } from '@/calendar/interfaces';
 import { differenceInMilliseconds, parseISO } from 'date-fns';
+import React from 'react';
 
 import { useDrop } from 'react-dnd';
-
-import { ItemTypes } from '@/calendar/components/dnd/draggable-event';
+import { ItemTypes } from '@/calendar/components/dnd/item-types';
 import { useUpdateEvent } from '@/calendar/hooks/use-update-event';
-
 import { cn } from '@/lib/utils';
 
 type DroppableTimeBlockProps = {
@@ -17,7 +16,7 @@ type DroppableTimeBlockProps = {
   children: React.ReactNode;
 };
 
-export function DroppableTimeBlock({ date, hour, minute, children }: DroppableTimeBlockProps) {
+function DroppableTimeBlockImpl({ date, hour, minute, children }: DroppableTimeBlockProps) {
   const { updateEvent } = useUpdateEvent();
 
   const [{ isOver, canDrop }, drop] = useDrop(
@@ -57,3 +56,5 @@ export function DroppableTimeBlock({ date, hour, minute, children }: DroppableTi
     </div>
   );
 }
+
+export const DroppableTimeBlock = React.memo(DroppableTimeBlockImpl);

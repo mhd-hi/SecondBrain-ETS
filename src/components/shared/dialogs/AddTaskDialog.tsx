@@ -61,7 +61,7 @@ export const AddTaskDialog = ({
   const [newTask, setNewTask] = useState(() => ({
     title: '',
     notes: '',
-    estimatedEffort: 1,
+    estimatedEffort: 3,
     dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
     type: TASK_TYPES.THEORIE as TaskType,
     status: StatusTask.TODO,
@@ -182,7 +182,7 @@ export const AddTaskDialog = ({
               <Input
                 id="estimatedEffort"
                 type="number"
-                step="0.25"
+                step="0.5"
                 value={newTask.estimatedEffort}
                 onChange={(e) => {
                   const raw = Number.parseFloat(e.target.value);
@@ -193,7 +193,7 @@ export const AddTaskDialog = ({
                     : 0.5;
                   setNewTask({ ...newTask, estimatedEffort: clamped });
                 }}
-                min="0.25"
+                min="0.5"
                 required
               />
             </div>

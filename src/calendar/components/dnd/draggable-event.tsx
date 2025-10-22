@@ -6,11 +6,8 @@ import { useDrag } from 'react-dnd';
 
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
+import { ItemTypes } from '@/calendar/components/dnd/item-types';
 import { cn } from '@/lib/utils';
-
-export const ItemTypes = {
-  EVENT: 'event',
-};
 
 type DraggableEventProps = {
   event: IEvent;

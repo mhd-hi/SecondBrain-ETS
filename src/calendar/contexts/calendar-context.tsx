@@ -1,10 +1,13 @@
 'use client';
+/* eslint-disable react-refresh/only-export-components */
 
 import type { Dispatch, SetStateAction } from 'react';
 
 import type { IEvent } from '@/calendar/interfaces';
 import type { TBadgeVariant, TVisibleHours } from '@/calendar/types';
 import { createContext, use, useMemo, useState } from 'react';
+import { EventsProvider } from '@/calendar/contexts/events-context';
+import { SelectedDateProvider } from '@/calendar/contexts/selected-date-context';
 import { VISIBLE_HOURS } from '@/lib/calendar/constants';
 
 type ICalendarContext = {
@@ -56,14 +59,19 @@ export function CalendarProvider({ children, events }: { children: React.ReactNo
       setBadgeVariant,
       visibleHours,
       setVisibleHours,
-      // If you go to the refetch approach, you can remove the localEvents and pass the events directly
       events: localEvents,
       setLocalEvents,
     }),
     [selectedDate, badgeVariant, visibleHours, localEvents],
   );
 
-  return <CalendarContext.Provider value={value}>{children}</CalendarContext.Provider>;
+  return (
+    <CalendarContext.Provider value={value}>
+      <SelectedDateProvider selectedDate={selectedDate} setSelectedDate={handleSelectDate}>
+        <EventsProvider events={localEvents} setLocalEvents={setLocalEvents}>{children}</EventsProvider>
+      </SelectedDateProvider>
+    </CalendarContext.Provider>
+  );
 }
 
 export function useCalendar(): ICalendarContext {

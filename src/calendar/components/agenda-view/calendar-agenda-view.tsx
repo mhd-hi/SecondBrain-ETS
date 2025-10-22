@@ -5,7 +5,7 @@ import { CalendarX2 } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { AgendaDayGroup } from '@/calendar/components/agenda-view/agenda-day-group';
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -15,7 +15,7 @@ type IProps = {
 };
 
 export function CalendarAgendaView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate } = useCalendar();
+  const { selectedDate } = useSelectedDate();
 
   const eventsByDay = useMemo(() => {
     const allDates = new Map<string, { date: Date; events: IEvent[]; multiDayEvents: IEvent[] }>();

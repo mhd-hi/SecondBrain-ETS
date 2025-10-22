@@ -5,14 +5,14 @@ import { useMemo } from 'react';
 
 import { YearViewMonth } from '@/calendar/components/year-view/year-view-month';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 type IProps = {
   allEvents: IEvent[];
 };
 
 export function CalendarYearView({ allEvents }: IProps) {
-  const { selectedDate } = useCalendar();
+  const { selectedDate } = useSelectedDate();
 
   const months = useMemo(() => {
     const yearStart = startOfYear(selectedDate);

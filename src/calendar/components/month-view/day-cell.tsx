@@ -8,7 +8,7 @@ import { DroppableDayCell } from '@/calendar/components/dnd/droppable-day-cell';
 import { EventBullet } from '@/calendar/components/month-view/event-bullet';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 import { getMonthCellEvents } from '@/calendar/helpers';
 
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ const MAX_VISIBLE_EVENTS = 3;
 
 export function DayCell({ cell, events, eventPositions }: IProps) {
   const { push } = useRouter();
-  const { setSelectedDate } = useCalendar();
+  const { setSelectedDate } = useSelectedDate();
 
   const { day, currentMonth, date } = cell;
 

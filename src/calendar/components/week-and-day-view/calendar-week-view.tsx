@@ -1,15 +1,17 @@
 import type { IEvent } from '@/calendar/interfaces';
 
-import { addDays, areIntervalsOverlapping, format, isSameDay, parseISO, startOfWeek } from 'date-fns';
+import { areIntervalsOverlapping, format, isSameDay } from 'date-fns';
+import React, { useMemo } from 'react';
 
 import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
-
 import { DroppableTimeBlock } from '@/calendar/components/dnd/droppable-time-block';
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { WeekViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/week-view-multi-day-events-row';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -21,16 +23,70 @@ type IProps = {
 };
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate, visibleHours } = useCalendar();
-
-  const safeSelectedDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
+  const { visibleHours } = useCalendar();
+  const { selectedDate } = useSelectedDate();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 
-  const weekStart = startOfWeek(safeSelectedDate);
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const weekDays = useMemo(() => {
+    const safeDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
+    return Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(safeDate);
+      day.setDate(safeDate.getDate() + i);
+      return day;
+    });
+  }, [selectedDate]);
 
   const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN((d as Date).getTime());
+
+  // Precompute dayEvents and groupedEvents for each day to avoid repeated work in the render loop
+  type DayGroup = { day: Date; dayEvents: IEvent[]; groupedEvents: IEvent[][] };
+
+  const dayGroups = useMemo<DayGroup[]>(() => {
+    return weekDays.map((day) => {
+      const dayEvents = singleDayEvents.filter((event) => {
+        return isSameDay(getEventStart(event), day) || isSameDay(getEventEnd(event), day);
+      });
+
+      return {
+        day,
+        dayEvents,
+        groupedEvents: groupEvents(dayEvents),
+      };
+    });
+  }, [weekDays, singleDayEvents]);
+
+  // Pre-compute event styles and overlap information
+  const eventStylesAndOverlaps = useMemo(() => {
+    const result: Record<string, { style: React.CSSProperties; hasOverlap: boolean }> = {};
+
+    dayGroups.forEach(({ day, groupedEvents }) => {
+      groupedEvents.forEach((group, groupIndex) => {
+        group.forEach((event) => {
+          const style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
+
+          const hasOverlap = groupedEvents.some(
+            (otherGroup, otherIndex) =>
+              otherIndex !== groupIndex
+              && otherGroup.some(otherEvent =>
+                areIntervalsOverlapping(
+                  { start: getEventStart(event), end: getEventEnd(event) },
+                  { start: getEventStart(otherEvent), end: getEventEnd(otherEvent) },
+                ),
+              ),
+          );
+
+          if (!hasOverlap) {
+            result[event.id] = { style: { ...style, width: '100%', left: '0%' }, hasOverlap: false };
+          } else {
+            result[event.id] = { style, hasOverlap: true };
+          }
+        });
+      });
+    });
+
+    return result;
+  }, [dayGroups, earliestEventHour, latestEventHour]);
 
   return (
     <>
@@ -82,10 +138,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
             {/* Week grid */}
             <div className="relative flex-1 border-l">
               <div className="grid grid-cols-7 divide-x">
-                {weekDays.map((day) => {
-                  const dayEvents = singleDayEvents.filter(event => isSameDay(parseISO(event.startDate), day) || isSameDay(parseISO(event.endDate), day));
-                  const groupedEvents = groupEvents(dayEvents);
-
+          {dayGroups.map(({ day, groupedEvents }) => {
                   return (
                     <div key={`${day.toISOString()}`} className="relative">
                       {hours.map((hour, index) => {
@@ -122,31 +175,17 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                         );
                       })}
 
-                      {groupedEvents.map((group, groupIndex) =>
+                      {groupedEvents.map(group => (
                         group.map((event) => {
-                          let style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
-                          const hasOverlap = groupedEvents.some(
-                            (otherGroup, otherIndex) =>
-                              otherIndex !== groupIndex
-                              && otherGroup.some(otherEvent =>
-                                areIntervalsOverlapping(
-                                  { start: parseISO(event.startDate), end: parseISO(event.endDate) },
-                                  { start: parseISO(otherEvent.startDate), end: parseISO(otherEvent.endDate) },
-                                ),
-                              ),
-                          );
-
-                          if (!hasOverlap) {
-                            style = { ...style, width: '100%', left: '0%' };
-                          }
+                          const { style } = eventStylesAndOverlaps[event.id] || { style: {} };
 
                           return (
                             <div key={event.id} className="absolute p-1" style={style}>
                               <EventBlock event={event} />
                             </div>
                           );
-                        }),
-                      )}
+                        })
+                      ))}
                     </div>
                   );
                 })}

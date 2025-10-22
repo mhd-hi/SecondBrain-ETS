@@ -10,6 +10,7 @@ import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calend
 import { DayViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/day-view-multi-day-events-row';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,7 +24,8 @@ type IProps = {
 };
 
 export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate, setSelectedDate, visibleHours } = useCalendar();
+  const { visibleHours } = useCalendar();
+  const { selectedDate, setSelectedDate } = useSelectedDate();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 

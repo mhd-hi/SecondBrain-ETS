@@ -5,7 +5,7 @@ import type { TEventFormData } from '@/calendar/schemas';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle } from 'lucide-react';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { useCalendar } from '@/calendar/contexts/calendar-context';
@@ -25,7 +25,7 @@ type IProps = {
   startTime?: { hour: number; minute: number };
 };
 
-export function AddEventDialog({ children, startDate, startTime }: IProps) {
+export const AddEventDialog = React.memo(({ children, startDate, startTime }: IProps) => {
   useCalendar();
 
   const { isOpen, onClose, onToggle } = useDisclosure();
@@ -255,4 +255,4 @@ export function AddEventDialog({ children, startDate, startTime }: IProps) {
       </DialogContent>
     </Dialog>
   );
-}
+});
