@@ -22,7 +22,9 @@ export function YearViewMonth({ month, events }: IProps) {
 
   const daysInMonth = useMemo(() => {
     const totalDays = getDaysInMonth(month);
-    const firstDay = startOfMonth(month).getDay();
+    const firstDayOfMonth = startOfMonth(month).getDay();
+    // Adjust for Monday-first week: Sunday (0) becomes 6, Monday (1) becomes 0, etc.
+    const firstDay = (firstDayOfMonth + 6) % 7;
 
     const blanks = Array.from({ length: firstDay }, (_, i) => ({ type: 'blank' as const, id: `blank-${i}` }));
     const days = Array.from({ length: totalDays }, (_, i) => ({ type: 'day' as const, day: i + 1, id: `day-${i + 1}` }));
@@ -30,7 +32,7 @@ export function YearViewMonth({ month, events }: IProps) {
     return [...blanks, ...days];
   }, [month]);
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   const handleClick = () => {
     setSelectedDate(new Date(month.getFullYear(), month.getMonth(), 1));
@@ -49,7 +51,7 @@ export function YearViewMonth({ month, events }: IProps) {
 
       <div className="flex-1 space-y-2 rounded-b-lg border border-t-0 p-3">
         <div className="grid grid-cols-7 gap-x-0.5 text-center">
-          {weekDays.map(day => (
+          {WEEK_DAYS.map(day => (
             <div key={day} className="text-xs font-medium text-muted-foreground">
               {day}
             </div>

@@ -51,8 +51,8 @@ export function rangeText(view: TCalendarView, date: Date) {
       end = endOfMonth(date);
       break;
     case 'week':
-      start = startOfWeek(date);
-      end = endOfWeek(date);
+      start = startOfWeek(date, { weekStartsOn: 1 });
+      end = endOfWeek(date, { weekStartsOn: 1 });
       break;
     case 'day':
       return format(date, formatString);
@@ -80,7 +80,7 @@ export function getEventsCount(events: IEvent[], date: Date, view: TCalendarView
     agenda: isSameMonth,
     year: isSameYear,
     day: isSameDay,
-    week: isSameWeek,
+    week: (eventDate: Date, compareDate: Date) => isSameWeek(eventDate, compareDate, { weekStartsOn: 1 }),
     month: isSameMonth,
   };
 

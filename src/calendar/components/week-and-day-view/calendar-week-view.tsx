@@ -1,6 +1,6 @@
 import type { IEvent } from '@/calendar/interfaces';
 
-import { areIntervalsOverlapping, format, isSameDay } from 'date-fns';
+import { areIntervalsOverlapping, format, isSameDay, startOfWeek } from 'date-fns';
 import React, { useMemo } from 'react';
 
 import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
@@ -30,9 +30,10 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
   const weekDays = useMemo(() => {
     const safeDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
+    const weekStart = startOfWeek(safeDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(safeDate);
-      day.setDate(safeDate.getDate() + i);
+      const day = new Date(weekStart);
+      day.setDate(weekStart.getDate() + i);
       return day;
     });
   }, [selectedDate]);
