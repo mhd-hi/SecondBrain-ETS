@@ -9,7 +9,8 @@
     "bun": ">=1.0.0"
   },
   "scripts": {
-    "build": "bun run db:deploy && next build",
+    "build": "next build",
+    "preview": "bun run build && next start",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -23,7 +24,6 @@
     "lint": "eslint",
     "lint:strict": "eslint ./src --max-warnings 1",
     "lint:fix": "eslint --fix",
-    "preview": "bun run build && next start",
     "start": "next start",
     "check": "bun lint && tsc --noEmit",
     "check:unused": "knip-bun",
