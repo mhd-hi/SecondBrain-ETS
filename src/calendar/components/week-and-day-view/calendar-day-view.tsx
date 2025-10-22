@@ -23,7 +23,7 @@ type IProps = {
 };
 
 export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate, setSelectedDate, users, visibleHours, workingHours } = useCalendar();
+  const { selectedDate, setSelectedDate, users, visibleHours } = useCalendar();
 
   const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
 
@@ -74,7 +74,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
             <div className="relative flex-1 border-l">
               <div className="relative">
                 {hours.map((hour, index) => {
-                  const isDisabled = !isWorkingHour(selectedDate, hour, workingHours);
+                  const isDisabled = !isWorkingHour(selectedDate, hour);
 
                   return (
                     <div key={hour} className={cn('relative', isDisabled && 'bg-calendar-disabled-hour')} style={{ height: '96px' }}>

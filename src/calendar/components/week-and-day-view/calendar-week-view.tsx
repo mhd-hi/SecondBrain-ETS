@@ -21,7 +21,7 @@ type IProps = {
 };
 
 export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate, workingHours, visibleHours } = useCalendar();
+  const { selectedDate, visibleHours } = useCalendar();
 
   const safeSelectedDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
 
@@ -89,7 +89,7 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                   return (
                     <div key={`${day.toISOString()}`} className="relative">
                       {hours.map((hour, index) => {
-                        const isDisabled = !isWorkingHour(day, hour, workingHours);
+                        const isDisabled = !isWorkingHour(day, hour);
 
                         return (
                           <div key={hour} className={cn('relative', isDisabled && 'bg-calendar-disabled-hour')} style={{ height: '96px' }}>

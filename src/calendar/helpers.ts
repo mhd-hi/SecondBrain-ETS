@@ -1,6 +1,6 @@
 import type { ICalendarCell, IEvent } from '@/calendar/interfaces';
 
-import type { TCalendarView, TVisibleHours, TWorkingHours } from '@/calendar/types';
+import type { TCalendarView, TVisibleHours } from '@/calendar/types';
 import {
   addDays,
   addMonths,
@@ -146,18 +146,9 @@ export function getEventBlockStyle(event: IEvent, day: Date, groupIndex: number,
   return { top: `${top}%`, width: `${width}%`, left: `${left}%` };
 }
 
-export function isWorkingHour(day: Date, hour: number, workingHours: TWorkingHours) {
-  if (!workingHours) {
-    return false;
-  }
-
-  const dayIndex = day.getDay() as keyof typeof workingHours;
-  const dayHours = workingHours[dayIndex as unknown as number];
-  if (!dayHours) {
-    return false;
-  }
-
-  return hour >= dayHours.from && hour < dayHours.to;
+// Deprecated: working hours were removed. For now treat every hour as working.
+export function isWorkingHour(_day: Date, _hour: number) {
+  return true;
 }
 
 export function getVisibleHours(visibleHours: TVisibleHours | undefined, singleDayEvents: IEvent[]) {

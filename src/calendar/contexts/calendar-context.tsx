@@ -3,8 +3,8 @@
 import type { Dispatch, SetStateAction } from 'react';
 
 import type { IEvent, IUser } from '@/calendar/interfaces';
-import type { TBadgeVariant, TVisibleHours, TWorkingHours } from '@/calendar/types';
-import { createContext, use, useState } from 'react';
+import type { TBadgeVariant, TVisibleHours } from '@/calendar/types';
+import { createContext, use, useMemo, useState } from 'react';
 
 type ICalendarContext = {
   selectedDate: Date;
@@ -14,8 +14,6 @@ type ICalendarContext = {
   badgeVariant: TBadgeVariant;
   setBadgeVariant: (variant: TBadgeVariant) => void;
   users: IUser[];
-  workingHours: TWorkingHours;
-  setWorkingHours: Dispatch<SetStateAction<TWorkingHours>>;
   visibleHours: TVisibleHours;
   setVisibleHours: Dispatch<SetStateAction<TVisibleHours>>;
   events: IEvent[];
@@ -24,25 +22,14 @@ type ICalendarContext = {
 
 const CalendarContext = createContext({} as ICalendarContext);
 
-const WORKING_HOURS = {
-  0: { from: 0, to: 0 },
-  1: { from: 8, to: 17 },
-  2: { from: 8, to: 17 },
-  3: { from: 8, to: 17 },
-  4: { from: 8, to: 17 },
-  5: { from: 8, to: 17 },
-  6: { from: 8, to: 12 },
-};
-
 // Default visible hours for the calendar: midnight (0) to noon (12)
 const VISIBLE_HOURS = { from: 0, to: 12 };
 
 export function CalendarProvider({ children, users, events }: { children: React.ReactNode; users: IUser[]; events: IEvent[] }) {
   const [badgeVariant, setBadgeVariant] = useState<TBadgeVariant>('colored');
   const [visibleHours, setVisibleHours] = useState<TVisibleHours>(VISIBLE_HOURS);
-  const [workingHours, setWorkingHours] = useState<TWorkingHours>(WORKING_HOURS);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [selectedUserId, setSelectedUserId] = useState<IUser['id'] | 'all'>('all');
 
   // This localEvents doesn't need to exists in a real scenario.
@@ -58,28 +45,25 @@ export function CalendarProvider({ children, users, events }: { children: React.
     setSelectedDate(date);
   };
 
-  return (
-    <CalendarContext.Provider
-      value={{
-        selectedDate,
-        setSelectedDate: handleSelectDate,
-        selectedUserId,
-        setSelectedUserId,
-        badgeVariant,
-        setBadgeVariant,
-        users,
-        visibleHours,
-        setVisibleHours,
-        workingHours,
-        setWorkingHours,
-        // If you go to the refetch approach, you can remove the localEvents and pass the events directly
-        events: localEvents,
-        setLocalEvents,
-      }}
-    >
-      {children}
-    </CalendarContext.Provider>
+  const value = useMemo(
+    () => ({
+      selectedDate,
+      setSelectedDate: handleSelectDate,
+      selectedUserId,
+      setSelectedUserId,
+      badgeVariant,
+      setBadgeVariant,
+      users,
+      visibleHours,
+      setVisibleHours,
+      // If you go to the refetch approach, you can remove the localEvents and pass the events directly
+      events: localEvents,
+      setLocalEvents,
+    }),
+    [selectedDate, selectedUserId, badgeVariant, users, visibleHours, localEvents],
   );
+
+  return <CalendarContext.Provider value={value}>{children}</CalendarContext.Provider>;
 }
 
 export function useCalendar(): ICalendarContext {
