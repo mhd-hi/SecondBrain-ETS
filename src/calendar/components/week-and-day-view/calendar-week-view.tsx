@@ -10,7 +10,7 @@ import { EventBlock } from '@/calendar/components/week-and-day-view/event-block'
 import { WeekViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/week-view-multi-day-events-row';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
 
-import { getEventBlockStyle, getVisibleHours, groupEvents, isWorkingHour } from '@/calendar/helpers';
+import { getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { cn } from '@/lib/utils';
@@ -89,10 +89,8 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
                   return (
                     <div key={`${day.toISOString()}`} className="relative">
                       {hours.map((hour, index) => {
-                        const isDisabled = !isWorkingHour(day, hour);
-
                         return (
-                          <div key={hour} className={cn('relative', isDisabled && 'bg-calendar-disabled-hour')} style={{ height: '96px' }}>
+                          <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
                             {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
 
                             <DroppableTimeBlock date={day} hour={hour} minute={0}>

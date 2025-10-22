@@ -10,7 +10,7 @@ import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calend
 import { DayViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/day-view-multi-day-events-row';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents, isWorkingHour } from '@/calendar/helpers';
+import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SingleCalendar } from '@/components/ui/single-calendar';
@@ -73,12 +73,10 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
             {/* Day grid */}
             <div className="relative flex-1 border-l">
               <div className="relative">
-                {hours.map((hour, index) => {
-                  const isDisabled = !isWorkingHour(selectedDate, hour);
-
+                {hours.map((hour) => {
                   return (
-                    <div key={hour} className={cn('relative', isDisabled && 'bg-calendar-disabled-hour')} style={{ height: '96px' }}>
-                      {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
+                    <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
+                      <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>
 
                       <DroppableTimeBlock date={selectedDate} hour={hour} minute={0}>
                         <AddEventDialog startDate={selectedDate} startTime={{ hour, minute: 0 }}>

@@ -23,7 +23,7 @@ type ICalendarContext = {
 const CalendarContext = createContext({} as ICalendarContext);
 
 // Default visible hours for the calendar: midnight (0) to noon (12)
-const VISIBLE_HOURS = { from: 0, to: 12 };
+export const VISIBLE_HOURS = { from: 0, to: 12 };
 
 export function CalendarProvider({ children, users, events }: { children: React.ReactNode; users: IUser[]; events: IEvent[] }) {
   const [badgeVariant, setBadgeVariant] = useState<TBadgeVariant>('colored');

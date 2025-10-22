@@ -28,6 +28,7 @@ import {
   subWeeks,
   subYears,
 } from 'date-fns';
+import { VISIBLE_HOURS } from './contexts/calendar-context';
 
 // ================ Header helper functions ================ //
 
@@ -146,13 +147,8 @@ export function getEventBlockStyle(event: IEvent, day: Date, groupIndex: number,
   return { top: `${top}%`, width: `${width}%`, left: `${left}%` };
 }
 
-// Deprecated: working hours were removed. For now treat every hour as working.
-export function isWorkingHour(_day: Date, _hour: number) {
-  return true;
-}
-
 export function getVisibleHours(visibleHours: TVisibleHours | undefined, singleDayEvents: IEvent[]) {
-  const defaultVisible = { from: 8, to: 18 } as TVisibleHours;
+  const defaultVisible = VISIBLE_HOURS as TVisibleHours;
   const vh = visibleHours ?? defaultVisible;
 
   let earliestEventHour = typeof vh.from === 'number' ? vh.from : defaultVisible.from;
