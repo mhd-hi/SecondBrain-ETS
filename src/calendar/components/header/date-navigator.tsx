@@ -1,8 +1,8 @@
-import type { IEvent } from '@/calendar/interfaces';
 import type { TCalendarView } from '@/calendar/types';
 import { format } from 'date-fns';
-
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+import { memo, useCallback } from 'react';
 
 import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
@@ -12,10 +12,9 @@ import { Button } from '@/components/ui/button';
 
 type IProps = {
   view: TCalendarView;
-  events: IEvent[];
 };
 
-export function DateNavigator({ view, events }: IProps) {
+export const DateNavigator = memo(({ view }: IProps) => {
   const { selectedDate, setSelectedDate } = useSelectedDate();
   const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN(d.getTime());
   const safeDate = isValidDate(selectedDate) ? selectedDate : null;
@@ -23,21 +22,21 @@ export function DateNavigator({ view, events }: IProps) {
   const month = safeDate ? format(safeDate, 'MMMM') : '—';
   const year = safeDate ? String(safeDate.getFullYear()) : '';
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     if (!safeDate) {
       return;
     }
     const newDate = navigateDate(safeDate, view, 'previous');
     setSelectedDate(newDate);
-  };
+  }, [safeDate, view, setSelectedDate]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (!safeDate) {
       return;
     }
     const newDate = navigateDate(safeDate, view, 'next');
     setSelectedDate(newDate);
-  };
+  }, [safeDate, view, setSelectedDate]);
 
   return (
     <div className="space-y-0.5">
@@ -61,4 +60,4 @@ export function DateNavigator({ view, events }: IProps) {
       </div>
     </div>
   );
-}
+});

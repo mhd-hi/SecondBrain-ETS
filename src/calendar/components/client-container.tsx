@@ -95,7 +95,7 @@ export function ClientContainer({ view }: IProps) {
 
   return (
     <div className="overflow-hidden rounded-xl border">
-      <CalendarHeader view={view} events={filteredEvents} />
+      <CalendarHeader view={view} />
 
       <DndProviderWrapper>
         {view === 'day' && <CalendarDayView singleDayEvents={singleDayEvents} multiDayEvents={multiDayEvents} />}
