@@ -15,7 +15,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:deploy": "bun run db:generate && bun run db:migrate && bun run migrate-colors.ts",
+    "db:deploy": "bun run db:generate && bun run db:migrate",
     "db:seed": "bun run src/server/db/seed.ts",
     "db:reset": "bun run db:generate && bun run db:push --force && bun run db:seed",
     "dev": "next dev --turbo --hostname localhost",

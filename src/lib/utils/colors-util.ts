@@ -3,7 +3,7 @@ import type { TCourseColor } from '@/types/colors';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-const COURSE_COLORS = ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'] as TCourseColor[];
+export const COURSE_COLORS = ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'] as TCourseColor[];
 
 export function cn(...inputs: ClassValue[]): string {
     return twMerge(clsx(...inputs));

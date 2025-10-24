@@ -61,8 +61,8 @@ export function AgendaEventCard({ event, eventCurrentDay, eventTotalDays }: IPro
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (e.currentTarget instanceof HTMLElement) {
- e.currentTarget.click();
-}
+        e.currentTarget.click();
+      }
     }
   };
 

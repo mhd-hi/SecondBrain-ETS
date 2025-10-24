@@ -90,9 +90,8 @@ function EventBlockImpl({ event, className }: IProps) {
           {durationInMinutes > 25 && (
             <p>
               {format(start, 'h:mm a')}
-              {' '}
--
-{format(end, 'h:mm a')}
+              {' - '}
+              {format(end, 'h:mm a')}
             </p>
           )}
         </div>
