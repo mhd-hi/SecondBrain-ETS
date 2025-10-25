@@ -1,6 +1,6 @@
 'use client';
 
-import type { TCalendarView, TEvent } from '@/calendar/types';
+import type { TEvent } from '@/calendar/types';
 import { isSameDay } from 'date-fns';
 import { useMemo } from 'react';
 
@@ -14,14 +14,12 @@ import { CalendarWeekView } from '@/calendar/components/week-and-day-view/calend
 import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-view';
 
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { useEvents } from '@/calendar/contexts/events-context';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 
-type IProps = {
-  view: TCalendarView;
-};
-
-export function ClientContainer({ view }: IProps) {
+export function ClientContainer() {
+  const view = useCalendarViewStore(state => state.view);
   const { selectedDate } = useCalendar();
   const { events } = useEvents();
 
@@ -94,7 +92,7 @@ export function ClientContainer({ view }: IProps) {
 
   return (
     <div className="overflow-hidden rounded-xl border h-full flex flex-col">
-      <CalendarHeader view={view} />
+  <CalendarHeader />
 
       <div className="flex-1 min-h-0">
         <DndProviderWrapper>

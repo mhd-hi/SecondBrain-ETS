@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-
 import { ClientContainer } from '@/calendar/components/client-container';
+
 import { useCalendar } from '@/calendar/contexts/calendar-context';
 import { useEvents } from '@/calendar/contexts/events-context';
 import { NavigationControls } from '@/components/WeeklyRoadmap/NavigationControls';
@@ -40,7 +40,7 @@ export function CalendarView() {
         onTodayClick={handleTodayClick}
       />
       <div className="flex-1 min-h-0">
-        <ClientContainer view="week" />
+        <ClientContainer />
       </div>
     </div>
   );

@@ -125,6 +125,10 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
           id: courses.id,
           color: courses.color,
           daypart: courses.daypart,
+          code: courses.code,
+          name: courses.name,
+          createdAt: courses.createdAt,
+          updatedAt: courses.updatedAt,
         },
       })
       .from(tasks)
@@ -149,12 +153,14 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
           id: row.course.id,
           color: row.course.color,
           daypart: row.course.daypart,
-          code: '', // Not needed for event conversion
-          name: '', // Not needed for event conversion
-          createdAt: new Date(), // Not needed for event conversion
-          updatedAt: new Date(), // Not needed for event conversion
+          code: row.course.code,
+          name: row.course.name,
+          createdAt: row.course.createdAt,
+          updatedAt: row.course.updatedAt,
         },
       };
+
+      console.log('Converting task to event:', task);
       return taskToEvent(task);
     });
 

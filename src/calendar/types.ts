@@ -13,6 +13,7 @@ export type TEvent = {
     type: 'studyBlock' | 'task';
     color: TCourseColor;
     secondaryColor?: string;
+    courseCode?: string;
 };
 
 export type TCalendarCell = {

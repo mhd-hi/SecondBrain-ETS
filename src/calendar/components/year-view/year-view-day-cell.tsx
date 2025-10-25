@@ -1,8 +1,9 @@
 import type { TEvent } from '@/calendar/types';
 import { isToday } from 'date-fns';
 
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 import { cn } from '@/lib/utils';
@@ -14,15 +15,15 @@ type IProps = {
 };
 
 export function YearViewDayCell({ day, date, events }: IProps) {
-  const { push } = useRouter();
   const { setSelectedDate } = useSelectedDate();
 
   const maxIndicators = 3;
   const eventCount = events.length;
 
+  const setView = useCalendarViewStore(state => state.setView);
   const handleClick = () => {
     setSelectedDate(date);
-    push('/day-view');
+    setView('day');
   };
 
   return (
@@ -43,7 +44,7 @@ export function YearViewDayCell({ day, date, events }: IProps) {
       {eventCount > 0 && (
         <div className="mt-0.5 flex gap-0.5">
           {eventCount <= maxIndicators
-? (
+          ? (
             events.map(event => (
               <div
                 key={event.id}
@@ -60,7 +61,7 @@ export function YearViewDayCell({ day, date, events }: IProps) {
               />
             ))
           )
-: (
+          : (
             <>
               {events[0] && (
                 <div

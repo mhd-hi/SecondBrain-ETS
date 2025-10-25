@@ -51,7 +51,7 @@ function DroppableTimeBlockImpl({ date, hour, minute, children }: DroppableTimeB
   );
 
   return (
-    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn('h-[24px]', isOver && canDrop && 'bg-accent/50')}>
+    <div ref={drop as unknown as React.RefObject<HTMLDivElement>} className={cn('h-[12px]', isOver && canDrop && 'bg-accent/50')}>
       {children}
     </div>
   );

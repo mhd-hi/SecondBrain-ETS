@@ -2,14 +2,17 @@
 
 import type { VariantProps } from 'class-variance-authority';
 import type { TEvent } from '@/calendar/types';
+import type { Daypart } from '@/types/course';
+
 import { cva } from 'class-variance-authority';
 
 import { format, parseISO } from 'date-fns';
 
 import { Clock } from 'lucide-react';
-
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
+
 import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { CourseCodeBadge } from '@/components/shared/atoms/CourseCodeBadge';
 
 const agendaEventCardVariants = cva(
   'flex select-none items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
@@ -90,6 +93,21 @@ export function AgendaEventCard({ event, eventCurrentDay, eventTotalDays }: IPro
                   {' '}
                   •
                   {' '}
+                </span>
+              )}
+              {/* Show course code badge if present */}
+              {event.courseCode && (
+                <span className="mr-2 align-middle inline-block">
+                  <CourseCodeBadge course={{
+                    id: '',
+                    code: event.courseCode,
+                    name: '',
+                    daypart: 'AM' as Daypart,
+                    color: event.color,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                  }}
+                  />
                 </span>
               )}
               {event.title}

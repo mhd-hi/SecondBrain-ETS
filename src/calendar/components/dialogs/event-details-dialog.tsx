@@ -32,6 +32,14 @@ export function EventDetailsDialog({ event, children }: IProps) {
             <div className="flex items-start gap-2">
               <Calendar className="mt-1 size-4 shrink-0" />
               <div>
+                <p className="text-sm font-medium">Course</p>
+                <p className="text-sm text-muted-foreground">{event.courseCode}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Calendar className="mt-1 size-4 shrink-0" />
+              <div>
                 <p className="text-sm font-medium">Start Date</p>
                 <p className="text-sm text-muted-foreground">{format(startDate, 'MMM d, yyyy h:mm a')}</p>
               </div>
@@ -44,7 +52,6 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 <p className="text-sm text-muted-foreground">{format(endDate, 'MMM d, yyyy h:mm a')}</p>
               </div>
             </div>
-
             {event.description && (
               <div className="flex items-start gap-2">
                 <FileText className="mt-1 size-4 shrink-0" />
@@ -54,7 +61,6 @@ export function EventDetailsDialog({ event, children }: IProps) {
                 </div>
               </div>
             )}
-
           </div>
 
           <DialogFooter>
