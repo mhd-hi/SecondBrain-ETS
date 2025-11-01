@@ -4,12 +4,11 @@ import type { HTMLAttributes } from 'react';
 import type { TEvent } from '@/calendar/types';
 
 import { cva } from 'class-variance-authority';
-import { differenceInMinutes, format } from 'date-fns';
+import { format } from 'date-fns';
 import React from 'react';
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
 import { DraggableEvent } from '@/calendar/components/dnd/draggable-event';
 import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { cn } from '@/lib/utils';
 
 const calendarWeekEventCardVariants = cva(
@@ -46,24 +45,21 @@ type IProps = {
   event: TEvent;
 } & HTMLAttributes<HTMLDivElement> & Omit<VariantProps<typeof calendarWeekEventCardVariants>, 'color'>;
 
-function EventBlockImpl({ event, className }: IProps) {
+function EventBlockImpl({ event, className, style }: IProps) {
   const { badgeVariant } = useCalendar();
 
-  const start = getEventStart(event);
-  const end = getEventEnd(event);
-  const durationInMinutes = differenceInMinutes(end, start);
-  const heightInPixels = (durationInMinutes / 60) * 96 - 8;
+  // Height and position are now controlled by the style prop
 
   const colorVariant = (badgeVariant === 'dot' ? `${event.color}-dot` : event.color) as VariantProps<typeof calendarWeekEventCardVariants>['color'];
 
-  const calendarWeekEventCardClasses = cn(calendarWeekEventCardVariants({ color: colorVariant, className }), durationInMinutes < 35 && 'py-0 justify-center');
+  const calendarWeekEventCardClasses = cn(calendarWeekEventCardVariants({ color: colorVariant, className }));
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       if (e.currentTarget instanceof HTMLElement) {
- e.currentTarget.click();
-}
+        e.currentTarget.click();
+      }
     }
   };
 
@@ -74,7 +70,7 @@ function EventBlockImpl({ event, className }: IProps) {
           role="button"
           tabIndex={0}
           className={calendarWeekEventCardClasses}
-          style={{ height: `${heightInPixels}px` }}
+          style={style}
           onKeyDown={handleKeyDown}
         >
           <div className="flex items-center gap-1.5 truncate">
@@ -87,13 +83,11 @@ function EventBlockImpl({ event, className }: IProps) {
             <p className="truncate font-semibold">{event.title}</p>
           </div>
 
-          {durationInMinutes > 25 && (
-            <p>
-              {format(start, 'h:mm a')}
-              {' - '}
-              {format(end, 'h:mm a')}
-            </p>
-          )}
+          <p>
+            {format(new Date(event.startDate), 'h:mm a')}
+            {' - '}
+            {format(new Date(event.endDate), 'h:mm a')}
+          </p>
         </div>
       </EventDetailsDialog>
     </DraggableEvent>

@@ -14,6 +14,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { cn } from '@/lib/utils';
 
+const SLOT_INTERVAL_MINUTES = 15; // Change this to 15, 30, or 60 as needed
+const HOUR_BLOCK_HEIGHT = 64; // px, must match the style in the grid
+
 type IProps = {
   events: TEvent[];
   courses: Course[];
@@ -92,7 +95,7 @@ export function CalendarWeekView({ events, courses }: IProps) {
             {/* Hours column */}
             <div className="relative w-18">
               {hours.map((hour, index) => (
-                <div key={hour} className="relative" style={{ height: '96px' }}>
+                <div key={hour} className="relative" style={{ height: '64px' }}>
                   <div className="absolute -top-3 right-2 flex h-6 items-center">
                     {index !== 0 && (() => {
                       const labelDate = new Date();
@@ -107,58 +110,68 @@ export function CalendarWeekView({ events, courses }: IProps) {
             {/* Week grid */}
             <div className="relative flex-1 border-l">
               <div className="grid grid-cols-7 divide-x">
-                {dayGroups.map(({ day, groupedEvents }) => (
-                  <div key={day.toISOString()} className="relative">
-                    {hours.map((hour, index) => {
-                      // For each hour, render 4 TimeSlotBlocks for :00, :15, :30, :45
-                      const slotHeight = 96 / 4; // 24px per 15m slot
-                      return (
-                        <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
-                          {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
-                          {[0, 15, 30, 45].map((minute, i) => {
-                            // Calculate the slot's date/time
-                            const slotDate = new Date(day);
-                            slotDate.setHours(hour, minute, 0, 0);
-                            // A slot is occupied if any event overlaps with this 15m window
-                            const slotEnd = new Date(slotDate.getTime() + 15 * 60 * 1000);
-                            const isOccupied = events.some((event) => {
-                              const eventStart = typeof event.startDate === 'string' ? parseISO(event.startDate) : event.startDate;
-                              const eventEnd = typeof event.endDate === 'string' ? parseISO(event.endDate) : event.endDate;
-                              return eventStart < slotEnd && eventEnd > slotDate;
-                            });
-                            return (
-                              <div key={minute} style={{ position: 'absolute', top: `${i * slotHeight}px`, left: 0, right: 0, height: `${slotHeight}px` }}>
-                                <TimeSlotBlock
-                                  date={slotDate}
-                                  courses={courses}
-                                  isOccupied={isOccupied}
-                                  onAddTask={() => {
-                                    setSelectedSlotDate(slotDate);
-                                    setTaskDialogOpen(true);
-                                  }}
-                                  onAddStudyBlock={() => {
-                                    setSelectedSlotDate(slotDate);
-                                    setStudyBlockDialogOpen(true);
-                                  }}
-                                />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })}
-                    {groupedEvents.map((group, groupIndex) => (
-                      group.map((event) => {
-                        const style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
+                {dayGroups.map(({ day, groupedEvents }) => {
+                  const slotsPerHour = 60 / SLOT_INTERVAL_MINUTES;
+                  const slotHeight = 64 / slotsPerHour; // Reduce from 96 to 64 for a more compact view
+                  return (
+                    <div key={day.toISOString()} className="relative">
+                      {hours.map((hour, index) => {
+                        const slotMinutes = Array.from({ length: slotsPerHour }, (_, i) => i * SLOT_INTERVAL_MINUTES);
                         return (
-                          <div key={event.id} className="absolute p-1" style={style}>
-                            <EventBlock event={event} />
+                          <div key={hour} className={cn('relative')} style={{ height: '64px' }}>
+                            {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
+                            {slotMinutes.map((minute, i) => {
+                              // Calculate the slot's date/time
+                              const slotDate = new Date(day);
+                              slotDate.setHours(hour, minute, 0, 0);
+                              // A slot is occupied if any event overlaps with this slot window
+                              const slotEnd = new Date(slotDate.getTime() + SLOT_INTERVAL_MINUTES * 60 * 1000);
+                              const isOccupied = events.some((event) => {
+                                const eventStart = typeof event.startDate === 'string' ? parseISO(event.startDate) : event.startDate;
+                                const eventEnd = typeof event.endDate === 'string' ? parseISO(event.endDate) : event.endDate;
+                                return eventStart < slotEnd && eventEnd > slotDate;
+                              });
+                              return (
+                                <div key={minute} style={{ position: 'absolute', top: `${i * slotHeight}px`, left: 0, right: 0, height: `${slotHeight}px` }}>
+                                  <TimeSlotBlock
+                                    date={slotDate}
+                                    courses={courses}
+                                    isOccupied={isOccupied}
+                                    onAddTask={() => {
+                                      setSelectedSlotDate(slotDate);
+                                      setTaskDialogOpen(true);
+                                    }}
+                                    onAddStudyBlock={() => {
+                                      setSelectedSlotDate(slotDate);
+                                      setStudyBlockDialogOpen(true);
+                                    }}
+                                  />
+                                </div>
+                              );
+                            })}
                           </div>
                         );
-                      })
-                    ))}
-                  </div>
-                ))}
+                      })}
+                      {groupedEvents.map((group, groupIndex) => (
+                        group.map((event) => {
+                          const style = getEventBlockStyle(
+                            event,
+                            day,
+                            groupIndex,
+                            groupedEvents.length,
+                            { from: earliestEventHour, to: latestEventHour },
+                            HOUR_BLOCK_HEIGHT,
+                            SLOT_INTERVAL_MINUTES,
+                            slotHeight,
+                          );
+                          return (
+                            <EventBlock key={event.id} event={event} className="absolute p-0.5 py-0.5 px-1 text-xs" style={style} />
+                          );
+                        })
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
 
               <CalendarTimeline firstVisibleHour={earliestEventHour} lastVisibleHour={latestEventHour} />

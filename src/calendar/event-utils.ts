@@ -11,6 +11,7 @@ export function studyBlockToEvent(studyBlock: StudyBlock): TEvent {
     const courseCodes = studyBlock.studyBlockItems?.map(item => item.course.code).filter(Boolean).join(', ') || '';
     const date = new Date(studyBlock.startAt);
     date.setHours(0, 0, 0, 0);
+
     const { startDate, endDate } = getDaypartTimes(date, studyBlock.daypart);
 
     return {
@@ -30,9 +31,7 @@ export function studyBlockToEvent(studyBlock: StudyBlock): TEvent {
 export function taskToEvent(task: Task): TEvent {
     const dueDate = new Date(task.dueDate);
     dueDate.setHours(0, 0, 0, 0); // Reset time to start of day
-    const daypartTimes = getDaypartTimes(dueDate, task.course.daypart);
-    const startDate = daypartTimes.startDate;
-    const endDate = daypartTimes.endDate;
+    const { startDate, endDate } = getDaypartTimes(dueDate, task.course.daypart);
 
     return {
         id: task.id,

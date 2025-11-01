@@ -113,27 +113,43 @@ export function groupEvents(dayEvents: TEvent[]) {
   return groups;
 }
 
-export function getEventBlockStyle(event: TEvent, day: Date, groupIndex: number, groupSize: number, visibleHoursRange?: { from: number; to: number }) {
+export function getEventBlockStyle(
+  event: TEvent,
+  day: Date,
+  groupIndex: number,
+  groupSize: number,
+  visibleHoursRange?: { from: number; to: number },
+  hourBlockHeight = 64,
+  slotIntervalMinutes = 30,
+  slotHeight = 32,
+) {
   const startDate = getEventStart(event);
+  const endDate = getEventEnd(event);
   const dayStart = new Date(day.setHours(0, 0, 0, 0));
   const eventStart = startDate < dayStart ? dayStart : startDate;
   const startMinutes = differenceInMinutes(eventStart, dayStart);
-
+  const endMinutes = differenceInMinutes(endDate, dayStart);
   let top;
-
+  let height;
   if (visibleHoursRange) {
     const visibleStartMinutes = visibleHoursRange.from * 60;
-    const visibleEndMinutes = visibleHoursRange.to * 60;
-    const visibleRangeMinutes = visibleEndMinutes - visibleStartMinutes;
-    top = ((startMinutes - visibleStartMinutes) / visibleRangeMinutes) * 100;
+    // Calculate how many slots from the visible start to the event start
+    const slotIndex = Math.floor((startMinutes - visibleStartMinutes) / slotIntervalMinutes);
+    const slotOffset = (startMinutes - visibleStartMinutes) % slotIntervalMinutes;
+    top = slotIndex * slotHeight + (slotOffset / slotIntervalMinutes) * slotHeight;
+    // Calculate event duration in slots
+    const duration = endMinutes - startMinutes;
+    const slotCount = Math.floor(duration / slotIntervalMinutes);
+    const slotRemainder = duration % slotIntervalMinutes;
+    height = slotCount * slotHeight + (slotRemainder / slotIntervalMinutes) * slotHeight;
   } else {
-    top = (startMinutes / 1440) * 100;
+    // Fallback for all-day or agenda views
+    top = (startMinutes / 1440) * (hourBlockHeight * 24 / 60);
+    height = ((endMinutes - startMinutes) / 1440) * (hourBlockHeight * 24 / 60);
   }
-
   const width = 100 / groupSize;
   const left = groupIndex * width;
-
-  return { top: `${top}%`, width: `${width}%`, left: `${left}%` };
+  return { top: `${top}px`, height: `${height}px`, width: `${width}%`, left: `${left}%` };
 }
 
 export function getVisibleHours(visibleHours: TVisibleHours | undefined, singleDayEvents: TEvent[]) {

@@ -30,8 +30,13 @@ export function getDaypartTimes(date: Date, daypart: Daypart): DaypartTimes {
             break;
     }
 
+    // Helper to get local ISO string (YYYY-MM-DDTHH:mm:ss, no Z)
+    function toLocalISOString(date: Date) {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+    }
     return {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: toLocalISOString(startDate),
+        endDate: toLocalISOString(endDate),
     };
 }
