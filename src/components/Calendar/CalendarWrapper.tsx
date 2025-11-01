@@ -29,7 +29,7 @@ export function CalendarWrapper() {
   }, [setSelectedDate]);
 
   return (
-    <div className="bg-card w-full h-full rounded-lg flex flex-col">
+    <div className="bg-card rounded-lg flex flex-col">
       <NavigationControls
         weekDates={weekDates}
         isLoading={false}

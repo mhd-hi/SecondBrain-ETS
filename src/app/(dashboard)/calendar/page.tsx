@@ -43,11 +43,6 @@ export default function CalendarPage() {
 
   return (
     <div className="h-full m-6 flex flex-col">
-      <div className="mb-6 flex-shrink-0">
-        <h1 className="text-2xl font-bold">📅 Calendar</h1>
-        <p className="text-gray-600">View your tasks and study blocks in a unified calendar</p>
-      </div>
-
       <div className="flex-1 min-h-0">
         <CalendarProvider events={events}>
           <CalendarWrapper />

@@ -1,14 +1,28 @@
-import { CalendarRange, Columns, Grid2x2, Grid3x3, List } from 'lucide-react';
+import { CalendarRange, Columns, Grid2x2, Grid3x3, List, Plus } from 'lucide-react';
 
+import { useState } from 'react';
 import { DateNavigator } from '@/calendar/components/header/date-navigator';
 import { TodayButton } from '@/calendar/components/header/today-button';
 import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 
+import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
+import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useCoursesContext } from '@/contexts/use-courses';
 
 export function CalendarHeader() {
   const view = useCalendarViewStore(state => state.view);
   const setView = useCalendarViewStore(state => state.setView);
+  const { courses } = useCoursesContext();
+  const [addTaskOpen, setAddTaskOpen] = useState(false);
+  const [addStudyBlockOpen, setAddStudyBlockOpen] = useState(false);
+
   return (
     <div className="flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-3">
@@ -67,13 +81,41 @@ export function CalendarHeader() {
           </div>
         </div>
 
-        {/* TODO: change this to open dropdown that has TaskDialog and StudyBlockDialog
-          <AddEventDialog>
-            <Button className="w-full sm:w-auto">
-              <Plus />
-              Add Event
+        {/* Add dropdown for Add Study Block and Add Task */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button className="w-full sm:w-auto" variant="default">
+              <Plus className="mr-2" />
+              Add
             </Button>
-        </AddEventDialog> */}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <button type="button" onClick={() => setAddStudyBlockOpen(true)}>
+                Add Study Block
+              </button>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <button type="button" onClick={() => setAddTaskOpen(true)}>
+                Add Task
+              </button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <AddStudyBlockDialog
+          open={addStudyBlockOpen}
+          onOpenChange={setAddStudyBlockOpen}
+          courses={courses}
+          trigger={false}
+          onStudyBlockAdded={() => setAddStudyBlockOpen(false)}
+        />
+        <AddTaskDialog
+          open={addTaskOpen}
+          onOpenChange={setAddTaskOpen}
+          courses={courses}
+          trigger={false}
+          onTaskAdded={() => setAddTaskOpen(false)}
+        />
       </div>
     </div>
   );

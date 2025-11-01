@@ -14,10 +14,12 @@ import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-
 
 import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
+import { useCoursesContext } from '@/contexts/use-courses';
 
 export function CalendarView() {
   const view = useCalendarViewStore(state => state.view);
   const events = useCalendarViewStore(state => state.events);
+  const { courses } = useCoursesContext();
 
   // Pre-parse dates once per event to avoid repeated parseISO calls on every render
   type ParsedEvent = TEvent & { startDateObj: Date; endDateObj: Date };
@@ -47,14 +49,13 @@ export function CalendarView() {
   const eventStartDates = useMemo(() => filteredEvents.map(event => ({ ...event, endDate: event.startDate })), [filteredEvents]);
 
   return (
-    <div className="overflow-hidden rounded-xl border h-full flex flex-col">
+    <div className="rounded-xl border flex flex-col">
       <CalendarHeader />
-
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 flex flex-col">
         <DndProviderWrapper>
           {view === 'day' && <CalendarDayView events={filteredEvents} />}
           {view === 'month' && <CalendarMonthView events={filteredEvents} />}
-          {view === 'week' && <CalendarWeekView events={filteredEvents} />}
+          {view === 'week' && <CalendarWeekView events={filteredEvents} courses={courses} />}
           {view === 'year' && <CalendarYearView allEvents={eventStartDates} />}
           {view === 'agenda' && <CalendarAgendaView events={filteredEvents} />}
         </DndProviderWrapper>

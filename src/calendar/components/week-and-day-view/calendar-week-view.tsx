@@ -1,37 +1,30 @@
 import type { TEvent } from '@/calendar/types';
-
-import { format, isSameDay, startOfWeek } from 'date-fns';
+import type { Course } from '@/types/course';
+import { endOfDay, format, parseISO, startOfDay, startOfWeek } from 'date-fns';
 import React, { useMemo } from 'react';
-
-import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
-import { DroppableTimeBlock } from '@/calendar/components/dnd/droppable-time-block';
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
-import { WeekViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/week-view-multi-day-events-row';
-import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
-
-import { getEventEnd, getEventStart } from '@/calendar/date-utils';
+import { TimeSlotBlock } from '@/calendar/components/week-and-day-view/time-slot-block';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
+
+import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
+import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { cn } from '@/lib/utils';
 
-const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN((d as Date).getTime());
-
 type IProps = {
-  singleDayEvents: TEvent[];
-  multiDayEvents: TEvent[];
+  events: TEvent[];
+  courses: Course[];
 };
 
-export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { visibleHours } = useCalendar();
-  const { selectedDate } = useSelectedDate();
-
-  const { hours, earliestEventHour, latestEventHour } = useMemo(
-    () => getVisibleHours(visibleHours, singleDayEvents),
-    [visibleHours, singleDayEvents],
-  );
+export function CalendarWeekView({ events, courses }: IProps) {
+  const [taskDialogOpen, setTaskDialogOpen] = React.useState(false);
+  const [studyBlockDialogOpen, setStudyBlockDialogOpen] = React.useState(false);
+  const [selectedSlotDate, setSelectedSlotDate] = React.useState<Date | null>(null);
+  const visibleHours = useCalendarViewStore(state => state.visibleHours);
+  const selectedDate = useCalendarViewStore(state => state.selectedDate);
 
   const weekDays = useMemo(() => {
     const safeDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
@@ -43,45 +36,28 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
     });
   }, [selectedDate]);
 
-  // Precompute dayEvents and groupedEvents for each day to avoid repeated work in the render loop
-  type DayGroup = { day: Date; dayEvents: TEvent[]; groupedEvents: TEvent[][] };
+  const { hours, earliestEventHour, latestEventHour } = useMemo(
+    () => getVisibleHours(visibleHours, events),
+    [visibleHours, events],
+  );
 
-  const dayGroups = useMemo<DayGroup[]>(() => {
+  // For each day, group events by overlap
+  const dayGroups = useMemo(() => {
     return weekDays.map((day) => {
-      const dayEvents = singleDayEvents.filter((event) => {
-        return isSameDay(getEventStart(event), day) || isSameDay(getEventEnd(event), day);
+      const dayStart = startOfDay(day);
+      const dayEnd = endOfDay(day);
+      const dayEvents = events.filter((event) => {
+        const eventStart = typeof event.startDate === 'string' ? parseISO(event.startDate) : event.startDate;
+        const eventEnd = typeof event.endDate === 'string' ? parseISO(event.endDate) : event.endDate;
+        // Event overlaps with this day if it starts before dayEnd and ends after dayStart
+        return eventStart < dayEnd && eventEnd > dayStart;
       });
-
       return {
         day,
-        dayEvents,
         groupedEvents: groupEvents(dayEvents),
       };
     });
-  }, [weekDays, singleDayEvents]);
-
-  // Pre-compute event styles and overlap information
-  const eventStylesAndOverlaps = useMemo(() => {
-    const result: Record<string, { style: React.CSSProperties; hasOverlap: boolean }> = {};
-
-    dayGroups.forEach(({ day, groupedEvents }) => {
-      groupedEvents.forEach((group, groupIndex) => {
-        group.forEach((event) => {
-          const style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
-
-          // If only one group, no overlaps, use full width
-          if (groupedEvents.length === 1) {
-            result[event.id] = { style: { ...style, width: '100%', left: '0%' }, hasOverlap: false };
-          } else {
-            // Multiple groups, assume overlaps and use divided width
-            result[event.id] = { style, hasOverlap: true };
-          }
-        });
-      });
-    });
-
-    return result;
-  }, [dayGroups, earliestEventHour, latestEventHour]);
+  }, [weekDays, events]);
 
   return (
     <>
@@ -92,17 +68,15 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
 
       <div className="hidden flex-col sm:flex">
         <div>
-          <WeekViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} />
-
           {/* Week header */}
           <div className="relative z-20 flex border-b">
             <div className="w-18"></div>
             <div className="grid flex-1 grid-cols-7 divide-x border-l">
               {weekDays.map((day) => {
-                const dayLabel = isValidDate(day) ? format(day, 'EE') : '—';
-                const dayNumber = isValidDate(day) ? format(day, 'd') : '-';
+                const dayLabel = format(day, 'EE');
+                const dayNumber = format(day, 'd');
                 return (
-                  <span key={isValidDate(day) ? day.toISOString() : String(Math.random())} className="py-2 text-center text-xs font-medium text-muted-foreground">
+                  <span key={day.toISOString()} className="py-2 text-center text-xs font-medium text-muted-foreground">
                     {dayLabel}
                     {' '}
                     <span className="ml-1 font-semibold text-foreground">{dayNumber}</span>
@@ -133,57 +107,58 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
             {/* Week grid */}
             <div className="relative flex-1 border-l">
               <div className="grid grid-cols-7 divide-x">
-          {dayGroups.map(({ day, groupedEvents }) => {
-                  return (
-                    <div key={`${day.toISOString()}`} className="relative">
-                      {hours.map((hour, index) => {
+                {dayGroups.map(({ day, groupedEvents }) => (
+                  <div key={day.toISOString()} className="relative">
+                    {hours.map((hour, index) => {
+                      // For each hour, render 4 TimeSlotBlocks for :00, :15, :30, :45
+                      const slotHeight = 96 / 4; // 24px per 15m slot
+                      return (
+                        <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
+                          {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
+                          {[0, 15, 30, 45].map((minute, i) => {
+                            // Calculate the slot's date/time
+                            const slotDate = new Date(day);
+                            slotDate.setHours(hour, minute, 0, 0);
+                            // A slot is occupied if any event overlaps with this 15m window
+                            const slotEnd = new Date(slotDate.getTime() + 15 * 60 * 1000);
+                            const isOccupied = events.some((event) => {
+                              const eventStart = typeof event.startDate === 'string' ? parseISO(event.startDate) : event.startDate;
+                              const eventEnd = typeof event.endDate === 'string' ? parseISO(event.endDate) : event.endDate;
+                              return eventStart < slotEnd && eventEnd > slotDate;
+                            });
+                            return (
+                              <div key={minute} style={{ position: 'absolute', top: `${i * slotHeight}px`, left: 0, right: 0, height: `${slotHeight}px` }}>
+                                <TimeSlotBlock
+                                  date={slotDate}
+                                  courses={courses}
+                                  isOccupied={isOccupied}
+                                  onAddTask={() => {
+                                    setSelectedSlotDate(slotDate);
+                                    setTaskDialogOpen(true);
+                                  }}
+                                  onAddStudyBlock={() => {
+                                    setSelectedSlotDate(slotDate);
+                                    setStudyBlockDialogOpen(true);
+                                  }}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                    {groupedEvents.map((group, groupIndex) => (
+                      group.map((event) => {
+                        const style = getEventBlockStyle(event, day, groupIndex, groupedEvents.length, { from: earliestEventHour, to: latestEventHour });
                         return (
-                          <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
-                            {index !== 0 && <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>}
-
-                            <DroppableTimeBlock date={day} hour={hour} minute={0}>
-                              <AddEventDialog startDate={day} startTime={{ hour, minute: 0 }}>
-                                <div className="absolute inset-x-0 top-0 h-[12px] cursor-pointer transition-colors hover:bg-accent" />
-                              </AddEventDialog>
-                            </DroppableTimeBlock>
-
-                            <DroppableTimeBlock date={day} hour={hour} minute={15}>
-                              <AddEventDialog startDate={day} startTime={{ hour, minute: 15 }}>
-                                <div className="absolute inset-x-0 top-[12px] h-[12px] cursor-pointer transition-colors hover:bg-accent" />
-                              </AddEventDialog>
-                            </DroppableTimeBlock>
-
-                            <div className="pointer-events-none absolute inset-x-0 top-1/2 border-b border-dashed"></div>
-
-                            <DroppableTimeBlock date={day} hour={hour} minute={30}>
-                              <AddEventDialog startDate={day} startTime={{ hour, minute: 30 }}>
-                                <div className="absolute inset-x-0 top-[24px] h-[12px] cursor-pointer transition-colors hover:bg-accent" />
-                              </AddEventDialog>
-                            </DroppableTimeBlock>
-
-                            <DroppableTimeBlock date={day} hour={hour} minute={45}>
-                              <AddEventDialog startDate={day} startTime={{ hour, minute: 45 }}>
-                                <div className="absolute inset-x-0 top-[36px] h-[12px] cursor-pointer transition-colors hover:bg-accent" />
-                              </AddEventDialog>
-                            </DroppableTimeBlock>
+                          <div key={event.id} className="absolute p-1" style={style}>
+                            <EventBlock event={event} />
                           </div>
                         );
-                      })}
-
-                      {groupedEvents.map(group => (
-                        group.map((event) => {
-                          const { style } = eventStylesAndOverlaps[event.id] || { style: {} };
-
-                          return (
-                            <div key={event.id} className="absolute p-1" style={style}>
-                              <EventBlock event={event} />
-                            </div>
-                          );
-                        })
-                      ))}
-                    </div>
-                  );
-                })}
+                      })
+                    ))}
+                  </div>
+                ))}
               </div>
 
               <CalendarTimeline firstVisibleHour={earliestEventHour} lastVisibleHour={latestEventHour} />
@@ -191,6 +166,22 @@ export function CalendarWeekView({ singleDayEvents, multiDayEvents }: IProps) {
           </div>
         </ScrollArea>
       </div>
+      <AddTaskDialog
+        open={taskDialogOpen}
+        onOpenChange={setTaskDialogOpen}
+        courses={courses}
+        selectedDate={selectedSlotDate ?? new Date()}
+        onTaskAdded={() => setTaskDialogOpen(false)}
+        trigger={false}
+      />
+      <AddStudyBlockDialog
+        open={studyBlockDialogOpen}
+        onOpenChange={setStudyBlockDialogOpen}
+        selectedDate={selectedSlotDate ?? new Date()}
+        onStudyBlockAdded={() => setStudyBlockDialogOpen(false)}
+        trigger={false}
+        courses={courses}
+      />
     </>
   );
 }

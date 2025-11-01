@@ -20,7 +20,7 @@ function DashboardLayoutContent({
         <AppSidebar courses={coursesListItems} isLoading={isLoading} onCourseAdded={refreshCourses} />
         <SidebarInset className="flex flex-col flex-1">
           <Navbar />
-          <main className="flex-1 container max-w-full py-6">
+          <main className="flex-1 container max-w-full">
             {children}
           </main>
         </SidebarInset>
