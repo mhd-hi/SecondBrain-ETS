@@ -3,14 +3,10 @@ import { areIntervalsOverlapping, format, isSameDay, parseISO } from 'date-fns';
 
 import { Calendar, Clock } from 'lucide-react';
 
-import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
-import { DroppableTimeBlock } from '@/calendar/components/dnd/droppable-time-block';
-
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
-import { DayViewMultiDayEventsRow } from '@/calendar/components/week-and-day-view/day-view-multi-day-events-row';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
-import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
+// import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,38 +15,42 @@ import { SingleCalendar } from '@/components/ui/single-calendar';
 import { cn } from '@/lib/utils';
 
 type IProps = {
-  singleDayEvents: TEvent[];
-  multiDayEvents: TEvent[];
+  events: TEvent[];
 };
 
-export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { visibleHours } = useCalendar();
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+export function CalendarDayView({ events }: IProps) {
+  const visibleHours = useCalendarViewStore(state => state.visibleHours);
+  const selectedDate = useCalendarViewStore(state => state.selectedDate);
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
 
-  const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, singleDayEvents);
-
-  const currentEvents = getCurrentEvents(singleDayEvents);
-
-  const dayEvents = singleDayEvents.filter((event) => {
+  const dayEvents = events.filter((event) => {
     const eventDate = parseISO(event.startDate);
     return isSameDay(eventDate, selectedDate);
   });
 
+  const { hours, earliestEventHour, latestEventHour } = getVisibleHours(visibleHours, dayEvents);
+  const currentEvents = getCurrentEvents(dayEvents);
   const groupedEvents = groupEvents(dayEvents);
 
   return (
     <div className="flex">
       <div className="flex flex-1 flex-col">
         <div>
-          <DayViewMultiDayEventsRow selectedDate={selectedDate} multiDayEvents={multiDayEvents} />
 
           {/* Day header */}
           <div className="relative z-20 flex border-b">
             <div className="w-18"></div>
             <span className="flex-1 border-l py-2 text-center text-xs font-medium text-muted-foreground">
               {format(selectedDate, 'EE')}
-{' '}
-<span className="font-semibold text-foreground">{format(selectedDate, 'd')}</span>
+              {' '}
+              <span className="font-semibold text-foreground">
+                {format(selectedDate, 'd')}
+              </span>
             </span>
           </div>
         </div>
@@ -76,6 +76,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                     <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
                       <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>
 
+                      {/* TODO: change this to open dropdown that has TaskDialog and StudyBlockDialog
                       <DroppableTimeBlock date={selectedDate} hour={hour} minute={0}>
                         <AddEventDialog startDate={selectedDate} startTime={{ hour, minute: 0 }}>
                           <div className="absolute inset-x-0 top-0 h-[12px] cursor-pointer transition-colors hover:bg-accent" />
@@ -100,7 +101,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                         <AddEventDialog startDate={selectedDate} startTime={{ hour, minute: 45 }}>
                           <div className="absolute inset-x-0 top-[36px] h-[12px] cursor-pointer transition-colors hover:bg-accent" />
                         </AddEventDialog>
-                      </DroppableTimeBlock>
+                      </DroppableTimeBlock> */}
                     </div>
                   );
                 })}
@@ -120,8 +121,8 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
                     );
 
                     if (!hasOverlap) {
- style = { ...style, width: '100%', left: '0%' };
-}
+                      style = { ...style, width: '100%', left: '0%' };
+                    }
 
                     return (
                       <div key={event.id} className="absolute p-1" style={style}>
@@ -139,7 +140,7 @@ export function CalendarDayView({ singleDayEvents, multiDayEvents }: IProps) {
       </div>
 
       <div className="hidden w-64 divide-y border-l md:block">
-        <SingleCalendar className="mx-auto w-fit" mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus />
+  <SingleCalendar className="mx-auto w-fit" mode="single" selected={selectedDate} onSelect={handleSelect} initialFocus />
 
         <div className="flex-1 space-y-3">
           {currentEvents.length > 0

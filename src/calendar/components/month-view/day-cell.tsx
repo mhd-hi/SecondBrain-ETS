@@ -8,26 +8,27 @@ import { DroppableDayCell } from '@/calendar/components/dnd/droppable-day-cell';
 import { EventBullet } from '@/calendar/components/month-view/event-bullet';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
 
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
-import { getMonthCellEvents } from '@/calendar/helpers';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 
 import { cn } from '@/lib/utils';
 
 type IProps = {
   cell: TCalendarCell;
   events: TEvent[];
-  eventPositions: Record<string, number>;
 };
 
 const MAX_VISIBLE_EVENTS = 3;
 
-export function DayCell({ cell, events, eventPositions }: IProps) {
+export function DayCell({ cell, events }: IProps) {
   const { push } = useRouter();
-  const { setSelectedDate } = useSelectedDate();
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
 
   const { day, currentMonth, date } = cell;
 
-  const cellEvents = useMemo(() => getMonthCellEvents(date, events, eventPositions), [date, events, eventPositions]);
+  const cellEvents = useMemo(() => events.filter((e) => {
+    const eventDate = new Date(e.startDate);
+    return eventDate.toDateString() === date.toDateString();
+  }), [date, events]);
   const isSunday = date.getDay() === 0;
 
   const handleClick = () => {
@@ -51,18 +52,14 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
         </button>
 
         <div className={cn('flex h-6 gap-1 px-2 lg:h-[94px] lg:flex-col lg:gap-2 lg:px-0', !currentMonth && 'opacity-50')}>
-          {[0, 1, 2].map((position) => {
-            const event = cellEvents.find(e => e.position === position);
-            const eventKey = event ? `event-${event.id}-${position}` : `empty-${position}`;
-
+          {cellEvents.slice(0, MAX_VISIBLE_EVENTS).map((event, idx) => {
+            const eventKey = `event-${event.id}-${idx}`;
             return (
               <div key={eventKey} className="lg:flex-1">
-                {event && (
-                  <>
-                    <EventBullet className="lg:hidden" color={event.color} />
-                    <MonthEventBadge className="hidden lg:flex" event={event} cellDate={startOfDay(date)} />
-                  </>
-                )}
+                <>
+                  <EventBullet className="lg:hidden" color={event.color} />
+                  <MonthEventBadge className="hidden lg:flex" event={event} cellDate={startOfDay(date)} />
+                </>
               </div>
             );
           })}
@@ -71,14 +68,14 @@ export function DayCell({ cell, events, eventPositions }: IProps) {
         {cellEvents.length > MAX_VISIBLE_EVENTS && (
           <p className={cn('h-4.5 px-1.5 text-xs font-semibold text-muted-foreground', !currentMonth && 'opacity-50')}>
             <span className="sm:hidden">
-+
-{cellEvents.length - MAX_VISIBLE_EVENTS}
+              +
+              {cellEvents.length - MAX_VISIBLE_EVENTS}
             </span>
             <span className="hidden sm:inline">
-{' '}
-{cellEvents.length - MAX_VISIBLE_EVENTS}
-{' '}
-more...
+              {' '}
+              {cellEvents.length - MAX_VISIBLE_EVENTS}
+              {' '}
+              more...
             </span>
           </p>
         )}

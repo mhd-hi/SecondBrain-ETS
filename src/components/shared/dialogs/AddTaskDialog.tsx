@@ -29,7 +29,7 @@ type AddTaskDialogProps = {
   selectedDate?: Date;
   onTaskAdded: () => void;
   trigger?: React.ReactNode;
-  courses?: Course[];
+  courses: Course[];
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };

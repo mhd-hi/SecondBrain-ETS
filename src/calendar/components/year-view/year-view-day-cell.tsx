@@ -1,10 +1,7 @@
 import type { TEvent } from '@/calendar/types';
 import { isToday } from 'date-fns';
 
-// import { useRouter } from 'next/navigation';
-
 import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
 
 import { cn } from '@/lib/utils';
 
@@ -15,7 +12,7 @@ type IProps = {
 };
 
 export function YearViewDayCell({ day, date, events }: IProps) {
-  const { setSelectedDate } = useSelectedDate();
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
 
   const maxIndicators = 3;
   const eventCount = events.length;

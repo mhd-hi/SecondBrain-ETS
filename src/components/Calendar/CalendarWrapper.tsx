@@ -1,19 +1,16 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ClientContainer } from '@/calendar/components/client-container';
+import { CalendarView } from '@/calendar/components/calendar-view';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { useEvents } from '@/calendar/contexts/events-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { NavigationControls } from '@/components/WeeklyRoadmap/NavigationControls';
 import { getWeekDates } from '@/lib/utils/date-util';
 
-export function CalendarView() {
-  const { setSelectedDate, selectedDate: _selectedDate } = useCalendar();
-  const { events: _events } = useEvents();
+export function CalendarWrapper() {
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
   const [weekOffset, setWeekOffset] = useState(0);
 
-  // Update selectedDate when weekOffset changes
   useEffect(() => {
     const newSelectedDate = new Date();
     newSelectedDate.setDate(newSelectedDate.getDate() + (weekOffset * 7));
@@ -40,7 +37,7 @@ export function CalendarView() {
         onTodayClick={handleTodayClick}
       />
       <div className="flex-1 min-h-0">
-        <ClientContainer />
+        <CalendarView />
       </div>
     </div>
   );

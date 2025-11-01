@@ -4,7 +4,6 @@ import { createContext, use, useMemo } from 'react';
 
 type EventsContextType = {
   events: TEvent[];
-  setLocalEvents: React.Dispatch<React.SetStateAction<TEvent[]>>;
 };
 
 const EventsContext = createContext<EventsContextType | undefined>(undefined);
@@ -12,12 +11,10 @@ const EventsContext = createContext<EventsContextType | undefined>(undefined);
 type EventsProviderProps = {
   children: React.ReactNode;
   events: TEvent[];
-  setLocalEvents: React.Dispatch<React.SetStateAction<TEvent[]>>;
 };
 
-export function EventsProvider({ children, events, setLocalEvents }: EventsProviderProps) {
-  const value = useMemo(() => ({ events, setLocalEvents }), [events, setLocalEvents]);
-
+export function EventsProvider({ children, events }: EventsProviderProps) {
+  const value = useMemo(() => ({ events }), [events]);
   return <EventsContext.Provider value={value}>{children}</EventsContext.Provider>;
 }
 

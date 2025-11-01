@@ -4,8 +4,6 @@ import type { TEvent } from '@/calendar/types';
 import { format, parseISO } from 'date-fns';
 
 import { Calendar, Clock, FileText } from 'lucide-react';
-import { EditEventDialog } from '@/calendar/components/dialogs/edit-event-dialog';
-import { Button } from '@/components/ui/button';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -64,11 +62,12 @@ export function EventDetailsDialog({ event, children }: IProps) {
           </div>
 
           <DialogFooter>
-            <EditEventDialog event={event}>
+            {/* TODO: change this to open dropdown that has TaskDialog and StudyBlockDialog
+              <EditEventDialog event={event}>
               <Button type="button" variant="outline">
                 Edit
               </Button>
-            </EditEventDialog>
+            </EditEventDialog> */}
           </DialogFooter>
         </DialogContent>
       </Dialog>

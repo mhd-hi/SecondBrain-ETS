@@ -4,28 +4,18 @@ import { useMemo } from 'react';
 
 import { DayCell } from '@/calendar/components/month-view/day-cell';
 
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 
-import { calculateMonthEventPositions, getCalendarCells } from '@/calendar/helpers';
+import { getCalendarCells } from '@/calendar/helpers';
+import { WEEK_DAYS } from '@/lib/calendar/constants';
 
-type IProps = {
-  singleDayEvents: TEvent[];
-  multiDayEvents: TEvent[];
+type Props = {
+  events: TEvent[];
 };
 
-const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
-  const { selectedDate } = useSelectedDate();
-
-  const allEvents = [...multiDayEvents, ...singleDayEvents];
-
+export function CalendarMonthView({ events }: Props) {
+  const selectedDate = useCalendarViewStore(state => state.selectedDate);
   const cells = useMemo(() => getCalendarCells(selectedDate), [selectedDate]);
-
-  const eventPositions = useMemo(
-    () => calculateMonthEventPositions(multiDayEvents, singleDayEvents, selectedDate),
-    [multiDayEvents, singleDayEvents, selectedDate],
-  );
 
   return (
     <div>
@@ -39,7 +29,7 @@ export function CalendarMonthView({ singleDayEvents, multiDayEvents }: IProps) {
 
       <div className="grid grid-cols-7 overflow-hidden">
         {cells.map(cell => (
-          <DayCell key={cell.date.toISOString()} cell={cell} events={allEvents} eventPositions={eventPositions} />
+          <DayCell key={cell.date.toISOString()} cell={cell} events={events} />
         ))}
       </div>
     </div>

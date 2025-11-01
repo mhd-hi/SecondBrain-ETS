@@ -4,7 +4,7 @@ import type { TEvent } from '@/calendar/types';
 
 import { useEffect, useState } from 'react';
 import { CalendarProvider } from '@/calendar/contexts/calendar-context';
-import { CalendarView } from '@/components/Calendar/CalendarView';
+import { CalendarWrapper } from '@/components/Calendar/CalendarWrapper';
 import { useCalendarTasks } from '@/hooks/use-task';
 
 export default function CalendarPage() {
@@ -44,13 +44,13 @@ export default function CalendarPage() {
   return (
     <div className="h-full m-6 flex flex-col">
       <div className="mb-6 flex-shrink-0">
-        <h1 className="text-2xl font-bold">Calendar</h1>
+        <h1 className="text-2xl font-bold">📅 Calendar</h1>
         <p className="text-gray-600">View your tasks and study blocks in a unified calendar</p>
       </div>
 
       <div className="flex-1 min-h-0">
         <CalendarProvider events={events}>
-          <CalendarView />
+          <CalendarWrapper />
         </CalendarProvider>
       </div>
     </div>

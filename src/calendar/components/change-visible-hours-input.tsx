@@ -5,14 +5,15 @@ import { Info } from 'lucide-react';
 
 import { useState } from 'react';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { Button } from '@/components/ui/button';
 import { TimeInput } from '@/components/ui/time-input';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export function ChangeVisibleHoursInput() {
-  const { visibleHours, setVisibleHours } = useCalendar();
+  const visibleHours = useCalendarViewStore(state => state.visibleHours);
+  const setVisibleHours = useCalendarViewStore(state => state.setVisibleHours);
 
   const [from, setFrom] = useState<{ hour: number; minute: number }>({ hour: visibleHours.from, minute: 0 });
   const [to, setTo] = useState<{ hour: number; minute: number }>({ hour: visibleHours.to, minute: 0 });

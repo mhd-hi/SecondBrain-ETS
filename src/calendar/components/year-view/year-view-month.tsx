@@ -1,14 +1,11 @@
 import type { TEvent } from '@/calendar/types';
 import { format, getDaysInMonth, isSameDay, startOfMonth } from 'date-fns';
-// import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { YearViewDayCell } from '@/calendar/components/year-view/year-view-day-cell';
-
 import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
-
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
+import { WEEK_DAYS } from '@/lib/calendar/constants';
 
 type IProps = {
   month: Date;
@@ -18,7 +15,7 @@ type IProps = {
 export function YearViewMonth({ month, events }: IProps) {
   const setView = useCalendarViewStore(state => state.setView);
 
-  const { setSelectedDate } = useSelectedDate();
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
 
   const monthName = format(month, 'MMMM');
 
@@ -33,8 +30,6 @@ export function YearViewMonth({ month, events }: IProps) {
 
     return [...blanks, ...days];
   }, [month]);
-
-  const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   const handleClick = () => {
     setSelectedDate(new Date(month.getFullYear(), month.getMonth(), 1));

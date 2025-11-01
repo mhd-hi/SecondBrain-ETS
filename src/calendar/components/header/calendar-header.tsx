@@ -1,6 +1,4 @@
-import { CalendarRange, Columns, Grid2x2, Grid3x3, List, Plus } from 'lucide-react';
-
-import { AddEventDialog } from '@/calendar/components/dialogs/add-event-dialog';
+import { CalendarRange, Columns, Grid2x2, Grid3x3, List } from 'lucide-react';
 
 import { DateNavigator } from '@/calendar/components/header/date-navigator';
 import { TodayButton } from '@/calendar/components/header/today-button';
@@ -69,12 +67,13 @@ export function CalendarHeader() {
           </div>
         </div>
 
-        <AddEventDialog>
-          <Button className="w-full sm:w-auto">
-            <Plus />
-            Add Event
-          </Button>
-        </AddEventDialog>
+        {/* TODO: change this to open dropdown that has TaskDialog and StudyBlockDialog
+          <AddEventDialog>
+            <Button className="w-full sm:w-auto">
+              <Plus />
+              Add Event
+            </Button>
+        </AddEventDialog> */}
       </div>
     </div>
   );

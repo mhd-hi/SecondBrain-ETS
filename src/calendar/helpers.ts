@@ -180,10 +180,14 @@ export function getCalendarCells(selectedDate: Date): TCalendarCell[] {
   const currentMonth = selectedDate.getMonth();
 
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  // getDay() returns 0 (Sunday) to 6 (Saturday). For Monday-first, treat 0 as 6, 1 as 0, ..., 6 as 5
+  const getMondayFirstDay = (date: Date) => {
+    const day = date.getDay();
+    return (day + 6) % 7;
+  };
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
-  const firstDayOfMonth = getFirstDayOfMonth(currentYear, currentMonth);
+  const firstDayOfMonth = getMondayFirstDay(new Date(currentYear, currentMonth, 1));
   const daysInPrevMonth = getDaysInMonth(currentYear, currentMonth - 1);
   const totalDays = firstDayOfMonth + daysInMonth;
 

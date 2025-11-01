@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { memo, useCallback } from 'react';
 
-import { useSelectedDate } from '@/calendar/contexts/selected-date-context';
+import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 
 import { navigateDate, rangeText } from '@/calendar/helpers';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,8 @@ type IProps = {
 };
 
 export const DateNavigator = memo(({ view }: IProps) => {
-  const { selectedDate, setSelectedDate } = useSelectedDate();
+  const selectedDate = useCalendarViewStore(state => state.selectedDate);
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
   const isValidDate = (d: unknown): d is Date => d instanceof Date && !Number.isNaN(d.getTime());
   const safeDate = isValidDate(selectedDate) ? selectedDate : null;
 

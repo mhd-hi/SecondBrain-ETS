@@ -38,7 +38,7 @@ export function taskToEvent(task: Task): TEvent {
         id: task.id,
         startDate,
         endDate,
-        title: task.title,
+        title: `${task.course.code} - ${task.title}`,
         description: task.notes,
         color: task.course.color,
         secondaryColor: getStatusBgClass(task.status),
