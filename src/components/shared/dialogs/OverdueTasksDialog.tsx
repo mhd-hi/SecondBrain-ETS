@@ -10,8 +10,8 @@ export function OverdueTasksDialog({ open, onOpenChange, overdueCount, onComplet
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="flex flex-col items-center gap-4 p-6"
         aria-describedby="complete-all-overdue-tasks-description"
+        className="flex flex-col items-center gap-4 p-6"
       >
         <DialogHeader className="w-full text-center">
           <DialogTitle className="mb-2 text-lg font-semibold">Complete All Overdue Tasks</DialogTitle>

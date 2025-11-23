@@ -206,8 +206,8 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
         )}
       </DialogTrigger>
       <DialogContent
-        className="sm:max-w-md"
         aria-describedby="add-course-description"
+        className="sm:max-w-md"
       >
         <DialogHeader>
           <DialogTitle>Add New Course</DialogTitle>
