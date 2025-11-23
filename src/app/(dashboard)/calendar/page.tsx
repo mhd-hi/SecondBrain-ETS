@@ -42,12 +42,12 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="h-full m-6 flex flex-col">
+  <div className="h-full mx-6 flex flex-col">
       <div className="flex-1 min-h-0">
         <CalendarProvider events={events}>
           <CalendarWrapper />
         </CalendarProvider>
       </div>
-    </div>
+  </div>
   );
 }
