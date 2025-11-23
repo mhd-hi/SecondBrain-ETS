@@ -61,6 +61,7 @@ export default antfu(
     rules: {
       // Turn off the crashing rule; let Prettier handle indentation
       'style/indent': 'off',
+      'style/eol-last': 'off',
     },
   },
 );

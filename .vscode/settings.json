@@ -22,5 +22,6 @@
   "search.exclude": {
     "yarn.lock": true
   },
-  "debug.toolBarLocation": "hidden" // helps with running the dev script without the debug toolbar
+  "debug.toolBarLocation": "hidden", // helps with running the dev script without the debug toolbar
+  "files.insertFinalNewline": true
 }

@@ -112,27 +112,31 @@ export function CalendarHeader() {
           </div>
         </div>
 
-        {/* Add dropdown for Add Study Block and Add Task */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="w-full sm:w-auto" variant="default">
-              <Plus className="mr-2" />
-              Add
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <button type="button" onClick={() => setAddStudyBlockOpen(true)}>
-                Add Study Block
-              </button>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <button type="button" onClick={() => setAddTaskOpen(true)}>
-                Add Task
-              </button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* FIXME: WIP */}
+        {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
+          ? (
+            <>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-full sm:w-auto" variant="default">
+                <Plus className="mr-2" />
+                Add
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <button type="button" onClick={() => setAddStudyBlockOpen(true)}>
+                  Add Study Block
+                </button>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <button type="button" onClick={() => setAddTaskOpen(true)}>
+                  Add Task
+                </button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
         <AddStudyBlockDialog
           open={addStudyBlockOpen}
           onOpenChange={setAddStudyBlockOpen}
@@ -147,6 +151,9 @@ export function CalendarHeader() {
           trigger={false}
           onTaskAdded={() => setAddTaskOpen(false)}
         />
+            </>
+                )
+        : null}
       </div>
     </div>
   );
