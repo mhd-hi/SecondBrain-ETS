@@ -28,7 +28,7 @@ export const POST = withAuth<{ taskId: string }>(
             notes: body.notes ?? null,
             status: (body.status as unknown as typeof subtasks.$inferInsert['status']) ?? StatusTask.TODO,
             estimatedEffort: typeof body.estimatedEffort === 'number' ? body.estimatedEffort : 0,
-            type: (body.type as unknown as TaskType) ?? TASK_TYPES.THEORIE,
+            type: (body.type as TaskType) ?? TASK_TYPES.THEORIE,
             dueDate: body.dueDate ? new Date(String(body.dueDate)) : undefined,
             createdAt: new Date(),
             updatedAt: new Date(),

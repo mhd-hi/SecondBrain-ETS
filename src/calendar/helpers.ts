@@ -1,0 +1,308 @@
+import type { TCalendarCell, TCalendarView, TEvent, TVisibleHours } from '@/calendar/types';
+
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  differenceInDays,
+  differenceInMinutes,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  format,
+  isSameDay,
+  isWithinInterval,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  subDays,
+  subMonths,
+  subWeeks,
+  subYears,
+} from 'date-fns';
+import { getEventEnd, getEventStart } from '@/calendar/date-utils';
+import { VISIBLE_HOURS } from '@/lib/calendar/constants';
+
+// ================ Header helper functions ================ //
+
+export function rangeText(view: TCalendarView, date: Date) {
+  const formatString = 'MMM d, yyyy';
+  let start: Date;
+  let end: Date;
+
+  switch (view) {
+    case 'agenda':
+      start = startOfMonth(date);
+      end = endOfMonth(date);
+      break;
+    case 'year':
+      start = startOfYear(date);
+      end = endOfYear(date);
+      break;
+    case 'month':
+      start = startOfMonth(date);
+      end = endOfMonth(date);
+      break;
+    case 'week':
+      start = startOfWeek(date, { weekStartsOn: 1 });
+      end = endOfWeek(date, { weekStartsOn: 1 });
+      break;
+    case 'day':
+      return format(date, formatString);
+    default:
+      return 'Error while formatting ';
+  }
+
+  return `${format(start, formatString)} - ${format(end, formatString)}`;
+}
+
+export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
+  switch (view) {
+    case 'agenda':
+      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
+    case 'year':
+      return direction === 'next' ? addYears(date, 1) : subYears(date, 1);
+    case 'month':
+      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
+    case 'week':
+      return direction === 'next' ? addWeeks(date, 1) : subWeeks(date, 1);
+    case 'day':
+      return direction === 'next' ? addDays(date, 1) : subDays(date, 1);
+    default:
+      return date;
+  }
+}
+
+// ================ Week and day view helper functions ================ //
+
+export function getCurrentEvents(events: TEvent[]) {
+  const now = new Date();
+  return events.filter(event => isWithinInterval(now, { start: getEventStart(event), end: getEventEnd(event) })) || null;
+}
+
+export function groupEvents(dayEvents: TEvent[]) {
+  const sortedEvents = dayEvents.sort((a, b) => getEventStart(a).getTime() - getEventStart(b).getTime());
+  const groups: TEvent[][] = [];
+
+  for (const event of sortedEvents) {
+    const eventStart = getEventStart(event);
+
+    let placed = false;
+    for (const group of groups) {
+      const lastEventInGroup = group[group.length - 1];
+      if (!lastEventInGroup) {
+        continue;
+      }
+      const lastEventEnd = getEventEnd(lastEventInGroup);
+
+      if (eventStart >= lastEventEnd) {
+        group.push(event);
+        placed = true;
+        break;
+      }
+    }
+
+    if (!placed) {
+      groups.push([event]);
+    }
+  }
+
+  return groups;
+}
+
+export function getEventBlockStyle(
+  event: TEvent,
+  day: Date,
+  groupIndex: number,
+  groupSize: number,
+  visibleHoursRange?: { from: number; to: number },
+  hourBlockHeight = 64,
+  slotIntervalMinutes = 30,
+  slotHeight = 32,
+) {
+  const startDate = getEventStart(event);
+  const endDate = getEventEnd(event);
+  const dayStart = new Date(day.setHours(0, 0, 0, 0));
+  const eventStart = startDate < dayStart ? dayStart : startDate;
+  const startMinutes = differenceInMinutes(eventStart, dayStart);
+  const endMinutes = differenceInMinutes(endDate, dayStart);
+  let top;
+  let height;
+  if (visibleHoursRange) {
+    const visibleStartMinutes = visibleHoursRange.from * 60;
+    // Calculate how many slots from the visible start to the event start
+    const slotIndex = Math.floor((startMinutes - visibleStartMinutes) / slotIntervalMinutes);
+    const slotOffset = (startMinutes - visibleStartMinutes) % slotIntervalMinutes;
+    top = slotIndex * slotHeight + (slotOffset / slotIntervalMinutes) * slotHeight;
+    // Calculate event duration in slots
+    const duration = endMinutes - startMinutes;
+    const slotCount = Math.floor(duration / slotIntervalMinutes);
+    const slotRemainder = duration % slotIntervalMinutes;
+    height = slotCount * slotHeight + (slotRemainder / slotIntervalMinutes) * slotHeight;
+  } else {
+    // Fallback for all-day or agenda views
+    top = (startMinutes / 1440) * (hourBlockHeight * 24 / 60);
+    height = ((endMinutes - startMinutes) / 1440) * (hourBlockHeight * 24 / 60);
+  }
+  const width = 100 / groupSize;
+  const left = groupIndex * width;
+  return { top: `${top}px`, height: `${height}px`, width: `${width}%`, left: `${left}%` };
+}
+
+export function getVisibleHours(visibleHours: TVisibleHours | undefined, singleDayEvents: TEvent[]) {
+  const defaultVisible = VISIBLE_HOURS;
+  const vh = visibleHours ?? defaultVisible;
+
+  let earliestEventHour = typeof vh.from === 'number' ? vh.from : defaultVisible.from;
+  let latestEventHour = typeof vh.to === 'number' ? vh.to : defaultVisible.to;
+
+  singleDayEvents.forEach((event) => {
+    try {
+      const start = getEventStart(event);
+      const endTime = getEventEnd(event);
+
+      if (Number.isNaN(start.getTime()) || Number.isNaN(endTime.getTime())) {
+        return;
+      }
+
+      const startHour = start.getHours();
+      const endHour = endTime.getHours() + (endTime.getMinutes() > 0 ? 1 : 0);
+
+      if (startHour < earliestEventHour) {
+        earliestEventHour = startHour;
+      }
+      if (endHour > latestEventHour) {
+        latestEventHour = endHour;
+      }
+    } catch {
+      // ignore malformed dates
+    }
+  });
+
+  latestEventHour = Math.min(latestEventHour, 24);
+
+  const hours = Array.from({ length: latestEventHour - earliestEventHour }, (_, i) => i + earliestEventHour);
+
+  return { hours, earliestEventHour, latestEventHour };
+}
+
+// ================ Month view helper functions ================ //
+
+export function getCalendarCells(selectedDate: Date): TCalendarCell[] {
+  const currentYear = selectedDate.getFullYear();
+  const currentMonth = selectedDate.getMonth();
+
+  const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+  // getDay() returns 0 (Sunday) to 6 (Saturday). For Monday-first, treat 0 as 6, 1 as 0, ..., 6 as 5
+  const getMondayFirstDay = (date: Date) => {
+    const day = date.getDay();
+    return (day + 6) % 7;
+  };
+
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const firstDayOfMonth = getMondayFirstDay(new Date(currentYear, currentMonth, 1));
+  const daysInPrevMonth = getDaysInMonth(currentYear, currentMonth - 1);
+  const totalDays = firstDayOfMonth + daysInMonth;
+
+  const prevMonthCells = Array.from({ length: firstDayOfMonth }, (_, i) => ({
+    day: daysInPrevMonth - firstDayOfMonth + i + 1,
+    currentMonth: false,
+    date: new Date(currentYear, currentMonth - 1, daysInPrevMonth - firstDayOfMonth + i + 1),
+  }));
+
+  const currentMonthCells = Array.from({ length: daysInMonth }, (_, i) => ({
+    day: i + 1,
+    currentMonth: true,
+    date: new Date(currentYear, currentMonth, i + 1),
+  }));
+
+  const nextMonthCells = Array.from({ length: (7 - (totalDays % 7)) % 7 }, (_, i) => ({
+    day: i + 1,
+    currentMonth: false,
+    date: new Date(currentYear, currentMonth + 1, i + 1),
+  }));
+
+  return [...prevMonthCells, ...currentMonthCells, ...nextMonthCells];
+}
+
+export function calculateMonthEventPositions(multiDayEvents: TEvent[], singleDayEvents: TEvent[], selectedDate: Date) {
+  const monthStart = startOfMonth(selectedDate);
+  const monthEnd = endOfMonth(selectedDate);
+
+  const eventPositions: { [key: string]: number } = {};
+  const occupiedPositions: { [key: string]: boolean[] } = {};
+
+  eachDayOfInterval({ start: monthStart, end: monthEnd }).forEach((day) => {
+    occupiedPositions[day.toISOString()] = [false, false, false];
+  });
+
+  const sortedEvents = [
+    ...multiDayEvents.sort((a, b) => {
+      const aDuration = differenceInDays(getEventEnd(a), getEventStart(a));
+      const bDuration = differenceInDays(getEventEnd(b), getEventStart(b));
+      return bDuration - aDuration || getEventStart(a).getTime() - getEventStart(b).getTime();
+    }),
+    ...singleDayEvents.sort((a, b) => getEventStart(a).getTime() - getEventStart(b).getTime()),
+  ];
+
+  sortedEvents.forEach((event) => {
+    const eventStart = getEventStart(event);
+    const eventEnd = getEventEnd(event);
+    const eventDays = eachDayOfInterval({
+      start: eventStart < monthStart ? monthStart : eventStart,
+      end: eventEnd > monthEnd ? monthEnd : eventEnd,
+    });
+
+    let position = -1;
+
+    for (let i = 0; i < 3; i++) {
+      if (
+        eventDays.every((day) => {
+          const dayPositions = occupiedPositions[startOfDay(day).toISOString()];
+          return dayPositions && !dayPositions[i];
+        })
+      ) {
+        position = i;
+        break;
+      }
+    }
+
+    if (position !== -1) {
+      eventDays.forEach((day) => {
+        const dayKey = startOfDay(day).toISOString();
+        occupiedPositions[dayKey] = occupiedPositions[dayKey] ?? [false, false, false];
+        occupiedPositions[dayKey][position] = true;
+      });
+      eventPositions[event.id] = position;
+    }
+  });
+
+  return eventPositions;
+}
+
+export function getMonthCellEvents(date: Date, events: TEvent[], eventPositions: Record<string, number>) {
+  const eventsForDate = events.filter((event) => {
+    const eventStart = getEventStart(event);
+    const eventEnd = getEventEnd(event);
+    return (date >= eventStart && date <= eventEnd) || isSameDay(date, eventStart) || isSameDay(date, eventEnd);
+  });
+
+  return eventsForDate
+    .map(event => ({
+      ...event,
+      position: eventPositions[event.id] ?? -1,
+      isMultiDay: event.startDate !== event.endDate,
+    }))
+    .sort((a, b) => {
+      if (a.isMultiDay && !b.isMultiDay) {
+        return -1;
+      }
+      if (!a.isMultiDay && b.isMultiDay) {
+        return 1;
+      }
+      return a.position - b.position;
+    });
+}

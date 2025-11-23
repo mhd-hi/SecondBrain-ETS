@@ -153,7 +153,7 @@ export default function CommandPalette() {
               <div className="flex items-center">
                 <NotebookText
                   className="h-4 w-4 mr-2"
-                  style={{ color: course.color ?? undefined }}
+                  style={{ color: course.color }}
                 />
                 <span>{course.title}</span>
               </div>

@@ -18,7 +18,7 @@ export const NavigationControls = ({
   onTodayClick,
 }: NavigationControlsProps) => {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-t-lg">
+    <div className="flex items-center gap-4 rounded-t-lg">
       <Button
         variant="outline"
         size="sm"

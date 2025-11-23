@@ -57,7 +57,7 @@ export const GET = withAuthSimple(
           ),
         ),
       ),
-    ).leftJoin(courses, eq(tasks.courseId, courses.id));
+    ).innerJoin(courses, eq(tasks.courseId, courses.id));
 
     const taskIds = results.map(r => r.tasks.id);
 
@@ -81,7 +81,7 @@ export const GET = withAuthSimple(
 
     const tasksData: Task[] = results.map(row => ({
       ...row.tasks,
-      course: row.courses ?? undefined,
+      course: row.courses,
       status: parseStatusTask(String(row.tasks.status)),
       subtasks: subsByTask.get(String(row.tasks.id)) ?? [],
       notes: row.tasks.notes ?? undefined,

@@ -18,7 +18,7 @@ export function CourseSkeleton() {
       <section className="mb-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">Task Completion</CardTitle>
+            <CardTitle className="flex items-center gap-2">Completion</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

@@ -25,5 +25,5 @@ export type Task = {
   createdAt: Date;
   updatedAt: Date;
   dueDate: Date;
-  course?: Course;
+  course: Course;
 };
