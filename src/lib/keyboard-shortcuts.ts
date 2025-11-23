@@ -44,15 +44,15 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
     description: 'Go to Pomodoro',
   },
   {
-    key: 'w',
+    key: 'c',
     ctrl: true,
     alt: true,
-    action: { type: 'navigate', path: ROUTES.WEEKLY_ROADMAP },
-    description: 'Go to Weekly Roadmap',
+    action: { type: 'navigate', path: ROUTES.CALENDAR },
+    description: 'Go to Calendar',
   },
   // Dialog shortcuts
   {
-    key: 'c',
+    key: 'r',
     ctrl: true,
     alt: true,
     action: { type: 'dialog', dialog: 'add-course' },

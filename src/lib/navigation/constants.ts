@@ -12,8 +12,8 @@ export const navbarItems = [
     icon: '🍅',
   },
   {
-    title: 'Weekly Roadmap',
-    url: ROUTES.WEEKLY_ROADMAP,
-    icon: '🗺️',
+    title: 'Calendar',
+    url: ROUTES.CALENDAR,
+    icon: '📅',
   },
 ];

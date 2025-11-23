@@ -1,5 +1,6 @@
 # Bugs
-
+- use pomodoroDaily table instead of attributes in user table to track daily pomodoro count
+- Add #theorie tags after effortTime in courseCard shortcuts
 # Features
 
 ### Study blocks

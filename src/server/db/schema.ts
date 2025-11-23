@@ -1,6 +1,7 @@
 import type { AdapterAccountType } from 'next-auth/adapters';
 import { relations, sql } from 'drizzle-orm';
 import {
+  boolean,
   date,
   index,
   integer,
@@ -8,6 +9,7 @@ import {
   pgTable,
   primaryKey,
   real,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -82,7 +84,7 @@ export const courses = pgTable('courses', {
   name: text('name').notNull(),
   code: text('code').notNull(),
   term: text('term').notNull().references(() => terms.id, { onDelete: 'restrict' }),
-  color: text('color').notNull(),
+  color: text('color', { enum: ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'] }).notNull(),
   daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull().default('AM'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -103,7 +105,10 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   dueDate: timestamp('due_date').notNull(),
-});
+}, table => [
+  index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
+  index('idx_tasks_user_id').on(table.userId),
+]);
 
 export const subtasks = pgTable('subtasks', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -116,7 +121,10 @@ export const subtasks = pgTable('subtasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   dueDate: timestamp('due_date'),
-});
+}, table => [
+  // Index for subtasks queries: WHERE task_id IN (taskIds)
+  index('idx_subtasks_task_id').on(table.taskId),
+]);
 
 export const pomodoroDaily = pgTable('pomodoro_daily', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -159,6 +167,33 @@ export const coursesCache = pgTable('courses_cache', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// Study blocks - individual study sessions
+export const studyBlocks = pgTable('study_blocks', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull(),
+  startAt: timestamp('start_at').notNull(),
+  endAt: timestamp('end_at').notNull(),
+  isCompleted: boolean('is_completed').notNull().default(false),
+}, t => [
+  uniqueIndex('uniq_study_blocks_user_daypart').on(t.userId, t.daypart, t.endAt),
+  index('idx_study_blocks_user_day').on(t.userId, t.startAt, t.endAt),
+]);
+
+// Ordered interleave items (A→B→C)
+export const studyBlockItems = pgTable('study_block_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  studyBlockId: uuid('study_block_id').notNull().references(() => studyBlocks.id, { onDelete: 'cascade' }),
+  courseId: uuid('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
+  order: smallint('order').notNull(), // 1.2.3 (position in the interleave)
+}, t => [
+  uniqueIndex('uniq_block_order').on(t.studyBlockId, t.order), // never two items at same position
+  index('idx_block_items_block').on(t.studyBlockId),
+  index('idx_block_items_course').on(t.courseId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -166,6 +201,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   courses: many(courses),
   tasks: many(tasks),
   customLinks: many(customLinks),
+  studyBlocks: many(studyBlocks),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -180,6 +216,7 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   user: one(users, { fields: [courses.userId], references: [users.id] }),
   tasks: many(tasks),
   customLinks: many(customLinks),
+  studyBlockItems: many(studyBlockItems),
 }));
 
 export const customLinksRelations = relations(customLinks, ({ one }) => ({
@@ -194,6 +231,16 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [courses.id],
   }),
   subtasks: many(subtasks),
+}));
+
+export const studyBlocksRelations = relations(studyBlocks, ({ one, many }) => ({
+  user: one(users, { fields: [studyBlocks.userId], references: [users.id] }),
+  studyBlockItems: many(studyBlockItems),
+}));
+
+export const courseStudyBlocksRelations = relations(studyBlockItems, ({ one }) => ({
+  studyBlock: one(studyBlocks, { fields: [studyBlockItems.studyBlockId], references: [studyBlocks.id] }),
+  course: one(courses, { fields: [studyBlockItems.courseId], references: [courses.id] }),
 }));
 
 // SQL function to delete courses and related data older than 8 months for all users

@@ -1,8 +1,10 @@
+import type { TCourseColor } from '@/types/colors';
 import type { Daypart } from '@/types/course';
 import { and, eq } from 'drizzle-orm';
 import { AuthenticationError, AuthorizationError, withAuth } from '@/lib/auth/api';
 import { deleteUserCourse, getUserCourse, getUserCourseTasks } from '@/lib/auth/db';
 import { statusResponse } from '@/lib/utils/api/api-server-util';
+import { COURSE_COLORS } from '@/lib/utils/colors-util';
 import { db } from '@/server/db';
 import { courses } from '@/server/db/schema';
 
@@ -44,19 +46,24 @@ export const PATCH = withAuth<{ courseId: string }>(
       }
 
       // Build the update object conditionally
-      const updatePayload: Partial<{ color: string; daypart: Daypart }> = {};
+      const updatePayload: Partial<{ color: TCourseColor; daypart: Daypart }> = {};
       if (color) {
+        if (!COURSE_COLORS.includes(color)) {
+          return statusResponse({ error: 'Invalid color' }, 400);
+        }
         updatePayload.color = color;
       }
       if (daypart) {
         updatePayload.daypart = daypart;
       }
 
+      // Ensure we have at least one field to update
+      if (!updatePayload.color && !updatePayload.daypart) {
+        return statusResponse({ error: 'No valid fields to update' }, 400);
+      }
+
       const result = await db.update(courses)
-        .set({
-          ...(updatePayload.color ? { color: updatePayload.color } : {}),
-          ...(updatePayload.daypart ? { daypart: updatePayload.daypart } : {}),
-        })
+        .set(updatePayload)
         .where(and(eq(courses.id, courseId), eq(courses.userId, user.id)))
         .returning();
       if (!result.length) {

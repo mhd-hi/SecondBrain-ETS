@@ -41,7 +41,8 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts",
-    "types/**/*.d.ts"
+    "types/**/*.d.ts",
+    "src/components/WeeklyRoadmap/WeeklyRoadmap.tsx.old"
   ],
   "exclude": [
     "node_modules",

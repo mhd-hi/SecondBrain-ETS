@@ -4,7 +4,7 @@ import type { Task, TaskType } from '@/types/task';
 import { calculateDueDateTask } from '@/lib/utils/task/task-util';
 import { StatusTask } from '@/types/status-task';
 
-export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId'>> {
+export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId' | 'course'>> {
     return raw.map((item, index) => {
         const type = (item.type ?? 'theorie') as TaskType;
         const title = String(item.title ?? '').trim();
@@ -20,7 +20,7 @@ export function normalizeTasks(raw: AITask[]): Array<Omit<Task, 'id' | 'courseId
             }))
             : undefined;
 
-        const task: Omit<Task, 'id' | 'courseId'> = {
+        const task: Omit<Task, 'id' | 'courseId' | 'course'> = {
             title,
             notes,
             type,

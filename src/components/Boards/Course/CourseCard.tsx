@@ -28,9 +28,9 @@ type CourseCardProps = {
 export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) {
   const [showColorDialog, setShowColorDialog] = useState(false);
     const [showDaypartDialog, setShowDaypartDialog] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(course.color || '#3b82f6');
+  const [selectedColor, setSelectedColor] = useState(course.color || 'blue');
   const tasks = course.tasks ?? [];
-  const displayColor = selectedColor || course.color || '#3b82f6';
+  const displayColor = selectedColor || course.color || 'blue';
 
   // Calculate progress and task counts
   const progressPercentage = calculateProgress(tasks);
@@ -63,23 +63,19 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
   });
 
   const rawStyle: Record<string, string> = {
-    'borderLeft': `4px solid ${selectedColor}`,
-    // expose course color as a CSS variable so Tailwind classes can still work
-    '--course-color': displayColor,
+    borderLeft: `4px solid ${selectedColor}`,
   };
 
   const cardStyle = rawStyle as React.CSSProperties;
 
   return (
     <div
-      className="relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]"
+      className={`border-l-4 border-${displayColor} relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]`}
       style={cardStyle}
     >
       <div className="absolute -top-[10px] -right-[10px] z-10">
         <ActionsDropdown actions={dropdownActions} triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-        <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={selectedColor} onUpdated={c => setSelectedColor(c)} />
-        {/* legacy inline dialog removed in favor of shared ChangeCourseColorDialog */}
-
+        <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={selectedColor} onUpdated={clr => setSelectedColor(clr)} />
         <ChangeCourseDaypartDialog
           courseId={course.id}
           open={showDaypartDialog}

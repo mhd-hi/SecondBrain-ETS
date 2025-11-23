@@ -3,9 +3,8 @@ export const ROUTES = {
     DASHBOARD: '/',
     COURSES: '/courses',
     POMODORO: '/pomodoro',
-    WEEKLY_ROADMAP: '/weekly-roadmap',
-    ROADMAP: '/roadmap',
     CALENDAR: '/calendar',
+    ROADMAP: '/roadmap',
     PREFERENCES: '/preferences',
     SIGNIN: '/api/auth/signin',
 };

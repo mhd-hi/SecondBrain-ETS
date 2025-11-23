@@ -1,10 +1,11 @@
+import type { TEvent } from '@/calendar/types';
 import type { StatusTask } from '@/types/status-task';
-import type { Subtask } from '@/types/subtask';
 import type { Task } from '@/types/task';
-import { and, eq, gte, inArray, lt } from 'drizzle-orm';
-import { parseStatusTask } from '@/lib/utils/task';
+import { and, eq, gte, lt } from 'drizzle-orm';
+import { studyBlockToEvent, taskToEvent } from '@/calendar/event-utils';
+import { getStudyBlocksForDateRange } from '@/lib/utils/study-block/queries';
 import { db } from '@/server/db';
-import { courses, subtasks, tasks } from '@/server/db/schema';
+import { courses, tasks } from '@/server/db/schema';
 
 type TaskRow = {
   tasks: {
@@ -27,22 +28,10 @@ type TaskRow = {
     code: string;
     term: string;
     color: string;
+    daypart: string;
     createdAt: Date;
     updatedAt: Date;
   } | null;
-};
-
-type DBSubtaskRow = {
-  id: string;
-  type: string;
-  taskId: string;
-  title: string;
-  notes?: string | null;
-  status: string;
-  estimatedEffort: number;
-  createdAt: Date;
-  updatedAt: Date;
-  dueDate?: Date | null;
 };
 
 export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: string): Promise<Task[]> => {
@@ -65,25 +54,6 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
 
     const taskRows = results as TaskRow[];
 
-    const taskIds = taskRows.map(tr => tr.tasks.id).filter(Boolean);
-
-    const subs: DBSubtaskRow[] = taskIds.length > 0
-      ? await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds))
-      : [];
-
-    const subsByTask = new Map<string, Subtask[]>();
-    for (const s of subs) {
-      const list = subsByTask.get(s.taskId) ?? [];
-      list.push({
-        id: s.id,
-        title: s.title,
-        status: parseStatusTask(String(s.status)),
-        notes: s.notes ?? undefined,
-        estimatedEffort: s.estimatedEffort,
-      });
-      subsByTask.set(s.taskId, list);
-    }
-
     return taskRows.map((row) => {
       const t = row.tasks;
       const course = row.courses ?? undefined;
@@ -96,7 +66,6 @@ export const getTasksForWeek = async (startDate: Date, endDate: Date, userId: st
         status: t.status,
         estimatedEffort: t.estimatedEffort,
         actualEffort: t.actualEffort,
-        subtasks: subsByTask.get(t.id) ?? [],
         createdAt: t.createdAt,
         updatedAt: t.updatedAt,
         dueDate: t.dueDate,
@@ -124,4 +93,85 @@ export const updateStatusTask = async (taskId: string, status: StatusTask, userI
     .set({ status, updatedAt: new Date() })
     .where(and(...conditions))
     .returning();
+};
+
+export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: string): Promise<TEvent[]> => {
+  try {
+    if (!userId) {
+      throw new Error('User authentication required');
+    }
+
+    // Fetch tasks
+    const taskConditions = [
+      gte(tasks.dueDate, startDate),
+      lt(tasks.dueDate, endDate),
+      eq(tasks.userId, userId),
+    ];
+
+    const taskResults = await db
+      .select({
+        id: tasks.id,
+        courseId: tasks.courseId,
+        title: tasks.title,
+        notes: tasks.notes,
+        type: tasks.type,
+        status: tasks.status,
+        estimatedEffort: tasks.estimatedEffort,
+        actualEffort: tasks.actualEffort,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+        dueDate: tasks.dueDate,
+        course: {
+          id: courses.id,
+          color: courses.color,
+          daypart: courses.daypart,
+          code: courses.code,
+          name: courses.name,
+          createdAt: courses.createdAt,
+          updatedAt: courses.updatedAt,
+        },
+      })
+      .from(tasks)
+      .innerJoin(courses, eq(tasks.courseId, courses.id))
+      .where(and(...taskConditions));
+
+    // Convert tasks to events using the utility function
+    const taskEvents = taskResults.map((row) => {
+      const task: Task = {
+        id: row.id,
+        courseId: row.courseId,
+        title: row.title,
+        notes: row.notes ?? undefined,
+        type: row.type as Task['type'],
+        status: row.status as StatusTask,
+        estimatedEffort: row.estimatedEffort,
+        actualEffort: row.actualEffort,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        dueDate: row.dueDate,
+        course: {
+          id: row.course.id,
+          color: row.course.color,
+          daypart: row.course.daypart,
+          code: row.course.code,
+          name: row.course.name,
+          createdAt: row.course.createdAt,
+          updatedAt: row.course.updatedAt,
+        },
+      };
+
+      console.log('Converting task to event:', task);
+      return taskToEvent(task);
+    });
+
+    // Fetch study blocks
+    const studyBlocks = await getStudyBlocksForDateRange(startDate, endDate, userId);
+    // Convert study blocks to events
+    const studyBlockEvents = studyBlocks.map(studyBlockToEvent);
+
+    return [...taskEvents, ...studyBlockEvents];
+  } catch (error) {
+    console.error('Error fetching calendar events:', error);
+    throw new Error('Failed to fetch calendar events');
+  }
 };

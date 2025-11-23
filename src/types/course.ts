@@ -1,3 +1,4 @@
+import type { TCourseColor } from './colors';
 import type { CustomLinkItem } from './custom-link';
 import type { Task } from './task';
 
@@ -8,7 +9,7 @@ export type Course = {
   code: string;
   name: string;
   daypart: Daypart;
-  color: string;
+  color: TCourseColor;
   description?: string;
   createdAt: Date;
   updatedAt: Date;
