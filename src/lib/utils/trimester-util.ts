@@ -1,4 +1,4 @@
-import { getCurrentTerm, getDatesForTerm, getCurrentOrUpcomingTerm } from '@/lib/utils/term-util';
+import { getCurrentOrUpcomingTerm, getDatesForTerm } from '@/lib/utils/term-util';
 import { TRIMESTER } from '@/types/term';
 
 export type TrimesterInfo = {
