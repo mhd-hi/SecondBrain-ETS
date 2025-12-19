@@ -12,7 +12,11 @@ if (process.env.NODE_ENV === 'production') {
 
     // Add optional integrations for additional features
     integrations: [
-      Sentry.replayIntegration(),
+      Sentry.replayIntegration({
+        maskAllText: false,
+        maskAllInputs: false,
+        blockAllMedia: false,
+      }),
       Sentry.browserTracingIntegration(),
       Sentry.browserProfilingIntegration(),
       // Only send console.error and console.warn calls as logs to Sentry

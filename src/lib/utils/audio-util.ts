@@ -28,13 +28,21 @@ type BeepOptions = {
   volume?: number;
 };
 
+// Persistent AudioContext instance
+let audioContextInstance: AudioContext | null = null;
+
 /**
- * Creates a Web Audio API context with fallback for different browsers
+ * Gets or creates a Web Audio API context with fallback for different browsers
  */
-function createAudioContext(): AudioContext | null {
+function getAudioContext(): AudioContext | null {
+  if (audioContextInstance && audioContextInstance.state !== 'closed') {
+    return audioContextInstance;
+  }
+
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    return new AudioContextClass();
+    audioContextInstance = new AudioContextClass();
+    return audioContextInstance;
   } catch (error) {
     console.warn('Could not create audio context:', error);
     return null;
@@ -73,7 +81,7 @@ function createBeep(
  */
 export function playCompletionSound(volume?: number): void {
   try {
-    const audioContext = createAudioContext();
+    const audioContext = getAudioContext();
     if (!audioContext) {
       return;
     }
@@ -92,7 +100,7 @@ export function playCompletionSound(volume?: number): void {
  */
 export function playNotificationSound(volume?: number): void {
   try {
-    const audioContext = createAudioContext();
+    const audioContext = getAudioContext();
     if (!audioContext) {
       return;
     }
@@ -104,7 +112,7 @@ export function playNotificationSound(volume?: number): void {
       volume: v,
     });
   } catch (error) {
-    console.warn('Could not play alert sound:', error);
+    console.warn('Could not play notification sound:', error);
   }
 }
 
@@ -114,7 +122,7 @@ export function playNotificationSound(volume?: number): void {
  */
 export function playAlertSound(volume?: number): void {
   try {
-    const audioContext = createAudioContext();
+    const audioContext = getAudioContext();
     if (!audioContext) {
       return;
     }
