@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +29,7 @@ jobs:
         run: bun audit
 
   typecheck:
+    name: Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +44,24 @@ jobs:
       - name: Run typecheck
         run: bun run typecheck
 
-  test-db-build:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.15
+      - name: Install dependencies
+        run: bun install
+      - name: Run tests
+        run: bun run test:run
+
+  test-db-migration-build:
+    name: Test DB Migration
     runs-on: ubuntu-latest
     services:
       postgres:
