@@ -17,6 +17,16 @@ import {
 } from '@/lib/utils/term-util';
 import { TRIMESTER } from '@/types/term';
 
+// Test data factory
+const TRIMESTER_DATES = {
+    WINTER_2025_START: new Date(2025, 0, 5),
+    WINTER_2025_END: new Date(2025, 3, 27),
+    SUMMER_2025_START: new Date(2025, 4, 1),
+    SUMMER_2025_END: new Date(2025, 7, 15),
+    AUTUMN_2025_START: new Date(2025, 8, 2),
+    AUTUMN_2025_END: new Date(2025, 11, 18),
+} as const;
+
 describe('term-util', () => {
     describe('isValidTermId', () => {
         it('should validate correct term IDs', () => {
@@ -341,11 +351,225 @@ describe('term-util', () => {
 
             expect(week).toBe(1);
         });
+
+        it('should calculate mid-term week for date in middle of term', () => {
+            // Jan 26, 2025 is 21 days (3 weeks) after winter start (Jan 5)
+            const dueDate = new Date(2025, 0, 26);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(3);
+        });
+
+        it('should calculate late-term week for date near end of term', () => {
+            // Apr 20, 2025 is near the end of winter (Apr 27)
+            const dueDate = new Date(2025, 3, 20);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(13);
+        });
+
+        it('should handle date on term end', () => {
+            // Apr 27, 2025 is the last day of winter
+            const dueDate = new Date(2025, 3, 27);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(13);
+        });
+
+        it('should handle date between autumn and winter (Dec 19, 2025)', () => {
+            // Dec 19, 2025 is between Autumn end (Dec 18) and Winter start (Jan 5, 2026)
+            // The function falls back to winter of the same year before checking next year
+            const dueDate = new Date(2025, 11, 19);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            // Since Dec 19 is after all 2025 terms end, it falls back to Autumn as the last term of 2025
+            expect(week).toBe(13);
+        });
+
+        it('should handle date between autumn and winter (Dec 18, 2025)', () => {
+            // Dec 18, 2025 is the last day of Autumn 2025
+            const dueDate = new Date(2025, 11, 18);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(13);
+        });
+
+        it('should handle date between winter and summer (Apr 28, 2025)', () => {
+            // Apr 28, 2025 is between Winter end (Apr 27) and Summer start (May 4)
+            const dueDate = new Date(2025, 3, 28);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            // Should default to next upcoming term (Summer 2025) week 1
+            expect(week).toBe(1);
+        });
+
+        it('should handle date between summer and autumn (Aug 16, 2025)', () => {
+            // Aug 16, 2025 is between Summer end (Aug 15) and Autumn start (Sep 2)
+            const dueDate = new Date(2025, 7, 16);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            // Should default to next upcoming term (Autumn 2025) week 1
+            expect(week).toBe(1);
+        });
+
+        it('should handle summer term dates', () => {
+            // May 11, 2025 is one week after summer start (May 4)
+            const dueDate = new Date(2025, 4, 11);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(1);
+        });
+
+        it('should handle autumn term dates', () => {
+            // Sep 9, 2025 is one week after autumn start (Sep 2)
+            const dueDate = new Date(2025, 8, 9);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(1);
+        });
+
+        it('should handle date far in the future', () => {
+            // Dec 1, 2026 (future year)
+            const dueDate = new Date(2026, 11, 1);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            // Should map to appropriate term in that year
+            expect(week).toBeGreaterThanOrEqual(1);
+            expect(week).toBeLessThanOrEqual(13);
+        });
     });
 
     describe('STANDARD_WEEKS_PER_TERM', () => {
         it('should be 13 weeks', () => {
             expect(STANDARD_WEEKS_PER_TERM).toBe(13);
+        });
+    });
+
+    describe('calculateWeekFromDueDate - boundary seconds', () => {
+        it('should handle term start at 00:00:00', () => {
+            const dueDate = new Date(2025, 0, 5, 0, 0, 0);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(1);
+        });
+
+        it('should handle date just before term end', () => {
+            // Apr 26, 2025 at 23:59:59 is still within the term
+            const dueDate = new Date(2025, 3, 26, 23, 59, 59);
+
+            const week = calculateWeekFromDueDate(dueDate);
+
+            expect(week).toBe(13);
+        });
+    });
+
+    describe('calculateWeekFromDueDate - variable course weeks', () => {
+        it('should scale weeks correctly for different course lengths', () => {
+            const dueDate = new Date(2025, 0, 12); // Week 1 of term
+
+            expect(calculateWeekFromDueDate(dueDate, 13)).toBe(1);
+            expect(calculateWeekFromDueDate(dueDate, 26)).toBeGreaterThan(1);
+            expect(calculateWeekFromDueDate(dueDate, 4)).toBeGreaterThanOrEqual(1);
+        });
+
+        it('should not exceed total course weeks', () => {
+            // Near end of term
+            const dueDate = new Date(2025, 3, 25);
+
+            expect(calculateWeekFromDueDate(dueDate, 10)).toBeLessThanOrEqual(10);
+            expect(calculateWeekFromDueDate(dueDate, 20)).toBeLessThanOrEqual(20);
+        });
+    });
+
+    describe('buildTerm - structure validation', () => {
+        it('should build term with correct structure', () => {
+            const term = buildTerm({ trimester: TRIMESTER.WINTER, year: 2025 });
+
+            expect(term).toMatchObject({
+                id: '20251',
+                label: 'Hiver 2025',
+            });
+        });
+
+        it('should build all term types with consistent structure', () => {
+            const winterTerm = buildTerm({ trimester: TRIMESTER.WINTER, year: 2025 });
+            const summerTerm = buildTerm({ trimester: TRIMESTER.SUMMER, year: 2025 });
+            const autumnTerm = buildTerm({ trimester: TRIMESTER.AUTUMN, year: 2025 });
+
+            [winterTerm, summerTerm, autumnTerm].forEach((term) => {
+                expect(term).toHaveProperty('id');
+                expect(term).toHaveProperty('label');
+                expect(term.id).toMatch(/^\d{5}$/);
+                expect(term.label).toMatch(/\d{4}$/); // Year at end
+            });
+        });
+    });
+
+    describe('getNextTerm vs getCurrentOrUpcomingTerm', () => {
+        beforeEach(() => {
+            vi.useFakeTimers();
+        });
+
+        afterEach(() => {
+            vi.useRealTimers();
+        });
+
+        it('should differ when in a term', () => {
+            // Jan 15, 2025 is in winter
+            vi.setSystemTime(new Date(2025, 0, 15));
+
+            expect(getCurrentTerm()).toBe(TRIMESTER.WINTER);
+            expect(getNextTerm()).toBe(TRIMESTER.SUMMER);
+
+            const upcoming = getCurrentOrUpcomingTerm();
+
+            expect(upcoming.trimester).toBe(TRIMESTER.WINTER);
+            expect(upcoming.year).toBe(2025);
+        });
+
+        it('should be same when between terms', () => {
+            // Dec 25, 2025 is between terms
+            vi.setSystemTime(new Date(2025, 11, 25));
+
+            expect(getCurrentTerm()).toBeNull();
+            expect(getNextTerm()).toBe(TRIMESTER.WINTER);
+
+            const upcoming = getCurrentOrUpcomingTerm();
+
+            expect(upcoming.trimester).toBe(TRIMESTER.WINTER);
+            expect(upcoming.year).toBe(2026);
+        });
+    });
+
+    describe('getTrimesterDatesForYear - consistency', () => {
+        it('should return dates matching test data factory', () => {
+            const dates = getTrimesterDatesForYear(2025);
+
+            expect(dates[TRIMESTER.WINTER].start).toEqual(TRIMESTER_DATES.WINTER_2025_START);
+            expect(dates[TRIMESTER.WINTER].end).toEqual(TRIMESTER_DATES.WINTER_2025_END);
+            expect(dates[TRIMESTER.SUMMER].start).toEqual(TRIMESTER_DATES.SUMMER_2025_START);
+            expect(dates[TRIMESTER.SUMMER].end).toEqual(TRIMESTER_DATES.SUMMER_2025_END);
+            expect(dates[TRIMESTER.AUTUMN].start).toEqual(TRIMESTER_DATES.AUTUMN_2025_START);
+            expect(dates[TRIMESTER.AUTUMN].end).toEqual(TRIMESTER_DATES.AUTUMN_2025_END);
+        });
+
+        it('should have consistent weeks across all trimesters', () => {
+            const dates = getTrimesterDatesForYear(2025);
+
+            expect(dates[TRIMESTER.WINTER].weeks).toBe(STANDARD_WEEKS_PER_TERM);
+            expect(dates[TRIMESTER.SUMMER].weeks).toBe(STANDARD_WEEKS_PER_TERM);
+            expect(dates[TRIMESTER.AUTUMN].weeks).toBe(STANDARD_WEEKS_PER_TERM);
         });
     });
 });
