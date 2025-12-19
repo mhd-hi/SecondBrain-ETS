@@ -1,21 +1,16 @@
+import { soundManager } from '@/lib/sound-manager';
 /**
  * Plays the selected notification sound based on user settings
  */
 export function playSelectedNotificationSound(sound: string, volume: number) {
-  switch (sound) {
-    case 'chime':
-      playNotificationSound(volume);
-      break;
-    case 'bell':
-      playAlertSound(volume);
-      break;
-    case 'none':
-      // No sound
-      break;
-    default:
-      playCompletionSound(volume);
-      break;
+  // Set volume globally
+  soundManager.setVolume(volume);
+  // Convert sound to key format
+  let key = sound;
+  if (key && key !== 'none') {
+    key = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
+  soundManager.play(key);
 }
 /**
  * Audio utility functions for creating pleasant notification sounds

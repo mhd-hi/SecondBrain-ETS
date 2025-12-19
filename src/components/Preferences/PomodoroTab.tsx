@@ -12,7 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { loadPomodoroSettings, savePomodoroSettings } from '@/lib/localstorage/pomodoro';
 import { initialPomodoroSettingsState, pomodoroSettingsReducer } from '@/lib/localstorage/pomodoro-settings-reducer';
+import { SOUND_KEYS, soundManager } from '@/lib/sound-manager';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
+// Removed duplicate import
 
 export function PomodoroTab() {
   const [state, dispatch] = useReducer(pomodoroSettingsReducer, initialPomodoroSettingsState);
@@ -34,8 +36,8 @@ export function PomodoroTab() {
   }, []);
 
   const testNotificationSound = useCallback(() => {
+    soundManager.init();
     const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
-
     playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
   }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume]);
 
@@ -145,7 +147,6 @@ export function PomodoroTab() {
           {/* Notification Sound */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="space-y-0.5">
-              <Label className="text-base">Notification Sound</Label>
               <div className="text-sm text-muted-foreground">
                 Choose your completion sound
               </div>
@@ -159,9 +160,11 @@ export function PomodoroTab() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default</SelectItem>
-                  <SelectItem value="chime">Chime</SelectItem>
-                  <SelectItem value="bell">Bell</SelectItem>
+                  {Object.keys(SOUND_KEYS).map(key => (
+                    <SelectItem key={key} value={key.toLowerCase().replace(/ /g, '_')}>
+                      {key}
+                    </SelectItem>
+                  ))}
                   <SelectItem value="none">None</SelectItem>
                 </SelectContent>
               </Select>

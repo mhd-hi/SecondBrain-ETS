@@ -7,6 +7,7 @@ import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { completePomodoroSession } from '@/hooks/use-pomodoro';
+import { soundManager } from '@/lib/sound-manager';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 import { PomodoroContext } from './pomodoro-context';
 
@@ -134,6 +135,10 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     // Ensure session is active when starting timer
     if (!isPomodoroActive) {
       setIsPomodoroActive(true);
+    }
+    // Unlock audio context and preload sounds on first timer start
+    if (typeof window !== 'undefined' && !soundManager.isReady()) {
+      soundManager.init();
     }
     setIsRunning(!isRunning);
   }, [isRunning, isPomodoroActive]);

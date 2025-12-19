@@ -29,10 +29,10 @@
   "chat.tools.terminal.autoApprove": {
     "mkdir": true,
     "/^git (status|diff|show\\b.*)$/": true,
+    "/^npm (test|run test|run build)$/": true,
+    "/^bun (test|run test|run build)$/": true,
     // keep dangerous stuff blocked
     "rm": false,
     "del": false,
-    "curl": false,
-    "wget": false
-  }
+  },
 }

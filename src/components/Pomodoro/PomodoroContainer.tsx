@@ -98,19 +98,19 @@ export function PomodoroContainer() {
                 />
                 <TabsTrigger
                   value="work"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Pomodoro
                 </TabsTrigger>
                 <TabsTrigger
                   value="shortBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Short Break
                 </TabsTrigger>
                 <TabsTrigger
                   value="longBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:!bg-transparent data-[state=active]:!text-foreground data-[state=active]:shadow-none transition-colors duration-200"
+                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
                 >
                   Long Break
                 </TabsTrigger>
