@@ -18,7 +18,7 @@ function TrimesterTimelineBar({ weekOfTrimester, totalWeeks }: { weekOfTrimester
         style={{ width: `${currentPosition}%` }}
       />
       <div
-        className="absolute top-1/2 w-4 h-4 bg-sky-600 rounded-full border-1 border-background transform -translate-y-1/2 -translate-x-1/2 z-10 shadow-sm"
+        className="absolute top-1/2 w-4 h-4 bg-sky-600 rounded-full border border-background transform -translate-y-1/2 -translate-x-1/2 z-10 shadow-sm"
         style={{ left: `${Math.min(Math.max(currentPosition, 3), 97)}%` }}
         title={`Week ${weekOfTrimester} of ${totalWeeks}`}
       />

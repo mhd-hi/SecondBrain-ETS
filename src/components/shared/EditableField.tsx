@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 
 type EditableFieldProps = {
   value: string;
@@ -93,10 +94,9 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         ? (
           inputType === 'textarea'
             ? (
-              <textarea
+              <Textarea
                 ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                className="w-full border border-muted-foreground/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground resize-none transition-all"
-                style={{ borderWidth: '1.5px', minHeight: '2.5em', maxHeight: '6em' }}
+                className="resize-y min-h-[2.5em]"
                 value={editValue}
                 onChange={e => setEditValue(e.target.value)}
                 onBlur={handleBlur}
