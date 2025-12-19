@@ -148,6 +148,37 @@ export function getNextTerm(): TrimesterKey {
     }
 }
 
+/**
+ * Get the current term if we're in one, otherwise return the next upcoming term
+ * Returns both the trimester and the correct year
+ */
+export function getCurrentOrUpcomingTerm(): { trimester: TrimesterKey; year: number } {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentTerm = getCurrentTerm();
+
+    if (currentTerm) {
+        return { trimester: currentTerm, year: currentYear };
+    }
+
+    // We're between terms, find which year the next term belongs to
+    const yearDates = getTrimesterDatesForYear(currentYear);
+    const winterDates = yearDates[TRIMESTER.WINTER];
+    const summerDates = yearDates[TRIMESTER.SUMMER];
+    const autumnDates = yearDates[TRIMESTER.AUTUMN];
+
+    if (winterDates && now < winterDates.start) {
+        return { trimester: TRIMESTER.WINTER, year: currentYear };
+    } else if (summerDates && now < summerDates.start) {
+        return { trimester: TRIMESTER.SUMMER, year: currentYear };
+    } else if (autumnDates && now < autumnDates.start) {
+        return { trimester: TRIMESTER.AUTUMN, year: currentYear };
+    } else {
+        // After autumn ends, next term is next year's winter
+        return { trimester: TRIMESTER.WINTER, year: currentYear + 1 };
+    }
+}
+
 export const getPrevTerm = (trimester: TrimesterKey, year: number) => {
     if (trimester === TRIMESTER.WINTER) {
         return { trimester: TRIMESTER.AUTUMN, year: year - 1 };

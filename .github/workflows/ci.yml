@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   lint:
+    name: Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -28,6 +29,7 @@ jobs:
         run: bun audit
 
   typecheck:
+    name: Type Check
     runs-on: ubuntu-latest
 
     steps:
@@ -42,7 +44,23 @@ jobs:
       - name: Run typecheck
         run: bun run typecheck
 
-  test-db-build:
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.15
+      - name: Install dependencies
+        run: bun install
+      - name: Run tests
+        run: bun run test:run
+
+  test-db-migration-build:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -87,3 +105,40 @@ jobs:
 
       - name: Build (migrations + production build)
         run: bun run build
+  # Gating job: All checks must pass before allowing merges
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test, test-db-migration-build]
+    if: always()
+
+    steps:
+      - name: Check job statuses
+        run: |
+          failed=false
+
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ Lint check failed"
+            failed=true
+          fi
+
+          if [[ "${{ needs.typecheck.result }}" != "success" ]]; then
+            echo "❌ Type check failed"
+            failed=true
+          fi
+
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "❌ Unit tests failed"
+            failed=true
+          fi
+
+          if [[ "${{ needs.test-db-migration-build.result }}" != "success" ]]; then
+            echo "❌ Database migration and build failed"
+            failed=true
+          fi
+
+          if [[ "$failed" == "true" ]]; then
+            exit 1
+          fi
+
+          echo "✅ All checks passed!"
