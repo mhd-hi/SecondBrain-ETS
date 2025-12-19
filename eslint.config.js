@@ -20,7 +20,14 @@ export default antfu(
       css: true,
     },
 
-    ignores: ['migrations/**/*', 'next-env.d.ts', 'node_modules/**/*', 'public/**/*'],
+    ignores: ['migrations/**/*', 'next-env.d.ts', 'node_modules/**/*', 'public/**/*',
+      "bun.lock",
+      "yarn.lock",
+      "package-lock.json",
+      ".next",
+      "node_modules",
+      "dist"
+    ],
   },
   jsxA11y.flatConfigs.recommended,
   {
