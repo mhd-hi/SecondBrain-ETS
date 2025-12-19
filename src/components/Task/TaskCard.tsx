@@ -179,7 +179,7 @@ export function TaskCard({
         </div>
       )}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1 flex-grow min-w-0">
+        <div className="space-y-1 grow min-w-0">
           {/* Editable Title */}
           <EditableField
             value={editedTitle}
@@ -273,7 +273,7 @@ export function TaskCard({
                     title="Click to edit estimated effort (hours)"
                   >
                     <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                      <Clock className="h-3 w-3 flex-shrink-0" />
+                      <Clock className="h-3 w-3 shrink-0" />
                       {formatEffortTime(editedEffort ?? task.estimatedEffort)}
                     </span>
                   </Badge>
@@ -285,7 +285,7 @@ export function TaskCard({
             {task.estimatedEffort > 0 && task.actualEffort > 0 && (
               <Badge variant="muted">
                 <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground">
-                  <BarChart3 className="h-3 w-3 flex-shrink-0" />
+                  <BarChart3 className="h-3 w-3 shrink-0" />
                   {Math.round((task.actualEffort / task.estimatedEffort) * 100)}
                   % complete
                 </span>
@@ -313,7 +313,7 @@ export function TaskCard({
           )}
         >
           <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:w-auto">
-            <div className="flex-shrink min-w-0 ml-auto">
+            <div className="shrink min-w-0 ml-auto">
               <StatusTaskChanger
                 currentStatus={task.status}
                 onStatusChange={newStatus => onUpdateStatusTask(task.id, newStatus)}
@@ -323,7 +323,7 @@ export function TaskCard({
               <Button
                 onClick={handleStartPomodoro}
                 size="sm"
-                className="pomodoro-button h-8 px-3 flex-shrink min-w-0 ml-auto"
+                className="pomodoro-button h-8 px-3 shrink min-w-0 ml-auto"
               >
                 <Play className="h-4 w-4" />
                 Pomodoro

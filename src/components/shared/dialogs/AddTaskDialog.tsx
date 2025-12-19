@@ -3,9 +3,10 @@
 import type { Course } from '@/types/course';
 import type { TaskType } from '@/types/task';
 import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
@@ -56,6 +57,11 @@ export const AddTaskDialog = ({
       // Uncontrolled mode: update internal state
       setInternalOpen(open);
     }
+
+    // When dialog is closed, trigger data refresh
+    if (!open) {
+      onTaskAdded();
+    }
   };
   const { addTask, isLoading } = useTask();
   const [newTask, setNewTask] = useState(() => ({
@@ -67,6 +73,8 @@ export const AddTaskDialog = ({
     status: StatusTask.TODO,
   }));
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(courseId ?? null);
+  const [createMore, setCreateMore] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
@@ -84,7 +92,8 @@ export const AddTaskDialog = ({
     });
     if (success) {
       toast.success('Task added successfully');
-      setIsOpen(false);
+
+      // Reset form
       setNewTask({
         title: '',
         notes: '',
@@ -93,7 +102,17 @@ export const AddTaskDialog = ({
         type: TASK_TYPES.THEORIE,
         status: StatusTask.TODO,
       });
-      onTaskAdded();
+
+      if (!createMore) {
+        // Only trigger refresh when closing the dialog
+        setIsOpen(false);
+        onTaskAdded();
+      } else {
+        // Focus the title input for quick next task entry
+        setTimeout(() => {
+          titleInputRef.current?.focus();
+        }, 100);
+      }
     }
   };
 
@@ -139,6 +158,7 @@ export const AddTaskDialog = ({
             <div className="grid gap-2">
               <Label htmlFor="title">Title</Label>
               <Input
+                ref={titleInputRef}
                 id="title"
                 value={newTask.title}
                 onChange={e => setNewTask({ ...newTask, title: e.target.value })}
@@ -199,6 +219,19 @@ export const AddTaskDialog = ({
             </div>
           </div>
           <DialogFooter>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="create-more"
+                checked={createMore}
+                onCheckedChange={checked => setCreateMore(checked === true)}
+              />
+              <label
+                htmlFor="create-more"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+              >
+                Create more
+              </label>
+            </div>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Adding...' : 'Add Task'}
             </Button>
