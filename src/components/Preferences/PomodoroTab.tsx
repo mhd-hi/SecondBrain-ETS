@@ -3,7 +3,6 @@
 import type { PomodoroSettings } from '@/lib/localstorage/pomodoro';
 
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,11 +36,12 @@ export function PomodoroTab() {
     };
   }, []);
 
-  // Save settings to localStorage
-  const savePomodoroSettingsHandler = useCallback(() => {
-    savePomodoroSettings(state.pomodoroSettings);
-    toast.success('Pomodoro settings saved!');
-  }, [state.pomodoroSettings]);
+  // Auto-save settings whenever they change
+  useEffect(() => {
+    if (!state.isLoading) {
+      savePomodoroSettings(state.pomodoroSettings);
+    }
+  }, [state.pomodoroSettings, state.isLoading]);
 
   const updatePomodoroSetting = useCallback((key: keyof PomodoroSettings, value: number | string) => {
     dispatch({ type: 'UPDATE_SETTING', key, value });
@@ -59,12 +59,6 @@ export function PomodoroTab() {
       </div>
     );
   }
-
-  // Compare current state to loaded settings to determine if changes exist
-  const loadedSettings = loadPomodoroSettings();
-  const isDirty = Object.keys(state.pomodoroSettings).some(
-    key => state.pomodoroSettings[key as keyof PomodoroSettings] !== loadedSettings[key as keyof PomodoroSettings],
-  );
 
   return (
     <Card>
@@ -200,17 +194,6 @@ export function PomodoroTab() {
               }
             </div>
           </div>
-        </div>
-
-        {/* Save Button */}
-        <div className="flex justify-end pt-4">
-          <Button
-            onClick={savePomodoroSettingsHandler}
-            className="w-full sm:w-auto"
-            disabled={!isDirty}
-          >
-            Save Pomodoro Settings
-          </Button>
         </div>
       </CardContent>
     </Card>
