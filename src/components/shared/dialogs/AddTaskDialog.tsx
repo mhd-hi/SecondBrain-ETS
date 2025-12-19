@@ -57,7 +57,7 @@ export const AddTaskDialog = ({
       // Uncontrolled mode: update internal state
       setInternalOpen(open);
     }
-    
+
     // When dialog is closed, trigger data refresh
     if (!open) {
       onTaskAdded();
@@ -92,7 +92,7 @@ export const AddTaskDialog = ({
     });
     if (success) {
       toast.success('Task added successfully');
-      
+
       // Reset form
       setNewTask({
         title: '',
@@ -102,7 +102,7 @@ export const AddTaskDialog = ({
         type: TASK_TYPES.THEORIE,
         status: StatusTask.TODO,
       });
-      
+
       if (!createMore) {
         // Only trigger refresh when closing the dialog
         setIsOpen(false);
@@ -220,13 +220,13 @@ export const AddTaskDialog = ({
           </div>
           <DialogFooter>
             <div className="flex items-center gap-2">
-              <Checkbox 
-                id="create-more" 
+              <Checkbox
+                id="create-more"
                 checked={createMore}
-                onCheckedChange={(checked) => setCreateMore(checked === true)}
+                onCheckedChange={checked => setCreateMore(checked === true)}
               />
-              <label 
-                htmlFor="create-more" 
+              <label
+                htmlFor="create-more"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
               >
                 Create more
