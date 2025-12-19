@@ -41,6 +41,26 @@ function notifyReadyStateChange() {
     readyListeners.forEach(listener => listener(audioReady));
 }
 
+/**
+ * Resume AudioContext, should be called after a user gesture
+ * Required by browser autoplay policies
+ */
+async function resumeAudioContext(): Promise<void> {
+    if (!isClient()) {
+        return;
+    }
+
+    try {
+        // Access Howler's internal AudioContext
+        const ctx = (Howler as { ctx?: AudioContext }).ctx;
+        if (ctx && ctx.state === 'suspended') {
+            await ctx.resume();
+        }
+    } catch (error) {
+        console.log('Failed to resume AudioContext:', error);
+    }
+}
+
 export const soundManager = {
     /**
      * Initialize sound manager - idempotent, safe to call multiple times
@@ -70,15 +90,26 @@ export const soundManager = {
 
             audioReady = true;
             notifyReadyStateChange();
-
-            // Unlock audio context, required for sound playback on some browsers
-            const firstKey = Object.keys(preloaded)[0];
-            if (firstKey && preloaded[firstKey]) {
-                preloaded[firstKey].play();
-                preloaded[firstKey].stop();
-            }
         } finally {
             isInitializing = false;
+        }
+    },
+
+    /**
+     * Resume audio context - call this on user interaction before playing sounds
+     * Returns true if successful, false otherwise
+     */
+    async resumeAudio(): Promise<boolean> {
+        if (!isClient()) {
+            return false;
+        }
+
+        try {
+            await resumeAudioContext();
+            return true;
+        } catch (error) {
+            console.log('Failed to resume audio:', error);
+            return false;
         }
     },
 

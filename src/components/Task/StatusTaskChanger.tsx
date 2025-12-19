@@ -62,7 +62,7 @@ const StatusTaskChanger = ({ currentStatus, onStatusChange }: StatusTaskChangerP
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
-          className="min-w-[var(--radix-dropdown-menu-trigger-width)] p-0 rounded-md overflow-hidden"
+          className="min-w-(--radix-dropdown-menu-trigger-width) p-0 rounded-md overflow-hidden"
         >
           {USER_STATUS_ORDER.map((status, index) => {
             return (

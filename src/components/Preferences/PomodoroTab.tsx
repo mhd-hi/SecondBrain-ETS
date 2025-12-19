@@ -47,9 +47,9 @@ export function PomodoroTab() {
     dispatch({ type: 'UPDATE_SETTING', key, value });
   }, []);
 
-  const testNotificationSound = useCallback(() => {
+  const testNotificationSound = useCallback(async () => {
     const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
-    playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
+    await playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
   }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume]);
 
   if (state.isLoading) {

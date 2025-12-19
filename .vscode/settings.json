@@ -23,16 +23,5 @@
     "yarn.lock": true
   },
   "debug.toolBarLocation": "hidden", // helps with running the dev script without the debug toolbar
-  "files.insertFinalNewline": true,
-  // TODO: remove later
-  "chat.tools.terminal.enableAutoApprove": true,
-  "chat.tools.terminal.autoApprove": {
-    "mkdir": true,
-    "/^git (status|diff|show\\b.*)$/": true,
-    "/^npm (test|run test|run build)$/": true,
-    "/^bun (test|run test|run build)$/": true,
-    // keep dangerous stuff blocked
-    "rm": false,
-    "del": false,
-  },
+  "files.insertFinalNewline": true
 }
