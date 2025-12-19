@@ -2,7 +2,7 @@
 
 import type { PomodoroSettings } from '@/lib/localstorage/pomodoro';
 
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,15 +14,27 @@ import { loadPomodoroSettings, savePomodoroSettings } from '@/lib/localstorage/p
 import { initialPomodoroSettingsState, pomodoroSettingsReducer } from '@/lib/localstorage/pomodoro-settings-reducer';
 import { SOUND_KEYS, soundManager } from '@/lib/sound-manager';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
-// Removed duplicate import
 
 export function PomodoroTab() {
   const [state, dispatch] = useReducer(pomodoroSettingsReducer, initialPomodoroSettingsState);
+  const [soundReady, setSoundReady] = useState(soundManager.isReady());
 
   // Load settings from localStorage on mount
   useEffect(() => {
     const settings = loadPomodoroSettings();
     dispatch({ type: 'LOAD_SETTINGS', payload: settings });
+  }, []);
+
+  // Monitor sound manager readiness via event listener
+  useEffect(() => {
+    // Subscribe to ready state changes
+    const unsubscribe = soundManager.onReadyStateChange((ready) => {
+      setSoundReady(ready);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Save settings to localStorage
@@ -36,7 +48,6 @@ export function PomodoroTab() {
   }, []);
 
   const testNotificationSound = useCallback(() => {
-    soundManager.init();
     const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
     playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
   }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume]);
@@ -168,14 +179,25 @@ export function PomodoroTab() {
                   <SelectItem value="none">None</SelectItem>
                 </SelectContent>
               </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={testNotificationSound}
-                disabled={state.pomodoroSettings.notificationSound === 'none'}
-              >
-                Test
-              </Button>
+              {
+                soundReady
+                  ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={testNotificationSound}
+                      disabled={state.pomodoroSettings.notificationSound === 'none'}
+                    >
+                      Test
+                    </Button>
+                  )
+                  : (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      Loading sounds...
+                    </div>
+                  )
+              }
             </div>
           </div>
         </div>

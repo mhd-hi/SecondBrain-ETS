@@ -40,8 +40,11 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
   const [totalTimeSec, setTotalTimeSec] = useState<number | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // On mount, update durations from localStorage
+  // On mount, initialize sound manager and update durations from localStorage
   useEffect(() => {
+    // Initialize sound manager on app startup (idempotent - safe to call multiple times)
+    soundManager.init();
+
     if (typeof window !== 'undefined') {
       const settings = localStorage.getItem('pomodoroSettings');
       let work = DEFAULT_WORK_DURTION;

@@ -13,7 +13,7 @@ export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   shortBreakDuration: 5,
   longBreakDuration: 15,
   soundVolume: 60,
-  notificationSound: 'default',
+  notificationSound: 'sax',
 };
 
 export function loadPomodoroSettings(): PomodoroSettings {
