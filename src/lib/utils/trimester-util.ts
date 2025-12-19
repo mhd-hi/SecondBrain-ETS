@@ -1,4 +1,4 @@
-import { getCurrentTerm, getDatesForTerm } from '@/lib/utils/term-util';
+import { getCurrentOrUpcomingTerm, getDatesForTerm } from '@/lib/utils/term-util';
 import { TRIMESTER } from '@/types/term';
 
 export type TrimesterInfo = {
@@ -13,28 +13,25 @@ export type TrimesterInfo = {
  */
 export function getCurrentTrimesterInfo(): TrimesterInfo {
     const currentDate = new Date();
-    const currentTerm = getCurrentTerm();
 
-    // Default fallback dates
+    // Use getCurrentOrUpcomingTerm to handle between-term periods correctly
+    const { trimester, year } = getCurrentOrUpcomingTerm();
+    const termDigit = trimester === TRIMESTER.WINTER
+        ? '1'
+        : trimester === TRIMESTER.SUMMER
+            ? '2'
+            : '3';
+    const termId = `${year}${termDigit}`;
+
     let startOfTrimester = new Date(currentDate.getFullYear(), 7, 1);
     let endOfTrimester = new Date(currentDate.getFullYear() + 1, 0, 15);
 
-    if (currentTerm) {
-        const year = currentDate.getFullYear();
-        const termDigit = currentTerm === TRIMESTER.WINTER
-            ? '1'
-            : currentTerm === TRIMESTER.SUMMER
-                ? '2'
-                : '3';
-        const termId = `${year}${termDigit}`;
-
-        try {
-            const dates = getDatesForTerm(termId);
-            startOfTrimester = dates.start;
-            endOfTrimester = dates.end;
-        } catch {
-            // Keep fallback dates if term calculation fails
-        }
+    try {
+        const dates = getDatesForTerm(termId);
+        startOfTrimester = dates.start;
+        endOfTrimester = dates.end;
+    } catch {
+        // Keep fallback dates if term calculation fails
     }
 
     const totalWeeks = Math.ceil((endOfTrimester.getTime() - startOfTrimester.getTime()) / (7 * 24 * 60 * 60 * 1000));

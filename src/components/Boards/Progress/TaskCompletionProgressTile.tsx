@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBadgeDate } from '@/lib/utils/date-util';
 import { calculateProgressMetrics } from '@/lib/utils/progress-util';
+import { buildTerm, getCurrentOrUpcomingTerm } from '@/lib/utils/term-util';
 import { getCurrentTrimesterInfo, getCurrentTrimesterPosition } from '@/lib/utils/trimester-util';
 
 function TaskProgressBar({ completed, inProgress, total }: { completed: number; inProgress: number; total: number }) {
@@ -59,20 +60,27 @@ export function CourseProgressTile({ tasks }: CourseProgressTileProps) {
   const nextWeek = new Date();
   nextWeek.setDate(nextWeek.getDate() + 7);
 
+  // Get current or upcoming term label
+  const { trimester, year } = getCurrentOrUpcomingTerm();
+  const termLabel = buildTerm({ trimester, year }).label;
+
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              Completion
-            </CardTitle>
-          </div>
+        <div className="flex items-center justify-between px-2">
+          <CardTitle className="flex items-center gap-2">
+            Completion
+          </CardTitle>
+          {termLabel && (
+            <h3 className="text-sm font-semibold  select-none">
+              {termLabel}
+            </h3>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Task Progress Visualization */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">

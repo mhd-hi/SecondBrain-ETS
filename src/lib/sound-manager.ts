@@ -18,7 +18,6 @@ export const SOUND_KEYS = SOUND_FILES.reduce((acc, file) => {
     return acc;
 }, {} as Record<string, string>);
 
-
 const SOUND_FILE_MAP = SOUND_FILES.reduce((acc, file) => {
     const displayKey = filenameToDisplayKey(file);
     acc[displayKey] = SOUND_DIR + file;

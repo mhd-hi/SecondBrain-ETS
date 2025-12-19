@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTrimesterProgress } from '@/hooks/use-trimester-progress';
 import { formatBadgeDate } from '@/lib/utils/date-util';
+import { buildTerm, getCurrentOrUpcomingTerm } from '@/lib/utils/term-util';
 
 function TrimesterTimelineBar({ weekOfTrimester, totalWeeks }: { weekOfTrimester: number; totalWeeks: number }) {
   const currentPosition = (weekOfTrimester / totalWeeks) * 100;
@@ -48,12 +49,23 @@ export function DashboardProgressTile() {
 
   const { currentSession } = progressStats;
 
+  // Get current or upcoming term label
+  const { trimester, year } = getCurrentOrUpcomingTerm();
+  const termLabel = buildTerm({ trimester, year }).label;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl font-semibold">
-          Progress
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-xl font-semibold">
+            Progress
+          </CardTitle>
+          {termLabel && (
+            <h3 className="text-sm font-semibold select-none">
+              {termLabel}
+            </h3>
+          )}
+        </div>
         <CardDescription className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />
           {formatBadgeDate(currentSession.date)}
