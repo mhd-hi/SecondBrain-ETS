@@ -2,7 +2,8 @@
 
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { QuoteBubble } from '@/components/shared/QuoteBubble';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -71,11 +72,12 @@ export function PomodoroContainer() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="relative max-w-3xl mx-auto space-y-6 pb-32">
       {/* Main Pomodoro Session Card */}
-      <Card className="border-2">
+      <div className="relative">
+        <Card className="border-2">
 
-        <CardContent className="space-y-6 mt-7">
+          <CardContent className="space-y-6 mt-7">
           {/* Task Display */}
           {currentTask && (
             <div className="p-4 bg-muted rounded-lg">
@@ -182,8 +184,11 @@ export function PomodoroContainer() {
           </div>
 
           <StreakBadge streak={streak ?? 0} />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <QuoteBubble className="pointer-events-auto mt-7 justify-items-end" />
+      </div>
 
     </div>
   );

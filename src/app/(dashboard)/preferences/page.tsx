@@ -3,6 +3,7 @@
 import { Settings } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { PreferencesContainer } from '@/components/Preferences/PreferencesContainer';
+import { CapybaraLoader } from '@/components/shared/CapybaraLoader';
 
 export default function PreferencesPage() {
   const { status } = useSession();
@@ -10,7 +11,7 @@ export default function PreferencesPage() {
   if (status === 'loading') {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+        <CapybaraLoader />
       </div>
     );
   }

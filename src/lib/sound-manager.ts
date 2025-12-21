@@ -5,6 +5,7 @@ export const SOUND_DEFAULT = 'Sax';
 const SOUND_DIR = '/sounds/';
 const SOUND_FILES = [
     'sax.mp3',
+    'westminster_chimes.mp3',
     'laugh.mp3',
     'fahh.mp3',
     'chicken_nuggets.mp3',

@@ -214,7 +214,7 @@ export function TaskCard({
             {((task.estimatedEffort >= 0) || editedEffort) && (
               <div>
                 {isEditingEffort && (
-                  <div ref={inputContainerRef} className="w-16 max-w-[72px]">
+                  <div ref={inputContainerRef} className="w-16 max-w-18">
                     {/* Use existing Input component styled for numbers */}
                     <Input
                       type="number"

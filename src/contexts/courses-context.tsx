@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import type { CourseListItem } from '@/types/api/course';
 import type { Course } from '@/types/course';
+import { useSession } from 'next-auth/react';
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/utils/api/api-client-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
@@ -29,6 +30,7 @@ type CoursesProviderProps = {
 };
 
 export function CoursesProvider({ children }: CoursesProviderProps) {
+  const { status } = useSession();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +91,16 @@ export function CoursesProvider({ children }: CoursesProviderProps) {
   }, []);
 
   useEffect(() => {
-    void fetchCourses();
-  }, [fetchCourses]);
+    if (status === 'authenticated') {
+      void fetchCourses();
+    }
+    // Reset loading state when transitioning away from authenticated
+    return () => {
+      if (status !== 'authenticated') {
+        setIsLoading(false);
+      }
+    };
+  }, [fetchCourses, status]);
 
   const value: CoursesContextType = useMemo(() => ({
     courses,
