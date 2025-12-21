@@ -57,7 +57,7 @@ export default function Navbar() {
           <Button
             variant="outline"
             size="sm"
-            className="ml-auto"
+            className="ml-auto hidden md:inline-flex"
             onClick={() => openCommandPalette()}
           >
             <Search className="mr-2 h-4 w-4" />

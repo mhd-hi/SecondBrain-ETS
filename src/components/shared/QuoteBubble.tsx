@@ -18,7 +18,7 @@ export function QuoteBubble({ className }: Props) {
 
   return (
     <div className={className}>
-      <div className="relative w-100 rounded-xl border bg-background/95 shadow-lg backdrop-blur px-4 py-3 space-y-2 text-sm">
+      <div className="relative w-full max-w-full mx-auto md:max-w-md md:mx-0 rounded-xl border bg-background/95 shadow-lg backdrop-blur px-4 py-3 space-y-2 text-sm">
         <span
           aria-hidden
           className="flex pointer-events-none absolute left-0 -top-1 w-1/3 items-center gap-2 -translate-y-4 px-4
