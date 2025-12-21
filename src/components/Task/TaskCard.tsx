@@ -17,6 +17,7 @@ import { toast } from '@/components/ui/sonner';
 import { useUpdateField } from '@/hooks/use-update-field';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
+import { TASK_TYPE_OPTIONS } from '@/types/task';
 import { CourseCodeBadge } from '../shared/atoms/CourseCodeBadge';
 import { EditableField } from '../shared/EditableField';
 
@@ -59,6 +60,27 @@ export function TaskCard({
     task.estimatedEffort > 0 ? task.estimatedEffort : undefined,
   );
   const inputContainerRef = useRef<HTMLDivElement | null>(null);
+
+    // State for type dropdown
+    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+    const [editedType, setEditedType] = useState(task.type);
+
+    // Task type options
+
+    // Save handler for type
+    const handleSaveType = async (newType: string) => {
+      setEditedType(newType as Task['type']);
+      setIsTypeDropdownOpen(false);
+      if (newType !== task.type) {
+        await updateField({
+          type: 'task',
+          id: task.id,
+          input: 'type',
+          value: newType,
+        });
+        toast.success('Task type updated');
+      }
+    };
 
   // Focus the numeric input when entering edit mode
   useEffect(() => {
@@ -210,6 +232,41 @@ export function TaskCard({
               }}
             />
 
+            {/* Task Type (clickable badge, opens dropdown) */}
+            <div className="relative">
+              <Badge
+                variant="muted"
+                className="cursor-pointer select-none"
+                onClick={() => setIsTypeDropdownOpen(true)}
+                title="Click to change task type"
+              >
+                <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                  {TASK_TYPE_OPTIONS.find(opt => opt.value === editedType)?.label ?? editedType}
+                </span>
+              </Badge>
+              {isTypeDropdownOpen && (
+                <div
+                  className="absolute z-20 mt-1 left-0 min-w-30 bg-popover border rounded shadow-lg py-1"
+                  tabIndex={-1}
+                  onBlur={() => setIsTypeDropdownOpen(false)}
+                >
+                  {TASK_TYPE_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      className={cn(
+                        'w-full text-left px-3 py-1 text-xs hover:bg-muted transition-colors',
+                        editedType === opt.value && 'font-bold text-primary',
+                      )}
+                      onClick={() => handleSaveType(opt.value)}
+                      type="button"
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Effort Time (editable) */}
             {((task.estimatedEffort >= 0) || editedEffort) && (
               <div>
@@ -292,16 +349,14 @@ export function TaskCard({
               </Badge>
             )}
 
-              {task.dueDate && task.status !== StatusTask.COMPLETED && (
-                <Badge variant="muted">
-                  <span style={{ cursor: 'pointer' }} aria-label="Edit due date">
-                    <DueDateDisplay
-                      date={editedDueDate ?? task.dueDate}
-                      onChange={d => handleSaveDueDate(d ?? null)}
-                    />
-                  </span>
-                </Badge>
-              )}
+              <Badge variant="muted" className="overflow-hidden ">
+                <span style={{ cursor: 'pointer' }} aria-label="Edit due date" className="block w-full min-w-0">
+                  <DueDateDisplay
+                    date={editedDueDate ?? task.dueDate ?? null}
+                    onChange={d => handleSaveDueDate(d ?? null)}
+                  />
+                </span>
+              </Badge>
           </div>
         </div>
 

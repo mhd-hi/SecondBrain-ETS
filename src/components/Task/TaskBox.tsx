@@ -90,7 +90,7 @@ export const TaskBox = ({
           {task.course?.code && (
             <p className="text-sm text-muted-foreground truncate">{task.course.code}</p>
           )}
-          <Badge variant="secondary" className="text-xs flex-shrink-0">
+          <Badge variant="secondary" className="text-xs shrink-0">
             {task.estimatedEffort}
             {' '}
             hr

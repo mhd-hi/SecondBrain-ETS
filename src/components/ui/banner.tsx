@@ -33,7 +33,7 @@ export function Banner({
             <span className={textClassName}><strong>{message}</strong></span>
           </div>
           {actions && (
-            <div className="flex items-center gap-2 ml-auto flex-shrink-0">
+            <div className="flex items-center gap-2 ml-auto shrink-0">
               {actions}
             </div>
           )}
