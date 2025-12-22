@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
-import { EditTaskDialog } from '@/components/shared/dialogs/EditTaskDialog';
+import { TaskUpdateDialog } from '@/components/shared/dialogs/TaskUpdateDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { Badge } from '@/components/ui/badge';
 import { deleteTask } from '@/hooks/use-task';
@@ -111,7 +111,7 @@ export const TaskBox = ({
           />
         </div>
       </div>
-      <EditTaskDialog
+      <TaskUpdateDialog
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         task={task}

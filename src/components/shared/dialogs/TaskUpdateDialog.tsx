@@ -16,10 +16,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { updateTask } from '@/hooks/use-task';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
-type EditTaskDialogProps = {
+type TaskUpdateDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   task: Task;
@@ -35,7 +36,7 @@ type FormState = {
   status: StatusTask;
 };
 
-export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDialogProps) => {
+export const TaskUpdateDialog = ({ open, onOpenChange, task, onSaved }: TaskUpdateDialogProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<FormState>(() => ({
     title: task.title ?? '',
@@ -52,7 +53,6 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-
     try {
       const payload: Partial<Task> = {
         title: form.title,
@@ -62,18 +62,7 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
         estimatedEffort: form.estimatedEffort,
         status: form.status,
       };
-
-      const res = await fetch(`/api/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || 'Failed to update task');
-      }
-
+      await updateTask(task.id, payload);
       toast.success('Task updated');
       onOpenChange(false);
       onSaved?.();
@@ -89,8 +78,8 @@ export const EditTaskDialog = ({ open, onOpenChange, task, onSaved }: EditTaskDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby="edit-task-description">
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
-          <DialogDescription id="edit-task-description">Edit the task details below and save your changes.</DialogDescription>
+          <DialogTitle>Update Task</DialogTitle>
+          <DialogDescription id="edit-task-description">Update the task details below and save your changes.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSave}>

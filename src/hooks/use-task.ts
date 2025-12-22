@@ -157,3 +157,15 @@ export const useCalendarTasks = () => {
 
   return { getCalendarTasks, isLoading, error };
 };
+
+export const updateTask = async (taskId: string, payload: Partial<Task>): Promise<void> => {
+  const res = await fetch(`/api/tasks/${taskId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'Failed to update task');
+  }
+};
