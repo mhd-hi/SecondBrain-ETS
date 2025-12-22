@@ -280,6 +280,7 @@ export default function CoursePage({ params }: CoursePageProps) {
             })}
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
+            overdueTasks={overdueTasks.map(task => ({ id: task.id, title: task.title, dueDate: task.dueDate ? String(task.dueDate) : undefined }))}
             triggerText="Actions"
             contentAlign="end"
           />

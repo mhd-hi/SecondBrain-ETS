@@ -20,6 +20,12 @@ export type DropdownAction = {
   title?: string;
 };
 
+type OverdueTask = {
+  id: string;
+  title: string;
+  dueDate?: string;
+};
+
 type ActionsDropdownProps = {
   actions: DropdownAction[];
   triggerClassName?: string;
@@ -29,6 +35,7 @@ type ActionsDropdownProps = {
   // optional overdue dialog support (for bulk actions)
   overdueCount?: number;
   onCompleteAll?: () => void;
+  overdueTasks?: OverdueTask[];
 };
 
 export function ActionsDropdown({
@@ -39,6 +46,7 @@ export function ActionsDropdown({
   triggerText,
   overdueCount,
   onCompleteAll,
+  overdueTasks,
 }: ActionsDropdownProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -47,7 +55,7 @@ export function ActionsDropdown({
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            'rounded-full bg-accent p-[6px] hover:bg-muted hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity',
+            'rounded-full bg-accent p-1.5 hover:bg-muted hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-opacity',
             triggerClassName,
             triggerText && 'rounded-md px-4 py-2 font-medium',
           )}
@@ -86,6 +94,7 @@ export function ActionsDropdown({
           onOpenChange={setDialogOpen}
           overdueCount={overdueCount ?? 0}
           onCompleteAll={onCompleteAll}
+          overdueTasks={overdueTasks}
         />
       )}
     </>
