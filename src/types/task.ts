@@ -12,6 +12,14 @@ export const TASK_TYPES = {
   LAB: 'lab',
 } as const;
 
+export const TASK_TYPE_OPTIONS = [
+  { label: 'Théorie', value: 'theorie' },
+  { label: 'Pratique', value: 'pratique' },
+  { label: 'Exam', value: 'exam' },
+  { label: 'Devoir', value: 'homework' },
+  { label: 'Lab', value: 'lab' },
+];
+
 export type Task = {
   id: string;
   courseId: string;

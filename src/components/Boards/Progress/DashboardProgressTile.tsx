@@ -55,7 +55,7 @@ export function DashboardProgressTile() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="px-6">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-xl font-semibold">
             Progress

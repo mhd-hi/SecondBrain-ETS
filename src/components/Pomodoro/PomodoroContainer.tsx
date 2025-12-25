@@ -2,7 +2,8 @@
 
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { QuoteBubble } from '@/components/shared/QuoteBubble';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -71,11 +72,12 @@ export function PomodoroContainer() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="relative max-w-3xl mx-auto space-y-6 pb-32">
       {/* Main Pomodoro Session Card */}
-      <Card className="border-2">
+      <div className="relative">
+        <Card className="border-2">
 
-        <CardContent className="space-y-6 mt-7">
+          <CardContent className="space-y-6 mt-7">
           {/* Task Display */}
           {currentTask && (
             <div className="p-4 bg-muted rounded-lg">
@@ -85,32 +87,24 @@ export function PomodoroContainer() {
           )}
 
           {/* Pomodoro Type Tabs */}
-          <div className="flex justify-center">
+          <div className="flex justify-center px-2">
             <Tabs value={pomodoroType} onValueChange={value => switchToPomodoroType(value as PomodoroType)}>
-              <TabsList className="relative grid w-fit grid-cols-3 h-10 bg-muted/50 p-1 rounded-xl">
-                {/* Sliding background indicator */}
-                <div
-                  className="absolute top-1 bottom-1 bg-background text-foreground rounded-lg shadow-sm transition-all duration-300 ease-out border"
-                  style={{
-                    left: `${pomodoroType === 'work' ? '4px' : pomodoroType === 'shortBreak' ? 'calc(33.333% + 1px)' : 'calc(66.666% - 2px)'}`,
-                    width: 'calc(33.333% - 2px)',
-                  }}
-                />
+              <TabsList className="flex flex-col md:grid w-full max-w-md md:grid-cols-3 h-auto min-h-10 bg-muted/50 p-1 rounded-xl gap-2 md:gap-0">
                 <TabsTrigger
                   value="work"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
+                  className="h-auto min-h-8 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border-0 transition-colors duration-200 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md"
                 >
                   Pomodoro
                 </TabsTrigger>
                 <TabsTrigger
                   value="shortBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
+                  className="h-auto min-h-8 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border-0 transition-colors duration-200 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md"
                 >
                   Short Break
                 </TabsTrigger>
                 <TabsTrigger
                   value="longBreak"
-                  className="relative z-10 h-8 px-3 text-sm font-medium rounded-lg border-0 bg-transparent data-[state=active]:bg-transparent! data-[state=active]:text-foreground! data-[state=active]:shadow-none transition-colors duration-200"
+                  className="h-auto min-h-8 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg border-0 transition-colors duration-200 whitespace-nowrap data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md"
                 >
                   Long Break
                 </TabsTrigger>
@@ -182,8 +176,11 @@ export function PomodoroContainer() {
           </div>
 
           <StreakBadge streak={streak ?? 0} />
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <QuoteBubble className="pointer-events-auto mt-7 justify-items-end" />
+      </div>
 
     </div>
   );

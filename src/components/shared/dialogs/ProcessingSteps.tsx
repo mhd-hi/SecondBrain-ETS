@@ -44,7 +44,7 @@ export function ProcessingSteps({ currentStep, stepStatus }: ProcessingStepsProp
 
     return (
       <div key={stepName} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-        <div className="relative flex-shrink-0">
+        <div className="relative shrink-0">
           {isDatabaseStep
             ? (
               <div className={`w-12 h-12 rounded border flex items-center justify-center bg-muted ${status === 'loading' ? 'animate-pulse' : ''}`}>

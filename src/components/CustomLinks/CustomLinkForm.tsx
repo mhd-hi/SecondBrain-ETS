@@ -68,7 +68,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
   return (
     <form onSubmit={submit} className="space-y-3">
         <div className="flex items-end gap-2">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
                 <label htmlFor="link-type-trigger" className="block text-sm font-medium mb-1">Title</label>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

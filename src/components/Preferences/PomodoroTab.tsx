@@ -43,14 +43,29 @@ export function PomodoroTab() {
     }
   }, [state.pomodoroSettings, state.isLoading]);
 
+  const [isTestPlaying, setIsTestPlaying] = useState(false);
+
   const updatePomodoroSetting = useCallback((key: keyof PomodoroSettings, value: number | string) => {
     dispatch({ type: 'UPDATE_SETTING', key, value });
-  }, []);
+    // Update volume in real-time while sound is playing
+    if (key === 'soundVolume' && isTestPlaying) {
+      const normalizedVolume = Math.max(0, Math.min(1, (value as number) / 100));
+      soundManager.setVolume(normalizedVolume);
+    }
+  }, [isTestPlaying]);
 
   const testNotificationSound = useCallback(async () => {
-    const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
-    await playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
-  }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume]);
+    if (isTestPlaying) {
+      soundManager.stop();
+      setIsTestPlaying(false);
+    } else {
+      const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
+      await playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
+      setIsTestPlaying(true);
+      // Stop after a reasonable time to reset the state
+      setTimeout(() => setIsTestPlaying(false), 5000);
+    }
+  }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume, isTestPlaying]);
 
   if (state.isLoading) {
     return (
@@ -182,7 +197,7 @@ export function PomodoroTab() {
                       onClick={testNotificationSound}
                       disabled={state.pomodoroSettings.notificationSound === 'none'}
                     >
-                      Test
+                      {isTestPlaying ? 'Stop' : 'Test'}
                     </Button>
                   )
                   : (

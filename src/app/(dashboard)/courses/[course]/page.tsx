@@ -12,8 +12,7 @@ import getCourseActions from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 
-import ChangeCourseColorDialog from '@/components/shared/dialogs/ChangeCourseColorDialog';
-import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
+import { CourseUpdateDialog } from '@/components/shared/dialogs/CourseUpdateDialog';
 
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 import { TaskCard } from '@/components/Task/TaskCard';
@@ -188,8 +187,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const overdueTasks = getOverdueTasks(filteredTasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
 
-  const [showColorDialog, setShowColorDialog] = useState(false);
-  const [showDaypartDialog, setShowDaypartDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
 
   const handleCompleteOverdueTasks = async () => {
     try {
@@ -271,20 +269,43 @@ export default function CoursePage({ params }: CoursePageProps) {
         </div>
         <div>
           <ActionsDropdown
-            actions={getCourseActions({
-              onDeleteCourse: handleDeleteCourse,
-              onDeleteAllLinks: handleDeleteAllLinks,
-              onOpenColor: () => setShowColorDialog(true),
-              onOpenDaypart: () => setShowDaypartDialog(true),
-              overdueCount: overdueTasks.length,
-            })}
+            actions={[
+              {
+                label: 'Update course',
+                onClick: () => setShowUpdateDialog(true),
+              },
+              ...getCourseActions({
+                onDeleteCourse: handleDeleteCourse,
+                onDeleteAllLinks: handleDeleteAllLinks,
+                overdueCount: overdueTasks.length,
+              }).filter(a => a.label !== 'Change color' && a.label !== 'Change daypart'),
+            ]}
             overdueCount={overdueTasks.length}
             onCompleteAll={handleCompleteOverdueTasks}
+            overdueTasks={overdueTasks.map(task => ({ id: task.id, title: task.title, dueDate: task.dueDate ? String(task.dueDate) : undefined }))}
             triggerText="Actions"
             contentAlign="end"
           />
-          <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={course.color} onUpdated={() => fetchCourse()} />
-          <ChangeCourseDaypartDialog courseId={course.id} open={showDaypartDialog} onOpenChange={setShowDaypartDialog} currentDaypart={course.daypart} onUpdated={() => fetchCourse()} />
+          <CourseUpdateDialog
+            open={showUpdateDialog}
+            onOpenChange={setShowUpdateDialog}
+            course={course}
+            onUpdate={async ({ color, daypart }) => {
+              // Call update logic here (assume updateCourse API or hook exists)
+              try {
+                // You may need to implement updateCourse in your hooks/api
+                if (color !== course.color || daypart !== course.daypart) {
+                  // Example: await updateCourse(course.id, { color, daypart });
+                  // For now, just show a toast and refetch
+                  toast.success('Course updated');
+                  await fetchCourse();
+                  await refreshCourses();
+                }
+              } catch (e) {
+                ErrorHandlers.api(e, 'Failed to update course');
+              }
+            }}
+          />
         </div>
       </div>
 

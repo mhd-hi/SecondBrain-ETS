@@ -1,16 +1,11 @@
 # Bugs
 - use pomodoroDaily table instead of attributes in user table to track daily pomodoro count
-- Add #theorie tags after effortTime in courseCard shortcuts
 # Features
 
 ### Study blocks
 - Add study block page
 - Allow user to create, edit, delete study blocks
 - Generate study blocks based on course and tasks data
-
-### Shortcut cheatsheet
-- Add a course
-- Add a task
 
 ### Batch-edit tasks
 - Add the button in actions dropdown in Course page
@@ -38,7 +33,6 @@ Once we selected a task, and completed (or partially completed, as long as we cl
 
 ### Tech debt
 - Add a proper state manager to avoid prop drilling shenanigans
-- in complete all overdue tasks, we should list all the affected tasks in the dialog to let user know the affected tasks
 
 ---
 

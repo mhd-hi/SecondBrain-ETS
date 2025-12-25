@@ -3,6 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
+import { CapybaraLoader } from '@/components/shared/CapybaraLoader';
 import { SignInCard } from '@/components/shared/SignInCard';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -21,7 +22,7 @@ function SignInContent() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <CapybaraLoader />
       </div>
     );
   }
@@ -31,7 +32,9 @@ function SignInContent() {
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md shadow-lg">
           <CardContent className="p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="flex justify-center mb-4">
+              <CapybaraLoader />
+            </div>
             <p>Redirecting...</p>
           </CardContent>
         </Card>
@@ -55,7 +58,7 @@ export default function SignInPage() {
     <Suspense
       fallback={(
         <div className="min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <CapybaraLoader />
         </div>
       )}
     >
