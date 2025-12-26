@@ -1,5 +1,7 @@
 // Utility functions and types for Pomodoro localStorage management
 
+import { SOUND_DEFAULT } from '../sound-manager';
+
 export type PomodoroSettings = {
   workDuration: number;
   shortBreakDuration: number;
@@ -13,7 +15,7 @@ export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   shortBreakDuration: 5,
   longBreakDuration: 15,
   soundVolume: 60,
-  notificationSound: 'sax',
+  notificationSound: SOUND_DEFAULT,
 };
 
 export function loadPomodoroSettings(): PomodoroSettings {

@@ -7,6 +7,7 @@ import type { Task } from '@/types/task';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { completePomodoroSession } from '@/hooks/use-pomodoro';
+import { DEFAULT_POMODORO_SETTINGS } from '@/lib/localstorage/pomodoro';
 import { soundManager } from '@/lib/sound-manager';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 import { PomodoroContext } from './pomodoro-context';
@@ -206,13 +207,13 @@ export function PomodoroProvider({ children }: PomodoroProviderProps) {
     ) {
       const timer = setTimeout(() => {
         // Read notification sound and volume from localStorage
-        let sound = 'default';
+        let sound = DEFAULT_POMODORO_SETTINGS.notificationSound;
         let volume = 0.2;
         try {
           const settings = localStorage.getItem('pomodoroSettings');
           if (settings) {
             const parsed = JSON.parse(settings);
-            sound = parsed.notificationSound || 'default';
+            sound = parsed.notificationSound || DEFAULT_POMODORO_SETTINGS.notificationSound;
             volume = typeof parsed.soundVolume === 'number' ? Math.max(0, Math.min(1, parsed.soundVolume / 100)) : 0.2;
           }
         } catch {}
