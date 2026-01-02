@@ -89,6 +89,13 @@ function SidebarProvider({
     [setOpenProp, open],
   );
 
+  // Collapse sidebar by default on small screens (not enough space)
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      setOpen(false);
+    }
+  }, []);
+
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile(open => !open) : setOpen(open => !open);

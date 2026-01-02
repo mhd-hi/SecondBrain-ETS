@@ -60,7 +60,7 @@ export const TaskBox = ({
       {...(!isDragOverlay ? listeners : {})}
     >
   {/* More actions button - visible on hover, positioned on the corner */}
-  <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+      <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <ActionsDropdown
           actions={[
             {
@@ -84,7 +84,7 @@ export const TaskBox = ({
           ]}
           triggerClassName="p-1"
         />
-  </div>
+      </div>
       <div className="text-left w-full">
         <div className="flex items-center justify-between gap-2">
           {task.course?.code && (

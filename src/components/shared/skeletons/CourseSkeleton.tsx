@@ -4,7 +4,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function CourseSkeleton() {
   return (
     <>
-      {/* Course header skeleton */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Skeleton className="h-9 w-24" />

@@ -12,6 +12,12 @@ import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { useUpdateField } from '@/hooks/use-update-field';
@@ -61,26 +67,24 @@ export function TaskCard({
   );
   const inputContainerRef = useRef<HTMLDivElement | null>(null);
 
-    // State for type dropdown
-    const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
-    const [editedType, setEditedType] = useState(task.type);
+  // State for type dropdown (Radix handles open/close)
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  const [editedType, setEditedType] = useState(task.type);
 
-    // Task type options
-
-    // Save handler for type
-    const handleSaveType = async (newType: string) => {
-      setEditedType(newType as Task['type']);
-      setIsTypeDropdownOpen(false);
-      if (newType !== task.type) {
-        await updateField({
-          type: 'task',
-          id: task.id,
-          input: 'type',
-          value: newType,
-        });
-        toast.success('Task type updated');
-      }
-    };
+  // Save handler for type
+  const handleSaveType = async (newType: string) => {
+    setEditedType(newType as Task['type']);
+    setIsTypeDropdownOpen(false); // Always close dropdown on select
+    if (newType !== task.type) {
+      await updateField({
+        type: 'task',
+        id: task.id,
+        input: 'type',
+        value: newType,
+      });
+      toast.success('Task type updated');
+    }
+  };
 
   // Focus the numeric input when entering edit mode
   useEffect(() => {
@@ -232,40 +236,39 @@ export function TaskCard({
               }}
             />
 
-            {/* Task Type (clickable badge, opens dropdown) */}
-            <div className="relative">
-              <Badge
-                variant="muted"
-                className="cursor-pointer select-none"
-                onClick={() => setIsTypeDropdownOpen(true)}
-                title="Click to change task type"
-              >
-                <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
-                  {TASK_TYPE_OPTIONS.find(opt => opt.value === editedType)?.label ?? editedType}
-                </span>
-              </Badge>
-              {isTypeDropdownOpen && (
-                <div
-                  className="absolute z-20 mt-1 left-0 min-w-30 bg-popover border rounded shadow-lg py-1"
-                  tabIndex={-1}
-                  onBlur={() => setIsTypeDropdownOpen(false)}
+            {/* Task Type (Radix dropdown, portaled) */}
+            <DropdownMenu open={isTypeDropdownOpen} onOpenChange={setIsTypeDropdownOpen}>
+              <DropdownMenuTrigger asChild>
+                <Badge
+                  variant="muted"
+                  className="cursor-pointer select-none"
+                  title="Click to change task type"
                 >
-                  {TASK_TYPE_OPTIONS.map(opt => (
-                    <button
-                      key={opt.value}
-                      className={cn(
-                        'w-full text-left px-3 py-1 text-xs hover:bg-muted transition-colors',
-                        editedType === opt.value && 'font-bold text-primary',
-                      )}
-                      onClick={() => handleSaveType(opt.value)}
-                      type="button"
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                  <span className="text-xs font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                    {TASK_TYPE_OPTIONS.find(opt => opt.value === editedType)?.label ?? editedType}
+                  </span>
+                </Badge>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="start" className="min-w-32 p-1">
+                {TASK_TYPE_OPTIONS.map(opt => (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    // Radix prefers onSelect; it also closes the menu automatically
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleSaveType(opt.value);
+                    }}
+                    className={cn(
+                      'text-xs cursor-pointer',
+                      editedType === opt.value && 'font-semibold text-primary',
+                    )}
+                  >
+                    {opt.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Effort Time (editable) */}
             {((task.estimatedEffort >= 0) || editedEffort) && (
