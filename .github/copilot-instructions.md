@@ -12,15 +12,17 @@ This is an AI-powered course management system for ETS university students that 
   - Pipeline communicates via `/api/course-pipeline` with real-time step updates
 
 ### State Management
-- **React Context Pattern**: Global state for courses, states, pomodoro
-  - `CoursesProvider` (`src/contexts/courses-context.tsx`): Main course data
-  - `PomodoroProvider` (`src/contexts/pomodoro-provider.tsx`): Timer functionality
-  - Always wrap components in provider hierarchy defined in `app/layout.tsx`
-- **Zustand Store Pattern**: Centralized state for tasks
-  - `useTaskStore` (`src/lib/stores/task-store.ts`): All task CRUD operations
-  - `useTaskOperations()` hook: Convenience wrapper for common operations
-  - `useCourseTasksStore(courseId)`: Get tasks for specific course with reactivity
-  - Optimistic updates: UI updates immediately, syncs with backend
+- **Zustand Store Pattern**: Centralized global state management
+  - **Tasks**: `useTaskStore` (`src/lib/stores/task-store.ts`)
+    - All task CRUD operations
+    - `useTaskOperations()` hook: Convenience wrapper for common operations
+    - `useCourseTasksStore(courseId)`: Get tasks for specific course with reactivity
+    - Optimistic updates: UI updates immediately, syncs with backend
+  - **Pomodoro**: `usePomodoroStore` (`src/lib/stores/pomodoro-store.ts`)
+    - Timer state management with built-in interval handling
+    - `usePomodoroOperations()` hook: Convenience wrapper (in `hooks/use-pomodoro.ts`)
+    - No provider needed - access state from anywhere
+    - Auto-initializes settings from localStorage
 
 ### Database Layer
 - **Drizzle ORM** with PostgreSQL, schema in `src/server/db/schema.ts`
@@ -96,6 +98,32 @@ export const POST = withAuthSimple(async (request, user) => {
   ```
 - **Sync fetched tasks** with store using `useSyncTasksWithStore(tasks)`
 - **Query tasks** using store selectors for reactive updates
+
+### Working with Pomodoro
+- **Use the Pomodoro store** for timer operations (no provider needed):
+  ```typescript
+  import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
+  // Or use the operations hook for convenience
+  import { usePomodoroOperations } from '@/hooks/use-pomodoro';
+  
+  // Direct store access
+  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroStore();
+  
+  // Or with operations hook (includes useCallback wrappers)
+  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroOperations();
+  
+  // Start pomodoro with task
+  startPomodoro(task, 25, true); // task, duration in minutes, autoStart
+  
+  // Toggle timer
+  toggleTimer();
+  
+  // Stop session
+  stopPomodoro();
+  ```
+- **Timer intervals managed internally** by the store
+- **Settings auto-load** from localStorage on initialization
+- **Access from anywhere** - no provider wrapping needed
 
 ### AI Processing Integration
 - Use `ServerCourseProcessingPipeline` for multi-step AI workflows

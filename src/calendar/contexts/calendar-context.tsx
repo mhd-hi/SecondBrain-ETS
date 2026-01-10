@@ -3,7 +3,7 @@
 
 import type { TBadgeVariant, TEvent } from '@/calendar/types';
 import { createContext, use, useEffect, useMemo, useState } from 'react';
-import { EventsProvider } from '@/calendar/contexts/events-context';
+// import { EventsProvider } from '@/calendar/contexts/events-context';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type ICalendarContext = {
@@ -37,7 +37,8 @@ export function CalendarProvider({ children, events }: { children: React.ReactNo
 
   return (
     <CalendarContext.Provider value={value}>
-      <EventsProvider events={events}>{children}</EventsProvider>
+      {/* <EventsProvider events={events}>{children}</EventsProvider> */}
+      {children}
     </CalendarContext.Provider>
   );
 }

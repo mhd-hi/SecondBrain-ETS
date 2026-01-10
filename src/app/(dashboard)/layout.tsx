@@ -4,7 +4,6 @@ import React from 'react';
 import Navbar from '@/components/shared/Navigation/Navbar/Navbar';
 import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { PomodoroProvider } from '@/contexts/pomodoro-provider';
 import { useCoursesContext } from '@/contexts/use-courses';
 
 function DashboardLayoutContent({
@@ -35,10 +34,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PomodoroProvider>
-      <DashboardLayoutContent>
-        {children}
-      </DashboardLayoutContent>
-    </PomodoroProvider>
+    <DashboardLayoutContent>
+      {children}
+    </DashboardLayoutContent>
   );
 }

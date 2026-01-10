@@ -2,13 +2,12 @@
 
 import type { PomodoroType } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { QuoteBubble } from '@/components/shared/QuoteBubble';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePomodoro } from '@/contexts/use-pomodoro';
-import { fetchPomodoroStreak } from '@/hooks/use-pomodoro';
+import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
 import { StreakBadge } from '../shared/atoms/StreakBadge';
 import { DurationSelector } from './DurationSelector';
 
@@ -19,33 +18,50 @@ export function PomodoroContainer() {
     totalTimeSec,
     pomodoroType,
     currentTask,
-    currentDuration,
+    sessionDurations,
     isPomodoroActive,
+    streak,
     toggleTimer,
     stopPomodoro,
     addFiveMinutes,
     switchToPomodoroType,
     updateDuration,
-  } = usePomodoro();
+    fetchStreak,
+  } = usePomodoroStore();
 
-  const [streak, setStreak] = useState<number | null>(null);
-  const _streakCalledRef = useRef(false);
-  if (!_streakCalledRef.current) {
-    _streakCalledRef.current = true;
-      (async () => {
-          const streakDays = await fetchPomodoroStreak();
-          setStreak(streakDays);
-      })();
-  }
+  // Compute current duration reactively from sessionDurations
+  const currentDuration = sessionDurations[pomodoroType];
 
-  const getProgress = () => {
-    return ((totalTimeSec - timeLeftSec) / totalTimeSec) * 100;
-  };
-
-  const formatTime = (seconds: number) => {
+  const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }, []);
+
+  // Fetch streak on mount
+  useEffect(() => {
+    fetchStreak();
+  }, [fetchStreak]);
+
+  // Update page title with timer when running
+  useEffect(() => {
+    if (isPomodoroActive && timeLeftSec > 0) {
+      const formattedTime = formatTime(timeLeftSec);
+      const typeLabel = pomodoroType === 'work' ? '🍅' : '☕';
+      document.title = `${formattedTime} ${typeLabel} - Pomodoro`;
+    } else {
+      document.title = 'Pomodoro - SecondBrain';
+    }
+
+    // Restore title on unmount
+    return () => {
+      document.title = 'Pomodoro - SecondBrain';
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPomodoroActive, timeLeftSec, pomodoroType]);
+
+  const getProgress = () => {
+    return ((totalTimeSec - timeLeftSec) / totalTimeSec) * 100;
   };
 
   // Show duration selector when not running and at the start of any pomodoro session
