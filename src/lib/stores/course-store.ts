@@ -202,7 +202,9 @@ export const useCourseStore = create<CourseStore>((set, get) => ({
             return true;
         } catch (error) {
             // Rollback optimistic update
-            get().updateCourse(courseId, { [field]: originalCourse[field as keyof Course] } as Partial<Course>);
+            if (Object.hasOwn(originalCourse, field)) {
+                get().updateCourse(courseId, { [field]: originalCourse[field as keyof Course] } as Partial<Course>);
+            }
 
             const errorMessage = 'Failed to update course';
             set({ isLoading: false, error: errorMessage });

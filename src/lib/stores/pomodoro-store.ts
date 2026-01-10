@@ -6,7 +6,7 @@ import { persist } from 'zustand/middleware';
 import { SOUND_DEFAULT, soundManager } from '@/lib/sound-manager';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
-const DEFAULT_WORK_DURATION = 25;
+export const DEFAULT_WORK_DURATION = 25;
 const DEFAULT_SHORT_BREAK_DURATION = 5;
 const DEFAULT_LONG_BREAK_DURATION = 15;
 const DEFAULT_SOUND_VOLUME = 60;
@@ -154,6 +154,10 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
             switchToPomodoroType: (newPomodoroType) => {
                 const state = get();
+                if (!Object.hasOwn(state.sessionDurations, newPomodoroType)) {
+                    console.error('Invalid pomodoro type:', newPomodoroType);
+                    return;
+                }
                 const duration = state.sessionDurations[newPomodoroType];
                 const durationInSeconds = duration * 60;
 

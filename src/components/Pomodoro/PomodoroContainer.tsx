@@ -7,7 +7,7 @@ import { QuoteBubble } from '@/components/shared/QuoteBubble';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
+import { DEFAULT_WORK_DURATION, usePomodoroStore } from '@/lib/stores/pomodoro-store';
 import { StreakBadge } from '../shared/atoms/StreakBadge';
 import { DurationSelector } from './DurationSelector';
 
@@ -30,7 +30,9 @@ export function PomodoroContainer() {
   } = usePomodoroStore();
 
   // Compute current duration reactively from sessionDurations
-  const currentDuration = sessionDurations[pomodoroType];
+  const currentDuration = Object.hasOwn(sessionDurations, pomodoroType)
+    ? sessionDurations[pomodoroType]
+    : DEFAULT_WORK_DURATION;
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);

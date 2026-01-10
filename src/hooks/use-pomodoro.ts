@@ -1,7 +1,7 @@
 import type { PomodoroType } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
 import { useCallback } from 'react';
-import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
+import { DEFAULT_WORK_DURATION, usePomodoroStore } from '@/lib/stores/pomodoro-store';
 
 export function usePomodoroOperations() {
     const store = usePomodoroStore();
@@ -60,7 +60,9 @@ export function usePomodoroOperations() {
         totalTimeSec: store.totalTimeSec,
         sessionDurations: store.sessionDurations,
         streak: store.streak,
-        currentDuration: store.sessionDurations[store.pomodoroType],
+        currentDuration: Object.hasOwn(store.sessionDurations, store.pomodoroType)
+            ? store.sessionDurations[store.pomodoroType]
+            : DEFAULT_WORK_DURATION,
     };
 }
 

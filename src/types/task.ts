@@ -30,6 +30,8 @@ export type Task = {
   estimatedEffort: number;
   actualEffort: number;
   subtasks?: Subtask[];
+  createdAt?: Date;
+  updatedAt?: Date;
   dueDate: Date;
   course: Course;
 };
