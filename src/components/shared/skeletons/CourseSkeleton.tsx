@@ -29,16 +29,13 @@ export function CourseSkeleton() {
       </section>
 
       {/* Course custom links skeleton */}
-      <section className="mb-6">
+      <section className="mb-5">
         <div className="rounded-lg flex flex-col">
           <div className="flex-1">
             <div className="space-y-4">
               <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Skeleton className="h-6 w-12" />
-                </div>
                 <div className="flex flex-wrap gap-4">
-                    <Skeleton key={1} className="w-8 h-8 rounded" />
+                    <Skeleton key={2} className="w-8 h-8 rounded" />
                 </div>
               </div>
             </div>

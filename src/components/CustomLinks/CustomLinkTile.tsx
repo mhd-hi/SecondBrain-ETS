@@ -4,6 +4,7 @@ import type { CustomLinkItem } from '@/types/custom-link';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { getDefaultImageFor } from '@/lib/utils/url-util';
 
 type CustomLinkTileProps = {
   item: CustomLinkItem;
@@ -14,6 +15,12 @@ export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLink
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
+  // Use imageUrl if available, otherwise fall back to default image for type
+  const finalImageUrl = item.imageUrl || getDefaultImageFor(item.type);
+
+  // Check if image is local (starts with /) or external
+  const isLocalImage = finalImageUrl.startsWith('/');
+
   return (
     <Link
       href={item.url}
@@ -22,13 +29,13 @@ export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLink
       className="group relative inline-flex items-center justify-center w-8 h-8"
       title={item.title}
     >
-      {item.imageUrl && !imageError
-        ? (
-          <div className="relative w-8 h-8">
-            {/* Skeleton - always present to maintain layout */}
-            <div className={`absolute inset-0 bg-muted/50 rounded transition-opacity duration-200 ${imageLoading ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
+      <div className="relative w-8 h-8">
+        {/* Skeleton - always present to maintain layout */}
+        <div className={`absolute inset-0 bg-muted/50 rounded transition-opacity duration-200 ${imageLoading ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
+        {isLocalImage
+          ? (
             <Image
-              src={item.imageUrl}
+              src={finalImageUrl}
               alt={`${item.title} icon`}
               width={32}
               height={32}
@@ -41,13 +48,26 @@ export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLink
               priority={false}
               sizes="32px"
             />
-          </div>
-        )
-        : (
-          <div className="w-8 h-8 bg-muted/50 rounded flex items-center justify-center text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
-            {item.type.charAt(0).toUpperCase()}
-          </div>
-        )}
+          )
+          : !imageError
+            ? (
+              <Image
+                src={finalImageUrl}
+                alt={`${item.title} icon`}
+                className={`absolute inset-0 w-full h-full object-contain transition-all duration-200 hover:scale-110 ${imageLoading ? 'opacity-0' : 'opacity-80 hover:opacity-100'}`}
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoading(false);
+                }}
+              />
+            )
+            : (
+              <div className="w-8 h-8 bg-muted/50 rounded flex items-center justify-center text-sm font-medium text-muted-foreground hover:bg-muted transition-colors">
+                {item.type.charAt(0).toUpperCase()}
+              </div>
+            )}
+      </div>
     </Link>
   );
 }

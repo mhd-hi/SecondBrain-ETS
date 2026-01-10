@@ -26,5 +26,40 @@ export function buildPlanETSUrl(courseCode: string, term: string): string {
 }
 
 export const validateUrl = (url: string): boolean => {
-    return url.trim().includes('.');
+    const trimmed = url.trim();
+    if (!trimmed) {
+        return false;
+    }
+
+    // Check if it already has a protocol
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        try {
+            const _url = new URL(trimmed);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    // For URLs without protocol, check basic pattern
+    return trimmed.includes('.');
+};
+
+/**
+ * Normalizes a URL by ensuring it has a proper protocol
+ * If no protocol is provided, defaults to https://
+ */
+export const normalizeUrl = (url: string): string => {
+    const trimmed = url.trim();
+    if (!trimmed) {
+        return '';
+    }
+
+    // If already has protocol, return as is
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        return trimmed;
+    }
+
+    // Add https:// by default
+    return `https://${trimmed}`;
 };

@@ -1,6 +1,7 @@
 import type { StatusTask } from '@/types/status-task';
 import type { Task, TaskType } from '@/types/task';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useTaskStore } from '@/lib/stores/task-store';
 
 export function useTaskOperations() {
@@ -113,42 +114,30 @@ export function useTask(taskId: string | undefined): Task | undefined {
 
 /**
  * Hook to get tasks for a specific course with automatic reactivity
- * Uses a stable selector that only changes when task IDs change, preventing infinite loops
+ * Uses Zustand's shallow comparison to prevent infinite loops from array reference changes
  */
 export function useCourseTasksStore(courseId: string): Task[] {
-    // Select only the task map reference - this is stable
-    const tasksMap = useTaskStore(state => state.tasks);
-
-    // Derive filtered tasks in useMemo - only recomputes when map reference or courseId changes
-    return useMemo(() => {
-        return Array.from(tasksMap.values()).filter(task => task.courseId === courseId);
-    }, [tasksMap, courseId]);
+    return useTaskStore(
+        useShallow(state => state.getTasksByCourse(courseId)),
+    );
 }
 
 /**
  * Hook to get tasks by status with automatic reactivity
- * Uses a stable selector that only changes when task IDs change, preventing infinite loops
+ * Uses Zustand's shallow comparison to prevent infinite loops from array reference changes
  */
 export function useTasksByStatus(status: StatusTask): Task[] {
-    // Select only the task map reference - this is stable
-    const tasksMap = useTaskStore(state => state.tasks);
-
-    // Derive filtered tasks in useMemo - only recomputes when map reference or status changes
-    return useMemo(() => {
-        return Array.from(tasksMap.values()).filter(task => task.status === status);
-    }, [tasksMap, status]);
+    return useTaskStore(
+        useShallow(state => state.getTasksByStatus(status)),
+    );
 }
 
 /**
  * Hook to get all tasks with automatic reactivity
- * Uses a stable selector that only changes when task map changes, preventing infinite loops
+ * Uses Zustand's shallow comparison to prevent infinite loops from array reference changes
  */
 export function useAllTasks(): Task[] {
-    // Select only the task map reference - this is stable
-    const tasksMap = useTaskStore(state => state.tasks);
-
-    // Derive all tasks in useMemo - only recomputes when map reference changes
-    return useMemo(() => {
-        return Array.from(tasksMap.values());
-    }, [tasksMap]);
+    return useTaskStore(
+        useShallow(state => state.getAllTasks()),
+    );
 }

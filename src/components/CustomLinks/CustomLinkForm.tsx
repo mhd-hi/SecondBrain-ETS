@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { getDefaultImageFor, validateUrl } from '@/lib/utils/url-util';
+import { getDefaultImageFor, normalizeUrl, validateUrl } from '@/lib/utils/url-util';
 import { LINK_TYPES } from '@/types/custom-link';
 
 export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate: (data: { title: string; url: string; type: LinkType; imageUrl?: string | null; courseId?: string | null }) => Promise<void>; initialCourseId?: string }) {
@@ -39,7 +39,7 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
 
     try {
       setLoading(true);
-      await onCreate({ title, url, type, imageUrl: imageUrl ?? null, courseId: initialCourseId ?? null });
+      await onCreate({ title, url: normalizeUrl(url), type, imageUrl: imageUrl ?? null, courseId: initialCourseId ?? null });
       setTitle(LINK_TYPES.MOODLE);
       setType(LINK_TYPES.MOODLE);
       setUrl('');

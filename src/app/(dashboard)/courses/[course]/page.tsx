@@ -273,7 +273,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   return (
     <main className="container mx-auto px-8 flex min-h-screen flex-col mt-6 mb-8">
 
-      <div className="flex items-center justify-between mb-10">
+      <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-4">
           {isLoading
             ? (
@@ -287,7 +287,7 @@ export default function CoursePage({ params }: CoursePageProps) {
           <ActionsDropdown
             actions={[
               {
-                label: 'Update course',
+                label: 'Course settings',
                 onClick: () => setShowUpdateDialog(true),
               },
               ...getCourseActions({
@@ -331,14 +331,14 @@ export default function CoursePage({ params }: CoursePageProps) {
         : (
           <div className="space-y-8">
             <section>
-              <CourseProgressTile tasks={tasks} />
-            </section>
-            <section>
               <CourseCustomLinks
                 courseId={course.id}
                 customLinks={course.customLinks}
                 onCustomLinksChange={() => void refreshCourses()}
               />
+            </section>
+            <section>
+              <CourseProgressTile tasks={tasks} />
             </section>
             <div className="flex items-center gap-4 mb-2">
               <SearchBar
