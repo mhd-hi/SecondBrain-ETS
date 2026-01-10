@@ -9,7 +9,6 @@ import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } fr
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { SingleCalendar } from '@/components/ui/single-calendar';
-// import { useCalendar } from '@/calendar/contexts/calendar-context';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
