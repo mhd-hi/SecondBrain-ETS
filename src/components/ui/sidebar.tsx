@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
 'use client';
 
 import type { VariantProps } from 'class-variance-authority';
@@ -94,7 +95,7 @@ function SidebarProvider({
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       setOpen(false);
     }
-  }, []);
+  }, [setOpen]);
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {

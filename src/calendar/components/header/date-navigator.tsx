@@ -4,10 +4,10 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { memo, useCallback } from 'react';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-
 import { navigateDate, rangeText } from '@/calendar/helpers';
+
 import { Button } from '@/components/ui/button';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type IProps = {
   view: TCalendarView;

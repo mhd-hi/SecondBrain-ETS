@@ -30,7 +30,7 @@ export function CourseUpdateDialog({ open, onOpenChange, course, onUpdate }: Upd
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Update Course</DialogTitle>
+          <DialogTitle>Course settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>

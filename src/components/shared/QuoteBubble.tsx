@@ -1,7 +1,7 @@
 'use client';
 
 import type { Quote } from '@/lib/util/quotes';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { nextQuote } from '@/lib/util/quotes';
 
@@ -10,11 +10,22 @@ type Props = {
 };
 
 export function QuoteBubble({ className }: Props) {
-  const [quote, setQuote] = useState<Quote>(() => nextQuote());
+  const [quote, setQuote] = useState<Quote | null>(null);
 
   const refresh = useCallback(() => {
     setQuote(nextQuote());
   }, []);
+
+  // Initialize quote on client side only to avoid hydration mismatch
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    setQuote(nextQuote());
+  }, []);
+
+  // Don't render until quote is loaded to avoid hydration mismatch
+  if (!quote) {
+    return null;
+  }
 
   return (
     <div className={className}>

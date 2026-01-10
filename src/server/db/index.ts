@@ -7,8 +7,13 @@ import * as schema from '@/server/db/schema';
 // For migrations
 const migrationClient = postgres(env.DATABASE_URL, { max: 1 });
 
-// For query purposes
-const queryClient = postgres(env.DATABASE_URL);
+// For query purposes - optimized with connection pooling
+const queryClient = postgres(env.DATABASE_URL, {
+    max: 10, // connection pool size
+    idle_timeout: 20,
+    connect_timeout: 10,
+    prepare: true, // enable prepared statements
+});
 
 export const db: PostgresJsDatabase<typeof schema> = drizzle(queryClient, { schema });
 

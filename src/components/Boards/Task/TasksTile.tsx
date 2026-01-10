@@ -7,7 +7,8 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { deleteTask, fetchFocusTasks, updateStatusTask } from '@/hooks/use-task';
+import { fetchFocusTasks } from '@/hooks/use-task';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { StatusTask } from '@/types/status-task';
 
 const GroupSection = ({
@@ -133,6 +134,9 @@ export const TodaysFocusTile = () => {
   const [expandedSubtasks, setExpandedSubtasks] = useState<Set<string>>(() => new Set());
   const [removingTaskIds, setRemovingTaskIds] = useState<Set<string>>(() => new Set());
 
+  const removeTask = useTaskStore(state => state.removeTask);
+  const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
+
   const fetchFocusTasksData = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -177,7 +181,7 @@ export const TodaysFocusTile = () => {
     }
 
     try {
-      await updateStatusTask(taskId, newStatus);
+      await updateTaskStatus(taskId, newStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
       toast.error('Failed to update task status');
@@ -209,7 +213,7 @@ export const TodaysFocusTile = () => {
     try {
       setRemovingTaskIds(prev => new Set(prev).add(taskId));
 
-      await deleteTask(taskId);
+      await removeTask(taskId);
 
       setTimeout(() => {
         setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
@@ -325,7 +329,7 @@ export const TodaysFocusTile = () => {
   const visibleGroups: TodaysFocusGroup[] = ['overdue', 'today', 'tomorrow', 'thisWeek', 'later'];
 
   return (
-    <div className="border rounded-lg bg-muted/30 min-h-[320px] flex flex-col">
+    <div className="border rounded-lg bg-muted/30 min-h-80 flex flex-col">
       <div className="p-6 pb-4 flex-1">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold">Today&apos;s Focus</h2>

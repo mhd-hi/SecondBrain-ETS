@@ -5,12 +5,11 @@ import { Calendar, Clock } from 'lucide-react';
 
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
-// import { useCalendar } from '@/calendar/contexts/calendar-context';
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { SingleCalendar } from '@/components/ui/single-calendar';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
 
@@ -111,7 +110,7 @@ export function CalendarDayView({ events }: IProps) {
           {currentEvents.length > 0
             ? (
               <div className="flex items-start gap-2 px-4 pt-4">
-                <span className="relative mt-[5px] flex size-2.5">
+                <span className="relative mt-1.25 flex size-2.5">
                   <span className="absolute inline-flex size-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex size-2.5 rounded-full bg-green-600"></span>
                 </span>
@@ -122,7 +121,7 @@ export function CalendarDayView({ events }: IProps) {
               <p className="p-4 text-center text-sm italic text-muted-foreground">No tasks or study blocks</p>
             )}
           {currentEvents.length > 0 && (
-            <ScrollArea className="h-[422px] px-4" type="always">
+            <ScrollArea className="h-105.5 px-4" type="always">
               <div className="space-y-6 pb-4">
                 {currentEvents.map(event => (
                   <div key={event.id} className="space-y-1.5">

@@ -1,7 +1,7 @@
 import type { TEvent } from '@/calendar/types';
 import { isToday } from 'date-fns';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
 

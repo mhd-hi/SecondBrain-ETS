@@ -16,7 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { updateTask } from '@/hooks/use-task';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
@@ -38,6 +38,8 @@ type FormState = {
 
 export const TaskUpdateDialog = ({ open, onOpenChange, task, onSaved }: TaskUpdateDialogProps) => {
   const [isSaving, setIsSaving] = useState(false);
+  const updateTask = useTaskStore(state => state.updateTask);
+  const updateTaskField = useTaskStore(state => state.updateTaskField);
   const [form, setForm] = useState<FormState>(() => ({
     title: task.title ?? '',
     notes: task.notes ?? '',
@@ -54,15 +56,25 @@ export const TaskUpdateDialog = ({ open, onOpenChange, task, onSaved }: TaskUpda
     e.preventDefault();
     setIsSaving(true);
     try {
-      const payload: Partial<Task> = {
+      // Update all fields using the store
+      const updates: Partial<Task> = {
         title: form.title,
         notes: form.notes,
         type: form.type,
-        dueDate: form.dueDate.toISOString() as unknown as Task['dueDate'],
+        dueDate: form.dueDate,
         estimatedEffort: form.estimatedEffort,
         status: form.status,
       };
-      await updateTask(task.id, payload);
+      updateTask(task.id, updates);
+
+      // Sync with backend
+      await updateTaskField(task.id, 'title', form.title);
+      await updateTaskField(task.id, 'notes', form.notes);
+      await updateTaskField(task.id, 'type', form.type);
+      await updateTaskField(task.id, 'dueDate', form.dueDate.toISOString());
+      await updateTaskField(task.id, 'estimatedEffort', form.estimatedEffort);
+      await updateTaskField(task.id, 'status', form.status);
+
       toast.success('Task updated');
       onOpenChange(false);
       onSaved?.();

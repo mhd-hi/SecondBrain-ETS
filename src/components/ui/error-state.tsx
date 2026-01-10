@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/lib/routes';
 
 type ErrorStateProps = {
   title?: string;
@@ -25,7 +26,7 @@ export function ErrorState({
           <Button
             variant="outline"
             className="mt-4"
-            onClick={() => router.push('/')}
+            onClick={() => router.push(ROUTES.HOME)}
           >
             Go Back
           </Button>

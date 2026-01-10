@@ -1,6 +1,6 @@
 import type { TEvent } from '@/calendar/types';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function useUpdateEvent() {
   const setEvents = useCalendarViewStore(state => state.setEvents);

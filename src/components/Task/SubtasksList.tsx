@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { Badge } from '@/components/ui/badge';
 import { deleteSubtask } from '@/hooks/use-subtask';
-import { useTask } from '@/hooks/use-task';
 import { useUpdateField } from '@/hooks/use-update-field';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { cn } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
@@ -46,7 +46,8 @@ const SubtasksList = ({
   const [hoveredSubtaskId, setHoveredSubtaskId] = useState<string | null>(null);
 
   const updateField = useUpdateField();
-  const { addTask } = useTask();
+  const createTask = useTaskStore(state => state.createTask);
+  const deleteSubtaskFromStore = useTaskStore(state => state.deleteSubtask);
 
   // Use controlled state if provided, otherwise use internal state
   const isExpanded = controlledIsExpanded ?? internalIsExpanded;
@@ -75,7 +76,7 @@ const SubtasksList = ({
   };
 
   return (
-    <div id="subtasks-list" className={cn(isExpanded && 'mt-4 space-y-2')}>
+    <div id="subtasks-list" className={cn(isExpanded && 'mt-1')}>
       {collapsible && (
         <div
           className={cn(
@@ -106,7 +107,7 @@ const SubtasksList = ({
       )}
 
       {isExpanded && (
-        <div className="space-y-2 pl-4 border-l-2 border-muted">
+        <div className="space-y-2 pl-3 border-l border-muted">
           {subtasks.map(subtask => (
             <div
               key={subtask.id}
@@ -120,7 +121,7 @@ const SubtasksList = ({
                   : 'bg-muted/30',
               )}
             >
-              <div className="flex-grow space-y-1">
+              <div className="grow">
                 <div className="flex items-center gap-2">
                   {subtask.status === StatusTask.COMPLETED
                     ? <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
@@ -198,16 +199,13 @@ const SubtasksList = ({
                               // Build minimal newTask payload using subtask data and prefer parent's due date
                               const newDueDate = courseIdDueDate ? (courseIdDueDate instanceof Date ? courseIdDueDate : new Date(courseIdDueDate)) : new Date();
 
-                              const success = await addTask({
-                                courseId,
-                                newTask: {
-                                  title: subtask.title,
-                                  notes: subtask.notes ?? '',
-                                  estimatedEffort: subtask.estimatedEffort ?? 0,
-                                  dueDate: newDueDate,
-                                  type: TASK_TYPES.THEORIE,
-                                  status: StatusTask.TODO,
-                                },
+                              const success = await createTask(courseId, {
+                                title: subtask.title,
+                                notes: subtask.notes ?? '',
+                                estimatedEffort: subtask.estimatedEffort ?? 0,
+                                dueDate: newDueDate,
+                                type: TASK_TYPES.THEORIE,
+                                status: StatusTask.TODO,
                               });
 
                               if (!success) {
@@ -233,6 +231,9 @@ const SubtasksList = ({
                                 return;
                               }
 
+                              // Update the store
+                              deleteSubtaskFromStore(taskId, subtask.id);
+
                               toast.success('Subtask converted to task');
                               if (onDeleteSubtask) {
                                 onDeleteSubtask(subtask.id);
@@ -255,6 +256,10 @@ const SubtasksList = ({
                               if (!ok) {
                                 throw new Error('Failed to delete');
                               }
+
+                              // Update the store
+                              deleteSubtaskFromStore(taskId, subtask.id);
+
                               toast.success('Subtask deleted');
                               if (onDeleteSubtask) {
                                 onDeleteSubtask(subtask.id);

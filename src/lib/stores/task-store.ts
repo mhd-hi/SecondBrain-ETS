@@ -1,0 +1,320 @@
+import type { StatusTask } from '@/types/status-task';
+import type { Subtask } from '@/types/subtask';
+import type { Task, TaskType } from '@/types/task';
+import { toast } from 'sonner';
+import { create } from 'zustand';
+import { api } from '@/lib/utils/api/api-client-util';
+import { ErrorHandlers } from '@/lib/utils/errors/error';
+
+type TaskStore = {
+    tasks: Map<string, Task>;
+    isLoading: boolean;
+    error: string | null;
+
+    setTasks: (tasks: Task[]) => void;
+    addTask: (task: Task) => void;
+    updateTask: (taskId: string, updates: Partial<Task>) => void;
+    deleteTask: (taskId: string) => void;
+
+    addSubtask: (taskId: string, subtask: Subtask) => void;
+    updateSubtask: (taskId: string, subtaskId: string, updates: Partial<Subtask>) => void;
+    deleteSubtask: (taskId: string, subtaskId: string) => void;
+
+    getTask: (taskId: string) => Task | undefined;
+    getTasksByCourse: (courseId: string) => Task[];
+    getTasksByStatus: (status: StatusTask) => Task[];
+    getTasksByDateRange: (startDate: Date, endDate: Date) => Task[];
+    getAllTasks: () => Task[];
+
+    fetchTask: (taskId: string) => Promise<Task | null>;
+    fetchTasksByCourse: (courseId: string) => Promise<Task[]>;
+    createTask: (courseId: string, newTask: {
+        title: string;
+        notes: string;
+        estimatedEffort: number;
+        dueDate: Date;
+        type: TaskType;
+        status: StatusTask;
+    }) => Promise<boolean>;
+    updateTaskField: (taskId: string, field: string, value: unknown) => Promise<boolean>;
+    updateTaskStatus: (taskId: string, status: StatusTask) => Promise<boolean>;
+    updateTaskDueDate: (taskId: string, dueDate: Date) => Promise<boolean>;
+    removeTask: (taskId: string) => Promise<boolean>;
+
+    clearError: () => void;
+    reset: () => void;
+};
+
+export const useTaskStore = create<TaskStore>((set, get) => ({
+    tasks: new Map(),
+    isLoading: false,
+    error: null,
+
+    setTasks: (tasks) => {
+        const taskMap = new Map<string, Task>();
+        for (const task of tasks) {
+            taskMap.set(task.id, task);
+        }
+        set({ tasks: taskMap });
+    },
+
+    addTask: (task) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            newTasks.set(task.id, task);
+            return { tasks: newTasks };
+        });
+    },
+
+    updateTask: (taskId, updates) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            const existingTask = newTasks.get(taskId);
+            if (existingTask) {
+                newTasks.set(taskId, { ...existingTask, ...updates });
+            }
+            return { tasks: newTasks };
+        });
+    },
+
+    deleteTask: (taskId) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            newTasks.delete(taskId);
+            return { tasks: newTasks };
+        });
+    },
+
+    addSubtask: (taskId, subtask) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            const task = newTasks.get(taskId);
+            if (task) {
+                const updatedTask = {
+                    ...task,
+                    subtasks: [...(task.subtasks || []), subtask],
+                };
+                newTasks.set(taskId, updatedTask);
+            }
+            return { tasks: newTasks };
+        });
+    },
+
+    updateSubtask: (taskId, subtaskId, updates) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            const task = newTasks.get(taskId);
+            if (task && task.subtasks) {
+                const updatedSubtasks = task.subtasks.map(sub =>
+                    sub.id === subtaskId ? { ...sub, ...updates } : sub,
+                );
+                newTasks.set(taskId, { ...task, subtasks: updatedSubtasks });
+            }
+            return { tasks: newTasks };
+        });
+    },
+
+    deleteSubtask: (taskId, subtaskId) => {
+        set((state) => {
+            const newTasks = new Map(state.tasks);
+            const task = newTasks.get(taskId);
+            if (task && task.subtasks) {
+                const updatedSubtasks = task.subtasks.filter(sub => sub.id !== subtaskId);
+                newTasks.set(taskId, { ...task, subtasks: updatedSubtasks });
+            }
+            return { tasks: newTasks };
+        });
+    },
+
+    getTask: (taskId) => {
+        return get().tasks.get(taskId);
+    },
+
+    getTasksByCourse: (courseId) => {
+        return Array.from(get().tasks.values()).filter(task => task.courseId === courseId);
+    },
+
+    getTasksByStatus: (status) => {
+        return Array.from(get().tasks.values()).filter(task => task.status === status);
+    },
+
+    getTasksByDateRange: (startDate, endDate) => {
+        return Array.from(get().tasks.values()).filter((task) => {
+            const taskDate = task.dueDate instanceof Date ? task.dueDate : new Date(task.dueDate);
+            return taskDate >= startDate && taskDate <= endDate;
+        });
+    },
+
+    getAllTasks: () => {
+        return Array.from(get().tasks.values());
+    },
+
+    fetchTask: async (taskId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch task');
+            }
+            const task = await response.json() as Task;
+            get().addTask(task);
+            set({ isLoading: false });
+            return task;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch task';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return null;
+        }
+    },
+
+    fetchTasksByCourse: async (courseId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks?courseId=${courseId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch tasks');
+            }
+            const tasks = await response.json() as Task[];
+            get().setTasks(tasks);
+            set({ isLoading: false });
+            return tasks;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch tasks';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return [];
+        }
+    },
+
+    createTask: async (courseId, newTask) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.post('/api/tasks', {
+                courseId,
+                tasks: [
+                    {
+                        ...newTask,
+                        dueDate: newTask.dueDate.toISOString(),
+                    },
+                ],
+            });
+
+            // If the API returns the created task, add it to the store
+            if (response && Array.isArray(response) && response.length > 0) {
+                get().addTask(response[0] as Task);
+            }
+
+            set({ isLoading: false });
+            return true;
+        } catch (error) {
+            const errorMessage = 'Failed to add task';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return false;
+        }
+    },
+
+    updateTaskField: async (taskId, field, value) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: value }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update task');
+            }
+
+            // Optimistically update the store
+            get().updateTask(taskId, { [field]: value } as Partial<Task>);
+
+            set({ isLoading: false });
+            return true;
+        } catch (error) {
+            const errorMessage = 'Failed to update task';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return false;
+        }
+    },
+
+    updateTaskStatus: async (taskId, status) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks/${taskId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update task status');
+            }
+
+            // Optimistically update the store
+            get().updateTask(taskId, { status });
+
+            set({ isLoading: false });
+            return true;
+        } catch (error) {
+            const errorMessage = 'Failed to update task status';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return false;
+        }
+    },
+
+    updateTaskDueDate: async (taskId, dueDate) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks/${taskId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    dueDate: dueDate.toISOString(),
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update task due date');
+            }
+
+            // Optimistically update the store
+            get().updateTask(taskId, { dueDate });
+
+            set({ isLoading: false });
+            return true;
+        } catch (error) {
+            const errorMessage = 'Failed to update task due date';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return false;
+        }
+    },
+
+    removeTask: async (taskId) => {
+        set({ isLoading: true, error: null });
+        try {
+            await api.delete(`/api/tasks/${taskId}`);
+
+            // Remove from store
+            get().deleteTask(taskId);
+
+            toast.success('Task deleted successfully');
+            set({ isLoading: false });
+            return true;
+        } catch (error) {
+            const errorMessage = 'Failed to delete task';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return false;
+        }
+    },
+
+    clearError: () => set({ error: null }),
+
+    reset: () => set({ tasks: new Map(), isLoading: false, error: null }),
+}));

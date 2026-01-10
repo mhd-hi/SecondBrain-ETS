@@ -4,10 +4,10 @@ import { useMemo } from 'react';
 
 import { DayCell } from '@/calendar/components/month-view/day-cell';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-
 import { getCalendarCells } from '@/calendar/helpers';
+
 import { WEEK_DAYS } from '@/lib/calendar/constants';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type Props = {
   events: TEvent[];

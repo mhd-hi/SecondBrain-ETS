@@ -14,6 +14,11 @@ export function useCustomLink(courseId?: string) {
     const [error, setError] = useState<string | null>(null);
 
     const fetchCustomLinks = useCallback(async () => {
+        // Don't fetch if courseId is explicitly undefined (component doesn't want to fetch)
+        if (courseId === undefined) {
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
@@ -32,7 +37,7 @@ export function useCustomLink(courseId?: string) {
     }, [courseId]);
 
     useEffect(() => {
-        fetchCustomLinks();
+        void fetchCustomLinks();
     }, [fetchCustomLinks]);
 
     const createCustomLink = useCallback(async (data: { title: string; url: string; type?: CustomLink; imageUrl?: string | null; courseId?: string | null }) => {
@@ -99,6 +104,22 @@ export function useCustomLink(courseId?: string) {
         createCustomLink,
         deleteCustomLink,
         deleteAllCourseLinks,
+    };
+}
+
+// Standalone function to create custom link without hook's data fetching
+export async function createCustomLinkAPI(data: { title: string; url: string; type?: CustomLink; imageUrl?: string | null; courseId?: string | null }): Promise<CustomLinkItem> {
+    const payload = {
+        title: data.title,
+        url: data.url,
+        type: data.type ?? LINK_TYPES.CUSTOM,
+        imageUrl: data.imageUrl ?? null,
+        courseId: data.courseId ?? null,
+    };
+    const created = await api.post<{ success: boolean; customLink: CustomLinkItem }>('/api/custom-links', payload, 'Failed to create link');
+    return {
+        ...created.customLink,
+        imageUrl: created.customLink.imageUrl ?? getDefaultImageFor(created.customLink.type ?? LINK_TYPES.CUSTOM),
     };
 }
 

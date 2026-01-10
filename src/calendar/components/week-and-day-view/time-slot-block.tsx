@@ -31,6 +31,7 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
         <DropdownMenuItem asChild>
           <button
             type="button"
+            className="w-full text-left"
             onClick={() => {
               setDropdownOpen(false);
               onAddTask();
@@ -39,9 +40,13 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
             Add Task
           </button>
         </DropdownMenuItem>
+        {/* FIXME: WIP make study block work */}
+        {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
+        ? (
         <DropdownMenuItem asChild>
           <button
             type="button"
+            className="w-full text-left"
             onClick={() => {
               setDropdownOpen(false);
               onAddStudyBlock();
@@ -50,6 +55,8 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
             Add Study Block
           </button>
         </DropdownMenuItem>
+        )
+        : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,6 +1,6 @@
 'use client';
-
 import type { Course } from '@/types/course';
+
 import type { Daypart } from '@/types/study-block';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useStudyBlock } from '@/hooks/use-study-block';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type AddStudyBlockDialogProps = {
   selectedDate?: Date;
@@ -29,13 +30,16 @@ type AddStudyBlockDialogProps = {
 };
 
 export const AddStudyBlockDialog = ({
-  selectedDate,
+  selectedDate: selectedDateProp,
   onStudyBlockAdded,
   trigger,
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
   courses,
 }: AddStudyBlockDialogProps) => {
+  // Use global selectedDate if prop not provided
+  const globalSelectedDate = useCalendarViewStore(state => state.selectedDate);
+  const selectedDate = selectedDateProp !== undefined ? selectedDateProp : globalSelectedDate;
   const [internalOpen, setInternalOpen] = useState(false);
 
   // Use external state if provided, otherwise use internal state

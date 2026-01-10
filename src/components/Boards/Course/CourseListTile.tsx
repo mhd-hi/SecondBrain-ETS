@@ -1,16 +1,17 @@
 'use client';
 
+import type { Course } from '@/types/course';
 import CourseCard from '@/components/Boards/Course/CourseCard';
 import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCoursesContext } from '@/contexts/use-courses';
 import { deleteCourseById } from '@/hooks/use-course';
+import { useCourses } from '@/hooks/use-course-store';
 import { handleApiSuccess } from '@/lib/utils';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/errors/error';
 
 export function CourseListTile() {
-  const { courses, isLoading, error, deleteCourse, refreshCourses } = useCoursesContext();
+  const { courses, isLoading, refreshCourses } = useCourses();
 
   const handleDeleteCourse = async (courseId: string) => {
     await handleConfirm(
@@ -18,7 +19,7 @@ export function CourseListTile() {
         async () => {
           try {
             await deleteCourseById(courseId);
-            deleteCourse(courseId);
+            await refreshCourses();
             handleApiSuccess('Course deleted successfully');
           } catch (error) {
             ErrorHandlers.api(error, CommonErrorMessages.COURSE_DELETE_FAILED, 'CoursesTile');
@@ -33,18 +34,6 @@ export function CourseListTile() {
       },
     );
   };
-
-  if (error) {
-    return (
-      <div className="border rounded-lg bg-muted/30 p-6">
-        <div className="text-center text-red-500">
-          Error:
-          {' '}
-          {error}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="border rounded-lg bg-muted/30 p-6">
@@ -62,7 +51,7 @@ export function CourseListTile() {
           )
           : (courses ?? []).length > 0
             ? (
-              (courses ?? []).map(course => (
+              (courses ?? []).map((course: Course) => (
                 <CourseCard
                   key={course.id}
                   course={course}

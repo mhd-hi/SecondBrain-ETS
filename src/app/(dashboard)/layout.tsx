@@ -4,15 +4,14 @@ import React from 'react';
 import Navbar from '@/components/shared/Navigation/Navbar/Navbar';
 import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { PomodoroProvider } from '@/contexts/pomodoro-provider';
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourseOperations } from '@/hooks/use-course-store';
 
 function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { coursesListItems, isLoading, refreshCourses } = useCoursesContext();
+  const { coursesListItems, isLoading, refreshCourses } = useCourseOperations();
 
   return (
     <SidebarProvider>
@@ -35,10 +34,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PomodoroProvider>
-      <DashboardLayoutContent>
-        {children}
-      </DashboardLayoutContent>
-    </PomodoroProvider>
+    <DashboardLayoutContent>
+      {children}
+    </DashboardLayoutContent>
   );
 }

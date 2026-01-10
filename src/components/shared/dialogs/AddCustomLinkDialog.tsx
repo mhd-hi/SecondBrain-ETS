@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useCustomLink } from '@/hooks/use-custom-link';
+import { createCustomLinkAPI } from '@/hooks/use-custom-link';
 
 type AddCustomLinkDialogProps = {
   courseId?: string;
@@ -34,11 +34,9 @@ export const AddCustomLinkDialog = ({ courseId, open, onOpenChange, onLinkCreate
     }
   };
 
-  const { createCustomLink } = useCustomLink(courseId);
-
   const handleCreate = async (data: { title: string; url: string; type: LinkType }) => {
     try {
-      await createCustomLink({ title: data.title, url: data.url, type: data.type, courseId });
+      await createCustomLinkAPI({ title: data.title, url: data.url, type: data.type, courseId });
       toast.success('Link created');
       setDialogOpen(false);
       onLinkCreated?.();

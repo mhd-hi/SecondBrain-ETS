@@ -12,7 +12,7 @@ import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-to
 import { TaskUpdateDialog } from '@/components/shared/dialogs/TaskUpdateDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { Badge } from '@/components/ui/badge';
-import { deleteTask } from '@/hooks/use-task';
+import { useTaskStore } from '@/lib/stores/task-store';
 
 type TaskProps = {
   task: Task;
@@ -30,6 +30,7 @@ export const TaskBox = ({
   onTaskUpdated,
 }: TaskProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { removeTask } = useTaskStore();
   const dragData: DraggedTask = {
     id: task.id,
     task,
@@ -59,7 +60,7 @@ export const TaskBox = ({
       {...(!isDragOverlay ? attributes : {})}
       {...(!isDragOverlay ? listeners : {})}
     >
-  {/* More actions button - visible on hover, positioned on the corner */}
+      {/* More actions button - visible on hover, positioned on the corner */}
       <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <ActionsDropdown
           actions={[
@@ -71,14 +72,8 @@ export const TaskBox = ({
               label: 'Delete',
               destructive: true,
               onClick: async () => {
-                await deleteTask(
-                  task.id,
-                  onTaskUpdated
-                    ? async () => {
-                        onTaskUpdated();
-                      }
-                    : undefined,
-                );
+                await removeTask(task.id);
+                onTaskUpdated?.();
               },
             },
           ]}

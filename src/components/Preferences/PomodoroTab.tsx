@@ -1,28 +1,20 @@
 'use client';
 
-import type { PomodoroSettings } from '@/lib/localstorage/pomodoro';
-
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { loadPomodoroSettings, savePomodoroSettings } from '@/lib/localstorage/pomodoro';
-import { initialPomodoroSettingsState, pomodoroSettingsReducer } from '@/lib/localstorage/pomodoro-settings-reducer';
 import { SOUND_KEYS, soundManager } from '@/lib/sound-manager';
+import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
 export function PomodoroTab() {
-  const [state, dispatch] = useReducer(pomodoroSettingsReducer, initialPomodoroSettingsState);
+  const { sessionDurations, settings, updateSessionDuration, updateSettings } = usePomodoroStore();
   const [soundReady, setSoundReady] = useState(soundManager.isReady());
-
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    const settings = loadPomodoroSettings();
-    dispatch({ type: 'LOAD_SETTINGS', payload: settings });
-  }, []);
+  const [isTestPlaying, setIsTestPlaying] = useState(false);
 
   // Monitor sound manager readiness via event listener
   useEffect(() => {
@@ -36,44 +28,18 @@ export function PomodoroTab() {
     };
   }, []);
 
-  // Auto-save settings whenever they change
-  useEffect(() => {
-    if (!state.isLoading) {
-      savePomodoroSettings(state.pomodoroSettings);
-    }
-  }, [state.pomodoroSettings, state.isLoading]);
-
-  const [isTestPlaying, setIsTestPlaying] = useState(false);
-
-  const updatePomodoroSetting = useCallback((key: keyof PomodoroSettings, value: number | string) => {
-    dispatch({ type: 'UPDATE_SETTING', key, value });
-    // Update volume in real-time while sound is playing
-    if (key === 'soundVolume' && isTestPlaying) {
-      const normalizedVolume = Math.max(0, Math.min(1, (value as number) / 100));
-      soundManager.setVolume(normalizedVolume);
-    }
-  }, [isTestPlaying]);
-
   const testNotificationSound = useCallback(async () => {
     if (isTestPlaying) {
       soundManager.stop();
       setIsTestPlaying(false);
     } else {
-      const normalizedVolume = Math.max(0, Math.min(1, state.pomodoroSettings.soundVolume / 100));
-      await playSelectedNotificationSound(state.pomodoroSettings.notificationSound, normalizedVolume);
+      const normalizedVolume = Math.max(0, Math.min(1, settings.soundVolume / 100));
+      await playSelectedNotificationSound(settings.notificationSound, normalizedVolume);
       setIsTestPlaying(true);
       // Stop after a reasonable time to reset the state
       setTimeout(() => setIsTestPlaying(false), 5000);
     }
-  }, [state.pomodoroSettings.notificationSound, state.pomodoroSettings.soundVolume, isTestPlaying]);
-
-  if (state.isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
+  }, [settings.notificationSound, settings.soundVolume, isTestPlaying]);
 
   return (
     <Card>
@@ -94,8 +60,8 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={state.pomodoroSettings.workDuration}
-                onChange={e => updatePomodoroSetting('workDuration', Number.parseInt(e.target.value) || 25)}
+                value={sessionDurations.work}
+                onChange={e => updateSessionDuration('work', Number.parseInt(e.target.value) || 25)}
                 className="w-20 text-center"
               />
               <span className="text-sm text-muted-foreground">min</span>
@@ -112,8 +78,8 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={state.pomodoroSettings.shortBreakDuration}
-                onChange={e => updatePomodoroSetting('shortBreakDuration', Number.parseInt(e.target.value) || 5)}
+                value={sessionDurations.shortBreak}
+                onChange={e => updateSessionDuration('shortBreak', Number.parseInt(e.target.value) || 5)}
                 className="w-20 text-center"
               />
               <span className="text-sm text-muted-foreground">min</span>
@@ -128,8 +94,8 @@ export function PomodoroTab() {
                 type="number"
                 min="5"
                 step="5"
-                value={state.pomodoroSettings.longBreakDuration}
-                onChange={e => updatePomodoroSetting('longBreakDuration', Number.parseInt(e.target.value) || 15)}
+                value={sessionDurations.longBreak}
+                onChange={e => updateSessionDuration('longBreak', Number.parseInt(e.target.value) || 15)}
                 className="w-20 text-center"
               />
               <span className="text-sm text-muted-foreground">min</span>
@@ -151,14 +117,22 @@ export function PomodoroTab() {
             </div>
             <div className="flex items-center gap-3">
               <Slider
-                value={[state.pomodoroSettings.soundVolume]}
-                onValueChange={value => updatePomodoroSetting('soundVolume', value[0] || 10)}
+                value={[settings.soundVolume]}
+                onValueChange={(value) => {
+                  const newVolume = value[0] || 10;
+                  updateSettings({ soundVolume: newVolume });
+                  // Update volume in real-time while sound is playing
+                  if (isTestPlaying) {
+                    const normalizedVolume = Math.max(0, Math.min(1, newVolume / 100));
+                    soundManager.setVolume(normalizedVolume);
+                  }
+                }}
                 max={100}
                 step={10}
                 className="w-24"
               />
               <span className="text-sm text-muted-foreground w-10">
-                {state.pomodoroSettings.soundVolume}
+                {settings.soundVolume}
                 %
               </span>
             </div>
@@ -173,8 +147,8 @@ export function PomodoroTab() {
             </div>
             <div className="flex items-center gap-2">
               <Select
-                value={state.pomodoroSettings.notificationSound}
-                onValueChange={(value: string) => updatePomodoroSetting('notificationSound', value)}
+                value={settings.notificationSound}
+                onValueChange={(value: string) => updateSettings({ notificationSound: value })}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
@@ -195,7 +169,7 @@ export function PomodoroTab() {
                       variant="outline"
                       size="sm"
                       onClick={testNotificationSound}
-                      disabled={state.pomodoroSettings.notificationSound === 'none'}
+                      disabled={settings.notificationSound === 'none'}
                     >
                       {isTestPlaying ? 'Stop' : 'Test'}
                     </Button>

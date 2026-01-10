@@ -5,8 +5,6 @@ import CommandPalette from '@/components/CommandPalette/CommandPalette';
 import { GlobalConfirmDialogProvider } from '@/components/shared/dialogs/ConfirmDialogProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/ui/theme-provider';
-import { CoursesProvider } from '@/contexts/courses-context';
-import { PomodoroProvider } from '@/contexts/pomodoro-provider';
 import { cn } from '@/lib/utils';
 import '@/styles/globals.css';
 
@@ -39,14 +37,9 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <PomodoroProvider>
-              <CoursesProvider>
-                {children}
-                <CommandPalette />
-              </CoursesProvider>
+              {children}
+              <CommandPalette />
               <Toaster />
-              </PomodoroProvider>
-
             </ThemeProvider>
           </GlobalConfirmDialogProvider>
         </SessionProvider>

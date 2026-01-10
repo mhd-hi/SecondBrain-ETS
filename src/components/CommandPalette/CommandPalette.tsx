@@ -15,7 +15,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourses } from '@/hooks/use-course-store';
 import { getShortcutDisplayText, getShortcutForDialog, getShortcutForPath, useKeyboardShortcuts } from '@/lib/keyboard-shortcuts';
 import { navbarItems } from '@/lib/navigation/constants';
 import { getCoursePath } from '@/lib/routes';
@@ -28,7 +28,7 @@ type PageItem = {
 
 export default function CommandPalette() {
   const router = useRouter();
-  const { courses, isLoading, refreshCourses } = useCoursesContext();
+  const { courses, isLoading, refreshCourses } = useCourses();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [addCourseDialogOpen, setAddCourseDialogOpen] = useState(false);

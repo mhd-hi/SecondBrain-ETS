@@ -3,9 +3,9 @@ import { format, getDaysInMonth, isSameDay, startOfMonth } from 'date-fns';
 import { useMemo } from 'react';
 
 import { YearViewDayCell } from '@/calendar/components/year-view/year-view-day-cell';
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { WEEK_DAYS } from '@/lib/calendar/constants';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type IProps = {
   month: Date;

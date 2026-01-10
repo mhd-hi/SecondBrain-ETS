@@ -1,6 +1,6 @@
 import { formatDate } from 'date-fns';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function TodayButton() {
   const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);

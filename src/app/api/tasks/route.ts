@@ -27,7 +27,11 @@ export const GET = withAuthSimple(
       filteredTasks = courseTasks.filter(task => statusStrings.includes(task.status));
     }
 
-    return NextResponse.json(filteredTasks);
+    return NextResponse.json(filteredTasks, {
+      headers: {
+        'Cache-Control': 'private, max-age=10, stale-while-revalidate=30',
+      },
+    });
   },
 );
 

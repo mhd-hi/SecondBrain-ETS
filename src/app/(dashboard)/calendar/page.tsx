@@ -1,15 +1,44 @@
 'use client';
 
-import type { TEvent } from '@/calendar/types';
-
-import { useEffect, useState } from 'react';
-import { CalendarProvider } from '@/calendar/contexts/calendar-context';
+import type { TCalendarView } from '@/calendar/types';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { CalendarWrapper } from '@/components/Calendar/CalendarWrapper';
 import { useCalendarTasks } from '@/hooks/use-task';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
+
+const VALID_VIEWS: TCalendarView[] = ['day', 'week', 'month', 'year', 'agenda'];
 
 export default function CalendarPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const { getCalendarTasks, isLoading: _isLoading, error } = useCalendarTasks();
-  const [events, setEvents] = useState<TEvent[]>([]);
+  const setStoreEvents = useCalendarViewStore(state => state.setEvents);
+  const view = useCalendarViewStore(state => state.view);
+  const setView = useCalendarViewStore(state => state.setView);
+  const isInitialized = useRef(false);
+
+  // Initialize view from URL parameter on mount
+  useEffect(() => {
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      const viewParam = searchParams.get('view');
+      if (viewParam && VALID_VIEWS.includes(viewParam as TCalendarView)) {
+        setView(viewParam as TCalendarView);
+      } else if (!viewParam) {
+        // Set default view in URL if not present
+        router.replace(`/calendar?view=${view}`, { scroll: false });
+      }
+    }
+  }, [searchParams, setView, view, router]);
+
+  // Update URL when view changes in store
+  useEffect(() => {
+    const currentViewParam = searchParams.get('view');
+    if (currentViewParam !== view) {
+      router.replace(`/calendar?view=${view}`, { scroll: false });
+    }
+  }, [view, router, searchParams]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -21,14 +50,14 @@ export default function CalendarPage() {
         endDate.setDate(endDate.getDate() + 30); // 30 days from now
 
         const fetchedEvents = await getCalendarTasks(startDate, endDate);
-        setEvents(fetchedEvents);
+        setStoreEvents(fetchedEvents);
       } catch (err) {
         console.error('Failed to fetch calendar events:', err);
       }
     };
 
     fetchEvents();
-  }, [getCalendarTasks]);
+  }, [getCalendarTasks, setStoreEvents]);
 
   if (error) {
     return (
@@ -44,9 +73,7 @@ export default function CalendarPage() {
   return (
   <div className="h-full mx-6 flex flex-col">
       <div className="flex-1 min-h-0">
-        <CalendarProvider events={events}>
-          <CalendarWrapper />
-        </CalendarProvider>
+        <CalendarWrapper />
       </div>
   </div>
   );

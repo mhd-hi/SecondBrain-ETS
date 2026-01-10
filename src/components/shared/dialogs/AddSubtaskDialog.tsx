@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { createSubtask } from '@/hooks/use-subtask';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { StatusTask } from '@/types/status-task';
 
 type AddSubtaskDialogProps = {
@@ -24,6 +25,7 @@ type AddSubtaskDialogProps = {
 
 export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }: AddSubtaskDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const addSubtask = useTaskStore(state => state.addSubtask);
   const [newSubtask, setNewSubtask] = useState(() => ({
     title: '',
     notes: '',
@@ -52,6 +54,10 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
       if (!created) {
         throw new Error('Creation failed');
       }
+
+      // Update the store with the new subtask
+      addSubtask(taskId, created);
+
       toast.success('Subtask added');
       handleClose();
       setNewSubtask({ title: '', notes: '', estimatedEffort: 0.5 });

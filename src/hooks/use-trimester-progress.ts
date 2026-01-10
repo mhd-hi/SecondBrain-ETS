@@ -1,15 +1,17 @@
 'use client';
 
+import type { Course } from '@/types/course';
+import type { Task } from '@/types/task';
 import type { CourseProgressBar, StatsProgressBar, TrimesterProgressBar } from '@/types/trimester-progressbar';
 import { useMemo } from 'react';
 
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourses } from '@/hooks/use-course-store';
 import { calculateCourseProgressMetrics, calculateProgressMetrics } from '@/lib/utils/progress-util';
 import { getCurrentTrimesterInfo } from '@/lib/utils/trimester-util';
 import { StatusTask } from '@/types/status-task';
 
 export function useTrimesterProgress(): StatsProgressBar | null {
-    const { courses, isLoading } = useCoursesContext();
+    const { courses, isLoading } = useCourses();
 
     return useMemo(() => {
         if (isLoading || !courses) {
@@ -21,14 +23,14 @@ export function useTrimesterProgress(): StatsProgressBar | null {
         const { totalWeeks, weekOfTrimester } = getCurrentTrimesterInfo();
 
         // Calculate course progress
-        const courseProgresses: CourseProgressBar[] = courses.map((course) => {
+        const courseProgresses: CourseProgressBar[] = courses.map((course: Course) => {
             const tasks = course.tasks || [];
             const progress = calculateProgressMetrics(tasks);
 
             // Tasks due within the next week
             const nextWeek = new Date();
             nextWeek.setDate(nextWeek.getDate() + 7);
-            const dueTasksCount = tasks.filter(task =>
+            const dueTasksCount = tasks.filter((task: Task) =>
                 task.status !== StatusTask.COMPLETED
                 && new Date(task.dueDate) <= nextWeek,
             ).length;

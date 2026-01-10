@@ -5,12 +5,12 @@ import React, { useMemo } from 'react';
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { TimeSlotBlock } from '@/calendar/components/week-and-day-view/time-slot-block';
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
-
 import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
+
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
 
@@ -25,9 +25,9 @@ type IProps = {
 export function CalendarWeekView({ events, courses }: IProps) {
   const [taskDialogOpen, setTaskDialogOpen] = React.useState(false);
   const [studyBlockDialogOpen, setStudyBlockDialogOpen] = React.useState(false);
-  const [selectedSlotDate, setSelectedSlotDate] = React.useState<Date | null>(null);
-  const visibleHours = useCalendarViewStore(state => state.visibleHours);
   const selectedDate = useCalendarViewStore(state => state.selectedDate);
+  const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
+  const visibleHours = useCalendarViewStore(state => state.visibleHours);
 
   const weekDays = useMemo(() => {
     const safeDate = selectedDate instanceof Date && !Number.isNaN(selectedDate.getTime()) ? selectedDate : new Date();
@@ -138,11 +138,11 @@ export function CalendarWeekView({ events, courses }: IProps) {
                                     courses={courses}
                                     isOccupied={isOccupied}
                                     onAddTask={() => {
-                                      setSelectedSlotDate(slotDate);
+                                      setSelectedDate(slotDate);
                                       setTaskDialogOpen(true);
                                     }}
                                     onAddStudyBlock={() => {
-                                      setSelectedSlotDate(slotDate);
+                                      setSelectedDate(slotDate);
                                       setStudyBlockDialogOpen(true);
                                     }}
                                   />
@@ -183,14 +183,14 @@ export function CalendarWeekView({ events, courses }: IProps) {
         open={taskDialogOpen}
         onOpenChange={setTaskDialogOpen}
         courses={courses}
-        selectedDate={selectedSlotDate ?? new Date()}
+        dueDate={selectedDate ?? new Date('2027-01-01')}
         onTaskAdded={() => setTaskDialogOpen(false)}
         trigger={false}
       />
       <AddStudyBlockDialog
         open={studyBlockDialogOpen}
         onOpenChange={setStudyBlockDialogOpen}
-        selectedDate={selectedSlotDate ?? new Date()}
+        selectedDate={selectedDate ?? new Date()}
         onStudyBlockAdded={() => setStudyBlockDialogOpen(false)}
         trigger={false}
         courses={courses}
