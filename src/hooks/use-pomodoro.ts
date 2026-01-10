@@ -3,10 +3,6 @@ import type { Task } from '@/types/task';
 import { useCallback } from 'react';
 import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
 
-/**
- * Custom hook that provides convenient methods for working with the pomodoro store
- * Use this for accessing pomodoro operations in components
- */
 export function usePomodoroOperations() {
     const store = usePomodoroStore();
 
@@ -48,7 +44,6 @@ export function usePomodoroOperations() {
     }, [store]);
 
     return {
-        // Operations
         startPomodoro,
         toggleTimer,
         stopPomodoro,
@@ -57,7 +52,6 @@ export function usePomodoroOperations() {
         updateDuration,
         fetchStreak,
 
-        // State
         currentTask: store.currentTask,
         pomodoroType: store.pomodoroType,
         isPomodoroActive: store.isPomodoroActive,

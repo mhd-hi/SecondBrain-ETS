@@ -24,7 +24,6 @@ type PomodoroSettings = {
 };
 
 type PomodoroStore = {
-    // State
     currentTask: Task | null;
     pomodoroType: PomodoroType;
     isPomodoroActive: boolean;
@@ -36,7 +35,6 @@ type PomodoroStore = {
     streak: number;
     isLoaded: boolean;
 
-    // Actions
     startPomodoro: (task: Task | null, duration?: number, autoStart?: boolean) => void;
     toggleTimer: () => void;
     stopPomodoro: () => void;
@@ -52,7 +50,6 @@ type PomodoroStore = {
     startTimerInterval: () => void;
     stopTimerInterval: () => void;
 
-    // Utility
     reset: () => void;
 };
 
@@ -62,7 +59,6 @@ let timerIntervalId: NodeJS.Timeout | null = null;
 export const usePomodoroStore = create<PomodoroStore>()(
     persist(
         (set, get) => ({
-            // Initial state
             currentTask: null,
             pomodoroType: 'work',
             isPomodoroActive: false,
@@ -81,7 +77,6 @@ export const usePomodoroStore = create<PomodoroStore>()(
             streak: 0,
             isLoaded: true,
 
-            // Actions
             startPomodoro: (task, duration, autoStart = false) => {
                 const state = get();
                 const workDuration = duration || state.sessionDurations.work;

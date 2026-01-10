@@ -7,30 +7,25 @@ import { api } from '@/lib/utils/api/api-client-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 
 type TaskStore = {
-    // State
     tasks: Map<string, Task>;
     isLoading: boolean;
     error: string | null;
 
-    // Actions
     setTasks: (tasks: Task[]) => void;
     addTask: (task: Task) => void;
     updateTask: (taskId: string, updates: Partial<Task>) => void;
     deleteTask: (taskId: string) => void;
 
-    // Subtask management
     addSubtask: (taskId: string, subtask: Subtask) => void;
     updateSubtask: (taskId: string, subtaskId: string, updates: Partial<Subtask>) => void;
     deleteSubtask: (taskId: string, subtaskId: string) => void;
 
-    // Queries
     getTask: (taskId: string) => Task | undefined;
     getTasksByCourse: (courseId: string) => Task[];
     getTasksByStatus: (status: StatusTask) => Task[];
     getTasksByDateRange: (startDate: Date, endDate: Date) => Task[];
     getAllTasks: () => Task[];
 
-    // API Actions
     fetchTask: (taskId: string) => Promise<Task | null>;
     createTask: (courseId: string, newTask: {
         title: string;
@@ -45,18 +40,15 @@ type TaskStore = {
     updateTaskDueDate: (taskId: string, dueDate: Date) => Promise<boolean>;
     removeTask: (taskId: string) => Promise<boolean>;
 
-    // Utility
     clearError: () => void;
     reset: () => void;
 };
 
 export const useTaskStore = create<TaskStore>((set, get) => ({
-    // Initial state
     tasks: new Map(),
     isLoading: false,
     error: null,
 
-    // State setters
     setTasks: (tasks) => {
         const taskMap = new Map<string, Task>();
         for (const task of tasks) {
@@ -92,7 +84,6 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         });
     },
 
-    // Subtask management
     addSubtask: (taskId, subtask) => {
         set((state) => {
             const newTasks = new Map(state.tasks);
@@ -134,7 +125,6 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         });
     },
 
-    // Query methods
     getTask: (taskId) => {
         return get().tasks.get(taskId);
     },
@@ -158,7 +148,6 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         return Array.from(get().tasks.values());
     },
 
-    // API Actions
     fetchTask: async (taskId) => {
         set({ isLoading: true, error: null });
         try {
@@ -305,7 +294,6 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
         }
     },
 
-    // Utility
     clearError: () => set({ error: null }),
 
     reset: () => set({ tasks: new Map(), isLoading: false, error: null }),

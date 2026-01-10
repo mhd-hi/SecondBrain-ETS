@@ -1,12 +1,8 @@
 import type { StatusTask } from '@/types/status-task';
 import type { Task, TaskType } from '@/types/task';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTaskStore } from '@/lib/stores/task-store';
 
-/**
- * Custom hook that provides convenient methods for working with the task store
- * Use this instead of directly accessing useTaskStore for better ergonomics
- */
 export function useTaskOperations() {
     const store = useTaskStore();
 
@@ -84,19 +80,16 @@ export function useTaskOperations() {
     );
 
     return {
-        // Store state
         tasks: store.getAllTasks(),
         isLoading: store.isLoading,
         error: store.error,
 
-        // Operations
         addTask,
         updateTaskStatus,
         updateTaskDueDate,
         updateTaskField,
         deleteTask,
 
-        // Queries
         getTask,
         getTasksByCourse,
         getTasksByStatus,
@@ -120,21 +113,42 @@ export function useTask(taskId: string | undefined): Task | undefined {
 
 /**
  * Hook to get tasks for a specific course with automatic reactivity
+ * Uses a stable selector that only changes when task IDs change, preventing infinite loops
  */
 export function useCourseTasksStore(courseId: string): Task[] {
-    return useTaskStore(state => state.getTasksByCourse(courseId));
+    // Select only the task map reference - this is stable
+    const tasksMap = useTaskStore(state => state.tasks);
+
+    // Derive filtered tasks in useMemo - only recomputes when map reference or courseId changes
+    return useMemo(() => {
+        return Array.from(tasksMap.values()).filter(task => task.courseId === courseId);
+    }, [tasksMap, courseId]);
 }
 
 /**
  * Hook to get tasks by status with automatic reactivity
+ * Uses a stable selector that only changes when task IDs change, preventing infinite loops
  */
 export function useTasksByStatus(status: StatusTask): Task[] {
-    return useTaskStore(state => state.getTasksByStatus(status));
+    // Select only the task map reference - this is stable
+    const tasksMap = useTaskStore(state => state.tasks);
+
+    // Derive filtered tasks in useMemo - only recomputes when map reference or status changes
+    return useMemo(() => {
+        return Array.from(tasksMap.values()).filter(task => task.status === status);
+    }, [tasksMap, status]);
 }
 
 /**
  * Hook to get all tasks with automatic reactivity
+ * Uses a stable selector that only changes when task map changes, preventing infinite loops
  */
 export function useAllTasks(): Task[] {
-    return useTaskStore(state => state.getAllTasks());
+    // Select only the task map reference - this is stable
+    const tasksMap = useTaskStore(state => state.tasks);
+
+    // Derive all tasks in useMemo - only recomputes when map reference changes
+    return useMemo(() => {
+        return Array.from(tasksMap.values());
+    }, [tasksMap]);
 }

@@ -3,7 +3,7 @@ import type { Task } from '@/types/task';
 
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
@@ -20,11 +20,10 @@ import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCoursesContext } from '@/contexts/use-courses';
-import { useCourse } from '@/hooks/use-course';
+import { useCourseOperations } from '@/hooks/use-course-store';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
-import { useSyncTasksWithStore } from '@/hooks/use-sync-tasks';
 import { batchUpdateStatusTask } from '@/hooks/use-task';
+import { useCourseTasksStore } from '@/hooks/use-task-store';
 import { useTaskStore } from '@/lib/stores/task-store';
 import { getWeekNumberFromDueDate } from '@/lib/utils/date-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
@@ -45,21 +44,48 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Use custom hooks instead of duplicate state management
-  const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
-  const { course, tasks, isLoading, error, fetchCourse, setTasks, deleteCourse: deleteCourseApi } = useCourse(courseId);
+  // Use store-based hooks
+  const { courses, refreshCourses, deleteCourse: deleteCourseFromStore, getCourse } = useCourseOperations();
+  const course = getCourse(courseId);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sync tasks with the store
-  useSyncTasksWithStore(tasks);
+  // Get tasks directly from the store for automatic reactivity
+  const tasks = useCourseTasksStore(courseId);
 
   // Get store methods for operations
   const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
   const removeTask = useTaskStore(state => state.removeTask);
 
+  // Fetch course and tasks initially - store will handle updates automatically
+  const fetchCourseData = useCallback(async () => {
+    if (!courseId) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/courses/${courseId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch course');
+      }
+      const data = await response.json();
+      // Sync tasks with store once
+      if (data.tasks && data.tasks.length > 0) {
+        useTaskStore.getState().setTasks(data.tasks);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load course');
+      ErrorHandlers.api(err, 'Failed to fetch course data');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [courseId]);
+
   useEffect(() => {
-    void fetchCourses();
-    void fetchCourse();
-  }, [fetchCourses, fetchCourse]);
+    void fetchCourseData();
+  }, [fetchCourseData]);
 
   // Simple anchor scrolling
   useEffect(() => {
@@ -105,34 +131,17 @@ export default function CoursePage({ params }: CoursePageProps) {
   }, [tasks, searchQuery]);
 
   const handleUpdateStatusTask = async (taskId: string, newStatus: StatusTask) => {
-    // Optimistic update - update UI immediately
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, status: newStatus } : task,
-      ),
-    );
-
     try {
       await updateTaskStatus(taskId, newStatus);
-
       // Ensure global course list (used by sidebar) reflects any overdue count changes
       void refreshCourses();
     } catch (error) {
-      // Rollback optimistic update on error
-      setTasks(prevTasks =>
-        prevTasks.map(task =>
-          task.id === taskId
-            ? { ...task, status: tasks.find(t => t.id === taskId)?.status || StatusTask.TODO }
-            : task,
-        ),
-      );
       ErrorHandlers.api(error, 'Failed to update task status');
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
     await removeTask(taskId);
-    await fetchCourse();
     void refreshCourses();
   };
 
@@ -146,9 +155,7 @@ export default function CoursePage({ params }: CoursePageProps) {
       await handleConfirm(
         'Are you sure you want to delete this course? This action cannot be undone.',
         async () => {
-          await deleteCourseApi();
-          // Remove from local courses context
-          deleteCourse(course.id);
+          await deleteCourseFromStore(course.id);
           // Redirect to root
           router.push('/');
           // Show toast with course code
@@ -180,7 +187,7 @@ export default function CoursePage({ params }: CoursePageProps) {
           const result = await deleteAllCourseLinks(course.id);
           toast.success(result.message);
           // Refresh course to update the custom links
-          void fetchCourse();
+          void fetchCourseData();
         },
         undefined,
         {
@@ -215,7 +222,6 @@ export default function CoursePage({ params }: CoursePageProps) {
       toast.success('Overdue tasks completed', {
         description: `${currentOverdueTasks.length} overdue tasks have been marked as completed`,
       });
-      await fetchCourse();
       // Batch operation changed task statuses; update global courses used by sidebar
       await refreshCourses();
     } catch (error) {
@@ -308,7 +314,6 @@ export default function CoursePage({ params }: CoursePageProps) {
                   // Example: await updateCourse(course.id, { color, daypart });
                   // For now, just show a toast and refetch
                   toast.success('Course updated');
-                  await fetchCourse();
                   await refreshCourses();
                 }
               } catch (e) {
@@ -332,7 +337,7 @@ export default function CoursePage({ params }: CoursePageProps) {
               <CourseCustomLinks
                 courseId={course.id}
                 customLinks={course.customLinks}
-                onCustomLinksChange={fetchCourse}
+                onCustomLinksChange={() => void refreshCourses()}
               />
             </section>
             <div className="flex items-center gap-4 mb-2">
@@ -347,7 +352,7 @@ export default function CoursePage({ params }: CoursePageProps) {
               <AddTaskDialog
                 courseId={course.id}
                 courseCode={course.code}
-                onTaskAdded={fetchCourse}
+                onTaskAdded={() => void refreshCourses()}
                 courses={courses}
                 trigger={(
                   <Button>
@@ -381,7 +386,7 @@ export default function CoursePage({ params }: CoursePageProps) {
                                 task={task}
                                 onDeleteTask={handleDeleteTask}
                                 onUpdateStatusTask={handleUpdateStatusTask}
-                                onTaskAdded={fetchCourse}
+                                onTaskAdded={fetchCourseData}
                               />
                             </div>
                           ))}

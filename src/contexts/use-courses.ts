@@ -1,12 +1,11 @@
 'use client';
 
-import { use } from 'react';
-import { CoursesContext } from './courses-context';
+/**
+ * @deprecated Use hooks from @/hooks/use-course-store.ts instead
+ * This file is kept for backward compatibility but will be removed
+ *
+ * Migration guide:
+ * - useCoursesContext() -> useCourses() or useCourseOperations()
+ */
 
-export function useCoursesContext() {
-  const context = use(CoursesContext);
-  if (context === undefined) {
-    throw new Error('useCourses must be used within a CoursesProvider');
-  }
-  return context;
-}
+export { useCourseOperations, useCourses as useCoursesContext } from '@/hooks/use-course-store';

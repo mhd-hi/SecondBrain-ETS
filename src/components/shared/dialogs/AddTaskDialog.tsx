@@ -62,11 +62,6 @@ export const AddTaskDialog = ({
       // Uncontrolled mode: update internal state
       setInternalOpen(open);
     }
-
-    // When dialog is closed, trigger data refresh
-    if (!open) {
-      onTaskAdded();
-    }
   };
   const { createTask, isLoading } = useTaskStore();
   const [newTask, setNewTask] = useState(() => ({
@@ -106,6 +101,8 @@ export const AddTaskDialog = ({
     const success = await createTask(courseId ?? selectedCourseId!, newTask);
     if (success) {
       toast.success('Task added successfully');
+      // Notify parent that a task was added (for any additional side effects)
+      onTaskAdded();
 
       // Reset form
       setNewTask({
@@ -118,9 +115,8 @@ export const AddTaskDialog = ({
       });
 
       if (!createMore) {
-        // Only trigger refresh when closing the dialog
+        // Close dialog after successful addition
         setIsOpen(false);
-        onTaskAdded();
       } else {
         // Focus the title input for quick next task entry
         setTimeout(() => {
