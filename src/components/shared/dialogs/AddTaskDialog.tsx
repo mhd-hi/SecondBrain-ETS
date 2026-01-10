@@ -228,7 +228,7 @@ export const AddTaskDialog = ({
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex items-center gap-2">
               <Checkbox
                 id="create-more"
@@ -237,14 +237,24 @@ export const AddTaskDialog = ({
               />
               <label
                 htmlFor="create-more"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                className="text-sm font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
               >
                 Create more
               </label>
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add Task'}
-            </Button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+                className="flex-1 sm:flex-initial"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-initial">
+                {isLoading ? 'Adding...' : 'Add Task'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -13,8 +13,8 @@ export function AgendaDayGroup({ date, events }: IProps) {
   const sortedEvents = [...events].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
   return (
-    <div className="space-y-4">
-      <div className="sticky top-0 flex items-center gap-4 bg-background py-2">
+    <div className="space-y-1">
+      <div className="sticky top-0 flex items-center gap-4 py-2 rounded-md p-1.5">
         <p className="text-sm font-semibold">{format(date, 'EEEE, MMMM d, yyyy')}</p>
       </div>
 

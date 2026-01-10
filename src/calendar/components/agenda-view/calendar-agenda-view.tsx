@@ -40,7 +40,7 @@ export function CalendarAgendaView({ events }: Props) {
   const hasAnyEvents = events.length > 0;
 
   return (
-    <div className="h-200">
+    <div>
       <ScrollArea className="h-full" type="always">
         <div className="space-y-6 p-4">
           {eventsByDay.map(dayGroup => (

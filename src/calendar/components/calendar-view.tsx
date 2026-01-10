@@ -49,9 +49,9 @@ export function CalendarView() {
   const eventStartDates = useMemo(() => filteredEvents.map(event => ({ ...event, endDate: event.startDate })), [filteredEvents]);
 
   return (
-    <div className="rounded-xl border flex flex-col">
+    <div className="rounded-xl border flex flex-col h-full">
       <CalendarHeader />
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex-1 flex flex-col">
         <DndProviderWrapper>
           {view === 'day' && <CalendarDayView events={filteredEvents} />}
           {view === 'month' && <CalendarMonthView events={filteredEvents} />}

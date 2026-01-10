@@ -112,10 +112,7 @@ export function CalendarHeader() {
           </div>
         </div>
 
-        {/* FIXME: WIP */}
-        {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
-          ? (
-            <>
+        <>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="w-full sm:w-auto" variant="default">
@@ -125,37 +122,40 @@ export function CalendarHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <button type="button" onClick={() => setAddStudyBlockOpen(true)}>
-                  Add Study Block
-                </button>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <button type="button" onClick={() => setAddTaskOpen(true)}>
+                <button type="button" className="w-full text-left" onClick={() => setAddTaskOpen(true)}>
                   Add Task
                 </button>
               </DropdownMenuItem>
+              {/* FIXME: WIP make study block work */}
+              {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
+              ? (
+                <DropdownMenuItem asChild>
+                  <button type="button" className="w-full text-left" onClick={() => setAddStudyBlockOpen(true)}>
+                    Add Study Block
+                  </button>
+                </DropdownMenuItem>
+                )
+                : null}
             </DropdownMenuContent>
           </DropdownMenu>
 
-        <AddStudyBlockDialog
-          open={addStudyBlockOpen}
-          onOpenChange={setAddStudyBlockOpen}
-          courses={courses}
-          selectedDate={selectedDate}
-          trigger={false}
-          onStudyBlockAdded={() => setAddStudyBlockOpen(false)}
-        />
-        <AddTaskDialog
-          open={addTaskOpen}
-          onOpenChange={setAddTaskOpen}
-          courses={courses}
-          dueDate={selectedDate}
-          trigger={false}
-          onTaskAdded={() => setAddTaskOpen(false)}
-        />
-            </>
-                )
-        : null}
+          <AddStudyBlockDialog
+            open={addStudyBlockOpen}
+            onOpenChange={setAddStudyBlockOpen}
+            courses={courses}
+            selectedDate={selectedDate}
+            trigger={false}
+            onStudyBlockAdded={() => setAddStudyBlockOpen(false)}
+          />
+          <AddTaskDialog
+            open={addTaskOpen}
+            onOpenChange={setAddTaskOpen}
+            courses={courses}
+            dueDate={selectedDate}
+            trigger={false}
+            onTaskAdded={() => setAddTaskOpen(false)}
+          />
+        </>
       </div>
     </div>
   );
