@@ -146,8 +146,6 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
         status: row.status as StatusTask,
         estimatedEffort: row.estimatedEffort,
         actualEffort: row.actualEffort,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
         dueDate: row.dueDate,
         course: {
           id: row.course.id,
@@ -155,12 +153,9 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
           daypart: row.course.daypart,
           code: row.course.code,
           name: row.course.name,
-          createdAt: row.course.createdAt,
-          updatedAt: row.course.updatedAt,
         },
       };
 
-      console.log('Converting task to event:', task);
       return taskToEvent(task);
     });
 

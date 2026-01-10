@@ -11,8 +11,8 @@ export type Course = {
   daypart: Daypart;
   color: TCourseColor;
   description?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   tasks?: Task[];
   customLinks?: CustomLinkItem[];
 };
