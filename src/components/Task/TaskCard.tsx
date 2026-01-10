@@ -21,6 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { useUpdateField } from '@/hooks/use-update-field';
+import { getCoursePath, getPomodoroPath } from '@/lib/routes';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPE_OPTIONS } from '@/types/task';
@@ -154,12 +155,12 @@ export function TaskCard({
 
   const handleNavigateToTask = () => {
     if (task.course?.id) {
-      router.push(`/courses/${task.course.id}#task-${task.id}`);
+      router.push(`${getCoursePath(task.course.id)}#task-${task.id}`);
     }
   };
 
   const handleStartPomodoro = () => {
-    router.push(`/pomodoro?taskId=${task.id}`);
+    router.push(`${getPomodoroPath(task.id)}`);
   };
 
   const defaultActions = [

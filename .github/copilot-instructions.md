@@ -47,7 +47,6 @@ export const POST = withAuthSimple(async (request, user) => {
 ### Custom Hooks Pattern
 - **Naming**: `use-[feature].ts` (kebab-case, not camelCase)
 - **Data fetching**: Hooks like `use-course.ts` handle CRUD operations
-- **Context consumption**: `use-courses.ts` exports `useCoursesContext()`
 - **Task operations**: Use `useTaskOperations()` from `use-task-store.ts` for all task CRUD
   - Replaces direct API calls with store-based operations
   - Automatic state synchronization across components

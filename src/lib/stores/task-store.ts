@@ -27,6 +27,7 @@ type TaskStore = {
     getAllTasks: () => Task[];
 
     fetchTask: (taskId: string) => Promise<Task | null>;
+    fetchTasksByCourse: (courseId: string) => Promise<Task[]>;
     createTask: (courseId: string, newTask: {
         title: string;
         notes: string;
@@ -164,6 +165,25 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
             set({ isLoading: false, error: errorMessage });
             ErrorHandlers.api(error, errorMessage);
             return null;
+        }
+    },
+
+    fetchTasksByCourse: async (courseId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await fetch(`/api/tasks?courseId=${courseId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch tasks');
+            }
+            const tasks = await response.json() as Task[];
+            get().setTasks(tasks);
+            set({ isLoading: false });
+            return tasks;
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch tasks';
+            set({ isLoading: false, error: errorMessage });
+            ErrorHandlers.api(error, errorMessage);
+            return [];
         }
     },
 

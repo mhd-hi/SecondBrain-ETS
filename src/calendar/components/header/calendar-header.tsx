@@ -12,13 +12,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourses } from '@/hooks/use-course-store';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarHeader() {
   const view = useCalendarViewStore(state => state.view);
   const setView = useCalendarViewStore(state => state.setView);
-  const { courses } = useCoursesContext();
+  const { courses } = useCourses();
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [addStudyBlockOpen, setAddStudyBlockOpen] = useState(false);
 

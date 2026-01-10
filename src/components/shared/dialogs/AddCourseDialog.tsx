@@ -15,9 +15,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useCoursesContext } from '@/contexts/use-courses';
 import { useAddCourse } from '@/hooks/use-add-course';
+import { useCourses } from '@/hooks/use-course-store';
 import { useTerms } from '@/hooks/use-terms';
+import { getCoursePath } from '@/lib/routes';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
 import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
@@ -54,7 +55,7 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
   const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
   const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
 
-  const { refreshCourses } = useCoursesContext();
+  const { refreshCourses } = useCourses();
 
   const {
     currentStep,
@@ -174,10 +175,13 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
 
   const handleGoToCourse = () => {
     const courseId = createdCourseId;
+    if (!courseId) {
+      return;
+    }
     setIsOpen(false);
     // Use setTimeout to ensure dialog state is reset before navigation
     setTimeout(() => {
-      router.push(`/courses/${courseId}`);
+      router.push(getCoursePath(courseId));
     }, 0);
   };
 

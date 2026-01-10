@@ -17,7 +17,8 @@ type CourseCustomLinksProps = {
 
 export default function CourseCustomLinks({ courseId, customLinks: propCustomLinks, onCustomLinksChange }: CourseCustomLinksProps) {
   // Only use the hook when no prop links are provided (fallback)
-  const { customLinks: hookLinks } = useCustomLink(propCustomLinks ? undefined : courseId);
+  const shouldFetchLinks = !propCustomLinks;
+  const { customLinks: hookLinks } = useCustomLink(shouldFetchLinks ? courseId : undefined);
   const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Use prop links if provided, otherwise fall back to hook

@@ -80,6 +80,13 @@ export function useTaskOperations() {
         [store],
     );
 
+    const fetchTasksByCourse = useCallback(
+        async (courseId: string) => {
+            return store.fetchTasksByCourse(courseId);
+        },
+        [store],
+    );
+
     return {
         tasks: store.getAllTasks(),
         isLoading: store.isLoading,
@@ -95,6 +102,9 @@ export function useTaskOperations() {
         getTasksByCourse,
         getTasksByStatus,
         getTasksByDateRange,
+
+        // Fetch operations
+        fetchTasksByCourse,
 
         // Utility
         clearError: store.clearError,

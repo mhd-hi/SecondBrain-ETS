@@ -3,6 +3,10 @@ import { useSession } from 'next-auth/react';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useCourseStore } from '@/lib/stores/course-store';
 
+/**
+ * Hook for course operations with automatic fetching on mount
+ * Should only be used at the top level (layout) to avoid duplicate fetches
+ */
 export function useCourseOperations() {
     const { status } = useSession();
 
@@ -20,6 +24,7 @@ export function useCourseOperations() {
         [courses],
     );
 
+    // Auto-fetch only if authenticated and not initialized
     useEffect(() => {
         if (status === 'authenticated' && !hasInitialized && !isLoading) {
             void useCourseStore.getState().fetchCourses();
@@ -84,6 +89,7 @@ export function useCourse(courseId: string) {
     const hasInitialized = useCourseStore(state => state.hasInitialized);
     const isLoading = useCourseStore(state => state.isLoading);
 
+    // Auto-fetch only if authenticated and not initialized
     useEffect(() => {
         if (status === 'authenticated' && !hasInitialized && !isLoading) {
             void useCourseStore.getState().fetchCourses();
@@ -107,12 +113,13 @@ export function useCourse(courseId: string) {
     };
 }
 
+/**
+ * Hook to read courses from the store without auto-fetching
+ * Use this in child components - the layout handles fetching via useCourseOperations
+ */
 export function useCourses() {
-    const { status } = useSession();
-
     const isLoading = useCourseStore(state => state.isLoading);
     const error = useCourseStore(state => state.error);
-    const hasInitialized = useCourseStore(state => state.hasInitialized);
 
     const coursesMap = useCourseStore(state => state.courses);
     const courses = useMemo(() => Array.from(coursesMap.values()), [coursesMap]);
@@ -124,18 +131,25 @@ export function useCourses() {
         [courses],
     );
 
-    useEffect(() => {
-        if (status === 'authenticated' && !hasInitialized && !isLoading) {
-            void useCourseStore.getState().fetchCourses();
-        } else if (status === 'unauthenticated') {
-            useCourseStore.getState().reset();
-        }
-    }, [status, hasInitialized, isLoading]);
+    const getCourse = useCallback((courseId: string) => {
+        return useCourseStore.getState().getCourse(courseId);
+    }, []);
+
+    const getCourseByCode = useCallback((code: string) => {
+        return useCourseStore.getState().getCourseByCode(code);
+    }, []);
+
+    const refreshCourses = useCallback(async () => {
+        return useCourseStore.getState().refreshCourses();
+    }, []);
 
     return {
         courses,
         coursesListItems,
         isLoading,
         error,
+        refreshCourses,
+        getCourse,
+        getCourseByCode,
     };
 }

@@ -4,14 +4,14 @@ import React from 'react';
 import Navbar from '@/components/shared/Navigation/Navbar/Navbar';
 import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourseOperations } from '@/hooks/use-course-store';
 
 function DashboardLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { coursesListItems, isLoading, refreshCourses } = useCoursesContext();
+  const { coursesListItems, isLoading, refreshCourses } = useCourseOperations();
 
   return (
     <SidebarProvider>

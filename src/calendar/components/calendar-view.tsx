@@ -13,13 +13,13 @@ import { CalendarWeekView } from '@/calendar/components/week-and-day-view/calend
 import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-view';
 
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
-import { useCoursesContext } from '@/contexts/use-courses';
+import { useCourses } from '@/hooks/use-course-store';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarView() {
   const view = useCalendarViewStore(state => state.view);
   const events = useCalendarViewStore(state => state.events);
-  const { courses } = useCoursesContext();
+  const { courses } = useCourses();
 
   // Pre-parse dates once per event to avoid repeated parseISO calls on every render
   type ParsedEvent = TEvent & { startDateObj: Date; endDateObj: Date };
