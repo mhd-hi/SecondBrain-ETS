@@ -1,6 +1,6 @@
 ---
 # Codacy configuration file
-# Exclude files and folders from analysis
+# Focus on security issues only, disable style/linting tools
 
 exclude_paths:
   - 'drizzle/**'
@@ -11,3 +11,29 @@ exclude_paths:
   - bun.lock
   - yarn.lock
   - package-lock.json
+
+# Disable non-security tools
+engines:
+  # Disable style/linting tools
+  stylelint:
+    enabled: false
+  eslint:
+    enabled: false
+  csslint:
+    enabled: false
+  remark-lint:
+    enabled: false
+
+  # Keep security-focused tools enabled
+  bandit:
+    enabled: true
+  brakeman:
+    enabled: true
+  bundler-audit:
+    enabled: true
+  gosec:
+    enabled: true
+  semgrep:
+    enabled: true
+  trivy:
+    enabled: true
