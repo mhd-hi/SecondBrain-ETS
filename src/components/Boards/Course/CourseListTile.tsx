@@ -55,7 +55,7 @@ export function CourseListTile() {
       <div className="grid w-full gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
         {isLoading
           ? (
-            Array.from({ length: 6 }).map((_, index) => (
+            Array.from({ length: 5 }).map((_, index) => (
               // eslint-disable-next-line react/no-array-index-key
               <Skeleton key={index} className="h-40 w-full rounded-lg" />
             ))
