@@ -1,6 +1,6 @@
 # SecondBrain ETS - AI Copilot Instructions
 
-This is an AI-powered course management system for ETS university students that parses course plans and creates manageable tasks using OpenAI.
+This is an AI-powered course management system for ETS university students that parses course plans and creates manageable tasks.
 
 ## Architecture Overview
 
@@ -12,10 +12,15 @@ This is an AI-powered course management system for ETS university students that 
   - Pipeline communicates via `/api/course-pipeline` with real-time step updates
 
 ### State Management
-- **React Context Pattern**: All global state uses React Context providers
+- **React Context Pattern**: Global state for courses, states, pomodoro
   - `CoursesProvider` (`src/contexts/courses-context.tsx`): Main course data
   - `PomodoroProvider` (`src/contexts/pomodoro-provider.tsx`): Timer functionality
   - Always wrap components in provider hierarchy defined in `app/layout.tsx`
+- **Zustand Store Pattern**: Centralized state for tasks
+  - `useTaskStore` (`src/lib/stores/task-store.ts`): All task CRUD operations
+  - `useTaskOperations()` hook: Convenience wrapper for common operations
+  - `useCourseTasksStore(courseId)`: Get tasks for specific course with reactivity
+  - Optimistic updates: UI updates immediately, syncs with backend
 
 ### Database Layer
 - **Drizzle ORM** with PostgreSQL, schema in `src/server/db/schema.ts`
@@ -39,8 +44,12 @@ export const POST = withAuthSimple(async (request, user) => {
 
 ### Custom Hooks Pattern
 - **Naming**: `use-[feature].ts` (kebab-case, not camelCase)
-- **Data fetching**: Hooks like `use-course.ts`, `use-task.ts` handle CRUD operations
+- **Data fetching**: Hooks like `use-course.ts` handle CRUD operations
 - **Context consumption**: `use-courses.ts` exports `useCoursesContext()`
+- **Task operations**: Use `useTaskOperations()` from `use-task-store.ts` for all task CRUD
+  - Replaces direct API calls with store-based operations
+  - Automatic state synchronization across components
+  - Built-in loading states and error handling
 
 ### Environment & Configuration
 - **Type-safe env**: `src/env.js` using `@t3-oss/env-nextjs` with Zod validation
@@ -61,6 +70,32 @@ export const POST = withAuthSimple(async (request, user) => {
 4. Create API routes in `src/app/api/[feature]/`
 5. Build custom hook in `src/hooks/use-[feature].ts`
 6. Create components in `src/components/[Feature]/`
+
+### Working with Tasks
+- **Always use the task store** for task operations:
+  ```typescript
+  import { useTaskOperations } from '@/hooks/use-task-store';
+  
+  const { createTask, updateTaskStatus, deleteTask } = useTaskOperations();
+  
+  // Create task
+  await createTask('course-id', {
+    title: 'Task title',
+    notes: 'Description',
+    estimatedEffort: 2,
+    dueDate: new Date(),
+    type: 'theorie',
+    status: 'todo',
+  });
+  
+  // Update status (optimistic)
+  await updateTaskStatus('task-id', 'completed');
+  
+  // Delete task
+  await deleteTask('task-id');
+  ```
+- **Sync fetched tasks** with store using `useSyncTasksWithStore(tasks)`
+- **Query tasks** using store selectors for reactive updates
 
 ### AI Processing Integration
 - Use `ServerCourseProcessingPipeline` for multi-step AI workflows

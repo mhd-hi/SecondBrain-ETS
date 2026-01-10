@@ -20,8 +20,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useTask } from '@/hooks/use-task';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
@@ -68,7 +68,7 @@ export const AddTaskDialog = ({
       onTaskAdded();
     }
   };
-  const { addTask, isLoading } = useTask();
+  const { createTask, isLoading } = useTaskStore();
   const [newTask, setNewTask] = useState(() => ({
     title: '',
     notes: '',
@@ -103,10 +103,7 @@ export const AddTaskDialog = ({
       toast.error('Please select a course.');
       return;
     }
-    const success = await addTask({
-      courseId: courseId ?? selectedCourseId!,
-      newTask,
-    });
+    const success = await createTask(courseId ?? selectedCourseId!, newTask);
     if (success) {
       toast.success('Task added successfully');
 

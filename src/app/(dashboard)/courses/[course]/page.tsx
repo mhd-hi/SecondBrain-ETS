@@ -23,7 +23,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useCoursesContext } from '@/contexts/use-courses';
 import { useCourse } from '@/hooks/use-course';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
-import { batchUpdateStatusTask, deleteTask, updateStatusTask } from '@/hooks/use-task';
+import { useSyncTasksWithStore } from '@/hooks/use-sync-tasks';
+import { batchUpdateStatusTask } from '@/hooks/use-task';
+import { useTaskStore } from '@/lib/stores/task-store';
 import { getWeekNumberFromDueDate } from '@/lib/utils/date-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
@@ -46,6 +48,13 @@ export default function CoursePage({ params }: CoursePageProps) {
   // Use custom hooks instead of duplicate state management
   const { courses, fetchCourses, refreshCourses, deleteCourse } = useCoursesContext();
   const { course, tasks, isLoading, error, fetchCourse, setTasks, deleteCourse: deleteCourseApi } = useCourse(courseId);
+
+  // Sync tasks with the store
+  useSyncTasksWithStore(tasks);
+
+  // Get store methods for operations
+  const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
+  const removeTask = useTaskStore(state => state.removeTask);
 
   useEffect(() => {
     void fetchCourses();
@@ -104,7 +113,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     );
 
     try {
-      await updateStatusTask(taskId, newStatus);
+      await updateTaskStatus(taskId, newStatus);
 
       // Ensure global course list (used by sidebar) reflects any overdue count changes
       void refreshCourses();
@@ -122,7 +131,8 @@ export default function CoursePage({ params }: CoursePageProps) {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    await deleteTask(taskId, fetchCourse);
+    await removeTask(taskId);
+    await fetchCourse();
     void refreshCourses();
   };
 

@@ -102,9 +102,9 @@ export const tasks = pgTable('tasks', {
   status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] }).default('TODO').notNull(),
   estimatedEffort: real('estimated_effort').notNull().default(1),
   actualEffort: real('actual_effort').notNull().default(0),
+  dueDate: timestamp('due_date').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  dueDate: timestamp('due_date').notNull(),
 }, table => [
   index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
   index('idx_tasks_user_id').on(table.userId),

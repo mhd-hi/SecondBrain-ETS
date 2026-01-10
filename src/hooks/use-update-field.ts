@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTaskStore } from '@/lib/stores/task-store';
 
 /**
  * Hook to update a field for a task or subtask via API.
@@ -11,6 +12,8 @@ export type UpdateFieldParams = {
 };
 
 export function useUpdateField() {
+  const updateTask = useTaskStore(state => state.updateTask);
+
   return useCallback(async (params: UpdateFieldParams) => {
     let endpoint = '';
     switch (params.type) {
@@ -26,6 +29,15 @@ export function useUpdateField() {
     }
 
     const value = params.value;
+
+    // Optimistic update in the store
+    if (params.type === 'task') {
+      updateTask(params.id, { [params.input]: value });
+    } else if (params.type === 'subtask') {
+      // For subtasks, we need the taskId to update - this would need to be passed in params
+      // For now, skip optimistic update for subtasks
+      // TODO: Enhance UpdateFieldParams to include taskId for subtask updates
+    }
 
     try {
       const res = await fetch(endpoint, {
@@ -49,5 +61,5 @@ export function useUpdateField() {
       console.error('Failed to update field', err);
       throw err;
     }
-  }, []);
+  }, [updateTask]);
 }
