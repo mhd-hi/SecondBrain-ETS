@@ -108,6 +108,8 @@ export const tasks = pgTable('tasks', {
 }, table => [
   index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
   index('idx_tasks_user_id').on(table.userId),
+  index('idx_tasks_course_id').on(table.courseId),
+  index('idx_tasks_user_course').on(table.userId, table.courseId),
 ]);
 
 export const subtasks = pgTable('subtasks', {
@@ -231,6 +233,10 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
     references: [courses.id],
   }),
   subtasks: many(subtasks),
+}));
+
+export const subtasksRelations = relations(subtasks, ({ one }) => ({
+  task: one(tasks, { fields: [subtasks.taskId], references: [tasks.id] }),
 }));
 
 export const studyBlocksRelations = relations(studyBlocks, ({ one, many }) => ({

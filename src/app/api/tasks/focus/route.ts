@@ -1,5 +1,4 @@
 import type { Subtask } from '@/types/subtask';
-import type { Task } from '@/types/task';
 import { and, eq, gte, inArray, lt, ne, or } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
@@ -33,60 +32,101 @@ export const GET = withAuthSimple(
         break;
     }
 
-    // Fetch tasks that are:
-    // 1. Overdue (due date < today) OR
-    // 2. Due within the selected time range AND are actionable (IN_PROGRESS or TODO)
-    // AND belong to the current user
-    const results = await db.select().from(tasks).where(
-      and(
-        eq(tasks.userId, user.id), // Filter by current user
-        or(
-          // Overdue tasks (not completed)
-          and(
-            lt(tasks.dueDate, now),
-            ne(tasks.status, StatusTask.COMPLETED),
-          ),
-          // Tasks due within filter range that are actionable (IN_PROGRESS or TODO)
-          and(
-            gte(tasks.dueDate, now),
-            lt(tasks.dueDate, endDate),
-            or(
-              eq(tasks.status, StatusTask.IN_PROGRESS),
-              eq(tasks.status, StatusTask.TODO),
+    // Fetch tasks with selected fields only
+    const results = await db
+      .select({
+        id: tasks.id,
+        courseId: tasks.courseId,
+        title: tasks.title,
+        notes: tasks.notes,
+        type: tasks.type,
+        status: tasks.status,
+        estimatedEffort: tasks.estimatedEffort,
+        actualEffort: tasks.actualEffort,
+        dueDate: tasks.dueDate,
+        courseCode: courses.code,
+        courseName: courses.name,
+        courseColor: courses.color,
+      })
+      .from(tasks)
+      .innerJoin(courses, eq(tasks.courseId, courses.id))
+      .where(
+        and(
+          eq(tasks.userId, user.id),
+          or(
+            // Overdue tasks (not completed)
+            and(
+              lt(tasks.dueDate, now),
+              ne(tasks.status, StatusTask.COMPLETED),
+            ),
+            // Tasks due within filter range that are actionable
+            and(
+              gte(tasks.dueDate, now),
+              lt(tasks.dueDate, endDate),
+              or(
+                eq(tasks.status, StatusTask.IN_PROGRESS),
+                eq(tasks.status, StatusTask.TODO),
+              ),
             ),
           ),
         ),
-      ),
-    ).innerJoin(courses, eq(tasks.courseId, courses.id));
+      );
 
-    const taskIds = results.map(r => r.tasks.id);
+    const taskIds = results.map(r => r.id);
 
     const subsByTask = new Map<string, Subtask[]>();
     if (taskIds.length > 0) {
-      const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
-      for (const s of subs as Array<Record<string, unknown>>) {
-        const key = String(s.taskId);
+      const subs = await db
+        .select({
+          id: subtasks.id,
+          taskId: subtasks.taskId,
+          title: subtasks.title,
+          status: subtasks.status,
+          notes: subtasks.notes,
+          estimatedEffort: subtasks.estimatedEffort,
+        })
+        .from(subtasks)
+        .where(inArray(subtasks.taskId, taskIds));
+
+      for (const s of subs) {
         const mapped: Subtask = {
-          id: String(s.id),
-          title: String(s.title),
+          id: s.id,
+          title: s.title,
           status: parseStatusTask(String(s.status)),
-          notes: s.notes == null ? undefined : String(s.notes),
-          estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
+          notes: s.notes ?? undefined,
+          estimatedEffort: s.estimatedEffort,
         };
-        const list = subsByTask.get(key) ?? [];
+        const list = subsByTask.get(s.taskId) ?? [];
         list.push(mapped);
-        subsByTask.set(key, list);
+        subsByTask.set(s.taskId, list);
       }
     }
 
-    const tasksData: Task[] = results.map(row => ({
-      ...row.tasks,
-      course: row.courses,
-      status: parseStatusTask(String(row.tasks.status)),
-      subtasks: subsByTask.get(String(row.tasks.id)) ?? [],
-      notes: row.tasks.notes ?? undefined,
+    const tasksData = results.map(row => ({
+      id: row.id,
+      courseId: row.courseId,
+      userId: user.id,
+      title: row.title,
+      notes: row.notes ?? undefined,
+      type: row.type,
+      status: parseStatusTask(String(row.status)),
+      estimatedEffort: row.estimatedEffort,
+      actualEffort: row.actualEffort,
+      dueDate: row.dueDate,
+      course: {
+        id: row.courseId,
+        code: row.courseCode,
+        name: row.courseName,
+        color: row.courseColor,
+        userId: user.id,
+      },
+      subtasks: subsByTask.get(row.id) ?? [],
     }));
 
-    return NextResponse.json(tasksData);
+    return NextResponse.json(tasksData, {
+      headers: {
+        'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+      },
+    });
   },
 );

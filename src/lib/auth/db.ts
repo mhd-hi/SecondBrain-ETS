@@ -1,8 +1,6 @@
 import type { SQL } from 'drizzle-orm';
-import type { Subtask } from '@/types/subtask';
 import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
-import { parseStatusTask } from '@/lib/utils/task/task-util';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';
@@ -13,9 +11,38 @@ import { StatusTask } from '@/types/status-task';
 export async function getUserCourses(userId: string) {
   return db.query.courses.findMany({
     where: eq(courses.userId, userId),
+    columns: {
+      id: true,
+      name: true,
+      code: true,
+      term: true,
+      color: true,
+      daypart: true,
+    },
     with: {
-      tasks: true,
-      customLinks: true,
+      tasks: {
+        columns: {
+          id: true,
+          courseId: true,
+          title: true,
+          notes: true,
+          type: true,
+          status: true,
+          estimatedEffort: true,
+          actualEffort: true,
+          dueDate: true,
+        },
+      },
+      customLinks: {
+        columns: {
+          id: true,
+          url: true,
+          title: true,
+          type: true,
+          imageUrl: true,
+          courseId: true,
+        },
+      },
     },
   });
 }
@@ -41,44 +68,58 @@ export async function getUserCourse(courseId: string, userId: string) {
 
 /**
  * Get tasks for a specific course with user verification
+ * Optimized with single query using manual aggregation
  */
 export async function getUserCourseTasks(courseId: string, userId: string) {
-  // First verify course ownership
-  await getUserCourse(courseId, userId);
-
-  const rows = await db
-    .select()
+  // Fetch tasks first
+  const taskRows = await db
+    .select({
+      id: tasks.id,
+      courseId: tasks.courseId,
+      title: tasks.title,
+      notes: tasks.notes,
+      type: tasks.type,
+      status: tasks.status,
+      estimatedEffort: tasks.estimatedEffort,
+      actualEffort: tasks.actualEffort,
+      dueDate: tasks.dueDate,
+    })
     .from(tasks)
     .where(and(eq(tasks.courseId, courseId), eq(tasks.userId, userId)))
     .orderBy(tasks.dueDate);
-  // Fetch subtasks for these tasks and attach
-  const taskIds = rows.map(r => r.id);
-  if (taskIds.length === 0) {
-    return rows;
+
+  if (taskRows.length === 0) {
+    return [];
   }
 
-  const subs = await db.select().from(subtasks).where(inArray(subtasks.taskId, taskIds));
+  // Fetch all subtasks in one query
+  const taskIds = taskRows.map(t => t.id);
+  const subtaskRows = await db
+    .select({
+      id: subtasks.id,
+      taskId: subtasks.taskId,
+      type: subtasks.type,
+      title: subtasks.title,
+      notes: subtasks.notes,
+      status: subtasks.status,
+      estimatedEffort: subtasks.estimatedEffort,
+      dueDate: subtasks.dueDate,
+    })
+    .from(subtasks)
+    .where(inArray(subtasks.taskId, taskIds));
 
-  // Map subtasks to their task id using a Map to avoid dynamic object indexing
-  const subsByTask = new Map<string, Subtask[]>();
-  for (const s of subs as Array<Record<string, unknown>>) {
-    const key = String(s.taskId);
-    const mapped: Subtask = {
-      id: String(s.id),
-      title: String(s.title),
-      status: parseStatusTask(String(s.status)),
-      notes: s.notes == null ? undefined : String(s.notes),
-      estimatedEffort: typeof s.estimatedEffort === 'number' ? s.estimatedEffort : 0,
-    };
-    const list = subsByTask.get(key) ?? [];
-    list.push(mapped);
-    subsByTask.set(key, list);
+  // Group subtasks by taskId
+  const subtasksByTask = new Map<string, typeof subtaskRows>();
+  for (const subtask of subtaskRows) {
+    const list = subtasksByTask.get(subtask.taskId) ?? [];
+    list.push(subtask);
+    subtasksByTask.set(subtask.taskId, list);
   }
 
-  // Attach
-  return rows.map(r => ({
-    ...r,
-    subtasks: subsByTask.get(String(r.id)) ?? [],
+  // Combine results
+  return taskRows.map(task => ({
+    ...task,
+    subtasks: subtasksByTask.get(task.id) ?? [],
   }));
 }
 

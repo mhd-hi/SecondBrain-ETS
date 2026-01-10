@@ -3,7 +3,7 @@ import type { Task } from '@/types/task';
 
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
@@ -47,9 +47,12 @@ export default function CoursePage({ params }: CoursePageProps) {
   const { courses } = useCourses();
   const course = useCourseStore(state => state.courses.get(courseId));
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFloatingButton, setShowFloatingButton] = useState(false);
+  const addTaskButtonRef = useRef<HTMLDivElement>(null);
 
   // Get tasks directly from the store for automatic reactivity
   const tasks = useCourseTasksStore(courseId);
+  const isLoading = useTaskStore(state => state.isLoading);
 
   // Get store methods for operations
   const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
@@ -72,6 +75,20 @@ export default function CoursePage({ params }: CoursePageProps) {
       router.push('/');
     }
   }, [courseId, fetchTasksByCourse, router]);
+
+  // Track when Add Task button scrolls out of view
+  useEffect(() => {
+    const handleScroll = () => {
+      if (addTaskButtonRef.current) {
+        const rect = addTaskButtonRef.current.getBoundingClientRect();
+        // Show floating button when original button is scrolled out of view
+        setShowFloatingButton(rect.bottom < 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Filter tasks based on search query
   const filteredTasks = useMemo(() => {
@@ -294,13 +311,13 @@ export default function CoursePage({ params }: CoursePageProps) {
         <section>
           <CourseCustomLinks
             courseId={course.id}
-            customLinks={course.customLinks}
+            customLinks={course.customLinks ?? []}
           />
         </section>
         <section>
           <CourseProgressTile tasks={tasks} />
         </section>
-        <div className="flex items-center gap-4 mb-2">
+        <div ref={addTaskButtonRef} className="flex items-center gap-4 mb-2">
           <SearchBar
             id="course-tasks-search-bar"
             name="course-tasks-search-bar"
@@ -322,50 +339,73 @@ export default function CoursePage({ params }: CoursePageProps) {
             )}
           />
         </div>
+
+        {/* Floating Add Task Button */}
+        {showFloatingButton && (
+          <div className="fixed top-20 z-40 animate-in slide-in-from-top duration-200 ease-out" style={{ right: '2rem' }}>
+            <AddTaskDialog
+              courseId={course.id}
+              courseCode={course.code}
+              onTaskAdded={() => {}}
+              courses={courses}
+              trigger={(
+                <Button className="shadow-lg hover:shadow-xl transition-all w-30">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Task
+                </Button>
+              )}
+            />
+          </div>
+        )}
+
         {/* Tasks content */}
-        {filteredTasks.length > 0
+        {isLoading
           ? (
-            <div className="space-y-5 will-change-scroll">
-              {Object.entries(tasksByWeek)
-                .sort(([a], [b]) => Number(a) - Number(b))
-                .map(([week, weekTasks]) => (
-                  <div key={week} className="space-y-3">
-                    <h3 className="font-semibold text-lg mb-1">
-                      {'Week '}
-                      {week}
-                    </h3>
-                    <div className="space-y-3">
-                      {weekTasks.map(task => (
-                        <div
-                          id={`task-${task.id}`}
-                          key={task.id}
-                          className="transform-gpu transition-all duration-200 rounded-lg"
-                        >
-                          <TaskCard
-                            task={task}
-                            onDeleteTask={handleDeleteTask}
-                            onUpdateStatusTask={handleUpdateStatusTask}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
+            <CourseSkeleton />
           )
-          : searchQuery.trim()
+          : filteredTasks.length > 0
             ? (
-              <div className="text-center text-muted-foreground py-12">
-                No tasks found matching &quot;
-                {searchQuery}
-                &quot;. Try a different search term.
+              <div className="space-y-5 will-change-scroll">
+                {Object.entries(tasksByWeek)
+                  .sort(([a], [b]) => Number(a) - Number(b))
+                  .map(([week, weekTasks]) => (
+                    <div key={week} className="space-y-3">
+                      <h3 className="font-semibold text-lg mb-1">
+                        {'Week '}
+                        {week}
+                      </h3>
+                      <div className="space-y-3">
+                        {weekTasks.map(task => (
+                          <div
+                            id={`task-${task.id}`}
+                            key={task.id}
+                            className="transform-gpu transition-all duration-200 rounded-lg"
+                          >
+                            <TaskCard
+                              task={task}
+                              onDeleteTask={handleDeleteTask}
+                              onUpdateStatusTask={handleUpdateStatusTask}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
               </div>
             )
-            : (
-              <div className="text-center text-muted-foreground py-12">
-                No tasks found. Add a task to get started.
-              </div>
-            )}
+            : searchQuery.trim()
+              ? (
+                <div className="text-center text-muted-foreground py-12">
+                  No tasks found matching &quot;
+                  {searchQuery}
+                  &quot;. Try a different search term.
+                </div>
+              )
+              : (
+                <div className="text-center text-muted-foreground py-12">
+                  No tasks found. Add a task to get started.
+                </div>
+              )}
       </div>
     </main>
   );

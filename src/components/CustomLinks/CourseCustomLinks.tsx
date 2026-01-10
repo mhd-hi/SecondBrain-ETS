@@ -7,22 +7,15 @@ import { useState } from 'react';
 
 import CustomLinkTile from '@/components/CustomLinks/CustomLinkTile';
 import AddCustomLinkDialog from '@/components/shared/dialogs/AddCustomLinkDialog';
-import { useCustomLink } from '@/hooks/use-custom-link';
 
 type CourseCustomLinksProps = {
   courseId: string;
-  customLinks?: CustomLinkItem[];
+  customLinks: CustomLinkItem[];
   onCustomLinksChange?: () => void; // Callback to refresh links from parent
 };
 
-export default function CourseCustomLinks({ courseId, customLinks: propCustomLinks, onCustomLinksChange }: CourseCustomLinksProps) {
-  // Only use the hook when no prop links are provided (fallback)
-  const shouldFetchLinks = !propCustomLinks;
-  const { customLinks: hookLinks } = useCustomLink(shouldFetchLinks ? courseId : undefined);
+export default function CourseCustomLinks({ courseId, customLinks, onCustomLinksChange }: CourseCustomLinksProps) {
   const [showAddDialog, setShowAddDialog] = useState(false);
-
-  // Use prop links if provided, otherwise fall back to hook
-  const customLinks = propCustomLinks ?? hookLinks;
 
   const hasLinks = customLinks.length > 0;
 
@@ -62,7 +55,7 @@ export default function CourseCustomLinks({ courseId, customLinks: propCustomLin
         onOpenChange={setShowAddDialog}
         onLinkCreated={() => {
           setShowAddDialog(false);
-          // If we have a callback to refresh, use it, otherwise the hook will handle it
+          // Refresh course data to get updated links
           if (onCustomLinksChange) {
             onCustomLinksChange();
           }
