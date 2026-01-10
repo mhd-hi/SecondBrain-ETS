@@ -1,0 +1,13 @@
+---
+# Codacy configuration file
+# Exclude files and folders from analysis
+
+exclude_paths:
+  - 'drizzle/**'
+  - '**/*.sql'
+  - 'node_modules/**'
+  - '.next/**'
+  - 'dist/**'
+  - bun.lock
+  - yarn.lock
+  - package-lock.json
