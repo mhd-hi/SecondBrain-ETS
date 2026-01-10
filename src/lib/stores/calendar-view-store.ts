@@ -1,4 +1,4 @@
-import type { TCalendarView, TEvent, TVisibleHours } from '@/calendar/types';
+import type { TBadgeVariant, TCalendarView, TEvent, TVisibleHours } from '@/calendar/types';
 import { create } from 'zustand';
 import { VISIBLE_HOURS } from '@/lib/calendar/constants';
 
@@ -18,6 +18,8 @@ type CalendarViewState = {
     setVisibleRange: (range: VisibleRange) => void;
     events: TEvent[];
     setEvents: (events: TEvent[] | ((prev: TEvent[]) => TEvent[])) => void;
+    badgeVariant: TBadgeVariant;
+    setBadgeVariant: (variant: TBadgeVariant) => void;
 };
 
 export const useCalendarViewStore = create<CalendarViewState>(set => ({
@@ -35,4 +37,6 @@ export const useCalendarViewStore = create<CalendarViewState>(set => ({
             events: typeof eventsOrUpdater === 'function' ? eventsOrUpdater(state.events) : eventsOrUpdater,
         };
     }),
+    badgeVariant: 'colored',
+    setBadgeVariant: variant => set({ badgeVariant: variant }),
 }));

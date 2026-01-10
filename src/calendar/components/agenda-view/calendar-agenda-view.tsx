@@ -5,9 +5,9 @@ import { CalendarX2 } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { AgendaDayGroup } from '@/calendar/components/agenda-view/agenda-day-group';
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
+
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type Props = {
   events: TEvent[];
@@ -40,7 +40,7 @@ export function CalendarAgendaView({ events }: Props) {
   const hasAnyEvents = events.length > 0;
 
   return (
-    <div className="h-[800px]">
+    <div className="h-200">
       <ScrollArea className="h-full" type="always">
         <div className="space-y-6 p-4">
           {eventsByDay.map(dayGroup => (

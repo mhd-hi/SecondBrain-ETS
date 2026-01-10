@@ -1,6 +1,6 @@
 'use client';
-
 import type { Course } from '@/types/course';
+
 import type { TaskType } from '@/types/task';
 import { Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -21,13 +21,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useTask } from '@/hooks/use-task';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
 
 type AddTaskDialogProps = {
   courseId?: string;
   courseCode?: string;
-  selectedDate?: Date;
+  dueDate?: Date;
   onTaskAdded: () => void;
   trigger?: React.ReactNode;
   courses: Course[];
@@ -38,13 +39,17 @@ type AddTaskDialogProps = {
 export const AddTaskDialog = ({
   courseId,
   courseCode,
-  selectedDate,
+  dueDate,
   onTaskAdded,
   trigger,
   courses,
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
 }: AddTaskDialogProps) => {
+  // Get global selectedDate from store if dueDate prop not provided
+  const globalSelectedDate = useCalendarViewStore(state => state.selectedDate);
+  const effectiveDueDate = dueDate || globalSelectedDate;
+
   const [internalOpen, setInternalOpen] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -68,7 +73,7 @@ export const AddTaskDialog = ({
     title: '',
     notes: '',
     estimatedEffort: 3,
-    dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
+    dueDate: effectiveDueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
     type: TASK_TYPES.THEORIE as TaskType,
     status: StatusTask.TODO,
   }));
@@ -76,10 +81,22 @@ export const AddTaskDialog = ({
   const [createMore, setCreateMore] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync selectedCourseId with courseId prop
   useEffect(() => {
     // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     setSelectedCourseId(courseId ?? null);
   }, [courseId]);
+
+  // Sync newTask.dueDate with effectiveDueDate when dialog opens
+  useEffect(() => {
+    if (isOpen && effectiveDueDate) {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setNewTask(prev => ({
+        ...prev,
+        dueDate: effectiveDueDate,
+      }));
+    }
+  }, [isOpen, effectiveDueDate]);
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseId && !selectedCourseId) {
@@ -98,7 +115,7 @@ export const AddTaskDialog = ({
         title: '',
         notes: '',
         estimatedEffort: 1,
-        dueDate: selectedDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
+        dueDate: effectiveDueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
         type: TASK_TYPES.THEORIE,
         status: StatusTask.TODO,
       });

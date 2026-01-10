@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import React from 'react';
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
 import { DraggableEvent } from '@/calendar/components/dnd/draggable-event';
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 import { cn } from '@/lib/utils';
 
 const calendarWeekEventCardVariants = cva(
@@ -46,7 +46,7 @@ type IProps = {
 } & HTMLAttributes<HTMLDivElement> & Omit<VariantProps<typeof calendarWeekEventCardVariants>, 'color'>;
 
 function EventBlockImpl({ event, className, style }: IProps) {
-  const { badgeVariant } = useCalendar();
+  const badgeVariant = useCalendarViewStore(state => state.badgeVariant);
 
   // Height and position are now controlled by the style prop
 

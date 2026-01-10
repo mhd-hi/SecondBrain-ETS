@@ -12,9 +12,9 @@ import { CalendarDayView } from '@/calendar/components/week-and-day-view/calenda
 import { CalendarWeekView } from '@/calendar/components/week-and-day-view/calendar-week-view';
 import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-view';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { useCoursesContext } from '@/contexts/use-courses';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarView() {
   const view = useCalendarViewStore(state => state.view);

@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 
 import { YearViewMonth } from '@/calendar/components/year-view/year-view-month';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 type IProps = {
   allEvents: TEvent[];

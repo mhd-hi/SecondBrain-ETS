@@ -8,7 +8,7 @@ import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-
 
 import { DraggableEvent } from '@/calendar/components/dnd/draggable-event';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 import { cn } from '@/lib/utils';
 
 const eventBadgeVariants = cva(
@@ -57,7 +57,7 @@ type IProps = {
 } & Omit<VariantProps<typeof eventBadgeVariants>, 'color' | 'multiDayPosition'>;
 
 export function MonthEventBadge({ event, cellDate, eventCurrentDay, eventTotalDays, className, position: propPosition }: IProps) {
-  const { badgeVariant } = useCalendar();
+  const badgeVariant = useCalendarViewStore(state => state.badgeVariant);
 
   const itemStart = startOfDay(parseISO(event.startDate));
   const itemEnd = endOfDay(parseISO(event.endDate));

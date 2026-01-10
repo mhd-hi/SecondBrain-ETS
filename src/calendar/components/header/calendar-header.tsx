@@ -1,9 +1,8 @@
 import { CalendarRange, Columns, Grid2x2, Grid3x3, List, Plus } from 'lucide-react';
 
 import { useState } from 'react';
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
-
 import { NavigationControls } from '@/components/Calendar/NavigationControls';
+
 import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCoursesContext } from '@/contexts/use-courses';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarHeader() {
   const view = useCalendarViewStore(state => state.view);
@@ -141,6 +141,7 @@ export function CalendarHeader() {
           open={addStudyBlockOpen}
           onOpenChange={setAddStudyBlockOpen}
           courses={courses}
+          selectedDate={selectedDate}
           trigger={false}
           onStudyBlockAdded={() => setAddStudyBlockOpen(false)}
         />
@@ -148,6 +149,7 @@ export function CalendarHeader() {
           open={addTaskOpen}
           onOpenChange={setAddTaskOpen}
           courses={courses}
+          dueDate={selectedDate}
           trigger={false}
           onTaskAdded={() => setAddTaskOpen(false)}
         />

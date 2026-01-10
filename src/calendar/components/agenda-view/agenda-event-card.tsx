@@ -11,8 +11,8 @@ import { format, parseISO } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
 import { CourseCodeBadge } from '@/components/shared/atoms/CourseCodeBadge';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 const agendaEventCardVariants = cva(
   'flex select-none items-center justify-between gap-3 rounded-md border p-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
@@ -51,7 +51,7 @@ type IProps = {
 };
 
 export function AgendaEventCard({ event, eventCurrentDay, eventTotalDays }: IProps) {
-  const { badgeVariant } = useCalendar();
+  const badgeVariant = useCalendarViewStore(state => state.badgeVariant);
 
   const startDate = parseISO(event.startDate);
   const endDate = parseISO(event.endDate);

@@ -59,7 +59,7 @@ export const TaskBox = ({
       {...(!isDragOverlay ? attributes : {})}
       {...(!isDragOverlay ? listeners : {})}
     >
-  {/* More actions button - visible on hover, positioned on the corner */}
+      {/* More actions button - visible on hover, positioned on the corner */}
       <div className="absolute -right-3 -top-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
         <ActionsDropdown
           actions={[

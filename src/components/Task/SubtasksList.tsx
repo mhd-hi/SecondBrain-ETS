@@ -120,7 +120,7 @@ const SubtasksList = ({
                   : 'bg-muted/30',
               )}
             >
-              <div className="flex-grow space-y-1">
+              <div className="grow space-y-1">
                 <div className="flex items-center gap-2">
                   {subtask.status === StatusTask.COMPLETED
                     ? <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />

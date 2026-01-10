@@ -8,7 +8,7 @@ import { DroppableDayCell } from '@/calendar/components/dnd/droppable-day-cell';
 import { EventBullet } from '@/calendar/components/month-view/event-bullet';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
 
-import { useCalendarViewStore } from '@/calendar/contexts/calendar-view-store';
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
 
@@ -51,7 +51,7 @@ export function DayCell({ cell, events }: IProps) {
           {day}
         </button>
 
-        <div className={cn('flex h-6 gap-1 px-2 lg:h-[94px] lg:flex-col lg:gap-2 lg:px-0', !currentMonth && 'opacity-50')}>
+        <div className={cn('flex h-6 gap-1 px-2 lg:h-23.5 lg:flex-col lg:gap-2 lg:px-0', !currentMonth && 'opacity-50')}>
           {cellEvents.slice(0, MAX_VISIBLE_EVENTS).map((event, idx) => {
             const eventKey = `event-${event.id}-${idx}`;
             return (

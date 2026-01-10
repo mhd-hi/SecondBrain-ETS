@@ -1,11 +1,12 @@
 'use client';
 
-import { useCalendar } from '@/calendar/contexts/calendar-context';
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
+
 export function ChangeBadgeVariantInput() {
-  const { badgeVariant, setBadgeVariant } = useCalendar();
+  const badgeVariant = useCalendarViewStore(state => state.badgeVariant);
+  const setBadgeVariant = useCalendarViewStore(state => state.setBadgeVariant);
 
   return (
     <div className="space-y-2">
