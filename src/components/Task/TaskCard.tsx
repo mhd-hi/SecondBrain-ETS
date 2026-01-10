@@ -178,7 +178,7 @@ export function TaskCard({
 
   return (
     <div className={cn(
-      'relative group p-4 rounded-lg border bg-card text-card-foreground shadow-sm transition-colors',
+      'relative group p-2 rounded-lg border bg-card text-card-foreground shadow-sm transition-colors',
       isCompleted && 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
       className,
     )}
@@ -204,8 +204,8 @@ export function TaskCard({
           />
         </div>
       )}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1 grow min-w-0">
+      <div className="flex flex-wrap items-start justify-between">
+        <div className="space-y-0.5 grow min-w-0">
           {/* Editable Title */}
           <EditableField
             value={editedTitle}

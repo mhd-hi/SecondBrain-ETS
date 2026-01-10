@@ -76,7 +76,7 @@ const SubtasksList = ({
   };
 
   return (
-    <div id="subtasks-list" className={cn(isExpanded && 'mt-4 space-y-2')}>
+    <div id="subtasks-list" className={cn(isExpanded && 'mt-1')}>
       {collapsible && (
         <div
           className={cn(
@@ -107,7 +107,7 @@ const SubtasksList = ({
       )}
 
       {isExpanded && (
-        <div className="space-y-2 pl-4 border-l-2 border-muted">
+        <div className="space-y-2 pl-3 border-l border-muted">
           {subtasks.map(subtask => (
             <div
               key={subtask.id}
@@ -121,7 +121,7 @@ const SubtasksList = ({
                   : 'bg-muted/30',
               )}
             >
-              <div className="grow space-y-1">
+              <div className="grow">
                 <div className="flex items-center gap-2">
                   {subtask.status === StatusTask.COMPLETED
                     ? <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />

@@ -366,12 +366,12 @@ export default function CoursePage({ params }: CoursePageProps) {
             {/* Tasks content */}
             {filteredTasks.length > 0
               ? (
-                <div className="space-y-8 will-change-scroll">
+                <div className="space-y-5 will-change-scroll">
                   {Object.entries(tasksByWeek)
                     .sort(([a], [b]) => Number(a) - Number(b))
                     .map(([week, weekTasks]) => (
-                      <div key={week} className="space-y-4">
-                        <h3 className="font-semibold text-lg mb-3">
+                      <div key={week} className="space-y-3">
+                        <h3 className="font-semibold text-lg mb-1">
                           {'Week '}
                           {week}
                         </h3>
