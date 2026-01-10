@@ -76,9 +76,9 @@ export const POST = withAuthSimple(async (request, user) => {
 - **Always use the task store** for task operations:
   ```typescript
   import { useTaskOperations } from '@/hooks/use-task-store';
-  
+
   const { createTask, updateTaskStatus, deleteTask } = useTaskOperations();
-  
+
   // Create task
   await createTask('course-id', {
     title: 'Task title',
@@ -88,10 +88,10 @@ export const POST = withAuthSimple(async (request, user) => {
     type: 'theorie',
     status: 'todo',
   });
-  
+
   // Update status (optimistic)
   await updateTaskStatus('task-id', 'completed');
-  
+
   // Delete task
   await deleteTask('task-id');
   ```
@@ -101,22 +101,22 @@ export const POST = withAuthSimple(async (request, user) => {
 ### Working with Pomodoro
 - **Use the Pomodoro store** for timer operations (no provider needed):
   ```typescript
-  import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
   // Or use the operations hook for convenience
   import { usePomodoroOperations } from '@/hooks/use-pomodoro';
-  
+  import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
+
   // Direct store access
   const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroStore();
-  
+
   // Or with operations hook (includes useCallback wrappers)
   const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroOperations();
-  
+
   // Start pomodoro with task
   startPomodoro(task, 25, true); // task, duration in minutes, autoStart
-  
+
   // Toggle timer
   toggleTimer();
-  
+
   // Stop session
   stopPomodoro();
   ```

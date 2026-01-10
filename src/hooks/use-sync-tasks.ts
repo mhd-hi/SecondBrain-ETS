@@ -15,16 +15,3 @@ export function useSyncTasksWithStore(tasks: Task[] | undefined) {
         }
     }, [tasks, setTasks]);
 }
-
-/**
- * Hook to sync a single task with the task store
- */
-export function useSyncTaskWithStore(task: Task | undefined) {
-    const addTask = useTaskStore(state => state.addTask);
-
-    useEffect(() => {
-        if (task) {
-            addTask(task);
-        }
-    }, [task, addTask]);
-}

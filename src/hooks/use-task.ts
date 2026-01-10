@@ -58,16 +58,6 @@ export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
   return response.json() as Promise<Task[]>;
 };
 
-export const fetchWeeklyTasks = async (weekStart: Date, weekEnd: Date): Promise<Task[]> => {
-  const response = await fetch(`/api/tasks/weekly?start=${weekStart.toISOString()}&end=${weekEnd.toISOString()}`);
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch tasks');
-  }
-
-  return response.json() as Promise<Task[]>;
-};
-
 export const fetchCalendarTasks = async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
   const response = await fetch(`/api/tasks/calendar?start=${startDate.toISOString()}&end=${endDate.toISOString()}`);
 
@@ -156,16 +146,4 @@ export const useCalendarTasks = () => {
   }, []);
 
   return { getCalendarTasks, isLoading, error };
-};
-
-export const updateTask = async (taskId: string, payload: Partial<Task>): Promise<void> => {
-  const res = await fetch(`/api/tasks/${taskId}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || 'Failed to update task');
-  }
 };
