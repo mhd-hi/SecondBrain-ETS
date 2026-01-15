@@ -31,15 +31,8 @@ function AuthErrorContent() {
           <CardDescription>{errorMessage}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {error === 'OAuthAccountNotLinked' && (
-            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800">
-                This email is already associated with another account. Please sign in with the original provider you used.
-              </p>
-            </div>
-          )}
           <div className="flex flex-col gap-2">
-            <Button asChild>
+            <Button>
               <Link href={ROUTES.SIGNIN}>Try Again</Link>
             </Button>
             <Button variant="outline" asChild>

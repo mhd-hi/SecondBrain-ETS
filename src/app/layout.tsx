@@ -3,6 +3,7 @@ import { SessionProvider } from 'next-auth/react';
 import { Geist, Inter } from 'next/font/google';
 import CommandPalette from '@/components/CommandPalette/CommandPalette';
 import { GlobalConfirmDialogProvider } from '@/components/shared/dialogs/ConfirmDialogProvider';
+import { VersionLogger } from '@/components/shared/VersionLogger';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${geist.variable}`} data-scroll-behavior="smooth">
       <body className={cn(inter.className, 'min-h-screen bg-background')}>
+        <VersionLogger />
         <SessionProvider>
           <GlobalConfirmDialogProvider>
             <ThemeProvider

@@ -205,8 +205,8 @@ export function TaskCard({
           />
         </div>
       )}
-      <div className="flex flex-wrap items-start justify-between">
-        <div className="space-y-0.5 grow min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="flex-1 min-w-0 w-full md:w-auto">
           {/* Editable Title */}
           <EditableField
             value={editedTitle}
@@ -224,7 +224,7 @@ export function TaskCard({
             className={cn('text-sm text-muted-foreground', isCompleted && 'opacity-70')}
             placeholder="Task description"
           />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-2">
             <SubtasksPill
               subtasks={subtasks ?? []}
               isExpanded={isSubtasksExpanded}
@@ -367,8 +367,8 @@ export function TaskCard({
         <div
           className={cn(
             // Row, wrap, full width on mobile, auto on desktop
-            'flex flex-row flex-wrap gap-2 w-full mt-3 items-start',
-            'md:flex-col md:items-end md:w-auto md:mt-0',
+            'flex flex-row flex-wrap gap-2 w-full items-start',
+            'md:flex-col md:items-end md:w-auto md:mr-2',
           )}
         >
           <div className="flex flex-row flex-wrap gap-2 lg:flex-col lg:w-auto">

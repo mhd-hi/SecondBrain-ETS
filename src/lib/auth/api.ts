@@ -37,8 +37,21 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
     return null;
   } catch (error) {
     console.error('Error getting authenticated user:', error);
+
+    // Check if it's a database connection issue
+    const errorMessage = error instanceof Error ? error.message : '';
+    const isDatabaseIssue = errorMessage.includes('timeout')
+      || errorMessage.includes('ETIMEDOUT')
+      || errorMessage.includes('connect')
+      || errorMessage.includes('ECONNREFUSED');
+
+    console.error(errorMessage);
     Sentry.captureException(error, {
-      tags: { context: 'auth', function: 'getAuthenticatedUser' },
+      tags: {
+        context: 'auth',
+        function: 'getAuthenticatedUser',
+        isDatabaseIssue: isDatabaseIssue ? 'yes' : 'no',
+      },
     });
     return null;
   }
@@ -78,9 +91,20 @@ export class AuthorizationError extends Error {
  * Standard error responses
  */
 export function createAuthErrorResponse(error: Error): NextResponse {
+  const errorMessage = error.message || '';
+  const isDatabaseIssue = errorMessage.includes('timeout')
+    || errorMessage.includes('ETIMEDOUT')
+    || errorMessage.includes('connect')
+    || errorMessage.includes('ECONNREFUSED');
+
   if (error instanceof AuthenticationError) {
+    // Provide better error message if database is likely paused
+    const message = isDatabaseIssue
+      ? 'Database is warming up. Please wait a moment and try again.'
+      : error.message;
+
     return NextResponse.json(
-      { error: error.message, code: 'UNAUTHENTICATED' },
+      { error: message, code: 'UNAUTHENTICATED', retry: isDatabaseIssue },
       { status: 401 },
     );
   }
@@ -92,9 +116,13 @@ export function createAuthErrorResponse(error: Error): NextResponse {
     );
   }
 
-  // Generic error
+  // Generic error with database hint
+  const message = isDatabaseIssue
+    ? 'Database connection issue. Please try again in a moment.'
+    : 'Internal server error';
+
   return NextResponse.json(
-    { error: 'Internal server error', code: 'INTERNAL_ERROR' },
+    { error: message, code: 'INTERNAL_ERROR', retry: isDatabaseIssue },
     { status: 500 },
   );
 }

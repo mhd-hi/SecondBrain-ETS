@@ -80,7 +80,7 @@ export const TaskBox = ({
           triggerClassName="p-1"
         />
       </div>
-      <div className="text-left w-full">
+      <div className="text-left w-full min-w-0">
         <div className="flex items-center justify-between gap-2">
           {task.course?.code && (
             <p className="text-sm text-muted-foreground truncate">{task.course.code}</p>
@@ -95,11 +95,11 @@ export const TaskBox = ({
 
         <TruncatedTextWithTooltip
           text={task.title}
-          className="text-sm font-normal mt-1 line-clamp-4 leading-tight"
+          className="text-sm font-normal line-clamp-4 leading-tight wrap-break-word"
           maxLines={4}
         />
 
-        <div className="mt-2">
+        <div className="mt-1">
           <StatusTaskChanger
             currentStatus={task.status}
             onStatusChange={(newStatus: StatusTask) => onStatusChange(task.id, newStatus)}

@@ -87,7 +87,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 
   return (
     <div
-      className={`relative flex items-center group ${className}`}
+      className={`relative flex items-center group max-w-full ${className}`}
       style={{ minWidth: 0 }}
     >
       {isEditing
@@ -96,7 +96,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             ? (
               <Textarea
                 ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                className="resize-y min-h-[2.5em]"
+                className="resize-y min-h-[2.5em] w-full max-w-full"
                 value={editValue}
                 onChange={e => setEditValue(e.target.value)}
                 onBlur={handleBlur}
@@ -108,7 +108,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             : (
               <input
                 ref={inputRef as React.RefObject<HTMLInputElement>}
-                className="w-full border border-muted-foreground/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground transition-all"
+                className="w-full max-w-full border border-muted-foreground/40 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary bg-background text-foreground transition-all"
                 style={{ borderWidth: '1.5px' }}
                 value={editValue}
                 onChange={e => setEditValue(e.target.value)}
@@ -123,7 +123,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         : (
           <button
             type="button"
-            className="w-full text-left px-2 py-1 rounded-md border border-transparent bg-transparent hover:border-muted-foreground/40 focus:border-muted-foreground/60 cursor-pointer transition-all"
+            className="w-full max-w-full text-left pl-2 pr-0 py-1 rounded-md border border-transparent bg-transparent hover:border-muted-foreground/40 focus:border-muted-foreground/60 cursor-pointer transition-all overflow-hidden"
             onClick={startEdit}
             disabled={disabled}
             style={{ minWidth: 0 }}
