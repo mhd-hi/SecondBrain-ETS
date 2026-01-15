@@ -26,6 +26,7 @@ declare module 'next-auth' {
  * Shared configuration for NextAuth.js providers and callbacks
  */
 const sharedConfig = {
+  trustHost: true, // Required for production/Vercel
   providers: [
     GoogleProvider({
       clientId: env.AUTH_GOOGLE_ID,
@@ -70,7 +71,8 @@ export const authConfig = {
   ...sharedConfig,
   adapter: DrizzleAdapter(db),
   session: {
-    strategy: 'jwt', // Use JWT sessions for compatibility with middleware
+    strategy: 'jwt', // Use JWT for middleware compatibility
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 } satisfies NextAuthConfig;
 

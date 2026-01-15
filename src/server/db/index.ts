@@ -12,7 +12,7 @@ const queryClient = postgres(env.DATABASE_URL, {
     max: 10, // connection pool size
     idle_timeout: 20,
     connect_timeout: 10,
-    prepare: true, // enable prepared statements
+    prepare: false, // Disable prepared statements for serverless compatibility
 });
 
 export const db: PostgresJsDatabase<typeof schema> = drizzle(queryClient, { schema });
