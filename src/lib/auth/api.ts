@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { auth } from '@/server/auth';
@@ -36,6 +37,9 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
     return null;
   } catch (error) {
     console.error('Error getting authenticated user:', error);
+    Sentry.captureException(error, {
+      tags: { context: 'auth', function: 'getAuthenticatedUser' },
+    });
     return null;
   }
 }
@@ -113,6 +117,10 @@ export function withAuth<TParams = Record<string, string>>(
       return await handler(request, { ...context, user });
     } catch (error) {
       console.error('Authentication error in API route:', error);
+      Sentry.captureException(error, {
+        tags: { context: 'auth', function: 'withAuth' },
+        extra: { route: request.url },
+      });
       return createAuthErrorResponse(error as Error);
     }
   };
@@ -120,17 +128,13 @@ export function withAuth<TParams = Record<string, string>>(
 
 /**
  * Higher-order function for simple authenticated API routes (no params)
+ * This is a convenience wrapper around withAuth for routes without dynamic params
+ * TODO: replace all usages with `withAuth` later
  */
 export function withAuthSimple(
   handler: (request: NextRequest, user: AuthenticatedUser) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest): Promise<NextResponse> => {
-    try {
-      const user = await requireAuth();
-      return await handler(request, user);
-    } catch (error) {
-      console.error('Authentication error in API route:', error);
-      return createAuthErrorResponse(error as Error);
-    }
-  };
+  return withAuth<Record<string, never>>(async (request, { user }) => {
+    return handler(request, user);
+  });
 }

@@ -9,7 +9,7 @@ const migrationClient = postgres(env.DATABASE_URL, { max: 1 });
 
 // For query purposes - optimized with connection pooling
 const queryClient = postgres(env.DATABASE_URL, {
-    max: 10, // connection pool size
+    max: 1, // Reduce to 1 for serverless (each function instance gets own connection)
     idle_timeout: 20,
     connect_timeout: 10,
     prepare: false, // Disable prepared statements for serverless compatibility

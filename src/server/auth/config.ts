@@ -74,6 +74,7 @@ export const authConfig = {
     strategy: 'jwt', // Use JWT for middleware compatibility
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  debug: process.env.NODE_ENV === 'development', // Enable debug logs in development
 } satisfies NextAuthConfig;
 
 /**
