@@ -14,6 +14,7 @@ export type TEvent = {
     color: TCourseColor;
     secondaryColor?: string;
     courseCode?: string;
+    courseId?: string;
 };
 
 export type TCalendarCell = {

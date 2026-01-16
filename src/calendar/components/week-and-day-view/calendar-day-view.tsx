@@ -9,6 +9,7 @@ import { getCurrentEvents, getEventBlockStyle, getVisibleHours, groupEvents } fr
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { SingleCalendar } from '@/components/ui/single-calendar';
+import { DAY_VIEW_HOUR_BLOCK_HEIGHT } from '@/lib/calendar/constants';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 import { cn } from '@/lib/utils';
@@ -57,7 +58,7 @@ export function CalendarDayView({ events }: IProps) {
             {/* Hours column */}
             <div className="relative w-18">
               {hours.map((hour, index) => (
-                <div key={hour} className="relative" style={{ height: '96px' }}>
+                <div key={hour} className="relative" style={{ height: `${DAY_VIEW_HOUR_BLOCK_HEIGHT}px` }}>
                   <div className="absolute -top-3 right-2 flex h-6 items-center">
                     {index !== 0 && <span className="text-xs text-muted-foreground">{format(new Date().setHours(hour, 0, 0, 0), 'hh a')}</span>}
                   </div>
@@ -69,7 +70,7 @@ export function CalendarDayView({ events }: IProps) {
               <div className="relative">
                 {hours.map((hour) => {
                   return (
-                    <div key={hour} className={cn('relative')} style={{ height: '96px' }}>
+                    <div key={hour} className={cn('relative')} style={{ height: `${DAY_VIEW_HOUR_BLOCK_HEIGHT}px` }}>
                       <div className="pointer-events-none absolute inset-x-0 top-0 border-b"></div>
                       {/* ...existing code... */}
                     </div>

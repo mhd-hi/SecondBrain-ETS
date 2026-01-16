@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio';
 import { buildPlanETSUrl as buildPlanETSURL } from '@/lib/utils/url-util';
+import { normalizeHtml } from './html-normalizer';
 
 export type PlanETSContent = {
   html: string;
@@ -45,10 +46,12 @@ export async function fetchPlanETSContent(courseCode: string, term: string): Pro
     throw new Error('No HTML content found in divContenusTrai');
   }
 
-  console.log(`Extracted HTML content length: ${relevantHtml.length} characters`);
-  console.log(`First 200 characters of extracted content: ${relevantHtml.substring(0, 200)}`);
-
+  // 4) Normalize the HTML content
+  console.log(`Preporcessed HTML length: ${relevantHtml.length} characters`);
+  console.log('Normalizing HTML content...');
+  const normalizedHtml = normalizeHtml(relevantHtml);
+  console.log(`Normalized HTML length: ${normalizedHtml.length} characters`);
   return {
-    html: relevantHtml,
+    html: normalizedHtml,
   };
 }

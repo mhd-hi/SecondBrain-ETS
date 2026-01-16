@@ -37,11 +37,12 @@ export function taskToEvent(task: Task): TEvent {
         id: task.id,
         startDate,
         endDate,
-        title: `${task.course.code} - ${task.title}`,
+        title: task.title,
         description: task.notes,
         color: task.course.color,
         secondaryColor: getStatusBgClass(task.status),
         type: 'task',
         courseCode: task.course.code,
+        courseId: task.courseId,
     };
 }

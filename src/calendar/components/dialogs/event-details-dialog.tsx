@@ -3,9 +3,11 @@
 import type { TEvent } from '@/calendar/types';
 import { format, parseISO } from 'date-fns';
 
-import { Calendar, Clock, FileText } from 'lucide-react';
+import { Calendar, Clock, ExternalLink, FileText } from 'lucide-react';
+import Link from 'next/link';
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { getCoursePath } from '@/lib/routes';
 
 type IProps = {
   event: TEvent;
@@ -29,6 +31,21 @@ export function EventDetailsDialog({ event, children }: IProps) {
           </DialogHeader>
 
           <div className="space-y-4">
+            {event.type === 'task' && event.courseId && (
+              <div className="flex items-start gap-2">
+                <ExternalLink className="mt-1 size-4 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Task Link</p>
+                  <Link
+                    href={`${getCoursePath(event.courseId)}#task-${event.id}`}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    View task details
+                  </Link>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-start gap-2">
               <Calendar className="mt-1 size-4 shrink-0" />
               <div>

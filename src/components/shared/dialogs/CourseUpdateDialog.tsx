@@ -28,7 +28,7 @@ export function CourseUpdateDialog({ open, onOpenChange, course, onUpdate }: Upd
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent aria-describedby="course-settings" className="max-w-md">
         <DialogHeader>
           <DialogTitle>Course settings</DialogTitle>
         </DialogHeader>

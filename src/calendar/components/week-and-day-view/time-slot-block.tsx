@@ -15,7 +15,7 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
 
   if (isOccupied) {
     // Render a transparent div that does not block pointer events, so event is draggable/clickable
-    return <div className="absolute inset-0 z-10 pointer-events-none" style={{ minHeight: '18px' }} />;
+    return <div className="absolute inset-0 z-10 pointer-events-none" />;
   }
 
   return (
@@ -23,7 +23,6 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
       <DropdownMenuTrigger asChild>
         <div
           className="absolute inset-0 z-10 cursor-pointer rounded-md hover:bg-accent/40"
-          style={{ minHeight: '18px' }}
           title="Add event"
         />
       </DropdownMenuTrigger>
