@@ -58,6 +58,7 @@ export default function CoursePage({ params }: CoursePageProps) {
   const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
   const removeTask = useTaskStore(state => state.removeTask);
   const deleteCourseFromStore = useCourseStore(state => state.removeCourse);
+  const updateCourseField = useCourseStore(state => state.updateCourseField);
   const fetchTasksByCourse = useTaskStore(state => state.fetchTasksByCourse);
 
   // Fetch tasks when component mounts or courseId changes
@@ -72,7 +73,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     } else if (courseId && !uuidRegex.test(courseId)) {
       // Invalid course ID format - redirect to home
       console.warn('Invalid course ID format, redirecting:', courseId);
-      router.push('/');
+      router.push(ROUTES.HOME);
     }
   }, [courseId, fetchTasksByCourse, router]);
 
@@ -247,7 +248,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // If courses loaded but this specific course not found, redirect to home
   if (!course && courses.length > 0) {
-    router.push('/');
+    router.push(ROUTES.HOME);
     return null;
   }
 
@@ -291,14 +292,22 @@ export default function CoursePage({ params }: CoursePageProps) {
             onOpenChange={setShowUpdateDialog}
             course={course}
             onUpdate={async ({ color, daypart }) => {
-              // Call update logic here (assume updateCourse API or hook exists)
               try {
-                // You may need to implement updateCourse in your hooks/api
-                if (color !== course.color || daypart !== course.daypart) {
-                  // Example: await updateCourse(course.id, { color, daypart });
-                  // For now, just show a toast
-                  toast.success('Course updated');
+                if (color === course.color && daypart === course.daypart) {
+                  return;
                 }
+
+                // Update color if changed
+                if (color !== course.color) {
+                  await updateCourseField(course.id, 'color', color);
+                }
+
+                // Update daypart if changed
+                if (daypart !== course.daypart) {
+                  await updateCourseField(course.id, 'daypart', daypart);
+                }
+
+                setShowUpdateDialog(false);
               } catch (e) {
                 ErrorHandlers.api(e, 'Failed to update course');
               }
@@ -307,7 +316,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         </div>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-4">
         <section>
           <CourseCustomLinks
             courseId={course.id}
@@ -365,7 +374,7 @@ export default function CoursePage({ params }: CoursePageProps) {
           )
           : filteredTasks.length > 0
             ? (
-              <div className="space-y-5 will-change-scroll">
+              <div className="space-y-5 will-change-scroll mt-7">
                 {Object.entries(tasksByWeek)
                   .sort(([a], [b]) => Number(a) - Number(b))
                   .map(([week, weekTasks]) => (

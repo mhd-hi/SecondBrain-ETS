@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { SOUND_DEFAULT, soundManager } from '@/lib/sound-manager';
+import { api } from '@/lib/utils/api/api-client-util';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
 export const DEFAULT_WORK_DURATION = 25;
@@ -246,25 +247,16 @@ export const usePomodoroStore = create<PomodoroStore>()(
                     const durationHours = completedMinutes / 60;
 
                     try {
-                        const response = await fetch('/api/pomodoro/complete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                durationHours,
-                                taskId: state.currentTask?.id,
-                            }),
+                        const data = await api.post<{ streakDays?: number }>('/api/pomodoro/complete', {
+                            durationHours,
+                            taskId: state.currentTask?.id,
                         });
 
-                        if (response.ok) {
-                            const data = await response.json() as { streakDays?: number } | null;
-                            const streakDays = (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
-                            set({ streak: streakDays });
-                            toast.success('Pomodoro completed!', {
-                                description: `You've worked for ${completedMinutes.toFixed(0)} minutes!`,
-                            });
-                        } else {
-                            toast.error('Failed to complete Pomodoro');
-                        }
+                        const streakDays = (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
+                        set({ streak: streakDays });
+                        toast.success('Pomodoro completed!', {
+                            description: `You've worked for ${completedMinutes.toFixed(0)} minutes!`,
+                        });
                     } catch (error) {
                         console.error('Failed to complete Pomodoro:', error);
                         toast.error(error instanceof Error ? error.message : 'Failed to complete Pomodoro');
@@ -287,27 +279,12 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
             fetchStreak: async () => {
                 try {
-                    const response = await fetch('/api/pomodoro/streak');
-
-                    if (!response.ok) {
-                        // If we get a 404, the user has no sessions yet (first time user)
-                        if (response.status === 404) {
-                            set({ streak: 0 });
-                            return;
-                        }
-
-                        // For other errors, log and set to 0 to avoid noisy exceptions
-                        console.error('Error fetching pomodoro streak (server):', response.statusText);
-                        set({ streak: 0 });
-                        return;
-                    }
-
-                    const data = await response.json() as { streakDays?: number } | null;
+                    const data = await api.get<{ streakDays?: number }>('/api/pomodoro/streak');
                     const streakDays = (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
                     set({ streak: streakDays });
                 } catch (error) {
-                    // Network errors or other unexpected issues: log and set to 0 to avoid noisy exceptions
-                    console.error('Error fetching pomodoro streak (client):', error);
+                    // If user has no sessions yet (404) or other errors, just set to 0
+                    console.error('Error fetching pomodoro streak:', error);
                     set({ streak: 0 });
                 }
             },

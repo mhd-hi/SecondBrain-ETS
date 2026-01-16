@@ -7,6 +7,7 @@ import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { checkCourseExists } from '@/hooks/use-course';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
+import { api } from '@/lib/utils/api/api-client-util';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
 import normalizeTasks from '@/pipelines/add-course-data/steps/ai/normalize';
@@ -100,23 +101,12 @@ async function createCourse(courseCode: string, courseName: string, term: string
   // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
-  const response = await fetch('/api/courses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      code: cleanCode,
-      name: courseName,
-      term,
-      daypart,
-    }),
-  });
-
-  if (!response.ok) {
-    const responseData = await response.json() as { error?: string };
-    throw new Error(responseData.error ?? 'Failed to create course');
-  }
-
-  const course = await response.json() as { id: string };
+  const course = await api.post<{ id: string }>('/api/courses', {
+    code: cleanCode,
+    name: courseName,
+    term,
+    daypart,
+  }, 'Failed to create course');
 
   if (!course.id) {
     throw new Error('Invalid course response: missing id');
@@ -146,19 +136,10 @@ async function createTasks(
     };
   });
 
-  const response = await fetch('/api/tasks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      courseId,
-      tasks: tasksWithDueDates,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json() as { error?: string };
-    throw new Error(errorData.error ?? 'Failed to create tasks');
-  }
+  await api.post('/api/tasks', {
+    courseId,
+    tasks: tasksWithDueDates,
+  }, 'Failed to create tasks');
 }
 
 export function useAddCourse(): UseAddCourseReturn {

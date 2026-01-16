@@ -145,8 +145,7 @@ const SubtasksList = ({
                   />
                   {subtask.estimatedEffort && (
                     <Badge variant="outline" className="text-xs">
-                      {subtask.estimatedEffort}
-                      h
+                      {`${subtask.estimatedEffort}h`}
                     </Badge>
                   )}
                 </div>

@@ -39,6 +39,25 @@ export const POST = withAuthSimple(async (request, user) => {
 });
 ```
 
+### API Client Pattern
+- **Always use the centralized `api` utility** (`src/lib/utils/api/api-client-util.ts`) instead of raw `fetch`
+- **Available methods**: `api.get()`, `api.post()`, `api.put()`, `api.patch()`, `api.delete()`
+- **Benefits**: Consistent error handling, automatic JSON parsing, centralized configuration
+- **Stores can make API calls**: Zustand stores handle API operations directly for better state management
+  ```typescript
+  import { api } from '@/lib/utils/api/api-client-util';
+
+  // In a store or hook
+  const data = await api.post('/api/tasks', { title: 'New task' }, 'Failed to create task');
+  
+  // Error handling is automatic, but you can add custom error messages
+  try {
+    await api.delete('/api/tasks/123');
+  } catch (error) {
+    toast.error('Custom error message');
+  }
+  ```
+
 ### Component Organization
 - **Feature-based folders**: `/components/Course/`, `/components/Task/`, `/components/Pomodoro/`
 - **Shared UI**: `/components/ui/` for reusable components (shadcn/ui)
