@@ -112,7 +112,7 @@ const GroupSection = ({
         {shouldLimit && (
           <div className="flex justify-center">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => toggleSectionExpanded(sectionKey)}
               className="text-xs text-muted-foreground hover:text-foreground"

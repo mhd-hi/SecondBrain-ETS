@@ -198,7 +198,7 @@ export function TaskCard({
         }}
       />
       {showCourseBadge && task.course && (
-        <div className="mb-1">
+        <div className="ml-1 mb-1">
           <CourseCodeBadge
             course={task.course}
             onClick={handleNavigateToTask}
