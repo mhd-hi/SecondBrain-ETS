@@ -22,8 +22,9 @@ import { getCoursePath } from '@/lib/routes';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
 import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
+import { DEFAULT_UNIVERSITY } from '@/types/university';
 import { ActionButtons } from './ActionButtons';
-import { CourseCodeInputForm } from './CourseCodeInputForm';
+import { CourseInputForm } from './CourseInputForm';
 import { ProcessingSteps } from './ProcessingSteps';
 
 type AddCourseDialogProps = {
@@ -33,7 +34,12 @@ type AddCourseDialogProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
-export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddCourseDialogProps) {
+export function AddCourseDialog({
+  onCourseAdded,
+  trigger,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
+}: AddCourseDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
 
   // Use external state if provided, otherwise use internal state
@@ -49,11 +55,21 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
   };
   const [courseCode, setCourseCode] = useState('');
   const [term, setTerm] = useState<string>('');
-  const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(undefined);
+  const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(
+    undefined,
+  );
   // start with empty string until user selects a daypart
   const [daypart, setDaypart] = useState<Daypart | ''>('');
-  const [availableTerms, setAvailableTerms] = useState<Array<{ id: string; label: string }>>([]);
-  const { terms: _fetchedTerms, loading: _termsLoading, error: _termsError, fetchTerms } = useTerms();
+  const [university, setUniversity] = useState<string>(DEFAULT_UNIVERSITY);
+  const [availableTerms, setAvailableTerms] = useState<
+    Array<{ id: string; label: string }>
+  >([]);
+  const {
+    terms: _fetchedTerms,
+    loading: _termsLoading,
+    error: _termsError,
+    fetchTerms,
+  } = useTerms();
 
   const { refreshCourses } = useCourses();
 
@@ -74,6 +90,7 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
     setCourseCode('');
     setFirstDayOfClass(undefined);
     setDaypart('');
+    setUniversity(DEFAULT_UNIVERSITY);
     reset();
   }, [reset]);
 
@@ -97,7 +114,8 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
           const got = await fetchTerms();
           setAvailableTerms(got);
           // default term to current session (middle item) if present (prev/current/next)
-          const middle = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+          const middle
+            = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
           if (middle) {
             setTerm(middle.id);
           }
@@ -117,8 +135,8 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
     const termDateStart = getDatesForTerm(term).start;
 
     if (termDateStart) {
-        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-        setFirstDayOfClass(termDateStart);
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setFirstDayOfClass(termDateStart);
     }
   }, [term, isOpen]);
 
@@ -132,7 +150,9 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
 
     // Validate course code format
     if (!isValidCourseCode(cleanCode)) {
-      toast.error('Invalid course code format. Please use format like MAT145 or LOG210');
+      toast.error(
+        'Invalid course code format. Please use format like MAT145 or LOG210',
+      );
       return;
     }
 
@@ -158,12 +178,20 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
       if (isValidTermId(cleaned)) {
         termToUse = cleaned;
       } else {
-        toast.error('Selected term id looks invalid. Please pick a valid term.');
+        toast.error(
+          'Selected term id looks invalid. Please pick a valid term.',
+        );
         return;
       }
     }
 
-    await startProcessing(cleanCode, termToUse, firstDayOfClass, daypart);
+    await startProcessing(
+      cleanCode,
+      termToUse,
+      firstDayOfClass,
+      daypart,
+      university,
+    );
   };
 
   const handleRetry = () => {
@@ -204,7 +232,7 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
       <DialogTrigger asChild>
         {trigger ?? (
           <Button>
-            <Plus className="h-4 w-4 mr-2 rounded-sm" />
+            <Plus className="mr-2 h-4 w-4 rounded-sm" />
             Add Course
           </Button>
         )}
@@ -216,11 +244,12 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
         <DialogHeader>
           <DialogTitle>Add New Course</DialogTitle>
           <DialogDescription id="add-course-description">
-            Enter a course code to automatically fetch its syllabus data and generate a structured learning plan.
+            Enter a course code to automatically fetch its syllabus data and
+            generate a structured learning plan.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <CourseCodeInputForm
+          <CourseInputForm
             courseCode={courseCode}
             setCourseCode={setCourseCode}
             term={term}
@@ -230,6 +259,8 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
             setFirstDayOfClass={setFirstDayOfClass}
             daypart={daypart}
             setDaypart={setDaypart}
+            university={university}
+            setUniversity={setUniversity}
             isProcessing={isProcessing}
             currentStep={currentStep}
             onSubmit={handleStartParsing}
@@ -238,12 +269,14 @@ export function AddCourseDialog({ onCourseAdded, trigger, open: externalOpen, on
           <ProcessingSteps currentStep={currentStep} stepStatus={stepStatus} />
 
           {/* Success Display */}
-          {currentStep === 'completed' && parsedData && createdCourseId && (
+          {currentStep === 'completed' && createdCourseId && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Course Created Successfully!</AlertTitle>
               <AlertDescription>
-                AI-generated tasks have been created. Please review the tasks and adjust them as needed.
+                {parsedData
+                  ? 'AI-generated tasks have been created. Please review the tasks and adjust them as needed.'
+                  : 'Course has been created. You can now add tasks manually.'}
               </AlertDescription>
             </Alert>
           )}

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from '@/components/shared/dialogs/ActionButtons';
-import { CourseCodeInputForm } from '@/components/shared/dialogs/CourseCodeInputForm';
+import { CourseInputForm } from '@/components/shared/dialogs/CourseInputForm';
 import { ProcessingSteps } from '@/components/shared/dialogs/ProcessingSteps';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ import { getCoursePath, ROUTES } from '@/lib/routes';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
 import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
+import { DEFAULT_UNIVERSITY } from '@/types/university';
 
 export default function AddCoursePage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function AddCoursePage() {
     undefined,
   );
   const [daypart, setDaypart] = useState<Daypart | ''>('');
+  const [university, setUniversity] = useState<string>(DEFAULT_UNIVERSITY);
   const [availableTerms, setAvailableTerms] = useState<
     Array<{ id: string; label: string }>
   >([]);
@@ -54,6 +56,7 @@ export default function AddCoursePage() {
     setCourseCode('');
     setFirstDayOfClass(undefined);
     setDaypart('');
+    setUniversity(DEFAULT_UNIVERSITY);
     reset();
   }, [reset]);
 
@@ -141,7 +144,13 @@ export default function AddCoursePage() {
       }
     }
 
-    await startProcessing(cleanCode, termToUse, firstDayOfClass, daypart);
+    await startProcessing(
+      cleanCode,
+      termToUse,
+      firstDayOfClass,
+      daypart,
+      university,
+    );
   };
 
   const handleRetry = () => {
@@ -174,7 +183,7 @@ export default function AddCoursePage() {
       </div>
 
       <div className="bg-card space-y-6 rounded-lg border p-6">
-        <CourseCodeInputForm
+        <CourseInputForm
           courseCode={courseCode}
           setCourseCode={setCourseCode}
           term={term}
@@ -184,6 +193,8 @@ export default function AddCoursePage() {
           setFirstDayOfClass={setFirstDayOfClass}
           daypart={daypart}
           setDaypart={setDaypart}
+          university={university}
+          setUniversity={setUniversity}
           isProcessing={isProcessing}
           currentStep={currentStep}
           onSubmit={handleStartParsing}
@@ -192,13 +203,14 @@ export default function AddCoursePage() {
         <ProcessingSteps currentStep={currentStep} stepStatus={stepStatus} />
 
         {/* Success Display */}
-        {currentStep === 'completed' && parsedData && createdCourseId && (
+        {currentStep === 'completed' && createdCourseId && (
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Course Created Successfully!</AlertTitle>
             <AlertDescription>
-              AI-generated tasks have been created. Please review the tasks and
-              adjust them as needed.
+              {parsedData
+                ? 'AI-generated tasks have been created. Please review the tasks and adjust them as needed.'
+                : 'Course has been created. You can now add tasks manually.'}
             </AlertDescription>
           </Alert>
         )}
