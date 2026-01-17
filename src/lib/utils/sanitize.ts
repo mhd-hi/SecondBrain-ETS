@@ -54,19 +54,23 @@ export function sanitizeUserInput(
     }
   }
 
-  // Remove HTML tags (simple regex-based approach)
-  // This prevents XSS and removes formatting
-  sanitized = sanitized.replace(/<[^>]*>/g, '');
+  // Remove HTML tags using iterative approach to handle nested/malformed tags
+  // This prevents attacks like <script<script>> from bypassing sanitization
+  let previousLength;
+  do {
+    previousLength = sanitized.length;
+    sanitized = sanitized.replace(/<[^>]*>/g, '');
+  } while (sanitized.length < previousLength);
 
   // Decode common HTML entities
   // Important: decode &amp; last to avoid double-unescaping sequences like "&amp;lt;"
   sanitized = sanitized
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, '\'')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&');
+    .replaceAll(/&lt;/g, '<')
+    .replaceAll(/&gt;/g, '>')
+    .replaceAll(/&quot;/g, '"')
+    .replaceAll(/&#39;/g, '\'')
+    .replaceAll(/&nbsp;/g, ' ')
+    .replaceAll(/&amp;/g, '&');
 
   // After decoding, ensure any newly introduced tag delimiters are removed
   sanitized = sanitized.replace(/[<>]/g, '');
