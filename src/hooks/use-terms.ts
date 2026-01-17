@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import { api } from '@/lib/utils/api/api-client-util';
 
 type Term = { id: string; label: string };
 
@@ -13,11 +14,7 @@ export const useTerms = () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch('/api/terms/exists');
-            if (!res.ok) {
-                throw new Error(`Failed to fetch terms: ${res.status}`);
-            }
-            const payload = await res.json() as { terms?: Term[] };
+            const payload = await api.get<{ terms?: Term[] }>('/api/terms/exists', 'Failed to fetch terms');
             const got = payload.terms ?? [];
             setTerms(got);
             return got;

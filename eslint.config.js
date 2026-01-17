@@ -20,7 +20,20 @@ export default antfu(
       css: true,
     },
 
-    ignores: ['migrations/**/*', 'next-env.d.ts', 'node_modules/**/*', 'public/**/*', 'bun.lock', 'yarn.lock', 'package-lock.json', '.next', 'node_modules', 'dist', '*.json', '**/*.md'],
+    ignores: [
+      'migrations/**/*',
+      'next-env.d.ts',
+      'node_modules/**/*',
+      'public/**/*',
+      'bun.lock',
+      'yarn.lock',
+      'package-lock.json',
+      '.next',
+      'node_modules',
+      'dist',
+      '*.json',
+      '**/*.md',
+    ],
   },
   jsxA11y.flatConfigs.recommended,
   {
@@ -62,6 +75,7 @@ export default antfu(
       // Turn off the crashing rule; let Prettier handle indentation
       'style/indent': 'off',
       'style/eol-last': 'off',
+      'style/operator-linebreak': 'off', // Let Prettier handle this (it always puts operators at end of line)
     },
   },
 );

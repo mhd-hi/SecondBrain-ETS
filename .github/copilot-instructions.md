@@ -5,6 +5,7 @@ This is an AI-powered course management system for ETS university students that 
 ## Architecture Overview
 
 ### Core Data Flow
+
 - **Course Processing Pipeline** (`src/pipelines/`): AI-driven course plan parsing workflow
   - `ServerCourseProcessingPipeline` orchestrates step-by-step processing
   - `OpenAIProcessor` handles AI text analysis
@@ -12,6 +13,7 @@ This is an AI-powered course management system for ETS university students that 
   - Pipeline communicates via `/api/course-pipeline` with real-time step updates
 
 ### State Management
+
 - **Zustand Store Pattern**: Centralized global state management
   - **Tasks**: `useTaskStore` (`src/lib/stores/task-store.ts`)
     - All task CRUD operations
@@ -25,6 +27,7 @@ This is an AI-powered course management system for ETS university students that 
     - Auto-initializes settings from localStorage
 
 ### Database Layer
+
 - **Drizzle ORM** with PostgreSQL, schema in `src/server/db/schema.ts`
 - **Table Naming**: All tables prefixed with `second-brain_` (see `drizzle.config.ts`)
 - **Migrations**: Use `bun run db:generate && bun run db:push` for schema changes
@@ -32,6 +35,7 @@ This is an AI-powered course management system for ETS university students that 
 ## Development Patterns
 
 ### API Route Structure
+
 ```typescript
 // Use withAuthSimple wrapper for authenticated endpoints
 export const POST = withAuthSimple(async (request, user) => {
@@ -39,12 +43,39 @@ export const POST = withAuthSimple(async (request, user) => {
 });
 ```
 
+### API Client Pattern
+
+- **Always use the centralized `api` utility** (`src/lib/utils/api/api-client-util.ts`) instead of raw `fetch`
+- **Available methods**: `api.get()`, `api.post()`, `api.put()`, `api.patch()`, `api.delete()`
+- **Benefits**: Consistent error handling, automatic JSON parsing, centralized configuration
+- **Stores can make API calls**: Zustand stores handle API operations directly for better state management
+
+  ```typescript
+  import { api } from "@/lib/utils/api/api-client-util";
+
+  // In a store or hook
+  const data = await api.post(
+    "/api/tasks",
+    { title: "New task" },
+    "Failed to create task",
+  );
+
+  // Error handling is automatic, but you can add custom error messages
+  try {
+    await api.delete("/api/tasks/123");
+  } catch (error) {
+    toast.error("Custom error message");
+  }
+  ```
+
 ### Component Organization
+
 - **Feature-based folders**: `/components/Course/`, `/components/Task/`, `/components/Pomodoro/`
 - **Shared UI**: `/components/ui/` for reusable components (shadcn/ui)
 - **Dialogs**: Global confirmation dialogs via `GlobalConfirmDialogProvider`
 
 ### Custom Hooks Pattern
+
 - **Naming**: `use-[feature].ts` (kebab-case, not camelCase)
 - **Data fetching**: Hooks like `use-course.ts` handle CRUD operations
 - **Task operations**: Use `useTaskOperations()` from `use-task-store.ts` for all task CRUD
@@ -53,18 +84,21 @@ export const POST = withAuthSimple(async (request, user) => {
   - Built-in loading states and error handling
 
 ### Environment & Configuration
+
 - **Type-safe env**: `src/env.js` using `@t3-oss/env-nextjs` with Zod validation
 - **Build tool**: Use Bun commands (`bun dev`, `bun build`) not npm/yarn
 - **Development**: `bun dev --turbo --hostname localhost` for local development
 
 ### Keyboard Shortcuts System
+
 - **Global shortcuts**: Defined in `src/lib/keyboard-shortcuts.ts`
 - **Command palette**: `Cmd/Ctrl+K` opens global command palette
-- **Types**: Navigate to pages, open dialogs, or toggle UI elements
+- **Types**: Navigate to pages (including `/courses/add`), open dialogs, or toggle UI elements
 
 ## Key Workflows
 
 ### Adding New Features
+
 1. Define types in `src/types/[feature].ts`
 2. Create database schema in `src/server/db/schema.ts`
 3. Generate migration: `bun run db:generate && bun run db:push`
@@ -73,43 +107,50 @@ export const POST = withAuthSimple(async (request, user) => {
 6. Create components in `src/components/[Feature]/`
 
 ### Working with Tasks
+
 - **Always use the task store** for task operations:
+
   ```typescript
-  import { useTaskOperations } from '@/hooks/use-task-store';
+  import { useTaskOperations } from "@/hooks/use-task-store";
 
   const { createTask, updateTaskStatus, deleteTask } = useTaskOperations();
 
   // Create task
-  await createTask('course-id', {
-    title: 'Task title',
-    notes: 'Description',
+  await createTask("course-id", {
+    title: "Task title",
+    notes: "Description",
     estimatedEffort: 2,
     dueDate: new Date(),
-    type: 'theorie',
-    status: 'todo',
+    type: "theorie",
+    status: "todo",
   });
 
   // Update status (optimistic)
-  await updateTaskStatus('task-id', 'completed');
+  await updateTaskStatus("task-id", "completed");
 
   // Delete task
-  await deleteTask('task-id');
+  await deleteTask("task-id");
   ```
+
 - **Sync fetched tasks** with store using `useSyncTasksWithStore(tasks)`
 - **Query tasks** using store selectors for reactive updates
 
 ### Working with Pomodoro
+
 - **Use the Pomodoro store** for timer operations (no provider needed):
+
   ```typescript
   // Or use the operations hook for convenience
-  import { usePomodoroOperations } from '@/hooks/use-pomodoro';
-  import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
+  import { usePomodoroOperations } from "@/hooks/use-pomodoro";
+  import { usePomodoroStore } from "@/lib/stores/pomodoro-store";
 
   // Direct store access
-  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroStore();
+  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } =
+    usePomodoroStore();
 
   // Or with operations hook (includes useCallback wrappers)
-  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } = usePomodoroOperations();
+  const { isRunning, timeLeftSec, toggleTimer, startPomodoro } =
+    usePomodoroOperations();
 
   // Start pomodoro with task
   startPomodoro(task, 25, true); // task, duration in minutes, autoStart
@@ -120,21 +161,25 @@ export const POST = withAuthSimple(async (request, user) => {
   // Stop session
   stopPomodoro();
   ```
+
 - **Timer intervals managed internally** by the store
 - **Settings auto-load** from localStorage on initialization
 - **Access from anywhere** - no provider wrapping needed
 
 ### AI Processing Integration
+
 - Use `ServerCourseProcessingPipeline` for multi-step AI workflows
 - Implement step-by-step processing with status updates
 - Handle `PipelineStepRequest`/`PipelineStepResult` types for API communication
 
 ### Authentication Flow
+
 - NextAuth.js with Drizzle adapter
 - Discord and Google OAuth providers
 - Use `withAuthSimple` wrapper for API route protection
 
 ### Exception Handling
+
 ```typescript
 try {
   // risky operation
@@ -144,12 +189,16 @@ try {
 ```
 
 ### Performance Tracing
+
 ```typescript
-Sentry.startSpan({
-  op: 'ui.click',
-  name: 'Course Processing Button',
-}, (span) => {
-  span.setAttribute('courseCode', courseCode);
-  // operation here
-});
+Sentry.startSpan(
+  {
+    op: "ui.click",
+    name: "Course Processing Button",
+  },
+  (span) => {
+    span.setAttribute("courseCode", courseCode);
+    // operation here
+  },
+);
 ```

@@ -1,12 +1,13 @@
 import type { TCalendarCell, TEvent } from '@/calendar/types';
 import { isToday, startOfDay } from 'date-fns';
 import { useRouter } from 'next/navigation';
-
 import { useMemo } from 'react';
 
 import { DroppableDayCell } from '@/calendar/components/dnd/droppable-day-cell';
+
 import { EventBullet } from '@/calendar/components/month-view/event-bullet';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
+import { getDayViewPath } from '@/lib/routes';
 
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
@@ -33,7 +34,7 @@ export function DayCell({ cell, events }: IProps) {
 
   const handleClick = () => {
     setSelectedDate(date);
-    push('/day-view');
+    push(getDayViewPath());
   };
 
   return (

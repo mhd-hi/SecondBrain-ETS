@@ -1,41 +1,47 @@
 'use client';
 
+import type { StepStatus } from '@/hooks/add-course-pipeline';
 import type { CourseAIResponse } from '@/types/api/ai';
 import type { Daypart } from '@/types/course';
 import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
-import { useCallback, useState } from 'react';
+import { useCallback, useReducer } from 'react';
 import { toast } from 'sonner';
+import {
+  deriveCreatedCourseId,
+  deriveCurrentStep,
+  deriveError,
+  deriveIsProcessing,
+  deriveParsedData,
+  deriveStepStatus,
+  pipelineReducer,
+} from '@/hooks/add-course-pipeline';
 import { checkCourseExists } from '@/hooks/use-course';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
+import { api } from '@/lib/utils/api/api-client-util';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
 import normalizeTasks from '@/pipelines/add-course-data/steps/ai/normalize';
-
-export type ProcessingStep = 'idle' | 'planets' | 'openai' | 'create-course' | 'create-tasks' | 'completed' | 'error';
-
-export type StepStatus = {
-  'planets': 'pending' | 'loading' | 'success' | 'error';
-  'openai': 'pending' | 'loading' | 'success' | 'error';
-  'create-course': 'pending' | 'loading' | 'success' | 'error';
-  'create-tasks': 'pending' | 'loading' | 'success' | 'error';
-};
+import { UNIVERSITY } from '@/types/university';
 
 export type UseAddCourseReturn = {
-  currentStep: ProcessingStep;
+  currentStep: string;
   stepStatus: StepStatus;
   parsedData: CourseAIResponse | null;
   createdCourseId: string | null;
   error: string | null;
   isProcessing: boolean;
-  // courseCode is the code like MAT145. term is PlanETS numeric format like '20252'
-  startProcessing: (courseCode: string, term: string, firstDayOfClass: Date, daypart: Daypart) => Promise<void>;
+  startProcessing: (
+    courseCode: string,
+    term: string,
+    firstDayOfClass: Date,
+    daypart: Daypart,
+    university?: string,
+  ) => Promise<void>;
   retry: () => void;
   reset: () => void;
 };
 
-// term is expected in PlanETS numeric format like '20252' (see mapping in AddCourseDialog)
 async function fetchCourseFromPlanETS(courseCode: string, term: string) {
-  // Validate course code format before making API call
   const cleanCode = assertValidCourseCode(courseCode);
 
   const response = await fetch('/api/course-pipeline', {
@@ -51,11 +57,11 @@ async function fetchCourseFromPlanETS(courseCode: string, term: string) {
   });
 
   if (!response.ok) {
-    const errorData = await response.json() as { error?: string };
+    const errorData = (await response.json()) as { error?: string };
     throw new Error(errorData.error ?? 'Failed to fetch planets data');
   }
 
-  const result = await response.json() as PipelineStepResult;
+  const result = (await response.json()) as PipelineStepResult;
 
   if (result.step.status === 'error') {
     throw new Error(result.step.error ?? 'Failed to fetch course data');
@@ -66,8 +72,11 @@ async function fetchCourseFromPlanETS(courseCode: string, term: string) {
   };
 }
 
-async function parseCourseWithAI(html: string, courseCode: string, term: string): Promise<CourseAIResponse> {
-  // Validate course code format before making API call
+async function parseCourseWithAI(
+  html: string,
+  courseCode: string,
+  term: string,
+): Promise<CourseAIResponse> {
   const cleanCode = assertValidCourseCode(courseCode);
 
   const response = await fetch('/api/course-pipeline', {
@@ -84,11 +93,11 @@ async function parseCourseWithAI(html: string, courseCode: string, term: string)
   });
 
   if (!response.ok) {
-    const errorData = await response.json() as { error?: string };
+    const errorData = (await response.json()) as { error?: string };
     throw new Error(errorData.error ?? 'Failed to process with OpenAI');
   }
 
-  const result = await response.json() as PipelineStepResult;
+  const result = (await response.json()) as PipelineStepResult;
 
   if (result.step.status === 'error') {
     throw new Error(result.step.error ?? 'Failed to parse with AI');
@@ -96,27 +105,24 @@ async function parseCourseWithAI(html: string, courseCode: string, term: string)
   return result.data as CourseAIResponse;
 }
 
-async function createCourse(courseCode: string, courseName: string, term: string, daypart: Daypart): Promise<{ id: string }> {
-  // Validate course code format before making API call
+async function createCourse(
+  courseCode: string,
+  courseName: string,
+  term: string,
+  daypart: Daypart,
+): Promise<{ id: string }> {
   const cleanCode = assertValidCourseCode(courseCode);
 
-  const response = await fetch('/api/courses', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const course = await api.post<{ id: string }>(
+    '/api/courses',
+    {
       code: cleanCode,
       name: courseName,
       term,
       daypart,
-    }),
-  });
-
-  if (!response.ok) {
-    const responseData = await response.json() as { error?: string };
-    throw new Error(responseData.error ?? 'Failed to create course');
-  }
-
-  const course = await response.json() as { id: string };
+    },
+    'Failed to create course',
+  );
 
   if (!course.id) {
     throw new Error('Invalid course response: missing id');
@@ -131,10 +137,8 @@ async function createTasks(
   term: string,
   firstDayOfClass: Date,
 ): Promise<void> {
-  // First normalize the AI tasks (validation, sanitization, subtask creation, etc.)
   const normalizedTasks = normalizeTasks(parsedData.tasks);
 
-  // Then apply due dates based on AI-provided week numbers and firstDayOfClass
   const tasksWithDueDates = normalizedTasks.map((task, index) => {
     const aiTask = parsedData.tasks[index];
     const week = typeof aiTask?.week === 'number' ? aiTask.week : 1;
@@ -146,137 +150,129 @@ async function createTasks(
     };
   });
 
-  const response = await fetch('/api/tasks', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  await api.post(
+    '/api/tasks',
+    {
       courseId,
       tasks: tasksWithDueDates,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json() as { error?: string };
-    throw new Error(errorData.error ?? 'Failed to create tasks');
-  }
+    },
+    'Failed to create tasks',
+  );
 }
 
 export function useAddCourse(): UseAddCourseReturn {
-  const [currentStep, setCurrentStep] = useState<ProcessingStep>('idle');
-  const [stepStatus, setStepStatus] = useState<StepStatus>({
-    'planets': 'pending',
-    'openai': 'pending',
-    'create-course': 'pending',
-    'create-tasks': 'pending',
-  });
-  const [parsedData, setParsedData] = useState<CourseAIResponse | null>(null);
-  const [createdCourseId, setCreatedCourseId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(pipelineReducer, { phase: 'idle' });
 
-  const isProcessing = currentStep === 'planets' || currentStep === 'openai' || currentStep === 'create-course' || currentStep === 'create-tasks';
+  const stepStatus = deriveStepStatus(state);
+  const currentStep = deriveCurrentStep(state);
+  const parsedData = deriveParsedData(state);
+  const createdCourseId = deriveCreatedCourseId(state);
+  const error = deriveError(state);
+  const isProcessing = deriveIsProcessing(state);
 
   const reset = useCallback(() => {
-    setCurrentStep('idle');
-    setStepStatus({
-      'planets': 'pending',
-      'openai': 'pending',
-      'create-course': 'pending',
-      'create-tasks': 'pending',
-    });
-    setParsedData(null);
-    setCreatedCourseId(null);
-    setError(null);
+    dispatch({ type: 'RESET' });
   }, []);
 
   const retry = useCallback(() => {
-    setCurrentStep('idle');
-    setStepStatus({
-      'planets': 'pending',
-      'openai': 'pending',
-      'create-course': 'pending',
-      'create-tasks': 'pending',
-    });
-    setError(null);
+    dispatch({ type: 'RETRY' });
   }, []);
 
-  const startProcessing = useCallback(async (courseCode: string, term: string, firstDayOfClass: Date, daypart: Daypart) => {
-    if (!courseCode.trim()) {
-      toast.error('Please enter a course code');
-      return;
-    }
-    setError(null);
+  const startProcessing = useCallback(
+    async (
+      courseCode: string,
+      term: string,
+      firstDayOfClass: Date,
+      daypart: Daypart,
+      university?: string,
+    ) => {
+      if (!courseCode.trim()) {
+        toast.error('Please enter a course code');
+        return;
+      }
 
-    const existenceResult = await checkCourseExists(courseCode.trim(), term);
-    if (existenceResult.exists) {
-      setCurrentStep('error');
-      const errorMessage = `Course ${courseCode.trim()} already exists in your account.`;
-      setError(errorMessage);
-      return;
-    }
+      dispatch({ type: 'START_CHECKING' });
 
-    // Start UI processing steps
-    setCurrentStep('planets');
-    setStepStatus({
-      'planets': 'loading',
-      'openai': 'pending',
-      'create-course': 'pending',
-      'create-tasks': 'pending',
-    });
+      const existenceResult = await checkCourseExists(courseCode.trim(), term);
+      if (existenceResult.exists) {
+        dispatch({
+          type: 'ERROR',
+          error: `Course ${courseCode.trim()} already exists in your account.`,
+          currentPhase: 'checking-existence',
+        });
+        return;
+      }
 
-    try {
-      // Step 1: Fetch from Planets
-      const planetsData = await fetchCourseFromPlanETS(courseCode.trim(), term);
-      setStepStatus(prev => ({ ...prev, planets: 'success' }));
+      const shouldSkipPipeline = !university || university === UNIVERSITY.NONE;
 
-      // Step 2: Parse with OpenAI
-      setCurrentStep('openai');
-      setStepStatus(prev => ({ ...prev, openai: 'loading' }));
-      const aiData = await parseCourseWithAI(planetsData.html, courseCode.trim(), term);
-      setStepStatus(prev => ({ ...prev, openai: 'success' }));
+      if (shouldSkipPipeline) {
+        dispatch({ type: 'START_SKIP_PIPELINE' });
 
-      setParsedData(aiData);
+        try {
+          const course = await createCourse(
+            courseCode.trim(),
+            courseCode.trim(),
+            term,
+            daypart,
+          );
+          dispatch({ type: 'SKIP_COURSE_SUCCESS', courseId: course.id });
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : 'An unknown error occurred';
+          dispatch({
+            type: 'ERROR',
+            error: errorMessage,
+            currentPhase: 'skipped-pipeline-course-loading',
+          });
+          toast.error(errorMessage);
+        }
+        return;
+      }
 
-      // Step 3: Create Course
-      setCurrentStep('create-course');
-      setStepStatus(prev => ({ ...prev, 'create-course': 'loading' }));
+      dispatch({ type: 'START_FULL_PIPELINE' });
 
-      const course = await createCourse(courseCode.trim(), aiData.courseCode, term, daypart);
-      setStepStatus(prev => ({ ...prev, 'create-course': 'success' }));
-      setCreatedCourseId(course.id);
+      try {
+        const planetsData = await fetchCourseFromPlanETS(
+          courseCode.trim(),
+          term,
+        );
+        dispatch({ type: 'PLANETS_SUCCESS', data: planetsData.html });
 
-      // Step 4: Create Tasks
-      setCurrentStep('create-tasks');
-      setStepStatus(prev => ({ ...prev, 'create-tasks': 'loading' }));
+        const aiData = await parseCourseWithAI(
+          planetsData.html,
+          courseCode.trim(),
+          term,
+        );
+        dispatch({ type: 'OPENAI_SUCCESS', data: aiData });
 
-      await createTasks(course.id, aiData, term, firstDayOfClass);
-      setStepStatus(prev => ({ ...prev, 'create-tasks': 'success' }));
+        const course = await createCourse(
+          courseCode.trim(),
+          courseCode.trim(),
+          term,
+          daypart,
+        );
+        dispatch({ type: 'COURSE_SUCCESS', courseId: course.id });
 
-      createPlanETSLink(course.id, courseCode.trim(), term).catch((err) => {
-        console.error('Failed to create PlanETS link:', err);
-      });
+        await createTasks(course.id, aiData, term, firstDayOfClass);
+        dispatch({ type: 'TASKS_SUCCESS' });
 
-      setCurrentStep('completed');
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-      setError(errorMessage);
-      setCurrentStep('error');
-      // Update step status based on current step
-      const failedStep = currentStep === 'planets'
-        ? 'planets'
-        : currentStep === 'openai'
-          ? 'openai'
-          : currentStep === 'create-course'
-            ? 'create-course'
-            : 'create-tasks';
+        createPlanETSLink(course.id, courseCode.trim(), term).catch((err) => {
+          console.error('Failed to create PlanETS link:', err);
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'An unknown error occurred';
+        dispatch({
+          type: 'ERROR',
+          error: errorMessage,
+          currentPhase: currentStep,
+        });
+        toast.error(errorMessage);
+      }
+    },
+    [currentStep],
+  );
 
-      setStepStatus(prev => ({
-        ...prev,
-        [failedStep]: 'error',
-      }));
-
-      toast.error(errorMessage);
-    }
-  }, [currentStep]);
   return {
     currentStep,
     stepStatus,

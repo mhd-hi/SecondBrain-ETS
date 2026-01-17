@@ -1,8 +1,20 @@
-import type { ProcessingStepsProps, StepName } from '@/types/dialog/add-course-dialog';
-import { AlertCircle, CheckCircle, Database, Loader2 } from 'lucide-react';
+import type {
+  ProcessingStepsProps,
+  StepName,
+} from '@/types/dialog/add-course-dialog';
+import {
+  AlertCircle,
+  CheckCircle,
+  Database,
+  Loader2,
+  MinusCircle,
+} from 'lucide-react';
 import Image from 'next/image';
 
-export function ProcessingSteps({ currentStep, stepStatus }: ProcessingStepsProps) {
+export function ProcessingSteps({
+  currentStep,
+  stepStatus,
+}: ProcessingStepsProps) {
   const getStepIcon = (stepName: StepName) => {
     if (stepName === 'planets') {
       return '/assets/logo_planets.png';
@@ -40,52 +52,66 @@ export function ProcessingSteps({ currentStep, stepStatus }: ProcessingStepsProp
     const label = getStepLabel(stepName);
     const status = stepStatus[stepName];
 
-    const isDatabaseStep = stepName === 'create-course' || stepName === 'create-tasks';
+    const isDatabaseStep
+      = stepName === 'create-course' || stepName === 'create-tasks';
 
     return (
-      <div key={stepName} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+      <div
+        key={stepName}
+        className="bg-card flex items-center gap-3 rounded-lg border p-3"
+      >
         <div className="relative shrink-0">
           {isDatabaseStep
-            ? (
-              <div className={`w-12 h-12 rounded border flex items-center justify-center bg-muted ${status === 'loading' ? 'animate-pulse' : ''}`}>
-                <Database className="h-6 w-6 text-muted-foreground" />
-              </div>
-            )
-            : (
-              <div className={`w-12 h-12 rounded border flex items-center justify-center bg-muted p-2 ${status === 'loading' ? 'animate-pulse' : ''}`}>
-                <Image
-                  src={logo}
-                  alt={`${label} logo`}
-                  width={32}
-                  height={32}
-                  className="rounded object-contain"
-                />
-              </div>
-            )}
+? (
+            <div
+              className={`bg-muted flex h-12 w-12 items-center justify-center rounded border ${status === 'loading' ? 'animate-pulse' : ''}`}
+            >
+              <Database className="text-muted-foreground h-6 w-6" />
+            </div>
+          )
+: (
+            <div
+              className={`bg-muted flex h-12 w-12 items-center justify-center rounded border p-2 ${status === 'loading' ? 'animate-pulse' : ''}`}
+            >
+              <Image
+                src={logo}
+                alt={`${label} logo`}
+                width={32}
+                height={32}
+                className="rounded object-contain"
+              />
+            </div>
+          )}
           {status === 'loading' && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded">
+            <div className="bg-background/80 absolute inset-0 flex items-center justify-center rounded">
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
           )}
           {status === 'success' && (
-            <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-1">
+            <div className="absolute -top-1 -right-1 rounded-full bg-green-500 p-1">
               <CheckCircle className="h-4 w-4 text-white" />
             </div>
           )}
           {status === 'error' && (
-            <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-1">
+            <div className="absolute -top-1 -right-1 rounded-full bg-red-500 p-1">
               <AlertCircle className="h-4 w-4 text-white" />
+            </div>
+          )}
+          {status === 'skipped' && (
+            <div className="absolute -top-1 -right-1 rounded-full bg-gray-400 p-1">
+              <MinusCircle className="h-4 w-4 text-white" />
             </div>
           )}
         </div>
 
         <div className="flex-1">
-          <div className="font-medium text-sm">{label}</div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm font-medium">{label}</div>
+          <div className="text-muted-foreground text-xs">
             {status === 'pending' && 'Waiting...'}
             {status === 'loading' && 'Processing...'}
             {status === 'success' && 'Completed'}
             {status === 'error' && 'Failed'}
+            {status === 'skipped' && 'Skipped'}
           </div>
         </div>
       </div>

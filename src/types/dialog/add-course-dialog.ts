@@ -34,6 +34,8 @@ export type AddCourseInputFormProps = {
     setFirstDayOfClass: (date: Date | undefined) => void;
     daypart: Daypart | '';
     setDaypart: (daypart: Daypart | '') => void;
+    university: string;
+    setUniversity: (university: string) => void;
     isProcessing: boolean;
     currentStep: UseAddCourseReturn['currentStep'];
     onSubmit: () => Promise<void>;
