@@ -70,10 +70,10 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   return (
     <div
-      className={`border-l-4 border-${displayColor} relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-[220px]`}
+      className={`border-l-4 border-${displayColor} relative group flex flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-4 gap-3 h-full min-h-55`}
       style={cardStyle}
     >
-      <div className="absolute -top-[10px] -right-[10px] z-10">
+      <div className="absolute -top-2.5 -right-2.5 z-10">
         <ActionsDropdown actions={dropdownActions} triggerClassName="absolute -right-[1px] z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
         <ChangeCourseColorDialog courseId={course.id} open={showColorDialog} onOpenChange={setShowColorDialog} currentColor={selectedColor} onUpdated={clr => setSelectedColor(clr)} />
         <ChangeCourseDaypartDialog

@@ -33,26 +33,32 @@ export const users = pgTable('user', {
   emailVerified: timestamp('emailVerified', { mode: 'date' }),
   image: text('image'),
   streakDays: integer('streak_days').notNull().default(0),
-  lastCompletedPomodoroDate: timestamp('last_completed_pomodoro_date', { mode: 'date' }),
+  lastCompletedPomodoroDate: timestamp('last_completed_pomodoro_date', {
+    mode: 'date',
+  }),
 });
 
-export const accounts = pgTable('account', {
-  userId: text('userId')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  type: text('type').$type<AdapterAccountType>().notNull(),
-  provider: text('provider').notNull(),
-  providerAccountId: text('providerAccountId').notNull(),
-  refresh_token: text('refresh_token'),
-  access_token: text('access_token'),
-  expires_at: integer('expires_at'),
-  token_type: text('token_type'),
-  scope: text('scope'),
-  id_token: text('id_token'),
-  session_state: text('session_state'),
-}, account => [
-  primaryKey({ columns: [account.provider, account.providerAccountId] }),
-]);
+export const accounts = pgTable(
+  'account',
+  {
+    userId: text('userId')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<AdapterAccountType>().notNull(),
+    provider: text('provider').notNull(),
+    providerAccountId: text('providerAccountId').notNull(),
+    refresh_token: text('refresh_token'),
+    access_token: text('access_token'),
+    expires_at: integer('expires_at'),
+    token_type: text('token_type'),
+    scope: text('scope'),
+    id_token: text('id_token'),
+    session_state: text('session_state'),
+  },
+  account => [
+    primaryKey({ columns: [account.provider, account.providerAccountId] }),
+  ],
+);
 
 export const sessions = pgTable('session', {
   sessionToken: text('sessionToken').primaryKey(),
@@ -62,13 +68,19 @@ export const sessions = pgTable('session', {
   expires: timestamp('expires', { mode: 'date' }).notNull(),
 });
 
-export const verificationTokens = pgTable('verificationToken', {
-  identifier: text('identifier').notNull(),
-  token: text('token').notNull(),
-  expires: timestamp('expires', { mode: 'date' }).notNull(),
-}, verificationToken => [
-  primaryKey({ columns: [verificationToken.identifier, verificationToken.token] }),
-]);
+export const verificationTokens = pgTable(
+  'verificationToken',
+  {
+    identifier: text('identifier').notNull(),
+    token: text('token').notNull(),
+    expires: timestamp('expires', { mode: 'date' }).notNull(),
+  },
+  verificationToken => [
+    primaryKey({
+      columns: [verificationToken.identifier, verificationToken.token],
+    }),
+  ],
+);
 
 export const terms = pgTable('terms', {
   id: text('id').primaryKey(), // '20253'
@@ -83,83 +95,124 @@ export const courses = pgTable('courses', {
     .references(() => users.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   code: text('code').notNull(),
-  term: text('term').notNull().references(() => terms.id, { onDelete: 'restrict' }),
-  color: text('color', { enum: ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'] }).notNull(),
-  daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull().default('AM'),
+  term: text('term')
+    .notNull()
+    .references(() => terms.id, { onDelete: 'restrict' }),
+  color: text('color', {
+    enum: ['blue', 'green', 'red', 'yellow', 'purple', 'orange', 'gray'],
+  }).notNull(),
+  daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] })
+    .notNull()
+    .default('AM'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const tasks = pgTable('tasks', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  courseId: uuid('course_id').references(() => courses.id, { onDelete: 'cascade' }).notNull(),
-  title: text('title').notNull(),
-  notes: text('notes'),
-  type: text('type', { enum: ['theorie', 'pratique', 'exam', 'homework', 'lab'] }).notNull().default('theorie'),
-  status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] }).default('TODO').notNull(),
-  estimatedEffort: real('estimated_effort').notNull().default(1),
-  actualEffort: real('actual_effort').notNull().default(0),
-  dueDate: timestamp('due_date').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, table => [
-  index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
-  index('idx_tasks_user_id').on(table.userId),
-  index('idx_tasks_course_id').on(table.courseId),
-  index('idx_tasks_user_course').on(table.userId, table.courseId),
-]);
+export const tasks = pgTable(
+  'tasks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    courseId: uuid('course_id')
+      .references(() => courses.id, { onDelete: 'cascade' })
+      .notNull(),
+    title: text('title').notNull(),
+    notes: text('notes'),
+    type: text('type', {
+      enum: ['theorie', 'pratique', 'exam', 'homework', 'lab'],
+    })
+      .notNull()
+      .default('theorie'),
+    status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] })
+      .default('TODO')
+      .notNull(),
+    estimatedEffort: real('estimated_effort').notNull().default(1),
+    actualEffort: real('actual_effort').notNull().default(0),
+    dueDate: timestamp('due_date').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  table => [
+    index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
+    index('idx_tasks_user_id').on(table.userId),
+    index('idx_tasks_course_id').on(table.courseId),
+    index('idx_tasks_user_course').on(table.userId, table.courseId),
+  ],
+);
 
-export const subtasks = pgTable('subtasks', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  type: text('type', { enum: ['theorie', 'pratique', 'exam', 'homework', 'lab'] }).notNull().default('theorie'),
-  taskId: uuid('task_id').notNull().references(() => tasks.id, { onDelete: 'cascade' }),
-  title: text('title').notNull(),
-  notes: text('notes'),
-  status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] }).default('TODO').notNull(),
-  estimatedEffort: real('estimated_effort').notNull().default(0),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  dueDate: timestamp('due_date'),
-}, table => [
-  // Index for subtasks queries: WHERE task_id IN (taskIds)
-  index('idx_subtasks_task_id').on(table.taskId),
-]);
+export const subtasks = pgTable(
+  'subtasks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    type: text('type', {
+      enum: ['theorie', 'pratique', 'exam', 'homework', 'lab'],
+    })
+      .notNull()
+      .default('theorie'),
+    taskId: uuid('task_id')
+      .notNull()
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    notes: text('notes'),
+    status: text('status', { enum: ['IN_PROGRESS', 'TODO', 'COMPLETED'] })
+      .default('TODO')
+      .notNull(),
+    estimatedEffort: real('estimated_effort').notNull().default(0),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    dueDate: timestamp('due_date'),
+  },
+  table => [
+    // Index for subtasks queries: WHERE task_id IN (taskIds)
+    index('idx_subtasks_task_id').on(table.taskId),
+  ],
+);
 
-export const pomodoroDaily = pgTable('pomodoro_daily', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  day: date('day', { mode: 'date' }).notNull(),
-  totalMinutes: integer('total_minutes').notNull().default(0),
-  taskIds: uuid('task_ids').array().notNull().default(sql`ARRAY[]::uuid[]`),
-}, t => [
-  uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day),
-]);
+export const pomodoroDaily = pgTable(
+  'pomodoro_daily',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    day: date('day', { mode: 'date' }).notNull(),
+    totalMinutes: integer('total_minutes').notNull().default(0),
+    taskIds: uuid('task_ids')
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::uuid[]`),
+  },
+  t => [uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day)],
+);
 
-export const customLinks = pgTable('custom_links', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  url: text('url').notNull(),
-  title: text('title').notNull(),
-  type: text('type').notNull().default('custom'),
-  imageUrl: text('image_url'),
+export const customLinks = pgTable(
+  'custom_links',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    url: text('url').notNull(),
+    title: text('title').notNull(),
+    type: text('type').notNull().default('custom'),
+    imageUrl: text('image_url'),
 
-  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  courseId: uuid('course_id').references(() => courses.id, { onDelete: 'cascade' }),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    courseId: uuid('course_id').references(() => courses.id, {
+      onDelete: 'cascade',
+    }),
 
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, table => [
-  // Composite index for the main query: WHERE user_id = ? AND course_id = ?
-  index('idx_custom_links_user_course').on(table.userId, table.courseId),
-  // Index for user-specific queries (dashboard custom links where course_id IS NULL)
-  index('idx_custom_links_user_id').on(table.userId),
-  // Index for course-specific queries
-  index('idx_custom_links_course_id').on(table.courseId),
-]);
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  table => [
+    // Composite index for the main query: WHERE user_id = ? AND course_id = ?
+    index('idx_custom_links_user_course').on(table.userId, table.courseId),
+    // Index for user-specific queries (dashboard custom links where course_id IS NULL)
+    index('idx_custom_links_user_id').on(table.userId),
+    // Index for course-specific queries
+    index('idx_custom_links_course_id').on(table.courseId),
+  ],
+);
 
 export const coursesCache = pgTable('courses_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -170,31 +223,47 @@ export const coursesCache = pgTable('courses_cache', {
 });
 
 // Study blocks - individual study sessions
-export const studyBlocks = pgTable('study_blocks', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull(),
-  startAt: timestamp('start_at').notNull(),
-  endAt: timestamp('end_at').notNull(),
-  isCompleted: boolean('is_completed').notNull().default(false),
-}, t => [
-  uniqueIndex('uniq_study_blocks_user_daypart').on(t.userId, t.daypart, t.endAt),
-  index('idx_study_blocks_user_day').on(t.userId, t.startAt, t.endAt),
-]);
+export const studyBlocks = pgTable(
+  'study_blocks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull(),
+    startAt: timestamp('start_at').notNull(),
+    endAt: timestamp('end_at').notNull(),
+    isCompleted: boolean('is_completed').notNull().default(false),
+  },
+  t => [
+    uniqueIndex('uniq_study_blocks_user_daypart').on(
+      t.userId,
+      t.daypart,
+      t.endAt,
+    ),
+    index('idx_study_blocks_user_day').on(t.userId, t.startAt, t.endAt),
+  ],
+);
 
 // Ordered interleave items (A→B→C)
-export const studyBlockItems = pgTable('study_block_items', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  studyBlockId: uuid('study_block_id').notNull().references(() => studyBlocks.id, { onDelete: 'cascade' }),
-  courseId: uuid('course_id').notNull().references(() => courses.id, { onDelete: 'cascade' }),
-  order: smallint('order').notNull(), // 1.2.3 (position in the interleave)
-}, t => [
-  uniqueIndex('uniq_block_order').on(t.studyBlockId, t.order), // never two items at same position
-  index('idx_block_items_block').on(t.studyBlockId),
-  index('idx_block_items_course').on(t.courseId),
-]);
+export const studyBlockItems = pgTable(
+  'study_block_items',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    studyBlockId: uuid('study_block_id')
+      .notNull()
+      .references(() => studyBlocks.id, { onDelete: 'cascade' }),
+    courseId: uuid('course_id')
+      .notNull()
+      .references(() => courses.id, { onDelete: 'cascade' }),
+    order: smallint('order').notNull(), // 1.2.3 (position in the interleave)
+  },
+  t => [
+    uniqueIndex('uniq_block_order').on(t.studyBlockId, t.order), // never two items at same position
+    index('idx_block_items_block').on(t.studyBlockId),
+    index('idx_block_items_course').on(t.courseId),
+  ],
+);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -223,7 +292,10 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
 
 export const customLinksRelations = relations(customLinks, ({ one }) => ({
   user: one(users, { fields: [customLinks.userId], references: [users.id] }),
-  course: one(courses, { fields: [customLinks.courseId], references: [courses.id] }),
+  course: one(courses, {
+    fields: [customLinks.courseId],
+    references: [courses.id],
+  }),
 }));
 
 export const tasksRelations = relations(tasks, ({ one, many }) => ({
@@ -244,10 +316,19 @@ export const studyBlocksRelations = relations(studyBlocks, ({ one, many }) => ({
   studyBlockItems: many(studyBlockItems),
 }));
 
-export const courseStudyBlocksRelations = relations(studyBlockItems, ({ one }) => ({
-  studyBlock: one(studyBlocks, { fields: [studyBlockItems.studyBlockId], references: [studyBlocks.id] }),
-  course: one(courses, { fields: [studyBlockItems.courseId], references: [courses.id] }),
-}));
+export const courseStudyBlocksRelations = relations(
+  studyBlockItems,
+  ({ one }) => ({
+    studyBlock: one(studyBlocks, {
+      fields: [studyBlockItems.studyBlockId],
+      references: [studyBlocks.id],
+    }),
+    course: one(courses, {
+      fields: [studyBlockItems.courseId],
+      references: [courses.id],
+    }),
+  }),
+);
 
 // SQL function to delete courses and related data older than 8 months for all users
 export const deleteOldCourses = sql`

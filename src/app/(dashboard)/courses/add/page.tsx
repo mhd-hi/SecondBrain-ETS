@@ -1,7 +1,7 @@
 'use client';
 
 import type { Daypart } from '@/types/course';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, NotebookText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -28,6 +28,7 @@ export default function AddCoursePage() {
   );
   const [daypart, setDaypart] = useState<Daypart | ''>('');
   const [university, setUniversity] = useState<string>(DEFAULT_UNIVERSITY);
+  const [userContext, setUserContext] = useState<string>('');
   const [availableTerms, setAvailableTerms] = useState<
     Array<{ id: string; label: string }>
   >([]);
@@ -57,6 +58,7 @@ export default function AddCoursePage() {
     setFirstDayOfClass(undefined);
     setDaypart('');
     setUniversity(DEFAULT_UNIVERSITY);
+    setUserContext('');
     reset();
   }, [reset]);
 
@@ -150,6 +152,7 @@ export default function AddCoursePage() {
       firstDayOfClass,
       daypart,
       university,
+      userContext,
     );
   };
 
@@ -176,7 +179,8 @@ export default function AddCoursePage() {
     <main className="container mx-auto mt-2 mb-3.5 flex min-h-screen flex-col gap-6 px-8">
       <div>
         <h1 className="text-foreground text-3xl font-bold">
-          📚 Add New Course
+          <NotebookText className="align-text-middle mr-2 inline-block h-7 w-7" />
+          Add new course
         </h1>
         <p className="text-muted-foreground mt-2">
           Enter a course code to automatically fetch its syllabus data and
@@ -197,6 +201,8 @@ export default function AddCoursePage() {
           setDaypart={setDaypart}
           university={university}
           setUniversity={setUniversity}
+          userContext={userContext}
+          setUserContext={setUserContext}
           isProcessing={isProcessing}
           currentStep={currentStep}
           onSubmit={handleStartParsing}

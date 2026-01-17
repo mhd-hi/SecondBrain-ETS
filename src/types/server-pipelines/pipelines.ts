@@ -21,11 +21,15 @@ export type PipelineResult = {
   steps: ProcessingStep[];
 };
 
+export type SupportedAIProvider = 'openai';
+
 export type PipelineStepRequest = {
   courseCode: string;
   term: string;
   step: 'planets' | 'openai';
   htmlData?: string;
+  aiProvider?: SupportedAIProvider;
+  userContext?: string;
 };
 
 export type PipelineStepResult = {

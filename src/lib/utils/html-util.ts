@@ -5,7 +5,14 @@
 export function normalizeHtml(html: string): string {
   let normalized = html;
 
-  normalized = normalized.replaceAll(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+  // Remove style blocks repeatedly to handle nested/recursive cases
+  const styleBlockPattern = /<style[^>]*>[\s\S]*?<\/style>/gi;
+  let previous: string;
+  do {
+    previous = normalized;
+    normalized = normalized.replace(styleBlockPattern, '');
+  } while (normalized !== previous);
+
   normalized = normalized.replaceAll(/\s+style="[^"]*"/gi, '');
   normalized = normalized.replaceAll(/\s+style='[^']*'/gi, '');
   normalized = normalized.replaceAll(/<\/?span[^>]*>/gi, '');
