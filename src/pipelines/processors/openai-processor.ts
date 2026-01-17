@@ -8,8 +8,9 @@ import { parseContentWithAI } from '@/pipelines/add-course-data/steps/ai/openai'
 export class OpenAIProcessor implements AIContentProcessor {
   async process(
     combinedData: string,
+    userContext?: string,
   ): Promise<{ courseData: CourseAIResponse }> {
-    const result = await parseContentWithAI(combinedData);
+    const result = await parseContentWithAI(combinedData, userContext);
 
     const courseData: CourseAIResponse = {
       courseCode: '',

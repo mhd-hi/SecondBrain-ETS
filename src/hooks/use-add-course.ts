@@ -36,6 +36,7 @@ export type UseAddCourseReturn = {
     firstDayOfClass: Date,
     daypart: Daypart,
     university?: string,
+    userContext?: string,
   ) => Promise<void>;
   retry: () => void;
   reset: () => void;
@@ -76,6 +77,7 @@ async function parseCourseWithAI(
   html: string,
   courseCode: string,
   term: string,
+  userContext?: string,
 ): Promise<CourseAIResponse> {
   const cleanCode = assertValidCourseCode(courseCode);
 
@@ -89,6 +91,7 @@ async function parseCourseWithAI(
       term,
       step: 'openai',
       htmlData: html,
+      userContext,
     }),
   });
 
@@ -185,6 +188,7 @@ export function useAddCourse(): UseAddCourseReturn {
       firstDayOfClass: Date,
       daypart: Daypart,
       university?: string,
+      userContext?: string,
     ) => {
       if (!courseCode.trim()) {
         toast.error('Please enter a course code');
@@ -242,6 +246,7 @@ export function useAddCourse(): UseAddCourseReturn {
           planetsData.html,
           courseCode.trim(),
           term,
+          userContext,
         );
         dispatch({ type: 'OPENAI_SUCCESS', data: aiData });
 

@@ -1,5 +1,7 @@
 import type { Daypart } from '@/types/course';
 import type { AddCourseInputFormProps } from '@/types/dialog/add-course-dialog';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { useState } from 'react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  getRemainingChars,
+  MAX_USER_CONTEXT_LENGTH,
+} from '@/lib/utils/sanitize';
 import { UNIVERSITY, UNIVERSITY_INFO } from '@/types/university';
 
 export function CourseInputForm({
@@ -24,10 +31,14 @@ export function CourseInputForm({
   setDaypart,
   university,
   setUniversity,
+  userContext,
+  setUserContext,
   isProcessing,
   currentStep,
   onSubmit,
 }: AddCourseInputFormProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <form
       onSubmit={(e) => {
@@ -56,9 +67,9 @@ export function CourseInputForm({
               maxLength={10}
               onKeyDown={(e) => {
                 if (
-                  e.key === 'Enter'
-                  && currentStep === 'idle'
-                  && courseCode.trim()
+                  e.key === 'Enter' &&
+                  currentStep === 'idle' &&
+                  courseCode.trim()
                 ) {
                   e.preventDefault();
                   void onSubmit();
@@ -136,6 +147,68 @@ export function CourseInputForm({
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            disabled={isProcessing}
+            className="bg-muted/30 hover:bg-muted/50 flex w-full items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors disabled:pointer-events-none disabled:opacity-50"
+          >
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="userContext"
+                className="cursor-pointer font-medium"
+              >
+                Additional Course Info
+              </Label>
+              <span className="text-muted-foreground text-xs">(optional)</span>
+            </div>
+            {isExpanded
+? (
+              <ChevronUp className="h-4 w-4" />
+            )
+: (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </button>
+
+          {isExpanded && (
+            <div className="animate-in fade-in slide-in-from-top-2 space-y-2 duration-200">
+              <Textarea
+                id="userContext"
+                value={userContext}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value.length <= MAX_USER_CONTEXT_LENGTH) {
+                    setUserContext(value);
+                  }
+                }}
+                placeholder="Provide additional course details to help generate more complete tasks. The AI will create additional tasks based on your input (e.g., weekly quizzes, lab reports, projects not in the plan)..."
+                disabled={isProcessing}
+                rows={6}
+                className="min-h-30 resize-y"
+              />
+              <div className="flex items-start justify-between gap-2 text-xs">
+                <div className="text-muted-foreground flex items-start gap-1.5">
+                  <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <span>Do not include private or sensitive information.</span>
+                </div>
+                <span
+                  className={`shrink-0 font-mono ${
+                    getRemainingChars(userContext) < 100
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {userContext.length}
+/
+{MAX_USER_CONTEXT_LENGTH}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </form>

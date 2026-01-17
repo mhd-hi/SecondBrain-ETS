@@ -25,6 +25,20 @@ jobs:
         run: bun install
       - name: Run lint
         run: bun run lint
+
+  audit:
+    name: Audit Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.15
+      - name: Install dependencies
+        run: bun install
       - name: Audit dependencies for vulnerabilities
         run: bun audit
 
@@ -60,6 +74,7 @@ jobs:
       - name: Run tests
         run: bun run test:run
 
+  # Tests DB migrations for production build
   test-db-migration-build:
     name: Test DB Migration
     runs-on: ubuntu-latest

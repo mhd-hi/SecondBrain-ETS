@@ -40,6 +40,12 @@ import {
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { getAddCoursePath, getCoursePath, ROUTES } from '@/lib/routes';
 
 type SidebarProps = {
@@ -72,9 +78,21 @@ export function AppSidebar({ courses, isLoading = false }: SidebarProps) {
         {/* My Courses Group */}
         <SidebarGroup>
           <SidebarGroupLabel>My Courses</SidebarGroupLabel>
-          <SidebarGroupAction onClick={() => router.push(getAddCoursePath())}>
-            <Plus className="size-4" />
-          </SidebarGroupAction>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <SidebarGroupAction
+                  onClick={() => router.push(getAddCoursePath())}
+                  className="h-8 w-8"
+                >
+                  <Plus className="size-5" />
+                </SidebarGroupAction>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>Add course</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoading

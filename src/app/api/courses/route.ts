@@ -4,51 +4,54 @@ import { withAuthSimple } from '@/lib/auth/api';
 import { createUserCourse, getUserCourses } from '@/lib/auth/db';
 import { generateRandomCourseColor } from '@/lib/utils/colors-util';
 
-export const GET = withAuthSimple(
-  async (request, user) => {
-    // Use secure query function that automatically filters by user
-    const coursesWithTasks = await getUserCourses(user.id);
-    return NextResponse.json(coursesWithTasks);
-  },
-);
+export const GET = withAuthSimple(async (request, user) => {
+  // Use secure query function that automatically filters by user
+  const coursesWithTasks = await getUserCourses(user.id);
+  return NextResponse.json(coursesWithTasks);
+});
 
-export const POST = withAuthSimple(
-  async (request, user) => {
-    const data = await request.json() as { code: string; name: string; term: string; daypart: Daypart };
+export const POST = withAuthSimple(async (request, user) => {
+  const data = (await request.json()) as {
+    code: string;
+    name: string;
+    term: string;
+    daypart: Daypart;
+    userContext?: string;
+  };
 
-    if (!data.code || !data.name) {
-      return NextResponse.json(
-        { error: 'code and name are required', code: 'MISSING_FIELDS' },
-        { status: 400 },
-      );
-    }
+  if (!data.code || !data.name) {
+    return NextResponse.json(
+      { error: 'code and name are required', code: 'MISSING_FIELDS' },
+      { status: 400 },
+    );
+  }
 
-    const { code, name, term, daypart } = data;
+  const { code, name, term, daypart } = data;
 
-    if (!term) {
-      return NextResponse.json(
-        { error: 'term is required', code: 'MISSING_TERM' },
-        { status: 400 },
-      );
-    }
-    // Check if course already exists for this user
-    const existingCourses = await getUserCourses(user.id);
-    const existingCourse = existingCourses.find(course => course.code === code);
+  if (!term) {
+    return NextResponse.json(
+      { error: 'term is required', code: 'MISSING_TERM' },
+      { status: 400 },
+    );
+  }
 
-    if (existingCourse) {
-      // Return the existing course instead of throwing an error
-      return NextResponse.json(existingCourse);
-    }
+  // Check if course already exists for this user
+  const existingCourses = await getUserCourses(user.id);
+  const existingCourse = existingCourses.find((course) => course.code === code);
 
-    // Use secure function to create course with automatic user assignment
-    const course = await createUserCourse(user.id, {
-      code,
-      name,
-      term,
-      daypart,
-      color: generateRandomCourseColor(),
-    });
+  if (existingCourse) {
+    // Return the existing course instead of throwing an error
+    return NextResponse.json(existingCourse);
+  }
 
-    return NextResponse.json(course);
-  },
-);
+  // Use secure function to create course with automatic user assignment
+  const course = await createUserCourse(user.id, {
+    code,
+    name,
+    term,
+    daypart,
+    color: generateRandomCourseColor(),
+  });
+
+  return NextResponse.json(course);
+});

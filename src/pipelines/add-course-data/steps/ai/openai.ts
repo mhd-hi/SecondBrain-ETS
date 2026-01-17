@@ -1,15 +1,31 @@
 import type { AITask } from '@/types/api/ai';
 import { callOpenAI } from './call';
 import { extractJsonArrayFromText } from './parse';
-import { buildCoursePlanParsePrompt, COURSE_PLAN_PARSER_SYSTEM_PROMPT } from './prompt';
+import {
+  buildCoursePlanParsePrompt,
+  COURSE_PLAN_PARSER_SYSTEM_PROMPT,
+} from './prompt';
 
 export type ParseAIResult = {
   tasks: AITask[];
 };
 
-export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
-  const prompt = buildCoursePlanParsePrompt(html);
+export async function parseContentWithAI(
+  html: string,
+  userContext?: string,
+): Promise<ParseAIResult> {
+  const prompt = buildCoursePlanParsePrompt(html, userContext);
   console.log('Built prompt. Length:', prompt.length, 'characters');
+  if (userContext) {
+    console.log(
+      'User context provided. Length:',
+      userContext.length,
+      'characters',
+    );
+    console.log('User context content:', userContext);
+  } else {
+    console.log('No user context provided');
+  }
 
   try {
     console.log('Starting OpenAI API call...');
@@ -40,7 +56,10 @@ export async function parseContentWithAI(html: string): Promise<ParseAIResult> {
 
     return { tasks: rawTasks };
   } catch (error) {
-    console.log('Error in parseContentWithAI:', error instanceof Error ? error.message : 'Unknown error');
+    console.log(
+      'Error in parseContentWithAI:',
+      error instanceof Error ? error.message : 'Unknown error',
+    );
     throw error;
   }
 }

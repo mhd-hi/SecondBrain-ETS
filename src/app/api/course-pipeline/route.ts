@@ -5,6 +5,7 @@ import type {
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
 import { assertValidCourseCode } from '@/lib/utils/course';
+import { sanitizeUserInput, validateUserContext } from '@/lib/utils/sanitize';
 import { AIProcessorFactory, UniversityCourseDataSource } from '@/pipelines';
 import { UNIVERSITY } from '@/types/university';
 
@@ -12,7 +13,7 @@ import { UNIVERSITY } from '@/types/university';
 export const POST = withAuthSimple(async (request, _user) => {
   try {
     const body = (await request.json()) as PipelineStepRequest;
-    const { courseCode, term, step, htmlData } = body;
+    const { courseCode, term, step, htmlData, aiProvider, userContext } = body;
 
     if (!term) {
       return NextResponse.json(
@@ -25,7 +26,26 @@ export const POST = withAuthSimple(async (request, _user) => {
         { error: 'Missing required parameter: courseCode' },
         { status: 400 },
       );
-    } // Validate course code format
+    }
+
+    // Validate and sanitize userContext
+    let sanitizedContext: string | undefined;
+    if (userContext) {
+      try {
+        validateUserContext(userContext);
+        sanitizedContext = sanitizeUserInput(userContext);
+      } catch (error) {
+        return NextResponse.json(
+          {
+            error:
+              error instanceof Error ? error.message : 'Invalid user context',
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    // Validate course code format
     let cleanCode: string;
     try {
       cleanCode = assertValidCourseCode(
@@ -106,8 +126,15 @@ export const POST = withAuthSimple(async (request, _user) => {
 
       try {
         const startTime = new Date().toISOString();
-        const aiProcessor = await AIProcessorFactory.createProcessor();
-        const result = await aiProcessor.process(htmlData);
+        console.log(
+          '[API] OpenAI step - User context:',
+          sanitizedContext
+            ? `Present (${sanitizedContext.length} chars)`
+            : 'Not provided',
+        );
+        const aiProcessor =
+          await AIProcessorFactory.createProcessor(aiProvider);
+        const result = await aiProcessor.process(htmlData, sanitizedContext);
         const endTime = new Date().toISOString();
         const courseData = result.courseData;
 
