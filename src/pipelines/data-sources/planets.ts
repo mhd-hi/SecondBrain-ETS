@@ -1,25 +1,40 @@
-import type { DataSource, SourceResult } from '@/types/server-pipelines/pipelines';
-import { fetchPlanETSContent } from '@/pipelines/add-course-data/steps/planets';
+import type {
+    DataSource,
+    SourceResult,
+} from '@/types/server-pipelines/pipelines';
+import type { UniversityId } from '@/types/university';
+import { UniversityStrategyFactory } from '@/pipelines/university-strategies/strategy-factory';
 
-export class PlanetsDataSource implements DataSource {
-    name = 'planets';
-    description = 'PlanETS Course Content';
+/**
+ * Data source for fetching course content from university systems
+ * Uses strategy pattern to support multiple universities
+ */
+export class UniversityCourseDataSource implements DataSource {
+    name: string;
+    description: string;
+    private universityId: UniversityId;
+
+    constructor(universityId: UniversityId) {
+        this.universityId = universityId;
+        const strategy = UniversityStrategyFactory.getStrategy(universityId);
+        this.name = `university_${universityId}`;
+        this.description = `${strategy.name} Course Content`;
+    }
 
     async fetch(courseCode: string, term: string): Promise<SourceResult> {
-        if (!term) {
-            throw new Error('Term id is required for PlanETS fetch');
-        }
-        const result = await fetchPlanETSContent(courseCode, term);
-
-        if (!result.html || result.html.trim().length < 100) {
-            throw new Error('Course data appears to be empty or invalid');
-        }
+        const strategy = UniversityStrategyFactory.getStrategy(this.universityId);
+        const html = await strategy.fetchCourseContent(courseCode, term);
 
         return {
-            data: result.html,
-            metadata: { source: 'planets', courseCode, term },
+            data: html,
+            metadata: {
+                source: this.name,
+                courseCode,
+                term,
+                universityId: this.universityId,
+            },
         };
     }
 }
 
-export default PlanetsDataSource;
+export default UniversityCourseDataSource;

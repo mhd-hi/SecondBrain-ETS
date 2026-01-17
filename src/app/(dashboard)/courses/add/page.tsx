@@ -68,8 +68,8 @@ export default function AddCoursePage() {
           const got = await fetchTerms();
           setAvailableTerms(got);
           // Default term to current session (middle item) if present (prev/current/next)
-          const middle
-            = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+          const middle =
+            got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
           if (middle) {
             setTerm(middle.id);
           }
@@ -173,16 +173,18 @@ export default function AddCoursePage() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="mb-2 text-3xl font-bold">Add New Course</h1>
-        <p className="text-muted-foreground">
+    <main className="container mx-auto mt-2 mb-3.5 flex min-h-screen flex-col gap-6 px-8">
+      <div>
+        <h1 className="text-foreground text-3xl font-bold">
+          📚 Add New Course
+        </h1>
+        <p className="text-muted-foreground mt-2">
           Enter a course code to automatically fetch its syllabus data and
           generate a structured learning plan.
         </p>
       </div>
 
-      <div className="bg-card space-y-6 rounded-lg border p-6">
+      <div className="bg-card mx-auto w-full max-w-3xl space-y-6 rounded-lg border p-6">
         <CourseInputForm
           courseCode={courseCode}
           setCourseCode={setCourseCode}
@@ -254,6 +256,6 @@ export default function AddCoursePage() {
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 }
