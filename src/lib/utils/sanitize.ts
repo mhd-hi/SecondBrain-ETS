@@ -59,13 +59,17 @@ export function sanitizeUserInput(
   sanitized = sanitized.replace(/<[^>]*>/g, '');
 
   // Decode common HTML entities
+  // Important: decode &amp; last to avoid double-unescaping sequences like "&amp;lt;"
   sanitized = sanitized
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, '\'')
-    .replace(/&nbsp;/g, ' ');
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&');
+
+  // After decoding, ensure any newly introduced tag delimiters are removed
+  sanitized = sanitized.replace(/[<>]/g, '');
 
   // Remove excessive whitespace (multiple spaces, tabs, newlines)
   sanitized = sanitized.replace(/\s+/g, ' ').trim();
