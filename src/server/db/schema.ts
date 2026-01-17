@@ -55,7 +55,7 @@ export const accounts = pgTable(
     id_token: text('id_token'),
     session_state: text('session_state'),
   },
-  (account) => [
+  account => [
     primaryKey({ columns: [account.provider, account.providerAccountId] }),
   ],
 );
@@ -75,7 +75,7 @@ export const verificationTokens = pgTable(
     token: text('token').notNull(),
     expires: timestamp('expires', { mode: 'date' }).notNull(),
   },
-  (verificationToken) => [
+  verificationToken => [
     primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
@@ -134,7 +134,7 @@ export const tasks = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     index('idx_tasks_user_due_date').on(table.userId, table.dueDate),
     index('idx_tasks_user_id').on(table.userId),
     index('idx_tasks_course_id').on(table.courseId),
@@ -164,7 +164,7 @@ export const subtasks = pgTable(
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
     dueDate: timestamp('due_date'),
   },
-  (table) => [
+  table => [
     // Index for subtasks queries: WHERE task_id IN (taskIds)
     index('idx_subtasks_task_id').on(table.taskId),
   ],
@@ -184,7 +184,7 @@ export const pomodoroDaily = pgTable(
       .notNull()
       .default(sql`ARRAY[]::uuid[]`),
   },
-  (t) => [uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day)],
+  t => [uniqueIndex('pomodoro_daily_user_day_uq').on(t.userId, t.day)],
 );
 
 export const customLinks = pgTable(
@@ -204,7 +204,7 @@ export const customLinks = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (table) => [
+  table => [
     // Composite index for the main query: WHERE user_id = ? AND course_id = ?
     index('idx_custom_links_user_course').on(table.userId, table.courseId),
     // Index for user-specific queries (dashboard custom links where course_id IS NULL)
@@ -235,7 +235,7 @@ export const studyBlocks = pgTable(
     endAt: timestamp('end_at').notNull(),
     isCompleted: boolean('is_completed').notNull().default(false),
   },
-  (t) => [
+  t => [
     uniqueIndex('uniq_study_blocks_user_daypart').on(
       t.userId,
       t.daypart,
@@ -258,7 +258,7 @@ export const studyBlockItems = pgTable(
       .references(() => courses.id, { onDelete: 'cascade' }),
     order: smallint('order').notNull(), // 1.2.3 (position in the interleave)
   },
-  (t) => [
+  t => [
     uniqueIndex('uniq_block_order').on(t.studyBlockId, t.order), // never two items at same position
     index('idx_block_items_block').on(t.studyBlockId),
     index('idx_block_items_course').on(t.courseId),

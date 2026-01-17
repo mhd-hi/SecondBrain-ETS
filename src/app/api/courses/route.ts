@@ -37,7 +37,7 @@ export const POST = withAuthSimple(async (request, user) => {
 
   // Check if course already exists for this user
   const existingCourses = await getUserCourses(user.id);
-  const existingCourse = existingCourses.find((course) => course.code === code);
+  const existingCourse = existingCourses.find(course => course.code === code);
 
   if (existingCourse) {
     // Return the existing course instead of throwing an error
