@@ -16,5 +16,6 @@ export function useIsMobile() {
     return () => mql.removeEventListener('change', onChange);
   }, []);
 
-  return !!isMobile;
+  // Return undefined during SSR/initial render to allow components to handle the loading state
+  return isMobile;
 }

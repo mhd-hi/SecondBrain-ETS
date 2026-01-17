@@ -1,0 +1,247 @@
+'use client';
+
+import type { Daypart } from '@/types/course';
+import { AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { ActionButtons } from '@/components/shared/dialogs/ActionButtons';
+import { CourseCodeInputForm } from '@/components/shared/dialogs/CourseCodeInputForm';
+import { ProcessingSteps } from '@/components/shared/dialogs/ProcessingSteps';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { useAddCourse } from '@/hooks/use-add-course';
+import { useCourses } from '@/hooks/use-course-store';
+import { useTerms } from '@/hooks/use-terms';
+import { getCoursePath, ROUTES } from '@/lib/routes';
+import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
+import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
+import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
+
+export default function AddCoursePage() {
+  const router = useRouter();
+  const [courseCode, setCourseCode] = useState('');
+  const [term, setTerm] = useState<string>('');
+  const [firstDayOfClass, setFirstDayOfClass] = useState<Date | undefined>(
+    undefined,
+  );
+  const [daypart, setDaypart] = useState<Daypart | ''>('');
+  const [availableTerms, setAvailableTerms] = useState<
+    Array<{ id: string; label: string }>
+  >([]);
+
+  const {
+    terms: _fetchedTerms,
+    loading: _termsLoading,
+    error: _termsError,
+    fetchTerms,
+  } = useTerms();
+  const { refreshCourses } = useCourses();
+
+  const {
+    currentStep,
+    stepStatus,
+    parsedData,
+    createdCourseId,
+    error,
+    isProcessing,
+    startProcessing,
+    retry,
+    reset,
+  } = useAddCourse();
+
+  const resetForm = useCallback(() => {
+    setCourseCode('');
+    setFirstDayOfClass(undefined);
+    setDaypart('');
+    reset();
+  }, [reset]);
+
+  // Fetch terms on mount
+  useEffect(() => {
+    if (availableTerms.length === 0) {
+      (async () => {
+        try {
+          const got = await fetchTerms();
+          setAvailableTerms(got);
+          // Default term to current session (middle item) if present (prev/current/next)
+          const middle
+            = got.length === 3 ? got[1] : got[Math.floor(got.length / 2)];
+          if (middle) {
+            setTerm(middle.id);
+          }
+        } catch (err) {
+          console.error('Failed to fetch terms:', err);
+        }
+      })();
+    }
+  }, [availableTerms.length, fetchTerms]);
+
+  // Set first day of class based on term
+  useEffect(() => {
+    if (!term || !isValidTermId(term)) {
+      return;
+    }
+
+    const termDateStart = getDatesForTerm(term).start;
+    if (termDateStart) {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setFirstDayOfClass(termDateStart);
+    }
+  }, [term]);
+
+  // Automatically refresh courses when course creation is completed
+  useEffect(() => {
+    if (currentStep === 'completed' && createdCourseId) {
+      void refreshCourses();
+    }
+  }, [currentStep, createdCourseId, refreshCourses]);
+
+  const handleStartParsing = async () => {
+    if (!courseCode.trim()) {
+      toast.error('Please enter a course code');
+      return;
+    }
+
+    const cleanCode = normalizeCourseCode(courseCode);
+
+    // Validate course code format
+    if (!isValidCourseCode(cleanCode)) {
+      toast.error(
+        'Invalid course code format. Please use format like MAT145 or LOG210',
+      );
+      return;
+    }
+
+    if (!term) {
+      toast.error('Please select a term');
+      return;
+    }
+
+    if (!firstDayOfClass) {
+      toast.error('Please select a first day of class.');
+      return;
+    }
+
+    if (!daypart) {
+      toast.error('Please select a daypart for the lecture.');
+      return;
+    }
+
+    let termToUse = term;
+    if (!isValidTermId(termToUse)) {
+      const cleaned = termToUse.replace(/^0+/, '');
+      if (isValidTermId(cleaned)) {
+        termToUse = cleaned;
+      } else {
+        toast.error(
+          'Selected term id looks invalid. Please pick a valid term.',
+        );
+        return;
+      }
+    }
+
+    await startProcessing(cleanCode, termToUse, firstDayOfClass, daypart);
+  };
+
+  const handleRetry = () => {
+    retry();
+  };
+
+  const handleTryDifferentCourse = () => {
+    resetForm();
+  };
+
+  const handleGoToCourse = () => {
+    if (!createdCourseId) {
+      return;
+    }
+    router.push(getCoursePath(createdCourseId));
+  };
+
+  const handleCancel = () => {
+    router.push(ROUTES.DASHBOARD);
+  };
+
+  return (
+    <div className="container mx-auto max-w-3xl px-4 py-8">
+      <div className="mb-6">
+        <h1 className="mb-2 text-3xl font-bold">Add New Course</h1>
+        <p className="text-muted-foreground">
+          Enter a course code to automatically fetch its syllabus data and
+          generate a structured learning plan.
+        </p>
+      </div>
+
+      <div className="bg-card space-y-6 rounded-lg border p-6">
+        <CourseCodeInputForm
+          courseCode={courseCode}
+          setCourseCode={setCourseCode}
+          term={term}
+          setTerm={setTerm}
+          availableTerms={availableTerms}
+          firstDayOfClass={firstDayOfClass}
+          setFirstDayOfClass={setFirstDayOfClass}
+          daypart={daypart}
+          setDaypart={setDaypart}
+          isProcessing={isProcessing}
+          currentStep={currentStep}
+          onSubmit={handleStartParsing}
+        />
+
+        <ProcessingSteps currentStep={currentStep} stepStatus={stepStatus} />
+
+        {/* Success Display */}
+        {currentStep === 'completed' && parsedData && createdCourseId && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Course Created Successfully!</AlertTitle>
+            <AlertDescription>
+              AI-generated tasks have been created. Please review the tasks and
+              adjust them as needed.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {PipelineErrorHandlers.getSafeErrorMessage(error)}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-2">
+          {currentStep === 'idle' && (
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isProcessing}
+            >
+              Cancel
+            </Button>
+          )}
+          <ActionButtons
+            currentStep={currentStep}
+            existingCourse={null}
+            isCheckingExistence={false}
+            courseCode={courseCode}
+            isProcessing={isProcessing}
+            parsedData={parsedData}
+            createdCourseId={createdCourseId}
+            onStartParsing={handleStartParsing}
+            onRetry={handleRetry}
+            onTryDifferentCourse={handleTryDifferentCourse}
+            onGoToExistingCourse={() => {}}
+            onDialogClose={handleCancel}
+            onGoToCourse={handleGoToCourse}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

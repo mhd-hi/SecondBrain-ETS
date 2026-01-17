@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { ROUTES } from './routes';
 
-type Dialog = 'add-course' | 'add-task';
+type Dialog = 'add-task';
 
 export type ShortcutAction =
   | { type: 'navigate'; path: string }
@@ -55,7 +55,7 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
     key: 'r',
     ctrl: true,
     alt: true,
-    action: { type: 'dialog', dialog: 'add-course' },
+    action: { type: 'navigate', path: ROUTES.ADD_COURSE },
     description: 'Add Course',
   },
   {
@@ -74,7 +74,9 @@ export function getShortcutForPath(path: string): KeyboardShortcut | undefined {
   );
 }
 
-export function getShortcutForDialog(dialog: Dialog): KeyboardShortcut | undefined {
+export function getShortcutForDialog(
+  dialog: Dialog,
+): KeyboardShortcut | undefined {
   return KEYBOARD_SHORTCUTS.find(
     shortcut =>
       shortcut.action.type === 'dialog' && shortcut.action.dialog === dialog,
@@ -83,7 +85,6 @@ export function getShortcutForDialog(dialog: Dialog): KeyboardShortcut | undefin
 
 export type ShortcutHandlers = {
   onToggleCommandPalette: () => void;
-  onOpenAddCourseDialog: () => void;
   onOpenAddTaskDialog: () => void;
   onNavigate: (path: string) => void;
 };
@@ -98,7 +99,9 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      const isMac
+        = typeof navigator !== 'undefined'
+          && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
       const matchingShortcut = KEYBOARD_SHORTCUTS.find((shortcut) => {
         const keyMatches = e.key.toLowerCase() === shortcut.key.toLowerCase();
@@ -120,9 +123,6 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
             break;
           case 'dialog':
             switch (matchingShortcut.action.dialog) {
-              case 'add-course':
-                currentHandlers.onOpenAddCourseDialog();
-                break;
               case 'add-task':
                 currentHandlers.onOpenAddTaskDialog();
                 break;
@@ -142,7 +142,9 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
 }
 
 export function getShortcutDisplayText(shortcut: KeyboardShortcut): string {
-  const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const isMac
+    = typeof navigator !== 'undefined'
+      && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
   const parts: string[] = [];
 
   if (shortcut.ctrl) {

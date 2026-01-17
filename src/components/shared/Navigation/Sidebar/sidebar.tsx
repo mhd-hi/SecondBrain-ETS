@@ -1,14 +1,19 @@
 'use client';
 
 import type { CourseListItem } from '@/types/api/course';
-import { ChevronsUpDown, LogOut, NotebookText, Plus, Settings } from 'lucide-react';
+import {
+  ChevronsUpDown,
+  LogOut,
+  NotebookText,
+  Plus,
+  Settings,
+} from 'lucide-react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { AppLogo } from '@/components/shared/atoms/AppLogo';
 import { StatusBadge } from '@/components/shared/atoms/StatusBadge';
-import { AddCourseDialog } from '@/components/shared/dialogs/AddCourseDialog';
 import { NavigationItems } from '@/components/shared/Navigation/NavigationItems';
 import {
   DropdownMenu,
@@ -35,7 +40,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { getCoursePath, ROUTES } from '@/lib/routes';
+import { getAddCoursePath, getCoursePath, ROUTES } from '@/lib/routes';
 
 type SidebarProps = {
   courses: CourseListItem[];
@@ -43,8 +48,9 @@ type SidebarProps = {
   onCourseAdded?: () => void;
 };
 
-export function AppSidebar({ courses, isLoading = false, onCourseAdded }: SidebarProps) {
+export function AppSidebar({ courses, isLoading = false }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
 
   return (
@@ -66,34 +72,29 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
         {/* My Courses Group */}
         <SidebarGroup>
           <SidebarGroupLabel>My Courses</SidebarGroupLabel>
-          <AddCourseDialog
-            onCourseAdded={onCourseAdded}
-            trigger={(
-              <SidebarGroupAction>
-                <Plus className="size-4" />
-              </SidebarGroupAction>
-            )}
-          />
+          <SidebarGroupAction onClick={() => router.push(getAddCoursePath())}>
+            <Plus className="size-4" />
+          </SidebarGroupAction>
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoading
-                ? (
-                  Array.from({ length: 5 }, (_, i) => (
+                ? Array.from({ length: 5 }, (_, i) => (
                     <SidebarMenuItem key={i}>
                       <SidebarMenuSkeleton showIcon index={i} />
                     </SidebarMenuItem>
                   ))
-                )
                 : courses.length === 0
-                  ? (' ')
-                  : (
-                    courses.map((course) => {
+                  ? ''
+                  : courses.map((course) => {
                       const isActive = pathname === `/courses/${course.id}`;
                       return (
                         <SidebarMenuItem key={course.id}>
                           <SidebarMenuButton asChild isActive={isActive}>
                             <Link href={getCoursePath(course.id)}>
-                              <NotebookText className="size-4" style={{ color: course.color }} />
+                              <NotebookText
+                                className="size-4"
+                                style={{ color: course.color }}
+                              />
                               <span>{course.code}</span>
                               <div className="ml-auto flex items-center gap-1">
                                 {course.overdueCount > 0 && (
@@ -108,8 +109,7 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
-                    })
-                  )}
+                    })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -120,59 +120,59 @@ export function AppSidebar({ courses, isLoading = false, onCourseAdded }: Sideba
           {/* User Authentication */}
           <SidebarMenuItem>
             {status === 'loading'
-              ? (
-                <SidebarMenuButton disabled className="h-12">
-                  <Skeleton className="w-6 h-6 rounded-full" />
-                  <span>Loading...</span>
-                </SidebarMenuButton>
-              )
-              : session
-                ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton className="w-full group/user-menu h-12">
-                        {session.user?.image && (
-                          <Image
-                            src={session.user.image}
-                            alt="Profile"
-                            width={24}
-                            height={24}
-                            className="w-8 h-8 rounded-full"
-                          />
-                        )}
-                        <span className="truncate">{session.user?.name}</span>
-                        <ChevronsUpDown className="size-4 ml-auto" />
-                      </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                      align="end"
-                      side="right"
-                      sideOffset={8}
-                      className="w-56"
-                    >
-                      <ThemeToggle />
-                      <DropdownMenuItem asChild>
-                        <Link href={ROUTES.PREFERENCES}>
-                          <Settings className="size-4 mr-2" />
-                          Preferences
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
-                        onClick={() => signOut()}
-                      >
-                        <LogOut className="size-4 mr-2" />
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )
-                : (
-                  <SidebarMenuButton onClick={() => signIn()} className="h-12">
-                    Sign In
+? (
+              <SidebarMenuButton disabled className="h-12">
+                <Skeleton className="h-6 w-6 rounded-full" />
+                <span>Loading...</span>
+              </SidebarMenuButton>
+            )
+: session
+? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton className="group/user-menu h-12 w-full">
+                    {session.user?.image && (
+                      <Image
+                        src={session.user.image}
+                        alt="Profile"
+                        width={24}
+                        height={24}
+                        className="h-8 w-8 rounded-full"
+                      />
+                    )}
+                    <span className="truncate">{session.user?.name}</span>
+                    <ChevronsUpDown className="ml-auto size-4" />
                   </SidebarMenuButton>
-                )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  side="right"
+                  sideOffset={8}
+                  className="w-56"
+                >
+                  <ThemeToggle />
+                  <DropdownMenuItem asChild>
+                    <Link href={ROUTES.PREFERENCES}>
+                      <Settings className="mr-2 size-4" />
+                      Preferences
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive hover:bg-destructive/10 focus:bg-destructive/10"
+                    onClick={() => signOut()}
+                  >
+                    <LogOut className="mr-2 size-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+: (
+              <SidebarMenuButton onClick={() => signIn()} className="h-12">
+                Sign In
+              </SidebarMenuButton>
+            )}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
