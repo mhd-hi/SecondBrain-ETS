@@ -1,12 +1,14 @@
 import type { ActionButtonsProps } from '@/types/dialog/add-course-dialog';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MAX_USER_CONTEXT_LENGTH } from '@/lib/utils/sanitize';
 
 export function ActionButtons({
   currentStep,
   existingCourse,
   isCheckingExistence,
   courseCode,
+  userContext,
   isProcessing,
   parsedData,
   createdCourseId,
@@ -19,25 +21,31 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   // Idle state without existing course - show Cancel and Add Course buttons
   if (currentStep === 'idle' && !existingCourse) {
+    const isUserContextInvalid = userContext.length > MAX_USER_CONTEXT_LENGTH;
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button onClick={onStartParsing} disabled={!courseCode.trim() || isCheckingExistence}>
+        <Button
+          onClick={onStartParsing}
+          disabled={
+            !courseCode.trim() || isCheckingExistence || isUserContextInvalid
+          }
+        >
           {isCheckingExistence
-            ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Checking...
-              </>
-            )
-            : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Course
-              </>
-            )}
+? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Checking...
+            </>
+          )
+: (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Course
+            </>
+          )}
         </Button>
       </div>
     );
@@ -53,9 +61,7 @@ export function ActionButtons({
         <Button variant="outline" onClick={onTryDifferentCourse}>
           Try Different Course
         </Button>
-        <Button onClick={onGoToExistingCourse}>
-          Go to Course
-        </Button>
+        <Button onClick={onGoToExistingCourse}>Go to Course</Button>
       </div>
     );
   }
@@ -68,7 +74,7 @@ export function ActionButtons({
           Cancel
         </Button>
         <Button variant="outline" onClick={onRetry}>
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           Retry
         </Button>
         <Button variant="outline" onClick={onTryDifferentCourse}>
@@ -85,9 +91,7 @@ export function ActionButtons({
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button onClick={onGoToCourse}>
-          Go to Course
-        </Button>
+        <Button onClick={onGoToCourse}>Go to Course</Button>
       </div>
     );
   }
@@ -97,7 +101,7 @@ export function ActionButtons({
     return (
       <div className="flex justify-end gap-2">
         <Button disabled>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </Button>
       </div>

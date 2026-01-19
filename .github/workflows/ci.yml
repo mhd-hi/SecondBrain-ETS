@@ -78,6 +78,11 @@ jobs:
   test-db-migration-build:
     name: Test DB Migration
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.changed_files.*.filename, 'drizzle/') ||
+      contains(github.event.pull_request.changed_files.*.filename, 'src/server/db/schema.ts') ||
+      contains(github.event.pull_request.changed_files.*.filename, 'drizzle.config.ts')
     services:
       postgres:
         image: postgres:15

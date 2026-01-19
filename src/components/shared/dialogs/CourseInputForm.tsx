@@ -185,21 +185,37 @@ export function CourseInputForm({
                     setUserContext(value);
                   }
                 }}
+                onPaste={(e) => {
+                  const pasteData = e.clipboardData.getData('text');
+                  const newLength = userContext.length + pasteData.length;
+                  if (newLength > MAX_USER_CONTEXT_LENGTH) {
+                    e.preventDefault();
+                    // Calculate how much can fit
+                    const remainingSpace =
+                      MAX_USER_CONTEXT_LENGTH - userContext.length;
+                    if (remainingSpace > 0) {
+                      const truncatedPaste = pasteData.slice(0, remainingSpace);
+                      setUserContext(userContext + truncatedPaste);
+                    }
+                  }
+                }}
                 placeholder="Provide additional course details to help generate more complete tasks. The AI will create additional tasks based on your input (e.g., weekly quizzes, lab reports, projects not in the plan)..."
                 disabled={isProcessing}
                 rows={6}
-                className="min-h-30 resize-y"
+                className={`min-h-30 resize-y ${userContext.length > MAX_USER_CONTEXT_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
               />
               <div className="flex items-start justify-between gap-2 text-xs">
                 <div className="text-muted-foreground flex items-start gap-1.5">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                  <span>Do not include private or sensitive information.</span>
+                  <span>Do not include sensitive information.</span>
                 </div>
                 <span
-                  className={`shrink-0 font-mono ${
-                    getRemainingChars(userContext) < 100
-                      ? 'text-orange-600 dark:text-orange-400'
-                      : 'text-muted-foreground'
+                  className={`shrink-0 font-mono font-medium ${
+                    userContext.length > MAX_USER_CONTEXT_LENGTH
+                      ? 'text-red-600 dark:text-red-400'
+                      : getRemainingChars(userContext) < 100
+                        ? 'text-orange-600 dark:text-orange-400'
+                        : 'text-muted-foreground'
                   }`}
                 >
                   {userContext.length}

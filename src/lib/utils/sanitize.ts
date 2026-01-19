@@ -2,7 +2,7 @@
  * Input sanitization utilities for user-provided content
  */
 
-const MAX_USER_CONTEXT_LENGTH = 1000;
+const MAX_USER_CONTEXT_LENGTH = 3000;
 
 /**
  * List of suspicious patterns that might indicate prompt injection attempts

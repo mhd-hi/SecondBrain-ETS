@@ -13,6 +13,7 @@ export type ActionButtonsProps = {
   existingCourse: { id: string; code: string; name: string } | null;
   isCheckingExistence: boolean;
   courseCode: string;
+  userContext: string;
   isProcessing: boolean;
   parsedData: UseAddCourseReturn['parsedData'];
   createdCourseId: UseAddCourseReturn['createdCourseId'];

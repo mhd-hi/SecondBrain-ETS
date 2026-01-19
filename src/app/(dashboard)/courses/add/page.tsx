@@ -250,6 +250,7 @@ export default function AddCoursePage() {
             existingCourse={null}
             isCheckingExistence={false}
             courseCode={courseCode}
+            userContext={userContext}
             isProcessing={isProcessing}
             parsedData={parsedData}
             createdCourseId={createdCourseId}
