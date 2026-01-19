@@ -36,7 +36,8 @@ export function CourseInputForm({
   isProcessing,
   currentStep,
   onSubmit,
-}: AddCourseInputFormProps) {
+  showDaypartError = false,
+}: AddCourseInputFormProps & { showDaypartError?: boolean }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -135,7 +136,14 @@ export function CourseInputForm({
                   onValueChange={(v: Daypart | '') => setDaypart(v)}
                   disabled={isProcessing}
                 >
-                  <SelectTrigger aria-label="Daypart">
+                  <SelectTrigger
+                    aria-label="Daypart"
+                    className={
+                      showDaypartError && !daypart
+                        ? 'border-red-500 ring-2 ring-red-500'
+                        : ''
+                    }
+                  >
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
@@ -180,24 +188,7 @@ export function CourseInputForm({
                 id="userContext"
                 value={userContext}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (value.length <= MAX_USER_CONTEXT_LENGTH) {
-                    setUserContext(value);
-                  }
-                }}
-                onPaste={(e) => {
-                  const pasteData = e.clipboardData.getData('text');
-                  const newLength = userContext.length + pasteData.length;
-                  if (newLength > MAX_USER_CONTEXT_LENGTH) {
-                    e.preventDefault();
-                    // Calculate how much can fit
-                    const remainingSpace =
-                      MAX_USER_CONTEXT_LENGTH - userContext.length;
-                    if (remainingSpace > 0) {
-                      const truncatedPaste = pasteData.slice(0, remainingSpace);
-                      setUserContext(userContext + truncatedPaste);
-                    }
-                  }
+                  setUserContext(e.target.value);
                 }}
                 placeholder="Provide additional course details to help generate more complete tasks. The AI will create additional tasks based on your input (e.g., weekly quizzes, lab reports, projects not in the plan)..."
                 disabled={isProcessing}

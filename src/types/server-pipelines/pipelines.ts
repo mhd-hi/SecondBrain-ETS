@@ -21,14 +21,11 @@ export type PipelineResult = {
   steps: ProcessingStep[];
 };
 
-export type SupportedAIProvider = 'openai';
-
 export type PipelineStepRequest = {
   courseCode: string;
   term: string;
-  step: 'planets' | 'openai';
+  step: 'planets' | 'ai';
   htmlData?: string;
-  aiProvider?: SupportedAIProvider;
   userContext?: string;
 };
 

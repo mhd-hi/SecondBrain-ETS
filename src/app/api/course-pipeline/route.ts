@@ -3,17 +3,18 @@ import type {
   PipelineStepResult,
 } from '@/types/server-pipelines/pipelines';
 import { NextResponse } from 'next/server';
+import { runAIProvider } from '@/lib/ai';
 import { withAuthSimple } from '@/lib/auth/api';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { sanitizeUserInput, validateUserContext } from '@/lib/utils/sanitize';
-import { AIProcessorFactory, UniversityCourseDataSource } from '@/pipelines';
+import { UniversityCourseDataSource } from '@/pipelines';
 import { UNIVERSITY } from '@/types/university';
 
 // Endpoint for step-by-step course processing
 export const POST = withAuthSimple(async (request, _user) => {
   try {
     const body = (await request.json()) as PipelineStepRequest;
-    const { courseCode, term, step, htmlData, aiProvider, userContext } = body;
+    const { courseCode, term, step, htmlData, userContext } = body;
 
     if (!term) {
       return NextResponse.json(
@@ -114,11 +115,11 @@ export const POST = withAuthSimple(async (request, _user) => {
       }
     }
 
-    if (step === 'openai') {
+    if (step === 'ai') {
       if (!htmlData) {
         return NextResponse.json(
           {
-            error: 'Missing required parameter: htmlData for OpenAI processing',
+            error: 'Missing required parameter: htmlData for AI processing',
           },
           { status: 400 },
         );
@@ -127,39 +128,44 @@ export const POST = withAuthSimple(async (request, _user) => {
       try {
         const startTime = new Date().toISOString();
         console.log(
-          '[API] OpenAI step - User context:',
+          '[API] AI step - User context:',
           sanitizedContext
             ? `Present (${sanitizedContext.length} chars)`
             : 'Not provided',
         );
-        const aiProcessor =
-          await AIProcessorFactory.createProcessor(aiProvider);
-        const result = await aiProcessor.process(htmlData, sanitizedContext);
+        const result = await runAIProvider(htmlData, sanitizedContext);
         const endTime = new Date().toISOString();
-        const courseData = result.courseData;
+        const courseData = {
+          courseCode: cleanCode,
+          term,
+          tasks: result.tasks,
+        };
 
         return NextResponse.json({
           step: {
-            id: 'openai',
-            name: 'AI Content Parsing',
+            id: 'ai',
+            name: 'AI Processing',
             status: 'success',
             startTime,
             endTime,
-            data: { tasksCount: result.courseData.tasks.length },
+            data: {
+              contentLength: htmlData.length,
+              courseCode: cleanCode,
+              term,
+            },
           },
           data: courseData,
         } as PipelineStepResult);
       } catch (error) {
         const errorMessage =
           error instanceof Error
-            ? `Failed to parse course content with OpenAI: ${error.message}`
-            : 'Failed to parse course content with OpenAI';
-
+            ? `Failed to process with AI: ${error.message}`
+            : 'Failed to process with AI';
         return NextResponse.json(
           {
             step: {
-              id: 'openai',
-              name: 'AI Content Parsing',
+              id: 'ai',
+              name: 'AI Processing',
               status: 'error',
               error: errorMessage,
               endTime: new Date().toISOString(),
@@ -172,7 +178,7 @@ export const POST = withAuthSimple(async (request, _user) => {
     }
 
     return NextResponse.json(
-      { error: 'Invalid step parameter. Must be "planets" or "openai"' },
+      { error: 'Invalid step parameter. Must be "planets" or "ai"' },
       { status: 400 },
     );
   } catch (error) {

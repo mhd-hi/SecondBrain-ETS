@@ -3,7 +3,7 @@
 import type { Daypart } from '@/types/course';
 import { AlertCircle, NotebookText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from '@/components/shared/dialogs/ActionButtons';
 import { CourseInputForm } from '@/components/shared/dialogs/CourseInputForm';
@@ -16,6 +16,7 @@ import { useTerms } from '@/hooks/use-terms';
 import { getCoursePath, ROUTES } from '@/lib/routes';
 import { isValidCourseCode, normalizeCourseCode } from '@/lib/utils/course';
 import { PipelineErrorHandlers } from '@/lib/utils/errors/error';
+import { MAX_USER_CONTEXT_LENGTH } from '@/lib/utils/sanitize';
 import { getDatesForTerm, isValidTermId } from '@/lib/utils/term-util';
 import { DEFAULT_UNIVERSITY } from '@/types/university';
 
@@ -32,6 +33,7 @@ export default function AddCoursePage() {
   const [availableTerms, setAvailableTerms] = useState<
     Array<{ id: string; label: string }>
   >([]);
+  const [showDaypartError, setShowDaypartError] = useState(false);
 
   const {
     terms: _fetchedTerms,
@@ -50,17 +52,7 @@ export default function AddCoursePage() {
     isProcessing,
     startProcessing,
     retry,
-    reset,
   } = useAddCourse();
-
-  const resetForm = useCallback(() => {
-    setCourseCode('');
-    setFirstDayOfClass(undefined);
-    setDaypart('');
-    setUniversity(DEFAULT_UNIVERSITY);
-    setUserContext('');
-    reset();
-  }, [reset]);
 
   // Fetch terms on mount
   useEffect(() => {
@@ -108,6 +100,13 @@ export default function AddCoursePage() {
       return;
     }
 
+    if (userContext.length > MAX_USER_CONTEXT_LENGTH) {
+      toast.error(
+        `User context is too long. Please reduce to ${MAX_USER_CONTEXT_LENGTH} characters or less.`,
+      );
+      return;
+    }
+
     const cleanCode = normalizeCourseCode(courseCode);
 
     // Validate course code format
@@ -129,9 +128,11 @@ export default function AddCoursePage() {
     }
 
     if (!daypart) {
-      toast.error('Please select a daypart for the lecture.');
+      toast.error('Please select a daypart for the first day of class.');
+      setShowDaypartError(true);
       return;
     }
+    setShowDaypartError(false);
 
     let termToUse = term;
     if (!isValidTermId(termToUse)) {
@@ -158,10 +159,6 @@ export default function AddCoursePage() {
 
   const handleRetry = () => {
     retry();
-  };
-
-  const handleTryDifferentCourse = () => {
-    resetForm();
   };
 
   const handleGoToCourse = () => {
@@ -205,6 +202,7 @@ export default function AddCoursePage() {
           setUserContext={setUserContext}
           isProcessing={isProcessing}
           currentStep={currentStep}
+          showDaypartError={showDaypartError}
           onSubmit={handleStartParsing}
         />
 
@@ -256,7 +254,6 @@ export default function AddCoursePage() {
             createdCourseId={createdCourseId}
             onStartParsing={handleStartParsing}
             onRetry={handleRetry}
-            onTryDifferentCourse={handleTryDifferentCourse}
             onGoToExistingCourse={() => {}}
             onDialogClose={handleCancel}
             onGoToCourse={handleGoToCourse}

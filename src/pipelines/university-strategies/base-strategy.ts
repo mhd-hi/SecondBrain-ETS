@@ -2,14 +2,7 @@
  * Base strategy interface for university-specific course data fetching
  */
 export type UniversityDataStrategy = {
-  /**
-   * Unique identifier for the university
-   */
-  readonly universityId: string;
-
-  /**
-   * Display name of the university
-   */
+  readonly id: string;
   readonly name: string;
 
   /**

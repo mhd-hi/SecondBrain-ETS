@@ -1,27 +1,22 @@
 import type { ActionButtonsProps } from '@/types/dialog/add-course-dialog';
 import { Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MAX_USER_CONTEXT_LENGTH } from '@/lib/utils/sanitize';
 
 export function ActionButtons({
   currentStep,
   existingCourse,
   isCheckingExistence,
   courseCode,
-  userContext,
   isProcessing,
-  parsedData,
   createdCourseId,
   onStartParsing,
   onRetry,
-  onTryDifferentCourse,
   onGoToExistingCourse,
   onDialogClose,
   onGoToCourse,
 }: ActionButtonsProps) {
   // Idle state without existing course - show Cancel and Add Course buttons
   if (currentStep === 'idle' && !existingCourse) {
-    const isUserContextInvalid = userContext.length > MAX_USER_CONTEXT_LENGTH;
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>
@@ -29,9 +24,8 @@ export function ActionButtons({
         </Button>
         <Button
           onClick={onStartParsing}
-          disabled={
-            !courseCode.trim() || isCheckingExistence || isUserContextInvalid
-          }
+          // No longer disable for userContext over limit
+          disabled={!courseCode.trim() || isCheckingExistence}
         >
           {isCheckingExistence
 ? (
@@ -51,22 +45,19 @@ export function ActionButtons({
     );
   }
 
-  // Idle state with existing course - show Cancel, Try Different Course, and Go to Course buttons
+  // Idle state with existing course - show Cancel, and Go to Course buttons
   if (currentStep === 'idle' && existingCourse) {
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button variant="outline" onClick={onTryDifferentCourse}>
-          Try Different Course
-        </Button>
         <Button onClick={onGoToExistingCourse}>Go to Course</Button>
       </div>
     );
   }
 
-  // Error state - show Cancel, Retry, and Try Different Course buttons
+  // Error state
   if (currentStep === 'error') {
     return (
       <div className="flex justify-end gap-2">
@@ -77,15 +68,12 @@ export function ActionButtons({
           <RefreshCw className="mr-2 h-4 w-4" />
           Retry
         </Button>
-        <Button variant="outline" onClick={onTryDifferentCourse}>
-          Try Different Course
-        </Button>
       </div>
     );
   }
 
   // Completed state - show Cancel and Go to Course buttons
-  if (currentStep === 'completed' && parsedData && createdCourseId) {
+  if (currentStep === 'completed' && createdCourseId) {
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>

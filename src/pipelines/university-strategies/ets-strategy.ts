@@ -10,7 +10,7 @@ import { CourseDataFetchError } from './base-strategy';
  * Uses the PlanETS system
  */
 export class ETSStrategy implements UniversityDataStrategy {
-  readonly universityId = UNIVERSITY.ETS;
+  readonly id = UNIVERSITY.ETS;
   readonly name = 'ÉTS';
 
   public async fetchCourseContent(
@@ -24,7 +24,7 @@ export class ETSStrategy implements UniversityDataStrategy {
       if (!htmlResponse.ok) {
         throw new CourseDataFetchError(
           `Failed to fetch course data: ${htmlResponse.status} ${htmlResponse.statusText}`,
-          this.universityId,
+          this.id,
           courseCode,
         );
       }
@@ -41,7 +41,7 @@ export class ETSStrategy implements UniversityDataStrategy {
       }
       throw new CourseDataFetchError(
         `Network error fetching course data: ${error instanceof Error ? error.message : String(error)}`,
-        this.universityId,
+        this.id,
         courseCode,
         error,
       );
@@ -52,7 +52,7 @@ export class ETSStrategy implements UniversityDataStrategy {
     if (!html || html.trim().length < 100) {
       throw new CourseDataFetchError(
         'Course data appears to be empty or invalid',
-        this.universityId,
+        this.id,
         'unknown',
       );
     }
@@ -66,7 +66,7 @@ export class ETSStrategy implements UniversityDataStrategy {
     if (!contentDiv.length) {
       throw new CourseDataFetchError(
         'Content div not found in PlanETS page',
-        this.universityId,
+        this.id,
         'unknown',
       );
     }
@@ -75,7 +75,7 @@ export class ETSStrategy implements UniversityDataStrategy {
     if (!relevantHtml) {
       throw new CourseDataFetchError(
         'No HTML content found in course page',
-        this.universityId,
+        this.id,
         'unknown',
       );
     }

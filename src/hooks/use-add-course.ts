@@ -17,10 +17,10 @@ import {
 } from '@/hooks/add-course-pipeline';
 import { checkCourseExists } from '@/hooks/use-course';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
+import { normalizeTasks } from '@/lib/ai';
 import { api } from '@/lib/utils/api/api-client-util';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
-import normalizeTasks from '@/pipelines/add-course-data/steps/ai/normalize';
 import { UNIVERSITY } from '@/types/university';
 
 export type UseAddCourseReturn = {
@@ -89,7 +89,7 @@ async function parseCourseWithAI(
     body: JSON.stringify({
       courseCode: cleanCode,
       term,
-      step: 'openai',
+      step: 'ai',
       htmlData: html,
       userContext,
     }),
@@ -97,7 +97,7 @@ async function parseCourseWithAI(
 
   if (!response.ok) {
     const errorData = (await response.json()) as { error?: string };
-    throw new Error(errorData.error ?? 'Failed to process with OpenAI');
+    throw new Error(errorData.error ?? 'Failed to process with AI');
   }
 
   const result = (await response.json()) as PipelineStepResult;
@@ -248,7 +248,7 @@ export function useAddCourse(): UseAddCourseReturn {
           term,
           userContext,
         );
-        dispatch({ type: 'OPENAI_SUCCESS', data: aiData });
+        dispatch({ type: 'AI_SUCCESS', data: aiData });
 
         const course = await createCourse(
           courseCode.trim(),
