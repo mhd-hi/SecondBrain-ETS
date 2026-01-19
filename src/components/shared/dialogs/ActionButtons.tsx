@@ -1,6 +1,26 @@
 import type { ActionButtonsProps } from '@/types/dialog/add-course-dialog';
-import { Loader2, Plus, RefreshCw } from 'lucide-react';
+import { Link as LinkIcon, Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+function GoToCourseActions({
+  onCancel,
+  onGoToCourse,
+}: {
+  onCancel: () => void;
+  onGoToCourse: () => void;
+}) {
+  return (
+    <div className="flex justify-end gap-2">
+      <Button variant="outline" onClick={onCancel}>
+        Cancel
+      </Button>
+      <Button onClick={onGoToCourse}>
+        <LinkIcon className="mr-2 h-4 w-4" />
+        Go to Course
+      </Button>
+    </div>
+  );
+}
 
 export function ActionButtons({
   currentStep,
@@ -11,7 +31,6 @@ export function ActionButtons({
   createdCourseId,
   onStartParsing,
   onRetry,
-  onGoToExistingCourse,
   onDialogClose,
   onGoToCourse,
 }: ActionButtonsProps) {
@@ -45,14 +64,13 @@ export function ActionButtons({
     );
   }
 
-  // Idle state with existing course - show Cancel, and Go to Course buttons
+  // Idle state with existing course - show only Cancel button
   if (currentStep === 'idle' && existingCourse) {
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button onClick={onGoToExistingCourse}>Go to Course</Button>
       </div>
     );
   }
@@ -75,12 +93,10 @@ export function ActionButtons({
   // Completed state - show Cancel and Go to Course buttons
   if (currentStep === 'completed' && createdCourseId) {
     return (
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => onDialogClose(false)}>
-          Cancel
-        </Button>
-        <Button onClick={onGoToCourse}>Go to Course</Button>
-      </div>
+      <GoToCourseActions
+        onCancel={() => onDialogClose(false)}
+        onGoToCourse={onGoToCourse}
+      />
     );
   }
 

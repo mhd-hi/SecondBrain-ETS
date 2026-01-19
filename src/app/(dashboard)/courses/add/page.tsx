@@ -9,7 +9,6 @@ import { ActionButtons } from '@/components/shared/dialogs/ActionButtons';
 import { CourseInputForm } from '@/components/shared/dialogs/CourseInputForm';
 import { ProcessingSteps } from '@/components/shared/dialogs/ProcessingSteps';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { useAddCourse } from '@/hooks/use-add-course';
 import { useCourses } from '@/hooks/use-course-store';
 import { useTerms } from '@/hooks/use-terms';
@@ -234,15 +233,6 @@ export default function AddCoursePage() {
 
         {/* Action Buttons */}
         <div className="flex justify-end gap-2">
-          {currentStep === 'idle' && (
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isProcessing}
-            >
-              Cancel
-            </Button>
-          )}
           <ActionButtons
             currentStep={currentStep}
             existingCourse={null}
@@ -254,7 +244,6 @@ export default function AddCoursePage() {
             createdCourseId={createdCourseId}
             onStartParsing={handleStartParsing}
             onRetry={handleRetry}
-            onGoToExistingCourse={() => {}}
             onDialogClose={handleCancel}
             onGoToCourse={handleGoToCourse}
           />

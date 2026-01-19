@@ -19,7 +19,6 @@ export type ActionButtonsProps = {
   createdCourseId: UseAddCourseReturn['createdCourseId'];
   onStartParsing: () => Promise<void>;
   onRetry: () => void;
-  onGoToExistingCourse: () => void;
   onDialogClose: (open: boolean) => void;
   onGoToCourse: () => void;
 };

@@ -38,8 +38,6 @@ export async function parseContentWithAI(
       'characters',
     );
     console.log('User context content:', userContext);
-  } else {
-    console.log('No user context provided');
   }
 
   try {
