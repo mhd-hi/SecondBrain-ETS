@@ -1,8 +1,8 @@
 import type { CourseAIResponse } from '@/types/api/ai';
 
 export type StepStatus = {
-  planets: 'pending' | 'loading' | 'success' | 'error' | 'skipped';
-  ai: 'pending' | 'loading' | 'success' | 'error' | 'skipped';
+  'planets': 'pending' | 'loading' | 'success' | 'error' | 'skipped';
+  'ai': 'pending' | 'loading' | 'success' | 'error' | 'skipped';
   'create-course': 'pending' | 'loading' | 'success' | 'error' | 'skipped';
   'create-tasks': 'pending' | 'loading' | 'success' | 'error' | 'skipped';
 };
