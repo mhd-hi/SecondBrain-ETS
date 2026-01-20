@@ -13,7 +13,10 @@ export async function runAIProvider(
   userContext?: string,
   provider: AIProviderName = ACTIVE_PROVIDER,
 ) {
-  const fn = aiProviders[provider];
+  // Validate the provider key before accessing aiProviders to prevent prototype pollution
+  const fn = Object.prototype.hasOwnProperty.call(aiProviders, provider)
+    ? aiProviders[provider]
+    : undefined;
   if (!fn) {
     throw new Error(`Unknown AI provider: ${provider}`);
   }
