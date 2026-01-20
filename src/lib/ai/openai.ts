@@ -1,4 +1,5 @@
 import type { AITask } from '@/types/api/ai';
+import * as Sentry from '@/lib/sentry-utils';
 import { callOpenAI } from './call';
 import { extractJsonArrayFromText } from './parse';
 import {
@@ -15,6 +16,20 @@ export async function parseContentWithAI(
   userContext?: string,
 ): Promise<ParseAIResult> {
   const prompt = buildCoursePlanParsePrompt(html, userContext);
+  Sentry.logger.info('Reporting OpenAI payload to Sentry', {
+    htmlLength: html.length,
+    userContextLength: userContext?.length ?? 0,
+    userContextPreview: userContext?.slice(0, 500) ?? '',
+    promptLength: prompt.length,
+  });
+  Sentry.captureException(new Error('OpenAI payload sent'), {
+    htmlLength: html.length,
+    userContextLength: userContext?.length ?? 0,
+    userContextPreview: userContext?.slice(0, 500) ?? '',
+    promptLength: prompt.length,
+    promptPreview: prompt.slice(0, 500),
+  });
+
   console.log('Built prompt. Length:', prompt.length, 'characters');
   if (userContext) {
     console.log(
@@ -23,8 +38,6 @@ export async function parseContentWithAI(
       'characters',
     );
     console.log('User context content:', userContext);
-  } else {
-    console.log('No user context provided');
   }
 
   try {

@@ -43,7 +43,7 @@ jobs:
         run: bun audit
 
   typecheck:
-    name: Type Check
+    name: Type Check & Build
     runs-on: ubuntu-latest
 
     steps:
@@ -57,6 +57,10 @@ jobs:
         run: bun install
       - name: Run typecheck
         run: bun run typecheck
+      - name: Use .env.example as .env
+        run: cp .env.example .env
+      - name: Run build
+        run: bun run build
 
   test:
     name: Tests
@@ -78,6 +82,11 @@ jobs:
   test-db-migration-build:
     name: Test DB Migration
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.changed_files.*.filename, 'drizzle/') ||
+      contains(github.event.pull_request.changed_files.*.filename, 'src/server/db/schema.ts') ||
+      contains(github.event.pull_request.changed_files.*.filename, 'drizzle.config.ts')
     services:
       postgres:
         image: postgres:15

@@ -19,7 +19,7 @@ export function ProcessingSteps({
     if (stepName === 'planets') {
       return '/assets/logo_planets.png';
     }
-    if (stepName === 'openai') {
+    if (stepName === 'ai') {
       return '/assets/logo_openai.png';
     }
     if (stepName === 'create-course') {
@@ -35,7 +35,7 @@ export function ProcessingSteps({
     if (stepName === 'planets') {
       return 'Fetch Course Data';
     }
-    if (stepName === 'openai') {
+    if (stepName === 'ai') {
       return 'Parse with AI';
     }
     if (stepName === 'create-course') {
@@ -52,8 +52,8 @@ export function ProcessingSteps({
     const label = getStepLabel(stepName);
     const status = stepStatus[stepName];
 
-    const isDatabaseStep
-      = stepName === 'create-course' || stepName === 'create-tasks';
+    const isDatabaseStep =
+      stepName === 'create-course' || stepName === 'create-tasks';
 
     return (
       <div
@@ -128,7 +128,7 @@ export function ProcessingSteps({
     <div className="space-y-3">
       <div className="text-sm font-medium">Processing steps:</div>
       {renderStepIndicator('planets')}
-      {renderStepIndicator('openai')}
+      {renderStepIndicator('ai')}
       {renderStepIndicator('create-course')}
       {renderStepIndicator('create-tasks')}
     </div>

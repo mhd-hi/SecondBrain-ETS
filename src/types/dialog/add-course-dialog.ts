@@ -1,7 +1,7 @@
 import type { UseAddCourseReturn } from '@/hooks/use-add-course';
 import type { Daypart } from '@/types/course';
 
-export type StepName = 'planets' | 'openai' | 'create-course' | 'create-tasks';
+export type StepName = 'planets' | 'ai' | 'create-course' | 'create-tasks';
 
 export type ProcessingStepsProps = {
   currentStep: UseAddCourseReturn['currentStep'];
@@ -13,13 +13,12 @@ export type ActionButtonsProps = {
   existingCourse: { id: string; code: string; name: string } | null;
   isCheckingExistence: boolean;
   courseCode: string;
+  userContext: string;
   isProcessing: boolean;
   parsedData: UseAddCourseReturn['parsedData'];
   createdCourseId: UseAddCourseReturn['createdCourseId'];
   onStartParsing: () => Promise<void>;
   onRetry: () => void;
-  onTryDifferentCourse: () => void;
-  onGoToExistingCourse: () => void;
   onDialogClose: (open: boolean) => void;
   onGoToCourse: () => void;
 };

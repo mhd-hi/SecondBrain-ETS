@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { deleteCourseById } from '@/hooks/use-course';
 import { useCourses } from '@/hooks/use-course-store';
 import { getAddCoursePath } from '@/lib/routes';
-import { handleApiSuccess } from '@/lib/utils';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/errors/error';
 
@@ -24,7 +23,6 @@ export function CourseListTile() {
         try {
           await deleteCourseById(courseId);
           await refreshCourses();
-          handleApiSuccess('Course deleted successfully');
         } catch (error) {
           ErrorHandlers.api(
             error,

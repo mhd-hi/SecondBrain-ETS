@@ -1,6 +1,26 @@
 import type { ActionButtonsProps } from '@/types/dialog/add-course-dialog';
-import { Loader2, Plus, RefreshCw } from 'lucide-react';
+import { Link as LinkIcon, Loader2, Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+function GoToCourseActions({
+  onCancel,
+  onGoToCourse,
+}: {
+  onCancel: () => void;
+  onGoToCourse: () => void;
+}) {
+  return (
+    <div className="flex justify-end gap-2">
+      <Button variant="outline" onClick={onCancel}>
+        Cancel
+      </Button>
+      <Button onClick={onGoToCourse}>
+        <LinkIcon className="mr-2 h-4 w-4" />
+        Go to Course
+      </Button>
+    </div>
+  );
+}
 
 export function ActionButtons({
   currentStep,
@@ -8,12 +28,9 @@ export function ActionButtons({
   isCheckingExistence,
   courseCode,
   isProcessing,
-  parsedData,
   createdCourseId,
   onStartParsing,
   onRetry,
-  onTryDifferentCourse,
-  onGoToExistingCourse,
   onDialogClose,
   onGoToCourse,
 }: ActionButtonsProps) {
@@ -24,43 +41,41 @@ export function ActionButtons({
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button onClick={onStartParsing} disabled={!courseCode.trim() || isCheckingExistence}>
+        <Button
+          onClick={onStartParsing}
+          // No longer disable for userContext over limit
+          disabled={!courseCode.trim() || isCheckingExistence}
+        >
           {isCheckingExistence
-            ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Checking...
-              </>
-            )
-            : (
-              <>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Course
-              </>
-            )}
+? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Checking...
+            </>
+          )
+: (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Course
+            </>
+          )}
         </Button>
       </div>
     );
   }
 
-  // Idle state with existing course - show Cancel, Try Different Course, and Go to Course buttons
+  // Idle state with existing course - show only Cancel button
   if (currentStep === 'idle' && existingCourse) {
     return (
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => onDialogClose(false)}>
           Cancel
         </Button>
-        <Button variant="outline" onClick={onTryDifferentCourse}>
-          Try Different Course
-        </Button>
-        <Button onClick={onGoToExistingCourse}>
-          Go to Course
-        </Button>
       </div>
     );
   }
 
-  // Error state - show Cancel, Retry, and Try Different Course buttons
+  // Error state
   if (currentStep === 'error') {
     return (
       <div className="flex justify-end gap-2">
@@ -68,27 +83,20 @@ export function ActionButtons({
           Cancel
         </Button>
         <Button variant="outline" onClick={onRetry}>
-          <RefreshCw className="h-4 w-4 mr-2" />
+          <RefreshCw className="mr-2 h-4 w-4" />
           Retry
-        </Button>
-        <Button variant="outline" onClick={onTryDifferentCourse}>
-          Try Different Course
         </Button>
       </div>
     );
   }
 
   // Completed state - show Cancel and Go to Course buttons
-  if (currentStep === 'completed' && parsedData && createdCourseId) {
+  if (currentStep === 'completed' && createdCourseId) {
     return (
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => onDialogClose(false)}>
-          Cancel
-        </Button>
-        <Button onClick={onGoToCourse}>
-          Go to Course
-        </Button>
-      </div>
+      <GoToCourseActions
+        onCancel={() => onDialogClose(false)}
+        onGoToCourse={onGoToCourse}
+      />
     );
   }
 
@@ -97,7 +105,7 @@ export function ActionButtons({
     return (
       <div className="flex justify-end gap-2">
         <Button disabled>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Processing...
         </Button>
       </div>

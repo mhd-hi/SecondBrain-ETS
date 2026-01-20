@@ -49,5 +49,3 @@ export function normalizeTasks(
     return task;
   });
 }
-
-export default normalizeTasks;

@@ -7,7 +7,7 @@ export function deriveStepStatus(state: PipelineState): StepStatus {
 
   const status: StepStatus = {
     'planets': 'pending',
-    'openai': 'pending',
+    'ai': 'pending',
     'create-course': 'pending',
     'create-tasks': 'pending',
   };
@@ -21,40 +21,40 @@ export function deriveStepStatus(state: PipelineState): StepStatus {
       status.planets = 'loading';
       break;
 
-    case 'openai-loading':
+    case 'ai-loading':
       status.planets = 'success';
-      status.openai = 'loading';
+      status.ai = 'loading';
       break;
 
     case 'create-course-loading':
       status.planets = 'success';
-      status.openai = 'success';
+      status.ai = 'success';
       status['create-course'] = 'loading';
       break;
 
     case 'create-tasks-loading':
       status.planets = 'success';
-      status.openai = 'success';
+      status.ai = 'success';
       status['create-course'] = 'success';
       status['create-tasks'] = 'loading';
       break;
 
     case 'completed':
       status.planets = 'success';
-      status.openai = 'success';
+      status.ai = 'success';
       status['create-course'] = 'success';
       status['create-tasks'] = 'success';
       break;
 
     case 'skipped-pipeline-course-loading':
       status.planets = 'skipped';
-      status.openai = 'skipped';
+      status.ai = 'skipped';
       status['create-course'] = 'loading';
       break;
 
     case 'skipped-pipeline-completed':
       status.planets = 'skipped';
-      status.openai = 'skipped';
+      status.ai = 'skipped';
       status['create-course'] = 'success';
       status['create-tasks'] = 'skipped';
       break;
@@ -70,8 +70,8 @@ export function deriveCurrentStep(state: PipelineState): string {
       return 'idle';
     case 'planets-loading':
       return 'planets';
-    case 'openai-loading':
-      return 'openai';
+    case 'ai-loading':
+      return 'ai';
     case 'create-course-loading':
     case 'skipped-pipeline-course-loading':
       return 'create-course';
@@ -88,7 +88,7 @@ export function deriveCurrentStep(state: PipelineState): string {
 export function deriveIsProcessing(state: PipelineState): boolean {
   return (
     state.phase === 'planets-loading' ||
-    state.phase === 'openai-loading' ||
+    state.phase === 'ai-loading' ||
     state.phase === 'create-course-loading' ||
     state.phase === 'create-tasks-loading' ||
     state.phase === 'skipped-pipeline-course-loading'

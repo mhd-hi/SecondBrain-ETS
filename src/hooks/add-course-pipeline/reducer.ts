@@ -3,7 +3,7 @@ import type { PipelineAction, PipelineState, StepStatus } from './types';
 function deriveStepStatusFromError(failedPhase: string): StepStatus {
   const status: StepStatus = {
     'planets': 'pending',
-    'openai': 'pending',
+    'ai': 'pending',
     'create-course': 'pending',
     'create-tasks': 'pending',
   };
@@ -11,13 +11,13 @@ function deriveStepStatusFromError(failedPhase: string): StepStatus {
   switch (failedPhase) {
     case 'planets-loading':
       status.planets = 'error';
-      status.openai = 'skipped';
+      status.ai = 'skipped';
       status['create-course'] = 'skipped';
       status['create-tasks'] = 'skipped';
       break;
-    case 'openai-loading':
+    case 'ai-loading':
       status.planets = 'success';
-      status.openai = 'error';
+      status.ai = 'error';
       status['create-course'] = 'skipped';
       status['create-tasks'] = 'skipped';
       break;
@@ -25,14 +25,14 @@ function deriveStepStatusFromError(failedPhase: string): StepStatus {
     case 'skipped-pipeline-course-loading':
       status.planets =
         failedPhase === 'create-course-loading' ? 'success' : 'skipped';
-      status.openai =
+      status.ai =
         failedPhase === 'create-course-loading' ? 'success' : 'skipped';
       status['create-course'] = 'error';
       status['create-tasks'] = 'skipped';
       break;
     case 'create-tasks-loading':
       status.planets = 'success';
-      status.openai = 'success';
+      status.ai = 'success';
       status['create-course'] = 'success';
       status['create-tasks'] = 'error';
       break;
@@ -56,10 +56,10 @@ export function pipelineReducer(
       return { phase: 'skipped-pipeline-course-loading' };
 
     case 'PLANETS_SUCCESS':
-      return { phase: 'openai-loading', planetsData: action.data };
+      return { phase: 'ai-loading', planetsData: action.data };
 
-    case 'OPENAI_SUCCESS':
-      if (state.phase !== 'openai-loading') {
+    case 'AI_SUCCESS':
+      if (state.phase !== 'ai-loading') {
         return state;
       }
       return { phase: 'create-course-loading', aiData: action.data };
