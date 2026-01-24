@@ -1,39 +1,13 @@
-import type { TCalendarCell, TCalendarView, TEvent, TVisibleHours } from '@/calendar/types';
+import type { TCalendarCell, TEvent, TVisibleHours } from '@/calendar/types';
 
 import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
   differenceInMinutes,
   isWithinInterval,
-  subDays,
-  subMonths,
-  subWeeks,
-  subYears,
 } from 'date-fns';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { VISIBLE_HOURS } from '@/lib/calendar/constants';
 
-export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
-  switch (view) {
-    case 'agenda':
-      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
-    case 'year':
-      return direction === 'next' ? addYears(date, 1) : subYears(date, 1);
-    case 'month':
-      return direction === 'next' ? addMonths(date, 1) : subMonths(date, 1);
-    case 'week':
-      return direction === 'next' ? addWeeks(date, 1) : subWeeks(date, 1);
-    case 'day':
-      return direction === 'next' ? addDays(date, 1) : subDays(date, 1);
-    default:
-      return date;
-  }
-}
-
 // ================ Week and day view helper functions ================ //
-
 export function getCurrentEvents(events: TEvent[]) {
   const now = new Date();
   return events.filter(event => isWithinInterval(now, { start: getEventStart(event), end: getEventEnd(event) })) || null;

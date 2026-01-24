@@ -2,7 +2,7 @@
 
 import { ErrorHandlers } from '@/lib/utils/errors/error';
 
-export const validateApiResponse = async <T>(response: Response): Promise<T> => {
+const validateApiResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`API request failed: ${response.status} ${response.statusText}. ${errorText}`);

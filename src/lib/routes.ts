@@ -7,7 +7,6 @@ export const ROUTES = {
   ROADMAP: '/roadmap',
   PREFERENCES: '/preferences',
   SIGNIN: '/api/auth/signin',
-  DAY_VIEW: '/day-view',
 } as const;
 
 // Route builder helpers
@@ -18,5 +17,3 @@ export const getPomodoroPath = (taskId?: string | number) =>
 export const getCalendarPath = (view?: string) => (view ? `${ROUTES.CALENDAR}?view=${view}` : ROUTES.CALENDAR);
 export const getPreferencesPath = (view?: 'profile' | 'pomodoro') =>
   view ? `${ROUTES.PREFERENCES}?view=${view}` : ROUTES.PREFERENCES;
-export const getDayViewPath = () => ROUTES.DAY_VIEW;
-export const getDashboardPath = () => ROUTES.DASHBOARD;

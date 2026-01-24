@@ -7,7 +7,7 @@ import { DroppableDayCell } from '@/calendar/components/dnd/droppable-day-cell';
 
 import { EventBullet } from '@/calendar/components/month-view/event-bullet';
 import { MonthEventBadge } from '@/calendar/components/month-view/month-event-badge';
-import { getDayViewPath } from '@/lib/routes';
+import { getCalendarPath } from '@/lib/routes';
 
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
@@ -34,7 +34,7 @@ export function DayCell({ cell, events }: IProps) {
 
   const handleClick = () => {
     setSelectedDate(date);
-    push(getDayViewPath());
+    push(getCalendarPath());
   };
 
   return (
