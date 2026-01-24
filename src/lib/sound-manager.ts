@@ -56,6 +56,14 @@ function isClient() {
   return typeof window !== 'undefined';
 }
 
+// Prevent Howler from auto-suspending the AudioContext in client environments
+if (isClient()) {
+  // Howler types may not include these properties
+  const howlerExt = Howler as unknown as { autoSuspend?: boolean; autoUnlock?: boolean };
+  howlerExt.autoSuspend = false;
+  howlerExt.autoUnlock = true;
+}
+
 /**
  * Notify all listeners when ready state changes
  */

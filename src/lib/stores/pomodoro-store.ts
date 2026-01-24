@@ -30,6 +30,7 @@ type PomodoroStore = {
   pomodoroStage: PomodoroStage;
   isPomodoroActive: boolean;
   isRunning: boolean;
+  endsAtMs: number | null;
   timeLeftSec: number;
   totalTimeSec: number;
   sessionDurations: SessionDurations;
@@ -37,7 +38,7 @@ type PomodoroStore = {
   streak: number;
   isLoaded: boolean;
 
-  startPomodoro: (task: Task | null, duration?: number, autoStart?: boolean) => void;
+  startPomodoro: (task: Task | null, duration?: number, autoStart?: boolean, userGesture?: boolean) => void;
   toggleTimer: () => void;
   stopPomodoro: () => void;
   addFiveMinutes: () => void;
@@ -56,278 +57,333 @@ type PomodoroStore = {
 };
 
 // Timer interval stored outside the store to avoid reactivity issues
-let timerIntervalId: NodeJS.Timeout | null = null;
+let timerIntervalId: ReturnType<typeof setInterval> | null = null;
+// Completion timeout stored at module scope for HMR/test robustness
+let completionTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
 export const usePomodoroStore = create<PomodoroStore>()(
   persist(
-    (set, get) => ({
-      currentTask: null,
-      pomodoroStage: 'work',
-      isPomodoroActive: false,
-      isRunning: false,
-      timeLeftSec: DEFAULT_WORK_DURATION * 60,
-      totalTimeSec: DEFAULT_WORK_DURATION * 60,
-      sessionDurations: {
-        work: DEFAULT_WORK_DURATION,
-        shortBreak: DEFAULT_SHORT_BREAK_DURATION,
-        longBreak: DEFAULT_LONG_BREAK_DURATION,
-      },
-      settings: {
-        soundVolume: DEFAULT_SOUND_VOLUME,
-        notificationSound: SOUND_DEFAULT_STORAGE,
-      },
-      streak: 0,
-      isLoaded: true,
-
-      startPomodoro: (task, duration, autoStart = false) => {
-        const state = get();
-        const workDuration = duration || state.sessionDurations.work;
-
-        // Update session durations if custom duration provided
-        const newSessionDurations = duration
-          ? { ...state.sessionDurations, work: duration }
-          : state.sessionDurations;
-
-        const durationInSeconds = workDuration * 60;
-
-        set({
-          currentTask: task,
-          pomodoroStage: 'work',
-          sessionDurations: newSessionDurations,
-          timeLeftSec: durationInSeconds,
-          totalTimeSec: durationInSeconds,
-          isPomodoroActive: true,
-          isRunning: autoStart,
-        });
-
-        if (autoStart) {
-          get().startTimerInterval();
+    (set, get) => {
+      function clearCompletionTimeout() {
+        if (completionTimeoutId) {
+          clearTimeout(completionTimeoutId);
+          completionTimeoutId = null;
         }
-      },
+      }
 
-      toggleTimer: () => {
-        const state = get();
+      function scheduleCompletionTimeout(endsAtMs: number) {
+        clearCompletionTimeout();
+        const delay = Math.max(0, endsAtMs - Date.now());
+        completionTimeoutId = setTimeout(() => {
+          get().tick();
+        }, delay);
+      }
 
-        // Ensure session is active when starting timer
-        if (!state.isPomodoroActive) {
-          set({ isPomodoroActive: true });
-        }
+      return {
+        currentTask: null,
+        pomodoroStage: 'work',
+        isPomodoroActive: false,
+        isRunning: false,
+        endsAtMs: null,
+        timeLeftSec: DEFAULT_WORK_DURATION * 60,
+        totalTimeSec: DEFAULT_WORK_DURATION * 60,
+        sessionDurations: {
+          work: DEFAULT_WORK_DURATION,
+          shortBreak: DEFAULT_SHORT_BREAK_DURATION,
+          longBreak: DEFAULT_LONG_BREAK_DURATION,
+        },
+        settings: {
+          soundVolume: DEFAULT_SOUND_VOLUME,
+          notificationSound: SOUND_DEFAULT_STORAGE,
+        },
+        streak: 0,
+        isLoaded: true,
 
-        // Unlock audio context and preload sounds on first timer start
-        if (typeof window !== 'undefined' && !soundManager.isReady()) {
-          soundManager.init();
-        }
-
-        const newIsRunning = !state.isRunning;
-        set({ isRunning: newIsRunning });
-
-        // Start or stop interval based on new state
-        if (newIsRunning) {
-          get().startTimerInterval();
-        } else {
+        startPomodoro: (task, duration, autoStart = false, userGesture = false) => {
+          // Prevent overlapping timers from previous runs
           get().stopTimerInterval();
-        }
-      },
+          clearCompletionTimeout();
 
-      stopPomodoro: () => {
-        const state = get();
+          const state = get();
+          const workDuration = duration ?? state.sessionDurations.work;
+          const durationInSeconds = workDuration * 60;
 
-        // Stop timer interval
-        get().stopTimerInterval();
+          // Only actually auto-start if caller explicitly marks this as a user gesture.
+          // This prevents programmatic auto-starts from relying on unlocked audio.
+          const shouldAutoStart = autoStart && userGesture;
 
-        const durationInSeconds = state.sessionDurations.work * 60;
+          const endsAt = shouldAutoStart ? Date.now() + durationInSeconds * 1000 : null;
 
-        set({
-          isRunning: false,
-          isPomodoroActive: false,
-          currentTask: null,
-          pomodoroStage: 'work',
-          timeLeftSec: durationInSeconds,
-          totalTimeSec: durationInSeconds,
-        });
-      },
-
-      addFiveMinutes: () => {
-        set(state => ({
-          timeLeftSec: state.timeLeftSec + 5 * 60,
-          totalTimeSec: state.totalTimeSec + 5 * 60,
-        }));
-      },
-
-      switchToPomodoroStage: (newPomodoroStage) => {
-        const state = get();
-        if (!Object.hasOwn(state.sessionDurations, newPomodoroStage)) {
-          console.error('Invalid pomodoro stage:', newPomodoroStage);
-          return;
-        }
-        const duration = state.sessionDurations[newPomodoroStage];
-        const durationInSeconds = duration * 60;
-
-        set({
-          pomodoroStage: newPomodoroStage,
-          timeLeftSec: durationInSeconds,
-          totalTimeSec: durationInSeconds,
-          isRunning: false,
-          isPomodoroActive: true,
-        });
-      },
-
-      updateDuration: (newDuration) => {
-        const state = get();
-
-        // Update the duration for the current session type
-        const newSessionDurations = {
-          ...state.sessionDurations,
-          [state.pomodoroStage]: newDuration,
-        };
-
-        set({ sessionDurations: newSessionDurations });
-
-        // If not running, update the timer
-        if (!state.isRunning) {
-          const durationInSeconds = newDuration * 60;
           set({
+            currentTask: task,
+            pomodoroStage: 'work',
+            sessionDurations: duration ? { ...state.sessionDurations, work: duration } : state.sessionDurations,
+            timeLeftSec: durationInSeconds,
+            totalTimeSec: durationInSeconds,
+            isPomodoroActive: true,
+            isRunning: shouldAutoStart,
+            endsAtMs: endsAt,
+          });
+
+          if (shouldAutoStart && endsAt) {
+            get().startTimerInterval();
+            scheduleCompletionTimeout(endsAt);
+            get().tick(); // immediate UI sync
+          }
+        },
+
+        toggleTimer: () => {
+          const state = get();
+
+          if (!state.isPomodoroActive) {
+            set({ isPomodoroActive: true });
+          }
+
+          const newIsRunning = !state.isRunning;
+
+          if (newIsRunning && typeof window !== 'undefined') {
+            if (!soundManager.isReady()) {
+              void soundManager.init();
+            }
+            void soundManager.resumeAudio();
+            if ('Notification' in window && Notification.permission === 'default') {
+              void Notification.requestPermission();
+            }
+          }
+
+          // Use a local authoritative timeLeft for pause/start transitions to avoid stale snapshots
+          let nextTimeLeftSec = state.timeLeftSec;
+
+          // If pausing, compute an exact remaining seconds from endsAtMs to avoid ~1s drift
+          if (!newIsRunning && state.endsAtMs) {
+            nextTimeLeftSec = Math.max(0, Math.ceil((state.endsAtMs - Date.now()) / 1000));
+          }
+
+          if (!newIsRunning) {
+            // Pause path: clear timers and update state in a single set to reduce renders
+            clearCompletionTimeout();
+            get().stopTimerInterval();
+            set({ isRunning: false, endsAtMs: null, timeLeftSec: nextTimeLeftSec });
+            return;
+          }
+
+          // Starting path: compute endsAt from the authoritative nextTimeLeftSec
+          const endsAt = Date.now() + nextTimeLeftSec * 1000;
+          set({ isRunning: true, endsAtMs: endsAt });
+
+          get().startTimerInterval();
+          scheduleCompletionTimeout(endsAt);
+          get().tick();
+        },
+
+        stopPomodoro: () => {
+          const state = get();
+          get().stopTimerInterval();
+          clearCompletionTimeout();
+
+          const durationInSeconds = state.sessionDurations.work * 60;
+
+          set({
+            isRunning: false,
+            isPomodoroActive: false,
+            endsAtMs: null,
+            currentTask: null,
+            pomodoroStage: 'work',
             timeLeftSec: durationInSeconds,
             totalTimeSec: durationInSeconds,
           });
-        }
-      },
+        },
 
-      updateSessionDuration: (type, duration) => {
-        const state = get();
-        const newSessionDurations = {
-          ...state.sessionDurations,
-          [type]: duration,
-        };
+        addFiveMinutes: () => {
+          set(state => ({
+            timeLeftSec: state.timeLeftSec + 5 * 60,
+            totalTimeSec: state.totalTimeSec + 5 * 60,
+            endsAtMs: state.isRunning && state.endsAtMs ? state.endsAtMs + 5 * 60 * 1000 : state.endsAtMs,
+          }));
 
-        set({ sessionDurations: newSessionDurations });
+          const s = get();
+          if (s.isRunning && s.endsAtMs) {
+            scheduleCompletionTimeout(s.endsAtMs);
+          }
+        },
 
-        // If currently on this session type and not running, update the timer
-        if (state.pomodoroStage === type && !state.isRunning) {
+        switchToPomodoroStage: (newPomodoroStage) => {
+          const state = get();
+          if (!Object.hasOwn(state.sessionDurations, newPomodoroStage)) {
+            console.error('Invalid pomodoro stage:', newPomodoroStage);
+            return;
+          }
+
+          get().stopTimerInterval();
+          clearCompletionTimeout();
+
+          const duration = state.sessionDurations[newPomodoroStage as keyof SessionDurations];
           const durationInSeconds = duration * 60;
+
           set({
+            pomodoroStage: newPomodoroStage,
             timeLeftSec: durationInSeconds,
             totalTimeSec: durationInSeconds,
+            isRunning: false,
+            isPomodoroActive: true,
+            endsAtMs: null,
           });
-        }
-      },
+        },
 
-      updateSettings: (newSettings) => {
-        set(state => ({
-          settings: { ...state.settings, ...newSettings },
-        }));
-      },
+        updateDuration: (newDuration) => {
+          const state = get();
+          // Prevent editing durations while a timer is running to avoid desync
+          if (state.isRunning) {
+            return;
+          }
 
-      tick: () => {
-        const state = get();
+          const newSessionDurations = { ...state.sessionDurations, [state.pomodoroStage]: newDuration };
+          set({ sessionDurations: newSessionDurations });
 
-        if (state.timeLeftSec > 0) {
-          set({ timeLeftSec: state.timeLeftSec - 1 });
-        } else {
-          set({ isRunning: false });
+          const durationInSeconds = newDuration * 60;
+          set({ timeLeftSec: durationInSeconds, totalTimeSec: durationInSeconds });
+        },
+
+        updateSessionDuration: (type, duration) => {
+          const state = get();
+          // Prevent editing durations while a timer is running to avoid desync
+          if (state.isRunning) {
+            return;
+          }
+
+          const newSessionDurations = { ...state.sessionDurations, [type]: duration };
+          set({ sessionDurations: newSessionDurations });
+
+          if (state.pomodoroStage === type) {
+            const durationInSeconds = duration * 60;
+            set({ timeLeftSec: durationInSeconds, totalTimeSec: durationInSeconds });
+          }
+        },
+
+        updateSettings: (newSettings) => {
+          set(state => ({ settings: { ...state.settings, ...newSettings } }));
+        },
+
+        tick: () => {
+          const state = get();
+          if (!state.isRunning || !state.endsAtMs) {
+            return;
+          }
+
+          const remainingSec = Math.max(0, Math.ceil((state.endsAtMs - Date.now()) / 1000));
+          if (remainingSec > 0) {
+            if (remainingSec !== state.timeLeftSec) {
+              set({ timeLeftSec: remainingSec });
+            }
+            return;
+          }
+
+          set({ timeLeftSec: 0, isRunning: false, endsAtMs: null });
           get().stopTimerInterval();
-          // Trigger completion after a small delay
-          setTimeout(() => {
-            get().handleTimerComplete();
-          }, 0);
-        }
-      },
+          // Clear the scheduled completion timeout immediately to avoid stale timers
+          clearCompletionTimeout();
+          setTimeout(() => get().handleTimerComplete(), 0);
+        },
 
-      handleTimerComplete: async () => {
-        const state = get();
+        handleTimerComplete: async () => {
+          clearCompletionTimeout();
+          const state = get();
 
-        // Use settings from store
-        const sound = state.settings.notificationSound;
-        const volume = Math.max(0, Math.min(1, state.settings.soundVolume / 100));
-
-        playSelectedNotificationSound(sound, volume);
-
-        // Complete pomodoro session if work session
-        if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
-          const completedMinutes = state.totalTimeSec / 60;
-          const durationHours = completedMinutes / 60;
+          const sound = state.settings.notificationSound;
+          const volume = Math.max(0, Math.min(1, state.settings.soundVolume / 100));
 
           try {
-            const data = await api.post<{ streakDays?: number }>('/api/pomodoro/complete', {
-              durationHours,
-              taskId: state.currentTask?.id,
-            });
-
-            const streakDays = (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
-            set({ streak: streakDays });
-            toast.success('Pomodoro completed!', {
-              description: `You've worked for ${completedMinutes.toFixed(0)} minutes!`,
-            });
-          } catch (error) {
-            console.error('Failed to complete Pomodoro:', error);
-            toast.error(error instanceof Error ? error.message : 'Failed to complete Pomodoro');
+            await playSelectedNotificationSound(sound, volume);
+          } catch (err) {
+            console.error('Alarm failed to play:', err);
           }
-        }
 
-        // Auto-progress to next session
-        if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
-          const workMinutes = state.totalTimeSec / 60;
-          const nextBreakType = workMinutes >= LONG_BREAK_THRESHOLD ? 'longBreak' : 'shortBreak';
-          get().switchToPomodoroStage(nextBreakType);
-        } else {
-          get().switchToPomodoroStage('work');
-        }
-      },
+          if (typeof window !== 'undefined' && document.visibilityState !== 'visible') {
+            if ('Notification' in window && Notification.permission === 'granted') {
+              try {
+                const title = state.pomodoroStage === 'work' ? 'Pomodoro complete' : 'Break finished';
+                const body = state.pomodoroStage === 'work' ? 'Time for a break.' : 'Back to work!';
+                void new Notification(title, { body });
+              } catch {
+                // ignore
+              }
+            }
+          }
 
-      setStreak: (streak) => {
-        set({ streak });
-      },
+          if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
+            const completedMinutes = state.totalTimeSec / 60;
+            const durationHours = completedMinutes / 60;
+            try {
+              const data = await api.post<{ streakDays?: number }>('/api/pomodoro/complete', {
+                durationHours,
+                taskId: state.currentTask?.id,
+              });
+              const streakDays = data && typeof data.streakDays === 'number' ? data.streakDays : 0;
+              set({ streak: streakDays });
+              toast.success('Pomodoro completed!', { description: `You've worked for ${completedMinutes.toFixed(0)} minutes!` });
+            } catch (error) {
+              console.error('Failed to complete Pomodoro:', error);
+              toast.error(error instanceof Error ? error.message : 'Failed to complete Pomodoro');
+            }
+          }
 
-      fetchStreak: async () => {
-        try {
-          const data = await api.get<{ streakDays?: number }>('/api/pomodoro/streak');
-          const streakDays = (data && typeof data.streakDays === 'number') ? data.streakDays : 0;
-          set({ streak: streakDays });
-        } catch (error) {
-          // If user has no sessions yet (404) or other errors, just set to 0
-          console.error('Error fetching pomodoro streak:', error);
-          set({ streak: 0 });
-        }
-      },
+          if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
+            const workMinutes = state.totalTimeSec / 60;
+            const nextBreakType = workMinutes >= LONG_BREAK_THRESHOLD ? 'longBreak' : 'shortBreak';
+            get().switchToPomodoroStage(nextBreakType);
+          } else {
+            get().switchToPomodoroStage('work');
+          }
+        },
 
-      startTimerInterval: () => {
-        // Clear any existing interval
-        if (timerIntervalId) {
-          clearInterval(timerIntervalId);
-        }
+        setStreak: streak => set({ streak }),
 
-        // Start new interval
-        timerIntervalId = setInterval(() => {
-          get().tick();
-        }, 1000);
-      },
+        fetchStreak: async () => {
+          try {
+            const data = await api.get<{ streakDays?: number }>('/api/pomodoro/streak');
+            const streakDays = data && typeof data.streakDays === 'number' ? data.streakDays : 0;
+            set({ streak: streakDays });
+          } catch (error) {
+            console.error('Error fetching pomodoro streak:', error);
+            set({ streak: 0 });
+          }
+        },
 
-      stopTimerInterval: () => {
-        if (timerIntervalId) {
-          clearInterval(timerIntervalId);
-          timerIntervalId = null;
-        }
-      },
+        startTimerInterval: () => {
+          if (timerIntervalId) {
+            clearInterval(timerIntervalId);
+          }
+          timerIntervalId = setInterval(() => get().tick(), 1000);
+        },
 
-      reset: () => {
-        get().stopTimerInterval();
+        stopTimerInterval: () => {
+          if (timerIntervalId) {
+            clearInterval(timerIntervalId);
+            timerIntervalId = null;
+          }
+        },
 
-        set({
-          currentTask: null,
-          pomodoroStage: 'work',
-          isPomodoroActive: false,
-          isRunning: false,
-          timeLeftSec: DEFAULT_WORK_DURATION * 60,
-          totalTimeSec: DEFAULT_WORK_DURATION * 60,
-          sessionDurations: {
-            work: DEFAULT_WORK_DURATION,
-            shortBreak: DEFAULT_SHORT_BREAK_DURATION,
-            longBreak: DEFAULT_LONG_BREAK_DURATION,
-          },
-          streak: 0,
-        });
-      },
-    }),
+        reset: () => {
+          get().stopTimerInterval();
+          clearCompletionTimeout();
+          set({
+            currentTask: null,
+            pomodoroStage: 'work',
+            isPomodoroActive: false,
+            isRunning: false,
+            endsAtMs: null,
+            timeLeftSec: DEFAULT_WORK_DURATION * 60,
+            totalTimeSec: DEFAULT_WORK_DURATION * 60,
+            sessionDurations: {
+              work: DEFAULT_WORK_DURATION,
+              shortBreak: DEFAULT_SHORT_BREAK_DURATION,
+              longBreak: DEFAULT_LONG_BREAK_DURATION,
+            },
+            streak: 0,
+          });
+        },
+      };
+    },
     {
       name: 'pomodoro-storage',
       partialize: state => ({
@@ -341,6 +397,5 @@ export const usePomodoroStore = create<PomodoroStore>()(
 // Initialize sound manager on client side
 if (typeof window !== 'undefined') {
   soundManager.init();
-  // Fetch streak on initialization
   usePomodoroStore.getState().fetchStreak();
 }
