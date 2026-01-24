@@ -1,5 +1,6 @@
 'use client';
 
+import type { SoundStorageKey } from '@/lib/sound-manager';
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { SOUND_KEYS, soundManager } from '@/lib/sound-manager';
+import { SOUND_OPTIONS, soundManager } from '@/lib/sound-manager';
 import { usePomodoroStore } from '@/lib/stores/pomodoro-store';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
@@ -40,6 +41,8 @@ export function PomodoroTab() {
       setTimeout(() => setIsTestPlaying(false), 5000);
     }
   }, [settings.notificationSound, settings.soundVolume, isTestPlaying]);
+
+  // settings.notificationSound is stored as a storage key (e.g. 'sax' or 'none')
 
   return (
     <Card>
@@ -148,39 +151,35 @@ export function PomodoroTab() {
             <div className="flex items-center gap-2">
               <Select
                 value={settings.notificationSound}
-                onValueChange={(value: string) => updateSettings({ notificationSound: value })}
+                onValueChange={(value: SoundStorageKey) => updateSettings({ notificationSound: value })}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.keys(SOUND_KEYS).map(key => (
-                    <SelectItem key={key} value={key.toLowerCase().replace(/ /g, '_')}>
-                      {key}
+                  {SOUND_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
                     </SelectItem>
                   ))}
-                  <SelectItem value="none">None</SelectItem>
                 </SelectContent>
               </Select>
-              {
-                soundReady
-                  ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={testNotificationSound}
-                      disabled={settings.notificationSound === 'none'}
-                    >
-                      {isTestPlaying ? 'Stop' : 'Test'}
-                    </Button>
-                  )
-                  : (
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      Loading sounds...
-                    </div>
-                  )
-              }
+              {soundReady && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={testNotificationSound}
+                >
+                  {isTestPlaying ? 'Stop' : 'Test'}
+                </Button>
+              )}
+
+              {!soundReady && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                  Loading sounds...
+                </div>
+              )}
             </div>
           </div>
         </div>
