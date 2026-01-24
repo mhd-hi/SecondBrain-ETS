@@ -6,9 +6,10 @@ export async function playSelectedNotificationSound(sound: SoundStorageKey, volu
   await soundManager.resumeAudio();
 
   soundManager.setVolume(volume);
-  const displayKey = STORAGE_TO_DISPLAY[sound as SoundStorageKey];
-  if (!displayKey) {
-    throw new Error(`Unknown sound storage key: ${String(sound)}`);
+
+  if (!Object.prototype.hasOwnProperty.call(STORAGE_TO_DISPLAY, sound)) {
+    throw new Error(`Invalid sound storage key: ${String(sound)}`);
   }
+  const displayKey = STORAGE_TO_DISPLAY[sound as SoundStorageKey];
   soundManager.play(displayKey);
 }
