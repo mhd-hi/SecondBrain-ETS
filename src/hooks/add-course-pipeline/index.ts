@@ -7,4 +7,4 @@ export {
   deriveParsedData,
   deriveStepStatus,
 } from './selectors';
-export type { PipelineAction, PipelineState, StepStatus } from './types';
+export type { StepStatus } from './types';

@@ -82,7 +82,7 @@ export function calculateDueDateWithCustomStartDate(
 }
 
 // Sorts tasks by due date and filters out completed tasks
-export const getTasksByDueDate = (tasks: Task[]) => {
+const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
     .filter(task => task.status !== StatusTask.COMPLETED && task.dueDate != null)
     .sort((a, b) => {

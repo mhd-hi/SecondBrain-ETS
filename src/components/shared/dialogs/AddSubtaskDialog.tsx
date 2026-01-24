@@ -126,5 +126,3 @@ export const AddSubtaskDialog = ({ taskId, open, onOpenChange, onSubtaskAdded }:
     </Dialog>
   );
 };
-
-export default AddSubtaskDialog;

@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import CustomLinkTile from '@/components/CustomLinks/CustomLinkTile';
-import AddCustomLinkDialog from '@/components/shared/dialogs/AddCustomLinkDialog';
+import { AddCustomLinkDialog } from '@/components/shared/dialogs/AddCustomLinkDialog';
 
 type CourseCustomLinksProps = {
   courseId: string;

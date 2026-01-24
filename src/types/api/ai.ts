@@ -1,6 +1,6 @@
 import type { TaskType } from '@/types/task';
 
-export type AISubtask = {
+type AISubtask = {
   title: string;
   estimatedEffort?: number;
   notes?: string;

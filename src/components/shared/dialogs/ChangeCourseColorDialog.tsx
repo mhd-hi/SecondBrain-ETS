@@ -75,5 +75,3 @@ export const ChangeCourseColorDialog = ({ courseId, open, onOpenChange, currentC
     </Dialog>
   );
 };
-
-export default ChangeCourseColorDialog;

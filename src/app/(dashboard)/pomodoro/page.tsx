@@ -1,4 +1,8 @@
+import { Settings } from 'lucide-react';
+import Link from 'next/link';
 import { PomodoroContainer } from '@/components/Pomodoro/PomodoroContainer';
+import { Button } from '@/components/ui/button';
+import { getPreferencesPath } from '@/lib/routes';
 
 export default function PomodoroPage() {
   return (
@@ -11,6 +15,13 @@ export default function PomodoroPage() {
           <p className="text-muted-foreground mt-2">
             Focus Session with the Pomodoro Technique
           </p>
+        </div>
+        <div>
+          <Link href={getPreferencesPath('pomodoro')}>
+            <Button variant="ghost" size="icon" aria-label="Pomodoro settings">
+              <Settings className="h-5 w-5" />
+            </Button>
+          </Link>
         </div>
       </div>
       <section className="flex-1">

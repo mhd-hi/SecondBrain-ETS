@@ -61,5 +61,3 @@ export const AddCustomLinkDialog = ({ courseId, open, onOpenChange, onLinkCreate
     </Dialog>
   );
 };
-
-export default AddCustomLinkDialog;

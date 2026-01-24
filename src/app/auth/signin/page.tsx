@@ -6,12 +6,13 @@ import { Suspense, useEffect } from 'react';
 import { CapybaraLoader } from '@/components/shared/CapybaraLoader';
 import { SignInCard } from '@/components/shared/SignInCard';
 import { Card, CardContent } from '@/components/ui/card';
+import { ROUTES } from '@/lib/routes';
 
 function SignInContent() {
   const { status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get('callbackUrl') || ROUTES.DASHBOARD;
 
   useEffect(() => {
     if (status === 'authenticated') {

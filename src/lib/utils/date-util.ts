@@ -12,7 +12,7 @@ const safelyConvertToDate = (date: Date | string | null | undefined): Date | nul
 };
 
 // Formats a date for display in a short format (e.g., "Jan 15")
-export const formatDate = (date: Date | null | undefined): string => {
+const formatDate = (date: Date | null | undefined): string => {
   const validDate = safelyConvertToDate(date);
   if (!validDate) {
     return '';
@@ -35,7 +35,7 @@ export const formatBadgeDate = (date: Date | null | undefined): string => {
 };
 
 // Get the start of the current week (Monday)
-export const getWeekStart = (weekOffset: number) => {
+const getWeekStart = (weekOffset: number) => {
   const now = new Date();
   const start = new Date(now);
   // Get Monday as the start of the week

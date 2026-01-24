@@ -45,7 +45,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
             )}
             title="Choose due date"
           >
-            <CalendarIcon className="h-3 w-3 flex-shrink-0" />
+            <CalendarIcon className="h-3 w-3 shrink-0" />
             No due date
           </button>
         </PopoverTrigger>
@@ -92,7 +92,7 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
           )}
           title="Choose due date"
         >
-          <CalendarIcon className="h-3 w-3 flex-shrink-0" />
+          <CalendarIcon className="h-3 w-3 shrink-0" />
           {formattedBadgeDate}
           {' - '}
           {dueDateText}

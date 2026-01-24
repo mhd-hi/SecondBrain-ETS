@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
-import AddSubtaskDialog from '@/components/shared/dialogs/AddSubtaskDialog';
+import { AddSubtaskDialog } from '@/components/shared/dialogs/AddSubtaskDialog';
 import { StatusTaskChanger } from '@/components/Task/StatusTaskChanger';
 import { SubtasksList } from '@/components/Task/SubtasksList';
 import { SubtasksPill } from '@/components/Task/SubtasksPill';

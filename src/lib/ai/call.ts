@@ -1,7 +1,7 @@
 import type { OpenAI } from 'openai';
 import { getOpenAIClient } from './client';
 
-export type OpenAICallResult = {
+type OpenAICallResult = {
   text: string;
   usage?: {
     total_tokens?: number;

@@ -9,15 +9,10 @@ import {
   differenceInMinutes,
   eachDayOfInterval,
   endOfMonth,
-  endOfWeek,
-  endOfYear,
-  format,
   isSameDay,
   isWithinInterval,
   startOfDay,
   startOfMonth,
-  startOfWeek,
-  startOfYear,
   subDays,
   subMonths,
   subWeeks,
@@ -25,39 +20,6 @@ import {
 } from 'date-fns';
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
 import { VISIBLE_HOURS } from '@/lib/calendar/constants';
-
-// ================ Header helper functions ================ //
-
-export function rangeText(view: TCalendarView, date: Date) {
-  const formatString = 'MMM d, yyyy';
-  let start: Date;
-  let end: Date;
-
-  switch (view) {
-    case 'agenda':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'year':
-      start = startOfYear(date);
-      end = endOfYear(date);
-      break;
-    case 'month':
-      start = startOfMonth(date);
-      end = endOfMonth(date);
-      break;
-    case 'week':
-      start = startOfWeek(date, { weekStartsOn: 1 });
-      end = endOfWeek(date, { weekStartsOn: 1 });
-      break;
-    case 'day':
-      return format(date, formatString);
-    default:
-      return 'Error while formatting ';
-  }
-
-  return `${format(start, formatString)} - ${format(end, formatString)}`;
-}
 
 export function navigateDate(date: Date, view: TCalendarView, direction: 'previous' | 'next'): Date {
   switch (view) {

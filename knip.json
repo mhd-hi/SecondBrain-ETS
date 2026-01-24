@@ -3,5 +3,11 @@
     "{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
     "src/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
   ],
-  "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}!"]
+  "project": [
+    "**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}!"
+  ],
+  "ignore": [
+    "src/components/ui/**",
+    "bun.lock"
+  ]
 }

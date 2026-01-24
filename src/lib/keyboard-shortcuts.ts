@@ -5,12 +5,12 @@ import { ROUTES } from './routes';
 
 type Dialog = 'add-task';
 
-export type ShortcutAction =
+type ShortcutAction =
   | { type: 'navigate'; path: string }
   | { type: 'dialog'; dialog: Dialog }
   | { type: 'toggle'; target: 'command-palette' };
 
-export type KeyboardShortcut = {
+type KeyboardShortcut = {
   key: string;
   ctrl: boolean;
   alt: boolean;
@@ -83,7 +83,7 @@ export function getShortcutForDialog(
   );
 }
 
-export type ShortcutHandlers = {
+type ShortcutHandlers = {
   onToggleCommandPalette: () => void;
   onOpenAddTaskDialog: () => void;
   onNavigate: (path: string) => void;

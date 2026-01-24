@@ -1,6 +1,6 @@
 import { Howl, Howler } from 'howler';
 
-export enum Sound {
+enum Sound {
   Sax = 'Sax',
   WestminsterChimes = 'Westminster Chimes',
   CashOut = 'Cash Out',
@@ -11,14 +11,11 @@ export enum Sound {
 }
 
 export type SoundStorageKey = 'sax' | 'westminster_chimes' | 'cash_out' | 'car_lock' | 'fahh' | 'laugh' | 'chicken_nuggets';
-export type SoundKey = Sound | SoundStorageKey;
-
-export const SOUND_DEFAULT: Sound = Sound.Sax;
 export const SOUND_DEFAULT_STORAGE: SoundStorageKey = 'westminster_chimes';
 const SOUND_DIR = '/sounds/';
 
-export type SoundFilename = `${SoundStorageKey}.mp3`;
-export type SoundFilePath = `${typeof SOUND_DIR}${SoundFilename}`;
+type SoundFilename = `${SoundStorageKey}.mp3`;
+type SoundFilePath = `${typeof SOUND_DIR}${SoundFilename}`;
 
 const SOUND_FILE_NAMES: Record<Sound, SoundFilename> = {
   [Sound.Sax]: 'sax.mp3',
@@ -29,10 +26,6 @@ const SOUND_FILE_NAMES: Record<Sound, SoundFilename> = {
   [Sound.Laugh]: 'laugh.mp3',
   [Sound.ChickenNuggets]: 'chicken_nuggets.mp3',
 };
-
-export const SOUND_KEYS = Object.fromEntries(
-  Object.values(Sound).map(value => [value, value]),
-) as Record<string, string>;
 
 const SOUND_FILE_MAP = Object.fromEntries(
   Object.entries(SOUND_FILE_NAMES).map(([key, file]) => [key, SOUND_DIR + file]),
@@ -47,6 +40,8 @@ export const STORAGE_TO_DISPLAY: Record<SoundStorageKey, Sound> = {
   laugh: Sound.Laugh,
   chicken_nuggets: Sound.ChickenNuggets,
 };
+
+export const SOUND_DEFAULT: Sound = STORAGE_TO_DISPLAY[SOUND_DEFAULT_STORAGE];
 
 export const SOUND_OPTIONS: { value: SoundStorageKey; label: Sound }[] = Object.entries(STORAGE_TO_DISPLAY).map(
   ([k, v]) => ({ value: k as SoundStorageKey, label: v }),
