@@ -1,5 +1,5 @@
 import type { SoundStorageKey } from '@/lib/sound-manager';
-import type { PomodoroType } from '@/types/pomodoro';
+import type { PomodoroStage } from '@/types/pomodoro';
 import type { Task } from '@/types/task';
 import { toast } from 'sonner';
 import { create } from 'zustand';
@@ -27,7 +27,7 @@ type PomodoroSettings = {
 
 type PomodoroStore = {
   currentTask: Task | null;
-  pomodoroType: PomodoroType;
+  pomodoroStage: PomodoroStage;
   isPomodoroActive: boolean;
   isRunning: boolean;
   timeLeftSec: number;
@@ -41,7 +41,7 @@ type PomodoroStore = {
   toggleTimer: () => void;
   stopPomodoro: () => void;
   addFiveMinutes: () => void;
-  switchToPomodoroType: (pomodoroType: PomodoroType) => void;
+  switchToPomodoroStage: (pomodoroStage: PomodoroStage) => void;
   updateDuration: (duration: number) => void;
   updateSessionDuration: (type: 'work' | 'shortBreak' | 'longBreak', duration: number) => void;
   updateSettings: (settings: Partial<PomodoroSettings>) => void;
@@ -62,7 +62,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
   persist(
     (set, get) => ({
       currentTask: null,
-      pomodoroType: 'work',
+      pomodoroStage: 'work',
       isPomodoroActive: false,
       isRunning: false,
       timeLeftSec: DEFAULT_WORK_DURATION * 60,
@@ -92,7 +92,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
         set({
           currentTask: task,
-          pomodoroType: 'work',
+          pomodoroStage: 'work',
           sessionDurations: newSessionDurations,
           timeLeftSec: durationInSeconds,
           totalTimeSec: durationInSeconds,
@@ -141,7 +141,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
           isRunning: false,
           isPomodoroActive: false,
           currentTask: null,
-          pomodoroType: 'work',
+          pomodoroStage: 'work',
           timeLeftSec: durationInSeconds,
           totalTimeSec: durationInSeconds,
         });
@@ -154,17 +154,17 @@ export const usePomodoroStore = create<PomodoroStore>()(
         }));
       },
 
-      switchToPomodoroType: (newPomodoroType) => {
+      switchToPomodoroStage: (newPomodoroStage) => {
         const state = get();
-        if (!Object.hasOwn(state.sessionDurations, newPomodoroType)) {
-          console.error('Invalid pomodoro type:', newPomodoroType);
+        if (!Object.hasOwn(state.sessionDurations, newPomodoroStage)) {
+          console.error('Invalid pomodoro stage:', newPomodoroStage);
           return;
         }
-        const duration = state.sessionDurations[newPomodoroType];
+        const duration = state.sessionDurations[newPomodoroStage];
         const durationInSeconds = duration * 60;
 
         set({
-          pomodoroType: newPomodoroType,
+          pomodoroStage: newPomodoroStage,
           timeLeftSec: durationInSeconds,
           totalTimeSec: durationInSeconds,
           isRunning: false,
@@ -178,7 +178,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
         // Update the duration for the current session type
         const newSessionDurations = {
           ...state.sessionDurations,
-          [state.pomodoroType]: newDuration,
+          [state.pomodoroStage]: newDuration,
         };
 
         set({ sessionDurations: newSessionDurations });
@@ -203,7 +203,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
         set({ sessionDurations: newSessionDurations });
 
         // If currently on this session type and not running, update the timer
-        if (state.pomodoroType === type && !state.isRunning) {
+        if (state.pomodoroStage === type && !state.isRunning) {
           const durationInSeconds = duration * 60;
           set({
             timeLeftSec: durationInSeconds,
@@ -243,7 +243,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
         playSelectedNotificationSound(sound, volume);
 
         // Complete pomodoro session if work session
-        if (state.pomodoroType === 'work' && state.totalTimeSec > 0) {
+        if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
           const completedMinutes = state.totalTimeSec / 60;
           const durationHours = completedMinutes / 60;
 
@@ -265,12 +265,12 @@ export const usePomodoroStore = create<PomodoroStore>()(
         }
 
         // Auto-progress to next session
-        if (state.pomodoroType === 'work' && state.totalTimeSec > 0) {
+        if (state.pomodoroStage === 'work' && state.totalTimeSec > 0) {
           const workMinutes = state.totalTimeSec / 60;
           const nextBreakType = workMinutes >= LONG_BREAK_THRESHOLD ? 'longBreak' : 'shortBreak';
-          get().switchToPomodoroType(nextBreakType);
+          get().switchToPomodoroStage(nextBreakType);
         } else {
-          get().switchToPomodoroType('work');
+          get().switchToPomodoroStage('work');
         }
       },
 
@@ -314,7 +314,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
         set({
           currentTask: null,
-          pomodoroType: 'work',
+          pomodoroStage: 'work',
           isPomodoroActive: false,
           isRunning: false,
           timeLeftSec: DEFAULT_WORK_DURATION * 60,

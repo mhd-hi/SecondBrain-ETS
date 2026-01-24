@@ -1,6 +1,6 @@
 'use client';
 
-import type { PomodoroType } from '@/types/pomodoro';
+import type { PomodoroStage } from '@/types/pomodoro';
 import { Pause, Play, Plus, Square } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { QuoteBubble } from '@/components/shared/QuoteBubble';
@@ -16,7 +16,7 @@ export function PomodoroContainer() {
     isRunning,
     timeLeftSec,
     totalTimeSec,
-    pomodoroType,
+    pomodoroStage,
     currentTask,
     sessionDurations,
     isPomodoroActive,
@@ -24,14 +24,14 @@ export function PomodoroContainer() {
     toggleTimer,
     stopPomodoro,
     addFiveMinutes,
-    switchToPomodoroType,
+    switchToPomodoroStage,
     updateDuration,
     fetchStreak,
   } = usePomodoroStore();
 
   // Compute current duration reactively from sessionDurations
-  const currentDuration = Object.hasOwn(sessionDurations, pomodoroType)
-    ? sessionDurations[pomodoroType]
+  const currentDuration = Object.hasOwn(sessionDurations, pomodoroStage)
+    ? sessionDurations[pomodoroStage]
     : DEFAULT_WORK_DURATION;
 
   const formatTime = useCallback((seconds: number) => {
@@ -49,7 +49,7 @@ export function PomodoroContainer() {
   useEffect(() => {
     if (isPomodoroActive && timeLeftSec > 0) {
       const formattedTime = formatTime(timeLeftSec);
-      const typeLabel = pomodoroType === 'work' ? '🍅' : '☕';
+      const typeLabel = pomodoroStage === 'work' ? '🍅' : '☕';
       document.title = `${formattedTime} ${typeLabel} - Pomodoro`;
     } else {
       document.title = 'Pomodoro - SecondBrain';
@@ -60,7 +60,7 @@ export function PomodoroContainer() {
       document.title = 'Pomodoro - SecondBrain';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPomodoroActive, timeLeftSec, pomodoroType]);
+  }, [isPomodoroActive, timeLeftSec, pomodoroStage]);
 
   const getProgress = () => {
     return ((totalTimeSec - timeLeftSec) / totalTimeSec) * 100;
@@ -73,14 +73,14 @@ export function PomodoroContainer() {
     // If pomodoro session is not active, we need to start it first
     if (!isPomodoroActive) {
       // This will activate the pomodoro session with current duration
-      switchToPomodoroType(pomodoroType);
+      switchToPomodoroStage(pomodoroStage);
     }
     toggleTimer();
   };
 
   const handleAddFiveMinutes = () => {
     // If timer is not running and we're at the start of a pomodoro session, add to duration selector
-    if (!isRunning && timeLeftSec === totalTimeSec && pomodoroType === 'work') {
+    if (!isRunning && timeLeftSec === totalTimeSec && pomodoroStage === 'work') {
       const newDuration = currentDuration + 5;
       updateDuration(newDuration);
     } else {
@@ -104,9 +104,9 @@ export function PomodoroContainer() {
             </div>
           )}
 
-          {/* Pomodoro Type Tabs */}
+          {/* Pomodoro Stage Tabs */}
           <div className="flex justify-center px-2">
-            <Tabs value={pomodoroType} onValueChange={value => switchToPomodoroType(value as PomodoroType)}>
+            <Tabs value={pomodoroStage} onValueChange={value => switchToPomodoroStage(value as PomodoroStage)}>
               <TabsList className="flex flex-col md:grid w-full max-w-md md:grid-cols-3 h-auto min-h-10 bg-muted/50 p-1 rounded-xl gap-2 md:gap-0">
                 <TabsTrigger
                   value="work"
@@ -150,7 +150,7 @@ export function PomodoroContainer() {
               <div className="bg-muted mb-4 h-1.5 w-full rounded-full">
                 <div
                   className={`h-1.5 rounded-full transition-all duration-1000 
-                    ${pomodoroType === 'work' ? 'bg-blue-500' : 'bg-green-500'}`}
+                    ${pomodoroStage === 'work' ? 'bg-blue-500' : 'bg-green-500'}`}
                   style={{ width: `${getProgress()}%` }}
                 />
               </div>

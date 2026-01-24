@@ -1,1 +1,1 @@
-export type PomodoroType = 'work' | 'shortBreak' | 'longBreak';
+export type PomodoroStage = 'work' | 'shortBreak' | 'longBreak';
