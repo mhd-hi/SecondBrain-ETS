@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { COURSE_COLORS } from '@/lib/utils/colors-util';
 import { COURSE_DAYPARTS } from '@/lib/utils/course-dayparts';
 
-export type UpdateCourseDialogProps = {
+type UpdateCourseDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   course: Course;

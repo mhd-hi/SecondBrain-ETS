@@ -8,17 +8,17 @@ import { toast } from 'sonner';
 import { CourseProgressTile } from '@/components/Boards/Progress/TaskCompletionProgressTile';
 import CourseCustomLinks from '@/components/CustomLinks/CourseCustomLinks';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
-import getCourseActions from '@/components/shared/atoms/get-course-actions';
+import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
+
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 
 import { CourseUpdateDialog } from '@/components/shared/dialogs/CourseUpdateDialog';
-
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
+
 import { TaskCard } from '@/components/Task/TaskCard';
 
 import { Button } from '@/components/ui/button';
-
 import { useCourses } from '@/hooks/use-course-store';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { batchUpdateStatusTask } from '@/hooks/use-task';
@@ -73,7 +73,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     } else if (courseId && !uuidRegex.test(courseId)) {
       // Invalid course ID format - redirect to home
       console.warn('Invalid course ID format, redirecting:', courseId);
-      router.push(ROUTES.HOME);
+      router.push(ROUTES.DASHBOARD);
     }
   }, [courseId, fetchTasksByCourse, router]);
 
@@ -152,7 +152,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         async () => {
           await deleteCourseFromStore(course.id);
           // Redirect to root
-          router.push(ROUTES.HOME);
+          router.push(ROUTES.DASHBOARD);
           // Show toast with course code
           toast.success(`Course ${course.code} deleted successfully`);
         },
@@ -248,7 +248,7 @@ export default function CoursePage({ params }: CoursePageProps) {
 
   // If courses loaded but this specific course not found, redirect to home
   if (!course && courses.length > 0) {
-    router.push(ROUTES.HOME);
+    router.push(ROUTES.DASHBOARD);
     return null;
   }
 

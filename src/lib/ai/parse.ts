@@ -1,6 +1,6 @@
 import type { AITask } from '@/types/api/ai';
 
-export function tryParseJson(text: string): unknown | null {
+function tryParseJson(text: string): unknown | null {
   try {
     return JSON.parse(text);
   } catch {

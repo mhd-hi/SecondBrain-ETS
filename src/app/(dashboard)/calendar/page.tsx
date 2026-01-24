@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { CalendarWrapper } from '@/components/Calendar/CalendarWrapper';
 import { useCalendarTasks } from '@/hooks/use-task';
+import { getCalendarPath } from '@/lib/routes';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 const VALID_VIEWS: TCalendarView[] = ['day', 'week', 'month', 'year', 'agenda'];
@@ -27,7 +28,7 @@ export default function CalendarPage() {
         setView(viewParam as TCalendarView);
       } else if (!viewParam) {
         // Set default view in URL if not present
-        router.replace(`/calendar?view=${view}`, { scroll: false });
+        router.replace(getCalendarPath(view), { scroll: false });
       }
     }
   }, [searchParams, setView, view, router]);
@@ -36,7 +37,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const currentViewParam = searchParams.get('view');
     if (currentViewParam !== view) {
-      router.replace(`/calendar?view=${view}`, { scroll: false });
+      router.replace(getCalendarPath(view), { scroll: false });
     }
   }, [view, router, searchParams]);
 

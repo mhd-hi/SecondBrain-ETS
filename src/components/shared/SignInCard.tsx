@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getCalendarPath } from '@/lib/routes';
 
 type SignInCardProps = {
   title?: string;
@@ -15,7 +16,7 @@ type SignInCardProps = {
 export function SignInCard({
   title = 'Welcome to SecondBrain ETS',
   description = 'Sign in to manage your courses and tasks',
-  callbackUrl = '/',
+  callbackUrl = `${getCalendarPath()}`,
   className = '',
 }: SignInCardProps) {
   return (

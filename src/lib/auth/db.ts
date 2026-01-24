@@ -1,4 +1,3 @@
-import type { SQL } from 'drizzle-orm';
 import { and, eq, inArray } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
 import { db } from '@/server/db';
@@ -313,67 +312,4 @@ export async function createUserCourse(
     .returning();
 
   return result[0];
-}
-
-/**
- * Batch operations with user filtering
- */
-export async function batchUpdateUserTasks(
-  userId: string,
-  updates: Array<{ id: string; data: Partial<typeof tasks.$inferInsert> }>,
-) {
-  const results = [];
-
-  for (const update of updates) {
-    const result = await updateUserTask(update.id, userId, update.data);
-    results.push(result);
-  }
-
-  return results;
-}
-
-/**
- * Complex queries with user filtering built-in
- */
-export async function getUserTasksWithCourseInfo(userId: string) {
-  return db
-    .select({
-      task: tasks,
-      course: {
-        id: courses.id,
-        name: courses.name,
-        code: courses.code,
-        color: courses.color,
-      },
-    })
-    .from(tasks)
-    .innerJoin(courses, eq(tasks.courseId, courses.id))
-    .where(and(eq(tasks.userId, userId), eq(courses.userId, userId)))
-    .orderBy(tasks.dueDate);
-}
-
-/**
- * Get tasks for specific date range with user filtering
- */
-export async function getUserTasksInDateRange(
-  userId: string,
-  startDate: Date,
-  endDate: Date,
-  additionalWhere?: SQL,
-) {
-  const baseWhere = and(
-    eq(tasks.userId, userId),
-    eq(courses.userId, userId), // Double verification via join
-  );
-
-  const whereClause = additionalWhere
-    ? and(baseWhere, additionalWhere)
-    : baseWhere;
-
-  return db
-    .select()
-    .from(tasks)
-    .innerJoin(courses, eq(tasks.courseId, courses.id))
-    .where(whereClause)
-    .orderBy(tasks.dueDate);
 }

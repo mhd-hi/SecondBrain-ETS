@@ -2,10 +2,6 @@
 
 import { toast } from 'sonner';
 
-export const handleApiSuccess = (message: string) => {
-  toast.success(message);
-};
-
 export const ErrorHandlers = {
   // API error handler with consistent logging and user notification
   api: (error: unknown, userMessage: string, context?: string) => {

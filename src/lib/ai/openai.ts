@@ -7,7 +7,7 @@ import {
   COURSE_PLAN_PARSER_SYSTEM_PROMPT,
 } from './prompt';
 
-export type ParseAIResult = {
+type ParseAIResult = {
   tasks: AITask[];
 };
 

@@ -4,7 +4,7 @@ import { useTaskStore } from '@/lib/stores/task-store';
 /**
  * Hook to update a field for a task or subtask via API.
  */
-export type UpdateFieldParams = {
+type UpdateFieldParams = {
   type: 'task' | 'subtask';
   id: string;
   input: string;

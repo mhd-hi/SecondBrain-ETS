@@ -1,7 +1,15 @@
 {
   "entry": [
-    "{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
-    "src/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
+    "src/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}",
+    "next.config.js",
+    "eslint.config.js",
+    "package.json"
   ],
-  "project": ["**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}!"]
+  "project": [
+    "**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"
+  ],
+  "ignore": [
+    "src/components/ui/**",
+    "bun.lock"
+  ]
 }

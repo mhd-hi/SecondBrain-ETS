@@ -36,7 +36,7 @@ function AuthErrorContent() {
               <Link href={ROUTES.SIGNIN}>Try Again</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href={ROUTES.HOME}>Go Home</Link>
+              <Link href={ROUTES.DASHBOARD}>Go Home</Link>
             </Button>
           </div>
         </CardContent>

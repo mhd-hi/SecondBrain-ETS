@@ -2,9 +2,7 @@ import type { AIProviderName } from './config';
 import { ACTIVE_PROVIDER } from './config';
 import { parseContentWithAI } from './openai';
 
-export type { AIProviderName } from './config';
-
-export const aiProviders = {
+const aiProviders = {
   openai: parseContentWithAI,
   // Add more providers here
 };

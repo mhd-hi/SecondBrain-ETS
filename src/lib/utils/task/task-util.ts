@@ -1,6 +1,5 @@
 import type { Task } from '@/types/task';
 
-import { getCurrentTerm, getNextTerm } from '@/lib/utils';
 import { getDatesForTerm } from '@/lib/utils/term-util';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPES } from '@/types/task';
@@ -29,16 +28,6 @@ export const TASK_STATUS_CONFIG = {
   },
 } as const;
 
-export function calculateDueDateTask(week: number, firstDayOfClass?: Date): Date {
-  // Preserve legacy behavior: if no explicit term, choose current or next trimester this year,
-  // and synthesize a term id so we can delegate to the term-based calculator.
-  const tri = getCurrentTerm() ?? getNextTerm();
-  const year = new Date().getFullYear();
-  const digit = tri === 'winter' ? '1' : tri === 'summer' ? '2' : '3';
-  const termId = `${year}${digit}`;
-  return calculateDueDateTaskForTerm(termId, week, firstDayOfClass);
-}
-
 export function calculateDueDateTaskForTerm(termId: string, week: number, firstDayOfClass?: Date): Date {
   const termDates = getDatesForTerm(termId);
   // Use firstDayOfClass as base if provided, otherwise fall back to term start
@@ -54,35 +43,8 @@ export function calculateDueDateTaskForTerm(termId: string, week: number, firstD
   return dueDate > termDates.end ? termDates.end : dueDate;
 }
 
-// Task 1 starts on the first day of class
-// Task 2 is due 7 days later (week 2)
-// Task N is due (N-1) * 7 days after the first day
-export function calculateDueDateWithCustomStartDate(
-  startDate: Date,
-  taskNumber: number,
-  term: string,
-): Date {
-  // Calculate the due date based on custom start date
-  const daysToAdd = (taskNumber - 1) * 7; // Task 1 = 0 days, Task 2 = 7 days, etc.
-  const dueDate = new Date(startDate);
-  dueDate.setDate(dueDate.getDate() + daysToAdd);
-
-  // Try to get term end date for validation, but don't fail if term is invalid
-  try {
-    const termDates = getDatesForTerm(term);
-    if (termDates.end && dueDate > termDates.end) {
-      console.warn(`Task ${taskNumber} due date (${dueDate.toISOString()}) extends beyond term end date (${termDates.end.toISOString()}). Using term end date instead.`);
-      return termDates.end;
-    }
-  } catch (error) {
-    console.warn(`Could not validate against term end date for term "${term}":`, error);
-  }
-
-  return dueDate;
-}
-
 // Sorts tasks by due date and filters out completed tasks
-export const getTasksByDueDate = (tasks: Task[]) => {
+const getTasksByDueDate = (tasks: Task[]) => {
   return tasks
     .filter(task => task.status !== StatusTask.COMPLETED && task.dueDate != null)
     .sort((a, b) => {

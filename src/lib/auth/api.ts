@@ -11,7 +11,7 @@ export type AuthenticatedUser = {
 };
 
 //  Get authenticated user from middleware headers (fast path) or session (fallback)
-export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
+async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
   try {
     // Try to get user from middleware headers first (faster)
     const headersList = await headers();
@@ -60,7 +60,7 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
 /**
  * Require authentication and return user or throw error
  */
-export async function requireAuth(): Promise<AuthenticatedUser> {
+async function requireAuth(): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser();
 
   if (!user) {
@@ -90,7 +90,7 @@ export class AuthorizationError extends Error {
 /**
  * Standard error responses
  */
-export function createAuthErrorResponse(error: Error): NextResponse {
+function createAuthErrorResponse(error: Error): NextResponse {
   const errorMessage = error.message || '';
   const isDatabaseIssue = errorMessage.includes('timeout')
     || errorMessage.includes('ETIMEDOUT')

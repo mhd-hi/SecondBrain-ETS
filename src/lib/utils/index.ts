@@ -9,4 +9,3 @@ export * from './dialog-util';
 export * from './errors/error';
 export * from './task';
 export * from './term-util';
-export * from './ui-transition-util';

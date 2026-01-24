@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
-import getCourseActions from '@/components/shared/atoms/get-course-actions';
+import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
-import ChangeCourseColorDialog from '@/components/shared/dialogs/ChangeCourseColorDialog';
+import { ChangeCourseColorDialog } from '@/components/shared/dialogs/ChangeCourseColorDialog';
 import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
 import { getCoursePath } from '@/lib/routes';
 import {

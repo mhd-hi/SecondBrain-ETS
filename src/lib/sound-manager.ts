@@ -1,29 +1,49 @@
 import { Howl, Howler } from 'howler';
-import { filenameToDisplayKey, storageKeyToDisplayKey } from '@/lib/sound-keys';
 
-export const SOUND_DEFAULT = 'Sax';
+enum Sound {
+  Sax = 'Sax',
+  WestminsterChimes = 'Westminster Chimes',
+  CashOut = 'Cash Out',
+  CarLock = 'Car Lock',
+  Fahh = 'Fahh',
+  Laugh = 'Laugh',
+  ChickenNuggets = 'Chicken Nuggets',
+}
+
+export type SoundStorageKey = 'sax' | 'westminster_chimes' | 'cash_out' | 'car_lock' | 'fahh' | 'laugh' | 'chicken_nuggets';
+export const SOUND_DEFAULT_STORAGE: SoundStorageKey = 'westminster_chimes';
 const SOUND_DIR = '/sounds/';
-const SOUND_FILES = [
-    'sax.mp3',
-    'westminster_chimes.mp3',
-    'cash_out.mp3',
-    'car_lock.mp3',
-    'fahh.mp3',
-    'laugh.mp3',
-    'chicken_nuggets.mp3',
-];
 
-export const SOUND_KEYS = SOUND_FILES.reduce((acc, file) => {
-    const displayKey = filenameToDisplayKey(file);
-    acc[displayKey] = displayKey;
-    return acc;
-}, {} as Record<string, string>);
+type SoundFilename = `${SoundStorageKey}.mp3`;
+type SoundFilePath = `${typeof SOUND_DIR}${SoundFilename}`;
 
-const SOUND_FILE_MAP = SOUND_FILES.reduce((acc, file) => {
-    const displayKey = filenameToDisplayKey(file);
-    acc[displayKey] = SOUND_DIR + file;
-    return acc;
-}, {} as Record<string, string>);
+const SOUND_FILE_NAMES: Record<Sound, SoundFilename> = {
+  [Sound.Sax]: 'sax.mp3',
+  [Sound.WestminsterChimes]: 'westminster_chimes.mp3',
+  [Sound.CashOut]: 'cash_out.mp3',
+  [Sound.CarLock]: 'car_lock.mp3',
+  [Sound.Fahh]: 'fahh.mp3',
+  [Sound.Laugh]: 'laugh.mp3',
+  [Sound.ChickenNuggets]: 'chicken_nuggets.mp3',
+};
+
+const SOUND_FILE_MAP = Object.fromEntries(
+  Object.entries(SOUND_FILE_NAMES).map(([key, file]) => [key, SOUND_DIR + file]),
+) as Record<Sound, SoundFilePath>;
+
+export const STORAGE_TO_DISPLAY: Record<SoundStorageKey, Sound> = {
+  sax: Sound.Sax,
+  westminster_chimes: Sound.WestminsterChimes,
+  cash_out: Sound.CashOut,
+  car_lock: Sound.CarLock,
+  fahh: Sound.Fahh,
+  laugh: Sound.Laugh,
+  chicken_nuggets: Sound.ChickenNuggets,
+};
+
+export const SOUND_OPTIONS: { value: SoundStorageKey; label: Sound }[] = Object.entries(STORAGE_TO_DISPLAY).map(
+  ([k, v]) => ({ value: k as SoundStorageKey, label: v }),
+);
 
 let audioReady = false;
 let isInitializing = false;
@@ -33,14 +53,14 @@ let globalVolume = 1;
 const readyListeners: Set<(ready: boolean) => void> = new Set();
 
 function isClient() {
-    return typeof window !== 'undefined';
+  return typeof window !== 'undefined';
 }
 
 /**
  * Notify all listeners when ready state changes
  */
 function notifyReadyStateChange() {
-    readyListeners.forEach(listener => listener(audioReady));
+  readyListeners.forEach(listener => listener(audioReady));
 }
 
 /**
@@ -48,129 +68,121 @@ function notifyReadyStateChange() {
  * Required by browser autoplay policies
  */
 async function resumeAudioContext(): Promise<void> {
-    if (!isClient()) {
-        return;
-    }
+  if (!isClient()) {
+    return;
+  }
 
-    try {
-        // Access Howler's internal AudioContext
-        const ctx = (Howler as { ctx?: AudioContext }).ctx;
-        if (ctx && ctx.state === 'suspended') {
-            await ctx.resume();
-        }
-    } catch (error) {
-        console.log('Failed to resume AudioContext:', error);
+  try {
+    // Access Howler's internal AudioContext
+    const ctx = (Howler as { ctx?: AudioContext }).ctx;
+    if (ctx && ctx.state === 'suspended') {
+      await ctx.resume();
     }
+  } catch (error) {
+    console.log('Failed to resume AudioContext:', error);
+  }
 }
 
 export const soundManager = {
-    /**
-     * Initialize sound manager - idempotent, safe to call multiple times
-     * Returns a promise that resolves when initialization is complete
-     */
-    async init(): Promise<void> {
-        if (!isClient()) {
-            return;
+  /**
+   * Initialize sound manager - idempotent, safe to call multiple times
+   * Returns a promise that resolves when initialization is complete
+   */
+  async init(): Promise<void> {
+    if (!isClient()) {
+      return;
+    }
+
+    // Already initialized or initializing
+    if (audioReady || isInitializing) {
+      return;
+    }
+
+    isInitializing = true;
+
+    try {
+      Object.entries(SOUND_FILE_MAP).forEach(([displayKey, src]) => {
+        if (!preloaded[displayKey]) {
+          preloaded[displayKey] = new Howl({
+            src: [src],
+            volume: globalVolume,
+          });
         }
+      });
 
-        // Already initialized or initializing
-        if (audioReady || isInitializing) {
-            return;
-        }
+      audioReady = true;
+      notifyReadyStateChange();
+    } finally {
+      isInitializing = false;
+    }
+  },
 
-        isInitializing = true;
+  /**
+   * Resume audio context - call this on user interaction before playing sounds
+   * Returns true if successful, false otherwise
+   */
+  async resumeAudio(): Promise<boolean> {
+    if (!isClient()) {
+      return false;
+    }
 
-        try {
-            Object.entries(SOUND_FILE_MAP).forEach(([displayKey, src]) => {
-                if (!preloaded[displayKey]) {
-                    preloaded[displayKey] = new Howl({
-                        src: [src],
-                        volume: globalVolume,
-                    });
-                }
-            });
+    try {
+      await resumeAudioContext();
+      return true;
+    } catch (error) {
+      console.log('Failed to resume audio:', error);
+      return false;
+    }
+  },
 
-            audioReady = true;
-            notifyReadyStateChange();
-        } finally {
-            isInitializing = false;
-        }
-    },
+  setVolume(v: number) {
+    globalVolume = Math.max(0, Math.min(1, v));
+    Howler.volume(globalVolume);
+    Object.values(preloaded).forEach((howl) => {
+      howl.volume(globalVolume);
+    });
+  },
 
-    /**
-     * Resume audio context - call this on user interaction before playing sounds
-     * Returns true if successful, false otherwise
-     */
-    async resumeAudio(): Promise<boolean> {
-        if (!isClient()) {
-            return false;
-        }
+  play(key: Sound) {
+    if (!isClient() || !audioReady) {
+      return;
+    }
 
-        try {
-            await resumeAudioContext();
-            return true;
-        } catch (error) {
-            console.log('Failed to resume audio:', error);
-            return false;
-        }
-    },
+    const displayKey = key;
 
-    setVolume(v: number) {
-        globalVolume = Math.max(0, Math.min(1, v));
-        Howler.volume(globalVolume);
-        Object.values(preloaded).forEach((howl) => {
-            howl.volume(globalVolume);
-        });
-    },
+    soundManager.stop();
 
-    play(key: string) {
-        if (!isClient() || !audioReady) {
-            return;
-        }
+    const howl = preloaded[displayKey];
+    if (howl) {
+      currentHowl = howl;
+      howl.volume(globalVolume);
+      howl.play();
+    }
+  },
 
-        if (key === 'none' || key.toLowerCase() === 'none') {
-            soundManager.stop();
-            return;
-        }
+  stop() {
+    if (currentHowl) {
+      currentHowl.stop();
+      currentHowl = null;
+    }
+  },
 
-        let displayKey = key;
-        if (!displayKey.includes(' ') && !displayKey.match(/[A-Z]/)) {
-            displayKey = storageKeyToDisplayKey(key);
-        }
+  isReady(): boolean {
+    return audioReady;
+  },
 
-        soundManager.stop();
+  isInitializing(): boolean {
+    return isInitializing;
+  },
 
-        const howl = preloaded[displayKey];
-        if (howl) {
-            currentHowl = howl;
-            howl.volume(globalVolume);
-            howl.play();
-        }
-    },
-
-    stop() {
-        if (currentHowl) {
-            currentHowl.stop();
-            currentHowl = null;
-        }
-    },
-
-    isReady(): boolean {
-        return audioReady;
-    },
-
-    isInitializing(): boolean {
-        return isInitializing;
-    },
-
-    /**
-     * Subscribe to ready state changes
-     * Returns unsubscribe function
-     */
-    onReadyStateChange(listener: (ready: boolean) => void): () => void {
-        readyListeners.add(listener);
-        return () => {
-            readyListeners.delete(listener);
-        };
-    },
+  /**
+   * Subscribe to ready state changes
+   * Returns unsubscribe function
+   */
+  onReadyStateChange(listener: (ready: boolean) => void): () => void {
+    readyListeners.add(listener);
+    return () => {
+      readyListeners.delete(listener);
+    };
+  },
 };
