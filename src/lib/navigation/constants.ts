@@ -1,4 +1,4 @@
-import { ROUTES } from '@/lib/routes';
+import { getCalendarPath, getPomodoroPath, ROUTES } from '@/lib/routes';
 
 export const navbarItems = [
   {
@@ -8,12 +8,12 @@ export const navbarItems = [
   },
   {
     title: 'Pomodoro',
-    url: ROUTES.POMODORO,
+    url: getPomodoroPath(),
     icon: '🍅',
   },
   {
     title: 'Calendar',
-    url: ROUTES.CALENDAR,
+    url: getCalendarPath(),
     icon: '📅',
   },
 ];

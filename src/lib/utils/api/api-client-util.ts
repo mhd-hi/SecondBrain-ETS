@@ -10,7 +10,7 @@ export const validateApiResponse = async <T>(response: Response): Promise<T> => 
   return response.json() as Promise<T>;
 };
 
-export const apiRequest = async <T>(
+const apiRequest = async <T>(
   url: string,
   options: RequestInit = {},
   errorMessage = 'Request failed',

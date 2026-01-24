@@ -60,7 +60,7 @@ async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> {
 /**
  * Require authentication and return user or throw error
  */
-export async function requireAuth(): Promise<AuthenticatedUser> {
+async function requireAuth(): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser();
 
   if (!user) {

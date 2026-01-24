@@ -41,8 +41,6 @@ export const STORAGE_TO_DISPLAY: Record<SoundStorageKey, Sound> = {
   chicken_nuggets: Sound.ChickenNuggets,
 };
 
-export const SOUND_DEFAULT: Sound = STORAGE_TO_DISPLAY[SOUND_DEFAULT_STORAGE];
-
 export const SOUND_OPTIONS: { value: SoundStorageKey; label: Sound }[] = Object.entries(STORAGE_TO_DISPLAY).map(
   ([k, v]) => ({ value: k as SoundStorageKey, label: v }),
 );

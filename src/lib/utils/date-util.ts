@@ -34,30 +34,6 @@ export const formatBadgeDate = (date: Date | null | undefined): string => {
   }).format(validDate);
 };
 
-// Get the start of the current week (Monday)
-const getWeekStart = (weekOffset: number) => {
-  const now = new Date();
-  const start = new Date(now);
-  // Get Monday as the start of the week
-  // getDay() returns 0 for Sunday, 1 for Monday, etc.
-  // We want Monday (1) to be our week start
-  const dayOfWeek = now.getDay();
-  const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday, go back 6 days, otherwise go to Monday
-  start.setDate(now.getDate() + daysToMonday + weekOffset * 7);
-  start.setHours(0, 0, 0, 0);
-  return start;
-};
-
-// Generate array of dates for the week
-export const getWeekDates = (weekOffset: number) => {
-  const start = getWeekStart(weekOffset);
-  return Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(start);
-    date.setDate(start.getDate() + i);
-    return date;
-  });
-};
-
 // Format week range for display
 export const formatWeekRange = (dates: Date[]) => {
   if (dates.length === 0) {

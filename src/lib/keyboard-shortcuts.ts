@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { ROUTES } from './routes';
+import { getCalendarPath, ROUTES } from './routes';
 
 type Dialog = 'add-task';
 
@@ -47,7 +47,7 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
     key: 'c',
     ctrl: true,
     alt: true,
-    action: { type: 'navigate', path: ROUTES.CALENDAR },
+    action: { type: 'navigate', path: getCalendarPath() },
     description: 'Go to Calendar',
   },
   // Dialog shortcuts
@@ -101,7 +101,8 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMac
         = typeof navigator !== 'undefined'
-          && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+        // eslint-disable-next-line style/indent-binary-ops
+        && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
 
       const matchingShortcut = KEYBOARD_SHORTCUTS.find((shortcut) => {
         const keyMatches = e.key.toLowerCase() === shortcut.key.toLowerCase();
@@ -144,7 +145,8 @@ export function useKeyboardShortcuts(handlers: ShortcutHandlers) {
 export function getShortcutDisplayText(shortcut: KeyboardShortcut): string {
   const isMac
     = typeof navigator !== 'undefined'
-      && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+    // eslint-disable-next-line style/indent-binary-ops
+    && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
   const parts: string[] = [];
 
   if (shortcut.ctrl) {
