@@ -6,6 +6,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { SOUND_DEFAULT_STORAGE, soundManager } from '@/lib/sound-manager';
 import { api } from '@/lib/utils/api/api-client-util';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { playSelectedNotificationSound } from '@/lib/utils/audio-util';
 
 export const DEFAULT_WORK_DURATION = 25;
@@ -314,7 +315,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
             const completedMinutes = state.totalTimeSec / 60;
             const durationHours = completedMinutes / 60;
             try {
-              const data = await api.post<{ streakDays?: number }>('/api/pomodoro/complete', {
+              const data = await api.post<{ streakDays?: number }>(API_ENDPOINTS.POMODORO.COMPLETE, {
                 durationHours,
                 taskId: state.currentTask?.id,
               });
@@ -340,7 +341,7 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
         fetchStreak: async () => {
           try {
-            const data = await api.get<{ streakDays?: number }>('/api/pomodoro/streak');
+            const data = await api.get<{ streakDays?: number }>(API_ENDPOINTS.POMODORO.STREAK);
             const streakDays = data && typeof data.streakDays === 'number' ? data.streakDays : 0;
             set({ streak: streakDays });
           } catch (error) {

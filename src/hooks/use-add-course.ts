@@ -19,6 +19,7 @@ import { checkCourseExists } from '@/hooks/use-course';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
 import { normalizeTasks } from '@/lib/ai';
 import { api } from '@/lib/utils/api/api-client-util';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { assertValidCourseCode } from '@/lib/utils/course';
 import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
 import { UNIVERSITY } from '@/types/university';
@@ -45,7 +46,7 @@ export type UseAddCourseReturn = {
 async function fetchCourseFromPlanETS(courseCode: string, term: string) {
   const cleanCode = assertValidCourseCode(courseCode);
 
-  const response = await fetch('/api/course-pipeline', {
+  const response = await fetch(API_ENDPOINTS.COURSES.PIPELINE, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ async function parseCourseWithAI(
 ): Promise<CourseAIResponse> {
   const cleanCode = assertValidCourseCode(courseCode);
 
-  const response = await fetch('/api/course-pipeline', {
+  const response = await fetch(API_ENDPOINTS.COURSES.PIPELINE, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ async function createCourse(
   const cleanCode = assertValidCourseCode(courseCode);
 
   const course = await api.post<{ id: string }>(
-    '/api/courses',
+    API_ENDPOINTS.COURSES.LIST,
     {
       code: cleanCode,
       name: courseName,
@@ -154,7 +155,7 @@ async function createTasks(
   });
 
   await api.post(
-    '/api/tasks',
+    API_ENDPOINTS.TASKS.LIST,
     {
       courseId,
       tasks: tasksWithDueDates,

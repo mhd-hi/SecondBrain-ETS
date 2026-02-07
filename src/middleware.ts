@@ -1,30 +1,31 @@
 import { NextResponse } from 'next/server';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { auth } from '@/middleware/auth';
 
 // Define routes that require authentication with more comprehensive patterns
 const protectedApiRoutes = [
-  '/api/courses',
-  '/api/tasks',
-  '/api/cron/cleanup-courses', // Protect cron jobs
-  '/api/pomodoro',
-  '/api/course-pipeline',
-  '/api/parse-course',
-  '/api/custom-links',
+  API_ENDPOINTS.COURSES.LIST,
+  API_ENDPOINTS.TASKS.LIST,
+  API_ENDPOINTS.POMODORO.BASE,
+  API_ENDPOINTS.COURSES.PIPELINE,
+  API_ENDPOINTS.PARSE_COURSE.BASE,
+  API_ENDPOINTS.CUSTOM_LINKS.LIST,
+  API_ENDPOINTS.CRON.CLEANUP_COURSES,
 ];
 
 // Define public API routes that should not be protected
 const publicApiRoutes = [
-  '/api/auth',
+  API_ENDPOINTS.AUTH.BASE,
 ];
 
 // Define public pages that don't require authentication
 const publicPages = [
-  '/api/auth/signin',
-  '/api/auth/signout',
-  '/api/auth/callback',
-  '/api/auth/csrf',
-  '/api/auth/session',
-  '/api/auth/providers',
+  API_ENDPOINTS.AUTH.SIGN_IN,
+  API_ENDPOINTS.AUTH.SIGN_OUT,
+  API_ENDPOINTS.AUTH.CALLBACK,
+  `${API_ENDPOINTS.AUTH.BASE}/csrf`,
+  `${API_ENDPOINTS.AUTH.BASE}/session`,
+  `${API_ENDPOINTS.AUTH.BASE}/providers`,
   '/auth/error',
   '/auth/signin',
 ];

@@ -12,7 +12,6 @@ import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-
 import { CourseUpdateDialog } from '@/components/shared/dialogs/CourseUpdateDialog';
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 
@@ -21,10 +20,12 @@ import { TaskCard } from '@/components/Task/TaskCard';
 import { Button } from '@/components/ui/button';
 import { useCourses } from '@/hooks/use-course-store';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
+import { useCourseCustomLinksStore } from '@/hooks/use-custom-link-store';
 import { batchUpdateStatusTask } from '@/hooks/use-task';
 import { useCourseTasksStore } from '@/hooks/use-task-store';
 import { ROUTES } from '@/lib/routes';
 import { useCourseStore } from '@/lib/stores/course-store';
+import { useCustomLinkStore } from '@/lib/stores/custom-link-store';
 import { useTaskStore } from '@/lib/stores/task-store';
 import { getWeekNumberFromDueDate } from '@/lib/utils/date-util';
 import { handleConfirm } from '@/lib/utils/dialog-util';
@@ -54,14 +55,18 @@ export default function CoursePage({ params }: CoursePageProps) {
   const tasks = useCourseTasksStore(courseId);
   const isLoading = useTaskStore(state => state.isLoading);
 
+  // Get custom links directly from the store for automatic reactivity
+  const customLinks = useCourseCustomLinksStore(courseId);
+
   // Get store methods for operations
   const updateTaskStatus = useTaskStore(state => state.updateTaskStatus);
   const removeTask = useTaskStore(state => state.removeTask);
   const deleteCourseFromStore = useCourseStore(state => state.removeCourse);
   const updateCourseField = useCourseStore(state => state.updateCourseField);
   const fetchTasksByCourse = useTaskStore(state => state.fetchTasksByCourse);
+  const fetchCustomLinksByCourse = useCustomLinkStore(state => state.fetchCustomLinksByCourse);
 
-  // Fetch tasks when component mounts or courseId changes
+  // Fetch tasks and custom links when component mounts or courseId changes
   // Only fetch if courseId is a valid UUID (not a custom link URL)
   useEffect(() => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -70,12 +75,15 @@ export default function CoursePage({ params }: CoursePageProps) {
       fetchTasksByCourse(courseId).catch((error: unknown) => {
         console.error('Failed to fetch tasks:', error);
       });
+      fetchCustomLinksByCourse(courseId).catch((error: unknown) => {
+        console.error('Failed to fetch custom links:', error);
+      });
     } else if (courseId && !uuidRegex.test(courseId)) {
       // Invalid course ID format - redirect to home
       console.warn('Invalid course ID format, redirecting:', courseId);
       router.push(ROUTES.DASHBOARD);
     }
-  }, [courseId, fetchTasksByCourse, router]);
+  }, [courseId, fetchTasksByCourse, fetchCustomLinksByCourse, router]);
 
   // Track when Add Task button scrolls out of view
   useEffect(() => {
@@ -320,7 +328,7 @@ export default function CoursePage({ params }: CoursePageProps) {
         <section>
           <CourseCustomLinks
             courseId={course.id}
-            customLinks={course.customLinks ?? []}
+            customLinks={customLinks}
           />
         </section>
         <section>

@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useTaskStore } from '@/lib/stores/task-store';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 
 /**
  * Hook to update a field for a task or subtask via API.
@@ -18,10 +19,10 @@ export function useUpdateField() {
     let endpoint = '';
     switch (params.type) {
       case 'task':
-        endpoint = '/api/tasks/update';
+        endpoint = API_ENDPOINTS.TASKS.UPDATE;
         break;
       case 'subtask':
-        endpoint = '/api/subtasks/update';
+        endpoint = API_ENDPOINTS.TASKS.SUBTASK_UPDATE;
         break;
       default:
         console.error('Invalid type for update:', params.type);

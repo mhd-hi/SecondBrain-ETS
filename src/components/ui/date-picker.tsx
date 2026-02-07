@@ -21,16 +21,26 @@ type DatePickerProps = {
 };
 
 export function DatePicker({ date, onDateChange, className, open }: DatePickerProps) {
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = open !== undefined;
+  const popoverOpen = isControlled ? open : internalOpen;
+  const setPopoverOpen = (value: boolean) => {
+    if (!isControlled) {
+      setInternalOpen(value);
+    }
+  };
+
   return (
-    <Popover open={open}>
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           className={cn(
-            'w-[240px] justify-start text-left font-normal border-input',
+            'w-60 justify-start text-left font-normal border-input',
             !date && 'text-muted-foreground',
             className,
           )}
+
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
           {date ? format(date, 'PPP') : <span>Pick a date</span>}

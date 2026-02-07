@@ -4,14 +4,15 @@ import type { Task } from '@/types/task';
 import type { FilterType } from '@/types/todays-focus';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/utils/api/api-client-util';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { withLoadingState } from '@/lib/utils/api/loading-util';
 
 export const fetchFocusTasks = async (filter: FilterType): Promise<Task[]> => {
-  return api.get(`/api/tasks/focus?filter=${filter}`, 'Failed to fetch focus tasks');
+  return api.get(`${API_ENDPOINTS.TASKS.FOCUS}?filter=${filter}`, 'Failed to fetch focus tasks');
 };
 
 const fetchCalendarTasks = async (startDate: Date, endDate: Date): Promise<TEvent[]> => {
-  return api.get(`/api/tasks/calendar?start=${startDate.toISOString()}&end=${endDate.toISOString()}`, 'Failed to fetch calendar tasks');
+  return api.get(`${API_ENDPOINTS.TASKS.CALENDAR}?start=${startDate.toISOString()}&end=${endDate.toISOString()}`, 'Failed to fetch calendar tasks');
 };
 
 export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTask): Promise<{
@@ -19,7 +20,7 @@ export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTas
   status: StatusTask;
   updatedTasks: Task[];
 }> => {
-  return api.patch('/api/tasks/batch/status', { taskIds, status }, 'Failed to batch update task status');
+  return api.patch(API_ENDPOINTS.TASKS.BATCH_STATUS, { taskIds, status }, 'Failed to batch update task status');
 };
 
 export const useCalendarTasks = () => {

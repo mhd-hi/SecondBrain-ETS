@@ -36,6 +36,8 @@ type AddTaskDialogProps = {
   onOpenChange?: (open: boolean) => void;
 };
 
+const DEFAULT_ESTIMATED_EFFORT = 3;
+
 export const AddTaskDialog = ({
   courseId,
   courseCode,
@@ -108,7 +110,7 @@ export const AddTaskDialog = ({
       setNewTask({
         title: '',
         notes: '',
-        estimatedEffort: 1,
+        estimatedEffort: DEFAULT_ESTIMATED_EFFORT,
         dueDate: effectiveDueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Today + 1 week
         type: TASK_TYPES.THEORIE,
         status: StatusTask.TODO,

@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { withAuthSimple } from '@/lib/auth/api';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { db } from '@/server/db';
 import { users } from '@/server/db/schema';
 
@@ -65,7 +66,7 @@ export const GET = withAuthSimple(
         lastCompletedPomodoroDate: userData.lastCompletedPomodoroDate,
       });
     } catch (error) {
-      console.error('Failed to fetch user streak:', { error, userId: user?.id, endpoint: '/api/pomodoro/streak' });
+      console.error('Failed to fetch user streak:', { error, userId: user?.id, endpoint: API_ENDPOINTS.POMODORO.STREAK });
       return NextResponse.json(
         { error: 'Failed to fetch streak information' },
         { status: 500 },

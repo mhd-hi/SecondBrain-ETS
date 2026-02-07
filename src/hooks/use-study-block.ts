@@ -17,14 +17,7 @@ export function useStudyBlock() {
     setError(null);
     return withLoadingState(async () => {
       try {
-        // TODO: Implement API call when study blocks API is ready
-        // await api.post('/api/study-blocks', {
-        //   daypart,
-        //   startAt: startAt.toISOString(),
-        //   endAt: endAt.toISOString(),
-        //   courseIds,
-        // });
-
+        // TODO: remove studyBlock
         // For now, just show a success message
         console.log('Adding study block:', { daypart, startAt, endAt, courseIds });
         toast.success('Study block added successfully (API not implemented yet)');

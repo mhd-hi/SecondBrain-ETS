@@ -32,16 +32,6 @@ export async function getUserCourses(userId: string) {
           dueDate: true,
         },
       },
-      customLinks: {
-        columns: {
-          id: true,
-          url: true,
-          title: true,
-          type: true,
-          imageUrl: true,
-          courseId: true,
-        },
-      },
     },
   });
 }

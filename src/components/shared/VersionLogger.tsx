@@ -8,7 +8,7 @@ export function VersionLogger() {
     const buildId = process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF || 'local';
 
     console.log(
-      `%c🧠 SecondBrain ETS %cv${version} %c(${buildId})`,
+      `%c🧠 SecondBrain ETS %cversion-${version} %c(${buildId})`,
       'color: #3b82f6; font-weight: bold; font-size: 14px',
       'color: #10b981; font-weight: bold',
       'color: #6b7280',

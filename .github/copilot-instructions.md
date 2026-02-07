@@ -45,23 +45,25 @@ export const POST = withAuthSimple(async (request, user) => {
 ### API Client Pattern
 
 - **Always use the centralized `api` utility** (`src/lib/utils/api/api-client-util.ts`) instead of raw `fetch`
+- **Always use centralized endpoint constants** (`src/lib/utils/api/endpoints.ts`) instead of hardcoded API paths
 - **Available methods**: `api.get()`, `api.post()`, `api.put()`, `api.patch()`, `api.delete()`
 - **Benefits**: Consistent error handling, automatic JSON parsing, centralized configuration
 - **Stores can make API calls**: Zustand stores handle API operations directly for better state management
 
   ```typescript
   import { api } from "@/lib/utils/api/api-client-util";
+  import { API_ENDPOINTS } from "@/lib/utils/api/endpoints";
 
   // In a store or hook
   const data = await api.post(
-    "/api/tasks",
+    API_ENDPOINTS.TASKS.LIST,
     { title: "New task" },
     "Failed to create task",
   );
 
   // Error handling is automatic, but you can add custom error messages
   try {
-    await api.delete("/api/tasks/123");
+    await api.delete(API_ENDPOINTS.TASKS.DETAIL(taskId));
   } catch (error) {
     toast.error("Custom error message");
   }

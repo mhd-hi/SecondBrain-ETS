@@ -7,10 +7,9 @@ import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { useCallback, useState } from 'react';
 import { api } from '@/lib/utils/api/api-client-util';
+import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
 import { withLoadingAndErrorHandling } from '@/lib/utils/api/loading-util';
 import { ErrorHandlers } from '@/lib/utils/errors/error';
-import { getDefaultImageFor } from '@/lib/utils/url-util';
-import { LINK_TYPES } from '@/types/custom-link';
 
 export function useCourse(courseId: string) {
   const [course, setCourse] = useState<Course | null>(null);
@@ -20,7 +19,7 @@ export function useCourse(courseId: string) {
   const fetchCourse = useCallback(async () => {
     await withLoadingAndErrorHandling(
       async () => {
-        const data = await api.get<CourseApiResponse>(`/api/courses/${courseId}`);
+        const data = await api.get<CourseApiResponse>(API_ENDPOINTS.COURSES.DETAIL(courseId));
 
         const tasksWithValidatedDates: Task[] = data.tasks.map(task => ({
           ...task,
@@ -39,18 +38,12 @@ export function useCourse(courseId: string) {
           },
         }));
 
-        const linksWithImages = data.customLinks.map(link => ({
-          ...link,
-          imageUrl: link.imageUrl ?? getDefaultImageFor(link.type ?? LINK_TYPES.CUSTOM),
-        }));
-
         setCourse({
           ...data,
           color: data.color as TCourseColor,
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
           tasks: tasksWithValidatedDates,
-          customLinks: linksWithImages,
         });
         setTasks(tasksWithValidatedDates);
       },
@@ -72,7 +65,7 @@ export function useCourse(courseId: string) {
   const updateCourseColor = useCallback(async (color: TCourseColor) => {
     await withLoadingAndErrorHandling(
       async () => {
-        const res = await fetch(`/api/courses/${courseId}`, {
+        const res = await fetch(API_ENDPOINTS.COURSES.DETAIL(courseId), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -99,7 +92,7 @@ export function useCourse(courseId: string) {
   const updateCourseDaypart = useCallback(async (daypart: Daypart) => {
     await withLoadingAndErrorHandling(
       async () => {
-        const res = await fetch(`/api/courses/${courseId}`, {
+        const res = await fetch(API_ENDPOINTS.COURSES.DETAIL(courseId), {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -124,7 +117,7 @@ export function useCourse(courseId: string) {
   const deleteCourse = useCallback(async () => {
     await withLoadingAndErrorHandling(
       async () => {
-        await api.delete(`/api/courses/${courseId}`, 'Failed to delete course');
+        await api.delete(API_ENDPOINTS.COURSES.DETAIL(courseId), 'Failed to delete course');
       },
       setIsLoading,
       (error) => {
@@ -153,7 +146,7 @@ export const checkCourseExists = async (code: string, term: string): Promise<{
   exists: boolean;
   course?: { id: string; code: string; name: string };
 }> => {
-  const response = await fetch(`/api/courses/exists?code=${encodeURIComponent(code)}&term=${encodeURIComponent(term)}`);
+  const response = await fetch(API_ENDPOINTS.COURSES.EXISTS(code, term));
 
   if (!response.ok) {
     throw new Error(`Failed to check course existence: ${response.statusText}`);
@@ -166,5 +159,5 @@ export const checkCourseExists = async (code: string, term: string): Promise<{
 };
 
 export async function deleteCourseById(courseId: string) {
-  return api.delete(`/api/courses/${courseId}`, 'Failed to delete course');
+  return api.delete(API_ENDPOINTS.COURSES.DETAIL(courseId), 'Failed to delete course');
 }
