@@ -4,7 +4,6 @@ import {
   date,
   index,
   integer,
-  json,
   pgTable,
   primaryKey,
   real,
@@ -190,14 +189,6 @@ export const customLinks = pgTable(
     index('idx_custom_links_course_id').on(table.courseId),
   ],
 );
-
-export const coursesCache = pgTable('courses_cache', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  courseCode: text('course_code').notNull().unique(),
-  parsedContent: json('parsed_content').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

@@ -106,6 +106,13 @@
       "when": 1770478600199,
       "tag": "0014_huge_tusk",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1770478692327,
+      "tag": "0015_warm_black_tom",
+      "breakpoints": true
     }
   ]
 }
