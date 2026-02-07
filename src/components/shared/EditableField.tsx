@@ -61,7 +61,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       // Single line, ellipsis
       return (
         <span
-          className="block truncate"
+          className={`block truncate ${!value ? 'opacity-50' : ''}`}
           style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
         >
           {value || placeholder}
@@ -76,7 +76,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       }
       return (
         <span
-          className="block overflow-hidden"
+          className={`block overflow-hidden ${!value ? 'opacity-50' : ''}`}
           style={{ display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', whiteSpace: 'normal', textOverflow: 'ellipsis' }}
         >
           {display || placeholder}

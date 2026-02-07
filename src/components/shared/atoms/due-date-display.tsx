@@ -40,10 +40,11 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
           <button
             type="button"
             className={cn(
-              'text-xs font-medium flex items-center gap-1 text-muted-foreground transition-colors duration-150 hover:text-foreground',
+              'text-xs font-medium flex items-center gap-1 text-muted-foreground transition-colors duration-150 hover:text-foreground min-h-7 md:min-h-0',
               className,
             )}
             title="Choose due date"
+            onClick={e => e.stopPropagation()}
           >
             <CalendarIcon className="h-3 w-3 shrink-0" />
             No due date
@@ -86,11 +87,12 @@ export const DueDateDisplay = ({ date, className, onChange }: DueDateDisplayProp
         <button
           type="button"
           className={cn(
-            'text-xs font-medium flex items-center gap-1 transition-colors duration-150',
+            'text-xs font-medium flex items-center gap-1 transition-colors duration-150 min-h-7 md:min-h-0',
             isOverdue ? 'text-amber-500 hover:text-yellow-500 transition-all duration-300 ease-in-out' : 'text-muted-foreground hover:text-foreground',
             className,
           )}
           title="Choose due date"
+          onClick={e => e.stopPropagation()}
         >
           <CalendarIcon className="h-3 w-3 shrink-0" />
           {formattedBadgeDate}
