@@ -3,7 +3,6 @@ import { CalendarRange, Columns, Grid2x2, Grid3x3, List, Plus } from 'lucide-rea
 import { useState } from 'react';
 import { NavigationControls } from '@/components/Calendar/NavigationControls';
 
-import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +19,6 @@ export function CalendarHeader() {
   const setView = useCalendarViewStore(state => state.setView);
   const { courses } = useCourses();
   const [addTaskOpen, setAddTaskOpen] = useState(false);
-  const [addStudyBlockOpen, setAddStudyBlockOpen] = useState(false);
 
   const selectedDate = useCalendarViewStore(state => state.selectedDate);
   const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
@@ -126,27 +124,8 @@ export function CalendarHeader() {
                   Add Task
                 </button>
               </DropdownMenuItem>
-              {/* FIXME: WIP make study block work */}
-              {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
-              ? (
-                <DropdownMenuItem asChild>
-                  <button type="button" className="w-full text-left" onClick={() => setAddStudyBlockOpen(true)}>
-                    Add Study Block
-                  </button>
-                </DropdownMenuItem>
-                )
-                : null}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <AddStudyBlockDialog
-            open={addStudyBlockOpen}
-            onOpenChange={setAddStudyBlockOpen}
-            courses={courses}
-            selectedDate={selectedDate}
-            trigger={false}
-            onStudyBlockAdded={() => setAddStudyBlockOpen(false)}
-          />
           <AddTaskDialog
             open={addTaskOpen}
             onOpenChange={setAddTaskOpen}

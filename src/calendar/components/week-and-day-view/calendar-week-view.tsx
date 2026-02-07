@@ -6,7 +6,6 @@ import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calend
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { TimeSlotBlock } from '@/calendar/components/week-and-day-view/time-slot-block';
 import { getEventBlockStyle, getVisibleHours, groupEvents } from '@/calendar/helpers';
-import { AddStudyBlockDialog } from '@/components/shared/dialogs/AddStudyBlockDialog';
 
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,7 +20,6 @@ type IProps = {
 
 export function CalendarWeekView({ events, courses }: IProps) {
   const [taskDialogOpen, setTaskDialogOpen] = React.useState(false);
-  const [studyBlockDialogOpen, setStudyBlockDialogOpen] = React.useState(false);
   const selectedDate = useCalendarViewStore(state => state.selectedDate);
   const setSelectedDate = useCalendarViewStore(state => state.setSelectedDate);
   const visibleHours = useCalendarViewStore(state => state.visibleHours);
@@ -138,10 +136,6 @@ export function CalendarWeekView({ events, courses }: IProps) {
                                       setSelectedDate(slotDate);
                                       setTaskDialogOpen(true);
                                     }}
-                                    onAddStudyBlock={() => {
-                                      setSelectedDate(slotDate);
-                                      setStudyBlockDialogOpen(true);
-                                    }}
                                   />
                                 </div>
                               );
@@ -183,14 +177,6 @@ export function CalendarWeekView({ events, courses }: IProps) {
         dueDate={selectedDate ?? new Date('2027-01-01')}
         onTaskAdded={() => setTaskDialogOpen(false)}
         trigger={false}
-      />
-      <AddStudyBlockDialog
-        open={studyBlockDialogOpen}
-        onOpenChange={setStudyBlockDialogOpen}
-        selectedDate={selectedDate ?? new Date()}
-        onStudyBlockAdded={() => setStudyBlockDialogOpen(false)}
-        trigger={false}
-        courses={courses}
       />
     </>
   );

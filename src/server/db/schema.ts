@@ -1,7 +1,6 @@
 import type { AdapterAccountType } from 'next-auth/adapters';
 import { relations, sql } from 'drizzle-orm';
 import {
-  boolean,
   date,
   index,
   integer,
@@ -9,7 +8,6 @@ import {
   pgTable,
   primaryKey,
   real,
-  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -60,20 +58,6 @@ export const sessions = pgTable('session', {
     .references(() => users.id, { onDelete: 'cascade' }),
   expires: timestamp('expires', { mode: 'date' }).notNull(),
 });
-
-export const verificationTokens = pgTable(
-  'verificationToken',
-  {
-    identifier: text('identifier').notNull(),
-    token: text('token').notNull(),
-    expires: timestamp('expires', { mode: 'date' }).notNull(),
-  },
-  verificationToken => [
-    primaryKey({
-      columns: [verificationToken.identifier, verificationToken.token],
-    }),
-  ],
-);
 
 export const terms = pgTable('terms', {
   id: text('id').primaryKey(), // '20253'
@@ -215,49 +199,6 @@ export const coursesCache = pgTable('courses_cache', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Study blocks - individual study sessions
-export const studyBlocks = pgTable(
-  'study_blocks',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    daypart: text('daypart', { enum: ['EVEN', 'AM', 'PM'] }).notNull(),
-    startAt: timestamp('start_at').notNull(),
-    endAt: timestamp('end_at').notNull(),
-    isCompleted: boolean('is_completed').notNull().default(false),
-  },
-  t => [
-    uniqueIndex('uniq_study_blocks_user_daypart').on(
-      t.userId,
-      t.daypart,
-      t.endAt,
-    ),
-    index('idx_study_blocks_user_day').on(t.userId, t.startAt, t.endAt),
-  ],
-);
-
-// Ordered interleave items (A→B→C)
-export const studyBlockItems = pgTable(
-  'study_block_items',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    studyBlockId: uuid('study_block_id')
-      .notNull()
-      .references(() => studyBlocks.id, { onDelete: 'cascade' }),
-    courseId: uuid('course_id')
-      .notNull()
-      .references(() => courses.id, { onDelete: 'cascade' }),
-    order: smallint('order').notNull(), // 1.2.3 (position in the interleave)
-  },
-  t => [
-    uniqueIndex('uniq_block_order').on(t.studyBlockId, t.order), // never two items at same position
-    index('idx_block_items_block').on(t.studyBlockId),
-    index('idx_block_items_course').on(t.courseId),
-  ],
-);
-
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -265,7 +206,6 @@ export const usersRelations = relations(users, ({ many }) => ({
   courses: many(courses),
   tasks: many(tasks),
   customLinks: many(customLinks),
-  studyBlocks: many(studyBlocks),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -280,7 +220,6 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   user: one(users, { fields: [courses.userId], references: [users.id] }),
   tasks: many(tasks),
   customLinks: many(customLinks),
-  studyBlockItems: many(studyBlockItems),
 }));
 
 export const customLinksRelations = relations(customLinks, ({ one }) => ({
@@ -303,25 +242,6 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
 export const subtasksRelations = relations(subtasks, ({ one }) => ({
   task: one(tasks, { fields: [subtasks.taskId], references: [tasks.id] }),
 }));
-
-export const studyBlocksRelations = relations(studyBlocks, ({ one, many }) => ({
-  user: one(users, { fields: [studyBlocks.userId], references: [users.id] }),
-  studyBlockItems: many(studyBlockItems),
-}));
-
-export const courseStudyBlocksRelations = relations(
-  studyBlockItems,
-  ({ one }) => ({
-    studyBlock: one(studyBlocks, {
-      fields: [studyBlockItems.studyBlockId],
-      references: [studyBlocks.id],
-    }),
-    course: one(courses, {
-      fields: [studyBlockItems.courseId],
-      references: [courses.id],
-    }),
-  }),
-);
 
 // SQL function to delete courses and related data older than 8 months for all users
 export const deleteOldCourses = sql`

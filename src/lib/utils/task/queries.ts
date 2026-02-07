@@ -2,8 +2,7 @@ import type { TEvent } from '@/calendar/types';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
 import { and, eq, gte, lt } from 'drizzle-orm';
-import { studyBlockToEvent, taskToEvent } from '@/calendar/event-utils';
-import { getStudyBlocksForDateRange } from '@/lib/utils/study-block/queries';
+import { taskToEvent } from '@/calendar/event-utils';
 import { db } from '@/server/db';
 import { courses, tasks } from '@/server/db/schema';
 
@@ -159,12 +158,7 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
       return taskToEvent(task);
     });
 
-    // Fetch study blocks
-    const studyBlocks = await getStudyBlocksForDateRange(startDate, endDate, userId);
-    // Convert study blocks to events
-    const studyBlockEvents = studyBlocks.map(studyBlockToEvent);
-
-    return [...taskEvents, ...studyBlockEvents];
+    return [...taskEvents];
   } catch (error) {
     console.error('Error fetching calendar events:', error);
     throw new Error('Failed to fetch calendar events');

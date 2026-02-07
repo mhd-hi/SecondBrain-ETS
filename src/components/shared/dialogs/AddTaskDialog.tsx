@@ -138,10 +138,10 @@ export const AddTaskDialog = ({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent aria-describedby="add-task-description">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Task</DialogTitle>
-          <DialogDescription id="add-task-description">
+          <DialogDescription>
             {courseCode ? `Add a new task for ${courseCode}` : 'Add a new task'}
           </DialogDescription>
         </DialogHeader>
