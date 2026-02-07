@@ -133,7 +133,7 @@ function createAuthErrorResponse(error: Error): NextResponse {
 export function withAuth<TParams = Record<string, string>>(
   handler: (
     request: NextRequest,
-    context: { params: Promise<TParams>; user: AuthenticatedUser }
+    context: { params: Promise<TParams>; user: AuthenticatedUser },
   ) => Promise<NextResponse>,
 ) {
   return async (

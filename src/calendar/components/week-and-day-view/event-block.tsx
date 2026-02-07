@@ -5,7 +5,7 @@ import type { TEvent } from '@/calendar/types';
 
 import { cva } from 'class-variance-authority';
 import { format } from 'date-fns';
-import React from 'react';
+import * as React from 'react';
 import { EventDetailsDialog } from '@/calendar/components/dialogs/event-details-dialog';
 import { DraggableEvent } from '@/calendar/components/dnd/draggable-event';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';

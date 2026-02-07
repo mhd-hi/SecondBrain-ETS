@@ -2,7 +2,8 @@
 
 import { NotebookText, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
 import {
   CommandDialog,

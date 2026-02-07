@@ -1,5 +1,5 @@
 import type { Course } from '@/types/course';
-import React from 'react';
+import * as React from 'react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 type TimeSlotBlockProps = {

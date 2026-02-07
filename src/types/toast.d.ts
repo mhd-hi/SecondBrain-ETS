@@ -1,5 +1,5 @@
 declare module 'sonner' {
-  import type React from 'react';
+  import type * as React from 'react';
 
   type ToastOptions = {
     description?: string;
