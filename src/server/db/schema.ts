@@ -82,7 +82,9 @@ export const courses = pgTable('courses', {
     .default('AM'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, table => [
+  index('idx_courses_term').on(table.term),
+]);
 
 export const tasks = pgTable(
   'tasks',
@@ -115,6 +117,7 @@ export const tasks = pgTable(
     index('idx_tasks_user_id').on(table.userId),
     index('idx_tasks_course_id').on(table.courseId),
     index('idx_tasks_user_course').on(table.userId, table.courseId),
+    index('idx_tasks_status').on(table.status),
   ],
 );
 
@@ -143,6 +146,7 @@ export const subtasks = pgTable(
   table => [
     // Index for subtasks queries: WHERE task_id IN (taskIds)
     index('idx_subtasks_task_id').on(table.taskId),
+    index('idx_subtasks_status').on(table.status),
   ],
 );
 
