@@ -5,9 +5,9 @@ import type { TaskType } from '@/types/task';
 import { Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DatePicker } from '@/components/ui/date-picker';
 import {
   Dialog,
   DialogContent,
@@ -204,9 +204,10 @@ export const AddTaskDialog = ({
             </div>
             <div className="grid gap-2">
               <Label>Due Date</Label>
-              <DatePicker
+              <DueDateDisplay
                 date={newTask.dueDate}
-                onDateChange={date => date && setNewTask({ ...newTask, dueDate: date })}
+                onChange={date => setNewTask({ ...newTask, dueDate: date! })}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
             <div className="grid gap-2">
@@ -217,13 +218,7 @@ export const AddTaskDialog = ({
                 step="0.5"
                 value={newTask.estimatedEffort}
                 onChange={(e) => {
-                  const raw = Number.parseFloat(e.target.value);
-                  // If input is negative -> default to 0.5. If input is positive, enforce minimum 0.25.
-                  // For non-numeric input, default to 0.5 as requested.
-                  const clamped = Number.isFinite(raw)
-                    ? (raw < 0 ? 0.5 : Math.max(0.25, raw))
-                    : 0.5;
-                  setNewTask({ ...newTask, estimatedEffort: clamped });
+                  setNewTask({ ...newTask, estimatedEffort: Number.parseFloat(e.target.value) });
                 }}
                 min="0.5"
                 required
