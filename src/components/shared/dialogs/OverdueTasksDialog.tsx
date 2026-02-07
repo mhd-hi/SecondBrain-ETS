@@ -31,17 +31,19 @@ export function OverdueTasksDialog({ open, onOpenChange, overdueCount, onComplet
         </DialogHeader>
         {overdueTasks && overdueTasks.length > 0 && (
           <div className="w-full max-h-96 overflow-y-auto border rounded bg-muted p-2 mb-2">
-
-            <div className="text-sm font-medium mb-2 text-left">Affected tasks:</div>
-              <span className="block mb-2 text-muted-foreground text-sm">
-                {overdueCount === 1
-                  ? '1 overdue task needs your attention.'
-                  : `${overdueCount} overdue tasks need your attention.`}
-              </span>
+            <div className="text-sm font-medium mb-2 text-left">
+              {`${overdueCount} affected tasks`}
+            </div>
             <ul className="list-disc pl-5 text-left">
-              {overdueTasks.map(task => (
+              {overdueTasks
+                ?.sort((a, b) => {
+                  const aDate = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+                  const bDate = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+                  return aDate - bDate;
+                })
+                .map(task => (
                 <li key={task.id} className="mb-1">
-                  <span className="font-semibold">{task.title}</span>
+                  <span className="font-light">{task.title}</span>
                   {task.dueDate && (
                     <span className="text-xs text-muted-foreground ml-2">
                       {formatDueDate(task.dueDate)}

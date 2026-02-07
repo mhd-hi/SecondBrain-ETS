@@ -1,7 +1,7 @@
 import type { TEvent } from '@/calendar/types';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
-import { and, eq, gte, lt } from 'drizzle-orm';
+import { and, eq, gte, inArray, lt } from 'drizzle-orm';
 import { taskToEvent } from '@/calendar/event-utils';
 import { db } from '@/server/db';
 import { courses, tasks } from '@/server/db/schema';
@@ -84,6 +84,27 @@ export const updateStatusTask = async (taskId: string, status: StatusTask, userI
 
   const conditions = [
     eq(tasks.id, taskId),
+    eq(tasks.userId, userId),
+  ];
+
+  return db
+    .update(tasks)
+    .set({ status, updatedAt: new Date() })
+    .where(and(...conditions))
+    .returning();
+};
+
+export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTask, userId: string) => {
+  if (!userId) {
+    throw new Error('User authentication required');
+  }
+
+  if (!taskIds.length) {
+    return [];
+  }
+
+  const conditions = [
+    inArray(tasks.id, taskIds),
     eq(tasks.userId, userId),
   ];
 
