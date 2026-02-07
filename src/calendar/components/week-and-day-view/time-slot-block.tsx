@@ -7,10 +7,9 @@ type TimeSlotBlockProps = {
   courses: Course[];
   isOccupied?: boolean;
   onAddTask: () => void;
-  onAddStudyBlock: () => void;
 };
 
-export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSlotBlockProps) {
+export function TimeSlotBlock({ isOccupied, onAddTask }: TimeSlotBlockProps) {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
   if (isOccupied) {
@@ -39,23 +38,6 @@ export function TimeSlotBlock({ isOccupied, onAddTask, onAddStudyBlock }: TimeSl
             Add Task
           </button>
         </DropdownMenuItem>
-        {/* FIXME: WIP make study block work */}
-        {process.env.NEXT_PUBLIC_NODE_ENV === 'development'
-        ? (
-        <DropdownMenuItem asChild>
-          <button
-            type="button"
-            className="w-full text-left"
-            onClick={() => {
-              setDropdownOpen(false);
-              onAddStudyBlock();
-            }}
-          >
-            Add Study Block
-          </button>
-        </DropdownMenuItem>
-        )
-        : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

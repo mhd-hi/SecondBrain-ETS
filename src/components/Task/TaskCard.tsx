@@ -353,8 +353,8 @@ export function TaskCard({
               </Badge>
             )}
 
-              <Badge variant="muted" className="overflow-hidden ">
-                <span style={{ cursor: 'pointer' }} aria-label="Edit due date" className="block w-full min-w-0">
+              <Badge variant="muted" className="overflow-visible">
+                <span aria-label="Edit due date" className="block w-full min-w-0">
                   <DueDateDisplay
                     date={editedDueDate ?? task.dueDate ?? null}
                     onChange={d => handleSaveDueDate(d ?? null)}

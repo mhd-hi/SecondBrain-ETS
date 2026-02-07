@@ -2,11 +2,6 @@
 - use pomodoroDaily table instead of attributes in user table to track daily pomodoro count
 # Features
 
-### Study blocks
-- Add study block page
-- Allow user to create, edit, delete study blocks
-- Generate study blocks based on course and tasks data
-
 ### Batch-edit tasks
 - Add the button in actions dropdown in Course page
 - In a modal, allow user to paste a list of tasks in a textarea, and parse it with AI to

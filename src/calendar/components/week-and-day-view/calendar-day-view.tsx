@@ -119,7 +119,7 @@ export function CalendarDayView({ events }: IProps) {
               </div>
             )
             : (
-              <p className="p-4 text-center text-sm italic text-muted-foreground">No tasks or study blocks</p>
+              <p className="p-4 text-center text-sm italic text-muted-foreground">No tasks</p>
             )}
           {currentEvents.length > 0 && (
             <ScrollArea className="h-105.5 px-4" type="always">

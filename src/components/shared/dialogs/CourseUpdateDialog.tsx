@@ -2,7 +2,7 @@ import type { TCourseColor } from '@/types/colors';
 import type { Course } from '@/types/course';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { COURSE_COLORS } from '@/lib/utils/colors-util';
 import { COURSE_DAYPARTS } from '@/lib/utils/course-dayparts';
@@ -28,13 +28,16 @@ export function CourseUpdateDialog({ open, onOpenChange, course, onUpdate }: Upd
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="course-settings" className="max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Course settings</DialogTitle>
+          <DialogTitle>Course Settings</DialogTitle>
+          <DialogDescription>
+            Customize your course settings such as color and daypart.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label className="block mb-1 font-medium" htmlFor="update-course-color">Course Color</label>
+            <label className="block mb-1 font-medium" htmlFor="update-course-color">Color</label>
             <Select value={color} onValueChange={v => setColor(v as TCourseColor)}>
               <SelectTrigger id="update-course-color">
                 <SelectValue placeholder="Select color" />
@@ -62,7 +65,7 @@ export function CourseUpdateDialog({ open, onOpenChange, course, onUpdate }: Upd
         </div>
         <DialogFooter className="mt-4">
           <Button onClick={handleSave} disabled={loading} className="w-full">
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Saving...' : 'Save changes'}
           </Button>
         </DialogFooter>
       </DialogContent>

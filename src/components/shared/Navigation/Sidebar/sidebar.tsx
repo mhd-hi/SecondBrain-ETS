@@ -46,6 +46,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { getAddCoursePath, getCoursePath, ROUTES } from '@/lib/routes';
 
 type SidebarProps = {
@@ -58,6 +59,7 @@ export function AppSidebar({ courses, isLoading = false }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const isMobile = useIsMobile();
 
   return (
     <Sidebar collapsible="icon" className="h-screen">
@@ -78,21 +80,32 @@ export function AppSidebar({ courses, isLoading = false }: SidebarProps) {
         {/* My Courses Group */}
         <SidebarGroup>
           <SidebarGroupLabel>My Courses</SidebarGroupLabel>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
+          {isMobile
+            ? (
                 <SidebarGroupAction
                   onClick={() => router.push(getAddCoursePath())}
                   className="h-8 w-8"
                 >
                   <Plus className="size-5" />
                 </SidebarGroupAction>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Add course</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              )
+            : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarGroupAction
+                        onClick={() => router.push(getAddCoursePath())}
+                        className="h-8 w-8"
+                      >
+                        <Plus className="size-5" />
+                      </SidebarGroupAction>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Add course</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoading

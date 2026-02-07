@@ -48,10 +48,10 @@ export const AddCustomLinkDialog = ({ courseId, open, onOpenChange, onLinkCreate
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent aria-describedby="add-custom-link-description">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Custom Link</DialogTitle>
-          <DialogDescription id="add-custom-link-description">Add a custom link for this course</DialogDescription>
+          <DialogDescription>Add a custom link for this course</DialogDescription>
         </DialogHeader>
         <div className="py-2">
           <CustomLinkForm onCreate={handleCreate} initialCourseId={courseId} />

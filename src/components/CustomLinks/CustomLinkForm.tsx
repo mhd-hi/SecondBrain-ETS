@@ -74,7 +74,9 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
                     <DropdownMenuTrigger asChild>
                     <Button variant="secondary" type="button" id="link-type-trigger" className="inline-flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                         <span className="flex items-center gap-2">
-                          <Image src={getDefaultImageFor(type)} alt={type} width={20} height={20} className="rounded" />
+                          <div className="w-5 h-5 relative">
+                            <Image src={getDefaultImageFor(type)} fill alt={type} className="rounded object-contain" sizes="20px" />
+                          </div>
                         </span>
                     </Button>
                     </DropdownMenuTrigger>
@@ -86,7 +88,9 @@ export default function CustomLinkForm({ onCreate, initialCourseId }: { onCreate
                           onClick={() => selectPreset(t)}
                           className="flex items-center gap-2"
                         >
-                            <Image src={getDefaultImageFor(t)} alt={t} width={20} height={20} className="rounded" />
+                            <div className="w-5 h-5 relative">
+                              <Image src={getDefaultImageFor(t)} fill alt={t} className="rounded object-contain" sizes="20px" />
+                            </div>
                             <span className="capitalize">{t}</span>
                         </DropdownMenuItem>
                         );

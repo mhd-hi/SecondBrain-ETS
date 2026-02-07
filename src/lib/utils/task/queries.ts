@@ -1,9 +1,8 @@
 import type { TEvent } from '@/calendar/types';
 import type { StatusTask } from '@/types/status-task';
 import type { Task } from '@/types/task';
-import { and, eq, gte, lt } from 'drizzle-orm';
-import { studyBlockToEvent, taskToEvent } from '@/calendar/event-utils';
-import { getStudyBlocksForDateRange } from '@/lib/utils/study-block/queries';
+import { and, eq, gte, inArray, lt } from 'drizzle-orm';
+import { taskToEvent } from '@/calendar/event-utils';
 import { db } from '@/server/db';
 import { courses, tasks } from '@/server/db/schema';
 
@@ -95,6 +94,27 @@ export const updateStatusTask = async (taskId: string, status: StatusTask, userI
     .returning();
 };
 
+export const batchUpdateStatusTask = async (taskIds: string[], status: StatusTask, userId: string) => {
+  if (!userId) {
+    throw new Error('User authentication required');
+  }
+
+  if (!taskIds.length) {
+    return [];
+  }
+
+  const conditions = [
+    inArray(tasks.id, taskIds),
+    eq(tasks.userId, userId),
+  ];
+
+  return db
+    .update(tasks)
+    .set({ status, updatedAt: new Date() })
+    .where(and(...conditions))
+    .returning();
+};
+
 export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: string): Promise<TEvent[]> => {
   try {
     if (!userId) {
@@ -159,12 +179,7 @@ export const getCalendarEvents = async (startDate: Date, endDate: Date, userId: 
       return taskToEvent(task);
     });
 
-    // Fetch study blocks
-    const studyBlocks = await getStudyBlocksForDateRange(startDate, endDate, userId);
-    // Convert study blocks to events
-    const studyBlockEvents = studyBlocks.map(studyBlockToEvent);
-
-    return [...taskEvents, ...studyBlockEvents];
+    return [...taskEvents];
   } catch (error) {
     console.error('Error fetching calendar events:', error);
     throw new Error('Failed to fetch calendar events');

@@ -46,7 +46,7 @@ export const ChangeCourseDaypartDialog = ({ courseId, open, onOpenChange, curren
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="change-course-daypart-description">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Change lecture daypart</DialogTitle>
         </DialogHeader>

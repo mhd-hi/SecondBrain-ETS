@@ -39,7 +39,7 @@ export const ChangeCourseColorDialog = ({ courseId, open, onOpenChange, currentC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="color-course-description">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Course Color</DialogTitle>
         </DialogHeader>
