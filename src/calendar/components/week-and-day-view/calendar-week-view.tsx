@@ -1,7 +1,8 @@
 import type { TEvent } from '@/calendar/types';
 import type { Course } from '@/types/course';
 import { endOfDay, format, parseISO, startOfDay, startOfWeek } from 'date-fns';
-import React, { useMemo } from 'react';
+import * as React from 'react';
+import { useMemo } from 'react';
 import { CalendarTimeline } from '@/calendar/components/week-and-day-view/calendar-time-line';
 import { EventBlock } from '@/calendar/components/week-and-day-view/event-block';
 import { TimeSlotBlock } from '@/calendar/components/week-and-day-view/time-slot-block';

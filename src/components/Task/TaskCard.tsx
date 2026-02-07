@@ -3,7 +3,8 @@
 import type { Task } from '@/types/task';
 import { BarChart3, Clock, Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { DueDateDisplay } from '@/components/shared/atoms/due-date-display';
 import { AddSubtaskDialog } from '@/components/shared/dialogs/AddSubtaskDialog';

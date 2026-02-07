@@ -4,7 +4,8 @@ import type { ConfirmOptions } from '@/lib/utils/dialog-util';
 import type { ConfirmDialogContextType, ConfirmFunction } from '@/types/dialog/confirmation-dialog';
 
 import { AlertTriangle } from 'lucide-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {

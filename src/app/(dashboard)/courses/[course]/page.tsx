@@ -118,10 +118,12 @@ export default function CoursePage({ params }: CoursePageProps) {
       }
 
       // Search in subtask titles
-      if (task.subtasks?.some(subtask =>
-        subtask.title.toLowerCase().includes(query)
-        || subtask.notes?.toLowerCase().includes(query),
-      )) {
+      if (
+        task.subtasks?.some(subtask =>
+          subtask.title.toLowerCase().includes(query)
+          || subtask.notes?.toLowerCase().includes(query),
+        )
+      ) {
         return true;
       }
 

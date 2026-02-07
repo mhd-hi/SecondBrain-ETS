@@ -1,7 +1,8 @@
 'use client';
 
 import type { Daypart } from '@/types/course';
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
