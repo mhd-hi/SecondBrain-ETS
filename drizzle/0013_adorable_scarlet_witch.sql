@@ -1,2 +1,2 @@
-DROP TABLE "study_block_items" CASCADE;--> statement-breakpoint
-DROP TABLE "study_blocks" CASCADE;
+DROP TABLE IF EXISTS "study_block_items" CASCADE;--> statement-breakpoint
+DROP TABLE IF EXISTS "study_blocks" CASCADE;

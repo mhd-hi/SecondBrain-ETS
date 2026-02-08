@@ -1,1 +1,1 @@
-DROP TABLE "verificationToken" CASCADE;
+DROP TABLE IF EXISTS "verificationToken" CASCADE;

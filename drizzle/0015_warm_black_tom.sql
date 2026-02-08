@@ -1,1 +1,1 @@
-DROP TABLE "courses_cache" CASCADE;
+DROP TABLE IF EXISTS "courses_cache" CASCADE;
