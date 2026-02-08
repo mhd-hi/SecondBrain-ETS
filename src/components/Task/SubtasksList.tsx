@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { ActionsDropdown } from '@/components/shared/atoms/actions-dropdown';
 import { Badge } from '@/components/ui/badge';
-import { deleteSubtask } from '@/hooks/use-subtask';
+import { deleteSubtask } from '@/hooks/task/use-subtask';
 import { useUpdateField } from '@/hooks/use-update-field';
 import { useTaskStore } from '@/lib/stores/task-store';
 import { cn } from '@/lib/utils';

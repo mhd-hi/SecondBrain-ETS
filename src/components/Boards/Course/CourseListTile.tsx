@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import CourseCard from '@/components/Boards/Course/CourseCard';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { deleteCourseById } from '@/hooks/use-course';
-import { useCourses } from '@/hooks/use-course-store';
-import { getAddCoursePath } from '@/lib/routes';
+import { deleteCourseById } from '@/hooks/course/use-course';
+import { useCourses } from '@/hooks/course/use-course-store';
+import { getAddCoursePath } from '@/lib/page-routes';
 import { handleConfirm } from '@/lib/utils/dialog-util';
 import { CommonErrorMessages, ErrorHandlers } from '@/lib/utils/errors/error';
 

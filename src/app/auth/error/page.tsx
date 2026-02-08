@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES } from '@/lib/page-routes';
 
 const errorMessages: Record<string, string> = {
   configuration: 'There is a problem with the server configuration.',

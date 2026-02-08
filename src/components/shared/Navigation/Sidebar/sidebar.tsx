@@ -47,7 +47,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getAddCoursePath, getCoursePath, ROUTES } from '@/lib/routes';
+import { getAddCoursePath, getCoursePath, ROUTES } from '@/lib/page-routes';
 
 type SidebarProps = {
   courses: CourseListItem[];

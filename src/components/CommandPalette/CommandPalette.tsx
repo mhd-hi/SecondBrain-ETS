@@ -15,15 +15,15 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from '@/components/ui/command';
-import { useCourses } from '@/hooks/use-course-store';
+import { useCourses } from '@/hooks/course/use-course-store';
+import { navbarItems } from '@/lib/navigation/constants';
+import { getAddCoursePath, getCoursePath } from '@/lib/page-routes';
 import {
   getShortcutDisplayText,
   getShortcutForDialog,
   getShortcutForPath,
   useKeyboardShortcuts,
-} from '@/lib/keyboard-shortcuts';
-import { navbarItems } from '@/lib/navigation/constants';
-import { getAddCoursePath, getCoursePath } from '@/lib/routes';
+} from '@/lib/utils/event-handlers/keyboard-shortcuts';
 
 type PageItem = {
   id: string;

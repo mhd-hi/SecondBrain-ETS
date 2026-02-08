@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { getCoursePath } from '@/lib/routes';
+import { getCoursePath } from '@/lib/page-routes';
 
 type IProps = {
   event: TEvent;

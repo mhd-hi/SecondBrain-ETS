@@ -1,4 +1,4 @@
-import type { UseAddCourseReturn } from '@/hooks/use-add-course';
+import type { UseAddCourseReturn } from '@/hooks/course/use-add-course';
 import type { Daypart } from '@/types/course';
 
 export type StepName = 'planets' | 'ai' | 'create-course' | 'create-tasks';

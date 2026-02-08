@@ -2,7 +2,7 @@ import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import { PomodoroContainer } from '@/components/Pomodoro/PomodoroContainer';
 import { Button } from '@/components/ui/button';
-import { getPreferencesPath } from '@/lib/routes';
+import { getPreferencesPath } from '@/lib/page-routes';
 
 export default function PomodoroPage() {
   return (
