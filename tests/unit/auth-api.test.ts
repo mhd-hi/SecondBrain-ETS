@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-explicit-any */
 import type { Mock } from 'vitest';
 import { headers } from 'next/headers';
 
