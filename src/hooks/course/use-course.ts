@@ -142,22 +142,6 @@ export function useCourse(courseId: string) {
   };
 }
 
-export const checkCourseExists = async (code: string, term: string): Promise<{
-  exists: boolean;
-  course?: { id: string; code: string; name: string };
-}> => {
-  const response = await fetch(API_ENDPOINTS.COURSES.EXISTS(code, term));
-
-  if (!response.ok) {
-    throw new Error(`Failed to check course existence: ${response.statusText}`);
-  }
-
-  return response.json() as Promise<{
-    exists: boolean;
-    course?: { id: string; code: string; name: string };
-  }>;
-};
-
 export async function deleteCourseById(courseId: string) {
   return api.delete(API_ENDPOINTS.COURSES.DETAIL(courseId), 'Failed to delete course');
 }

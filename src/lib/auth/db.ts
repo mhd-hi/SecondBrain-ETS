@@ -1,5 +1,10 @@
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { AuthorizationError } from '@/lib/auth/api';
+import {
+  findCourseByIdAndUser,
+  findTasksWithSubtasks,
+  findUserCoursesWithTasks,
+} from '@/lib/utils/course/queries';
 import { db } from '@/server/db';
 import { courses, subtasks, tasks } from '@/server/db/schema';
 import { StatusTask } from '@/types/status-task';
@@ -8,50 +13,17 @@ import { StatusTask } from '@/types/status-task';
  * Get courses for authenticated user
  */
 export async function getUserCourses(userId: string) {
-  return db.query.courses.findMany({
-    where: eq(courses.userId, userId),
-    columns: {
-      id: true,
-      name: true,
-      code: true,
-      term: true,
-      color: true,
-      daypart: true,
-    },
-    with: {
-      tasks: {
-        columns: {
-          id: true,
-          courseId: true,
-          title: true,
-          notes: true,
-          type: true,
-          status: true,
-          estimatedEffort: true,
-          actualEffort: true,
-          dueDate: true,
-        },
-      },
-    },
-  });
+  return findUserCoursesWithTasks(userId);
 }
 
 /**
  * Get single course for authenticated user with ownership verification
  */
 export async function getUserCourse(courseId: string, userId: string) {
-  const course = await db.query.courses.findFirst({
-    where: and(eq(courses.id, courseId), eq(courses.userId, userId)),
-    with: {
-      tasks: true,
-      customLinks: true,
-    },
-  });
-
+  const course = await findCourseByIdAndUser(courseId, userId);
   if (!course) {
-    throw new AuthorizationError('Course not found or access denied');
+    throw new AuthorizationError('Course not found');
   }
-
   return course;
 }
 
@@ -60,56 +32,7 @@ export async function getUserCourse(courseId: string, userId: string) {
  * Optimized with single query using manual aggregation
  */
 export async function getUserCourseTasks(courseId: string, userId: string) {
-  // Fetch tasks first
-  const taskRows = await db
-    .select({
-      id: tasks.id,
-      courseId: tasks.courseId,
-      title: tasks.title,
-      notes: tasks.notes,
-      type: tasks.type,
-      status: tasks.status,
-      estimatedEffort: tasks.estimatedEffort,
-      actualEffort: tasks.actualEffort,
-      dueDate: tasks.dueDate,
-    })
-    .from(tasks)
-    .where(and(eq(tasks.courseId, courseId), eq(tasks.userId, userId)))
-    .orderBy(tasks.dueDate);
-
-  if (taskRows.length === 0) {
-    return [];
-  }
-
-  // Fetch all subtasks in one query
-  const taskIds = taskRows.map(t => t.id);
-  const subtaskRows = await db
-    .select({
-      id: subtasks.id,
-      taskId: subtasks.taskId,
-      type: subtasks.type,
-      title: subtasks.title,
-      notes: subtasks.notes,
-      status: subtasks.status,
-      estimatedEffort: subtasks.estimatedEffort,
-      dueDate: subtasks.dueDate,
-    })
-    .from(subtasks)
-    .where(inArray(subtasks.taskId, taskIds));
-
-  // Group subtasks by taskId
-  const subtasksByTask = new Map<string, typeof subtaskRows>();
-  for (const subtask of subtaskRows) {
-    const list = subtasksByTask.get(subtask.taskId) ?? [];
-    list.push(subtask);
-    subtasksByTask.set(subtask.taskId, list);
-  }
-
-  // Combine results
-  return taskRows.map(task => ({
-    ...task,
-    subtasks: subtasksByTask.get(task.id) ?? [],
-  }));
+  return findTasksWithSubtasks(courseId, userId);
 }
 
 /**

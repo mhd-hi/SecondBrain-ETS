@@ -15,7 +15,6 @@ export const API_ENDPOINTS = {
   COURSES: {
     LIST: '/api/courses',
     DETAIL: (courseId: string) => `/api/courses/${courseId}`,
-    EXISTS: (code: string, term: string) => `/api/courses/exists?code=${encodeURIComponent(code)}&term=${encodeURIComponent(term)}`,
     PIPELINE: '/api/course-pipeline',
   },
 

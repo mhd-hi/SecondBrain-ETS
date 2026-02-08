@@ -1,7 +1,7 @@
 import type { TEvent } from '@/calendar/types';
 import type { Task } from '@/types/task';
 import { getStatusBgClass } from '@/lib/utils';
-import { getDaypartTimes } from '@/lib/utils/daypart';
+import { getDaypartTimes } from '@/lib/utils/course/daypart';
 
 /**
  * Converts a Task to an TEvent for calendar display

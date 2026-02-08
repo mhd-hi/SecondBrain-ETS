@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useCourses } from '@/hooks/use-course-store';
+import { useCourses } from '@/hooks/course/use-course-store';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarHeader() {

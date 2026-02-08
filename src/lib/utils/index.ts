@@ -3,7 +3,7 @@ export * from './api/api-server-util';
 export * from './api/loading-util';
 export * from './audio-util';
 export * from './colors-util';
-export * from './course';
+export * from './course/course';
 export * from './date-util';
 export * from './dialog-util';
 export * from './errors/error';

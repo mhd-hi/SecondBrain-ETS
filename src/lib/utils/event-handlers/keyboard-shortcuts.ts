@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { getCalendarPath, ROUTES } from './routes';
+import { getCalendarPath, ROUTES } from '../../page-routes';
 
 type Dialog = 'add-task';
 

@@ -18,12 +18,12 @@ import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 import { TaskCard } from '@/components/Task/TaskCard';
 
 import { Button } from '@/components/ui/button';
-import { useCourses } from '@/hooks/use-course-store';
+import { useCourses } from '@/hooks/course/use-course-store';
+import { batchUpdateStatusTask } from '@/hooks/task/use-task';
+import { useCourseTasksStore } from '@/hooks/task/use-task-store';
 import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { useCourseCustomLinksStore } from '@/hooks/use-custom-link-store';
-import { batchUpdateStatusTask } from '@/hooks/use-task';
-import { useCourseTasksStore } from '@/hooks/use-task-store';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES } from '@/lib/page-routes';
 import { useCourseStore } from '@/lib/stores/course-store';
 import { useCustomLinkStore } from '@/lib/stores/custom-link-store';
 import { useTaskStore } from '@/lib/stores/task-store';

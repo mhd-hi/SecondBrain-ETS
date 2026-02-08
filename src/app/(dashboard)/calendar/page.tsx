@@ -4,8 +4,8 @@ import type { TCalendarView } from '@/calendar/types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { CalendarWrapper } from '@/components/Calendar/CalendarWrapper';
-import { useCalendarTasks } from '@/hooks/use-task';
-import { getCalendarPath } from '@/lib/routes';
+import { useCalendarTasks } from '@/hooks/task/use-task';
+import { getCalendarPath } from '@/lib/page-routes';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 const VALID_VIEWS: TCalendarView[] = ['day', 'week', 'month', 'year', 'agenda'];

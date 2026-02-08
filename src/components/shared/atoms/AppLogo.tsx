@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES } from '@/lib/page-routes';
 
 type AppLogoProps = {
   className?: string;

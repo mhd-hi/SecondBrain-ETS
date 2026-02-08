@@ -84,6 +84,7 @@ export const courses = pgTable('courses', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, table => [
   index('idx_courses_term').on(table.term),
+  uniqueIndex('uq_courses_user_code_term').on(table.userId, table.code, table.term),
 ]);
 
 export const tasks = pgTable(

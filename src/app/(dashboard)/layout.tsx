@@ -4,7 +4,7 @@ import * as React from 'react';
 import Navbar from '@/components/shared/Navigation/Navbar/Navbar';
 import { AppSidebar } from '@/components/shared/Navigation/Sidebar/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { useCourseOperations } from '@/hooks/use-course-store';
+import { useCourseOperations } from '@/hooks/course/use-course-store';
 
 function DashboardLayoutContent({
   children,

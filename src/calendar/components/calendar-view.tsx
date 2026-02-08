@@ -13,7 +13,7 @@ import { CalendarWeekView } from '@/calendar/components/week-and-day-view/calend
 import { CalendarYearView } from '@/calendar/components/year-view/calendar-year-view';
 
 import { getEventEnd, getEventStart } from '@/calendar/date-utils';
-import { useCourses } from '@/hooks/use-course-store';
+import { useCourses } from '@/hooks/course/use-course-store';
 import { useCalendarViewStore } from '@/lib/stores/calendar-view-store';
 
 export function CalendarView() {

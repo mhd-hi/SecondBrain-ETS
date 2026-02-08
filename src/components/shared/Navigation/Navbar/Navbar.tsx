@@ -17,8 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { openCommandPalette } from '@/lib/command-palette';
-import { getShortcutDisplayText, KEYBOARD_SHORTCUTS } from '@/lib/keyboard-shortcuts';
+import { openCommandPalette } from '@/lib/utils/event-handlers/command-palette';
+import { getShortcutDisplayText, KEYBOARD_SHORTCUTS } from '@/lib/utils/event-handlers/keyboard-shortcuts';
 
 export default function Navbar() {
   // Find the command palette shortcut

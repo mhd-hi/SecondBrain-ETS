@@ -6,7 +6,7 @@ import { Suspense, useEffect } from 'react';
 import { CapybaraLoader } from '@/components/shared/CapybaraLoader';
 import { SignInCard } from '@/components/shared/SignInCard';
 import { Card, CardContent } from '@/components/ui/card';
-import { ROUTES } from '@/lib/routes';
+import { ROUTES } from '@/lib/page-routes';
 
 function SignInContent() {
   const { status } = useSession();

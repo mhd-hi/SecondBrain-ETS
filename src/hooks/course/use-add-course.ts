@@ -1,6 +1,6 @@
 'use client';
 
-import type { StepStatus } from '@/hooks/add-course-pipeline';
+import type { StepStatus } from '@/hooks/course/add-course-pipeline';
 import type { CourseAIResponse } from '@/types/api/ai';
 import type { Daypart } from '@/types/course';
 import type { PipelineStepResult } from '@/types/server-pipelines/pipelines';
@@ -14,13 +14,12 @@ import {
   deriveParsedData,
   deriveStepStatus,
   pipelineReducer,
-} from '@/hooks/add-course-pipeline';
-import { checkCourseExists } from '@/hooks/use-course';
+} from '@/hooks/course/add-course-pipeline';
 import { createPlanETSLink } from '@/hooks/use-custom-link';
 import { normalizeTasks } from '@/lib/ai';
 import { api } from '@/lib/utils/api/api-client-util';
 import { API_ENDPOINTS } from '@/lib/utils/api/endpoints';
-import { assertValidCourseCode } from '@/lib/utils/course';
+import { assertValidCourseCode } from '@/lib/utils/course/course';
 import { calculateDueDateTaskForTerm } from '@/lib/utils/task';
 import { UNIVERSITY } from '@/types/university';
 
@@ -197,16 +196,6 @@ export function useAddCourse(): UseAddCourseReturn {
       }
 
       dispatch({ type: 'START_CHECKING' });
-
-      const existenceResult = await checkCourseExists(courseCode.trim(), term);
-      if (existenceResult.exists) {
-        dispatch({
-          type: 'ERROR',
-          error: `Course ${courseCode.trim()} already exists in your account.`,
-          currentPhase: 'checking-existence',
-        });
-        return;
-      }
 
       const shouldSkipPipeline = !university || university === UNIVERSITY.NONE;
 

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { TaskCard } from '@/components/Task/TaskCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { fetchFocusTasks } from '@/hooks/use-task';
+import { fetchFocusTasks } from '@/hooks/task/use-task';
 import { useTaskStore } from '@/lib/stores/task-store';
 import { StatusTask } from '@/types/status-task';
 
