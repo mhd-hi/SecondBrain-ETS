@@ -22,7 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { useUpdateField } from '@/hooks/use-update-field';
-import { getCoursePath, getPomodoroPath } from '@/lib/routes';
+import { getCoursePath, getPomodoroPath } from '@/lib/page-routes';
 import { cn, formatEffortTime } from '@/lib/utils';
 import { StatusTask } from '@/types/status-task';
 import { TASK_TYPE_OPTIONS } from '@/types/task';

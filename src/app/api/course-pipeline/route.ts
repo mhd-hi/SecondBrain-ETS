@@ -5,13 +5,14 @@ import type {
 import { NextResponse } from 'next/server';
 import { runAIProvider } from '@/lib/ai';
 import { withAuthSimple } from '@/lib/auth/api';
-import { assertValidCourseCode } from '@/lib/utils/course';
+import { assertValidCourseCode } from '@/lib/utils/course/course';
+import { courseExists } from '@/lib/utils/course/queries';
 import { sanitizeUserInput, validateUserContext } from '@/lib/utils/sanitize';
 import { UniversityCourseDataSource } from '@/pipelines';
 import { UNIVERSITY } from '@/types/university';
 
 // Endpoint for step-by-step course processing
-export const POST = withAuthSimple(async (request, _user) => {
+export const POST = withAuthSimple(async (request, user) => {
   try {
     const body = (await request.json()) as PipelineStepRequest;
     const { courseCode, term, step, htmlData, userContext } = body;
@@ -63,6 +64,19 @@ export const POST = withAuthSimple(async (request, _user) => {
         },
         { status: 400 },
       );
+    }
+
+    try {
+      const existsResult = await courseExists(user.id, cleanCode, term);
+      if (existsResult.exists) {
+        return NextResponse.json(
+          { error: `Course ${cleanCode} already exists in your account`, code: 'COURSE_EXISTS' },
+          { status: 409 },
+        );
+      }
+    } catch (err) {
+      console.error('Failed to check course existence in pipeline:', err);
+      return NextResponse.json({ error: 'Failed to check course existence' }, { status: 500 });
     }
 
     if (step === 'planets') {

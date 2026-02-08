@@ -10,7 +10,7 @@ import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { TruncatedTextWithTooltip } from '@/components/shared/atoms/text-with-tooltip';
 import { ChangeCourseColorDialog } from '@/components/shared/dialogs/ChangeCourseColorDialog';
 import { ChangeCourseDaypartDialog } from '@/components/shared/dialogs/ChangeCourseDaypartDialog';
-import { getCoursePath } from '@/lib/routes';
+import { getCoursePath } from '@/lib/page-routes';
 import {
   calculateProgress,
   getCompletedTasksCount,

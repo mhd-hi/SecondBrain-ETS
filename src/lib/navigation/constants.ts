@@ -1,4 +1,4 @@
-import { getCalendarPath, getPomodoroPath, ROUTES } from '@/lib/routes';
+import { getCalendarPath, getPomodoroPath, ROUTES } from '@/lib/page-routes';
 
 export const navbarItems = [
   {
