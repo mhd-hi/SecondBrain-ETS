@@ -5,7 +5,7 @@
       "schedule": "0 0 1 * *"
     }
   ],
-  "buildCommand": "bun run build",
+  "buildCommand": "bun run db:deploy && bun run build",
   "devCommand": "bun run dev",
   "installCommand": "bun install",
   "env": {
