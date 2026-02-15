@@ -39,8 +39,11 @@ export function CourseUpdateDialog({ open, onOpenChange, course, onUpdate }: Upd
           <div>
             <label className="block mb-1 font-medium" htmlFor="update-course-color">Color</label>
             <Select value={color} onValueChange={v => setColor(v as TCourseColor)}>
-              <SelectTrigger id="update-course-color">
-                <SelectValue placeholder="Select color" />
+              <SelectTrigger id="update-course-color" className="flex items-center gap-2">
+                <div aria-hidden className="w-4 h-4 rounded border shrink-0" style={{ backgroundColor: color }} />
+                <div className="flex-1">
+                  <SelectValue placeholder="Select color" />
+                </div>
               </SelectTrigger>
               <SelectContent>
                 {COURSE_COLORS.map(c => (

@@ -8,7 +8,7 @@ export const STATUS_ORDER = [
   StatusTask.TODO,
   StatusTask.IN_PROGRESS,
   StatusTask.COMPLETED,
-] as const;
+] as StatusTask[];
 
 export const TASK_STATUS_CONFIG = {
   [StatusTask.TODO]: {
@@ -26,7 +26,7 @@ export const TASK_STATUS_CONFIG = {
     bgColor: 'bg-green-600',
     textColor: 'text-green-100',
   },
-} as const;
+} as Record<StatusTask, { label: string; bgColor: string; textColor: string }>;
 
 export function calculateDueDateTaskForTerm(termId: string, week: number, firstDayOfClass?: Date): Date {
   const termDates = getDatesForTerm(termId);

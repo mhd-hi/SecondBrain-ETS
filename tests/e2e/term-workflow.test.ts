@@ -8,7 +8,11 @@ import {
     getDatesForTerm,
     parseTermId,
 } from '@/lib/utils/term-util';
+
 import { TRIMESTER } from '@/types/term';
+import { ensureViSetSystemTime } from '../helpers/time';
+
+ensureViSetSystemTime(vi);
 
 describe('term-workflow - e2e integration', () => {
     describe('complete term workflow', () => {

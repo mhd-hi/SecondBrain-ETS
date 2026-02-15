@@ -6,24 +6,68 @@ import { db } from '@/server/db';
 import { customLinks } from '@/server/db/schema';
 
 export const DELETE = withAuth<{ customLinkId: string }>(async (req: NextRequest, { params, user }) => {
-    try {
-        const { customLinkId } = params as { customLinkId?: string };
+  try {
+    const { customLinkId } = params as { customLinkId?: string };
 
-        if (!customLinkId) {
-            return NextResponse.json({ success: false, error: 'Missing customLinkId' }, { status: 400 });
-        }
-
-        // Only delete if customLink belongs to the user
-        const res = await db.delete(customLinks).where(and(eq(customLinks.id, customLinkId), eq(customLinks.userId, user.id))).returning();
-
-        if (!res.length) {
-            return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
-        }
-
-        // Note: cascade and ownership enforcement should be handled at DB or caller level
-        return NextResponse.json({ success: true });
-    } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        return NextResponse.json({ success: false, error: msg }, { status: 400 });
+    if (!customLinkId) {
+      return NextResponse.json({ success: false, error: 'Missing customLinkId' }, { status: 400 });
     }
+
+    // Only delete if customLink belongs to the user
+    const res = await db.delete(customLinks).where(and(eq(customLinks.id, customLinkId), eq(customLinks.userId, user.id))).returning();
+
+    if (!res.length) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+    }
+
+    // Note: cascade and ownership enforcement should be handled at DB or caller level
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ success: false, error: msg }, { status: 400 });
+  }
+});
+
+export const PATCH = withAuth<{ customLinkId: string }>(async (req: NextRequest, { params, user }) => {
+  try {
+    const { customLinkId } = params as { customLinkId?: string };
+
+    if (!customLinkId) {
+      return NextResponse.json({ success: false, error: 'Missing customLinkId' }, { status: 400 });
+    }
+
+    const body = await req.json();
+    const { title, url, type } = body ?? {};
+
+    // Build update object only with allowed fields
+    const updates: Record<string, unknown> = {};
+    if (typeof title === 'string') {
+      updates.title = title;
+    }
+    if (typeof url === 'string') {
+      updates.url = url.trim();
+    }
+    if (typeof type === 'string') {
+      updates.type = type;
+    }
+
+    if (!Object.keys(updates).length) {
+      return NextResponse.json({ success: false, error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    // Only update links that belong to the authenticated user
+    const updated = await db.update(customLinks)
+      .set({ ...updates, updatedAt: new Date() } as Partial<Record<string, unknown>>)
+      .where(and(eq(customLinks.id, customLinkId), eq(customLinks.userId, user.id)))
+      .returning();
+
+    if (!updated.length) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, customLink: updated[0] });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ success: false, error: msg }, { status: 400 });
+  }
 });

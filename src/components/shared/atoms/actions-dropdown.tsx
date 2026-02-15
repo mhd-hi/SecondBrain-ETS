@@ -2,7 +2,7 @@
 
 import { MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
-import { OverdueTasksDialog } from '@/components/shared/dialogs/OverdueTasksDialog';
+import { OverdueTasksDialog } from '@/components/shared/dialogs/CompleteOverdueTasksDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,

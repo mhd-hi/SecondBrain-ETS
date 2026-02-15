@@ -12,7 +12,8 @@ import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-import { CourseUpdateDialog } from '@/components/shared/dialogs/CourseUpdateDialog';
+import { CourseUpdateDialog } from '@/components/shared/dialogs/UpdateCourseDialog';
+import UpdateCustomLinksDialog from '@/components/shared/dialogs/UpdateCustomLinksDialog';
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 
 import { TaskCard } from '@/components/Task/TaskCard';
@@ -21,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import { useCourses } from '@/hooks/course/use-course-store';
 import { batchUpdateStatusTask } from '@/hooks/task/use-task';
 import { useCourseTasksStore } from '@/hooks/task/use-task-store';
-import { deleteAllCourseLinks } from '@/hooks/use-custom-link';
 import { useCourseCustomLinksStore } from '@/hooks/use-custom-link-store';
 import { ROUTES } from '@/lib/page-routes';
 import { useCourseStore } from '@/lib/stores/course-store';
@@ -180,31 +180,7 @@ export default function CoursePage({ params }: CoursePageProps) {
     }
   };
 
-  const handleDeleteAllLinks = async () => {
-    if (!course) {
-      return;
-    }
-
-    try {
-      await handleConfirm(
-        'Are you sure you want to delete all custom links for this course? This action cannot be undone.',
-        async () => {
-          const result = await deleteAllCourseLinks(course.id);
-          toast.success(result.message);
-          // Custom links updated, no need to refetch
-        },
-        undefined,
-        {
-          title: 'Delete All Links',
-          confirmText: 'Delete All',
-          cancelText: 'Cancel',
-          variant: 'destructive',
-        },
-      );
-    } catch (error) {
-      ErrorHandlers.api(error, 'Failed to delete all custom links', 'CoursePage');
-    }
-  };
+  const [showManageLinks, setShowManageLinks] = useState(false);
 
   const overdueTasks = getOverdueTasks(filteredTasks, [StatusTask.IN_PROGRESS, StatusTask.COMPLETED]);
 
@@ -287,7 +263,7 @@ export default function CoursePage({ params }: CoursePageProps) {
               },
               ...getCourseActions({
                 onDeleteCourse: handleDeleteCourse,
-                onDeleteAllLinks: handleDeleteAllLinks,
+                onUpdateLinks: () => setShowManageLinks(true),
                 overdueCount: overdueTasks.length,
               }).filter(a => a.label !== 'Change color' && a.label !== 'Change daypart'),
             ]}
@@ -297,6 +273,7 @@ export default function CoursePage({ params }: CoursePageProps) {
             triggerText="Actions"
             contentAlign="end"
           />
+            <UpdateCustomLinksDialog open={showManageLinks} onOpenChange={setShowManageLinks} courseId={course.id} />
           <CourseUpdateDialog
             open={showUpdateDialog}
             onOpenChange={setShowUpdateDialog}

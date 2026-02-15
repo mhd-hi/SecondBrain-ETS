@@ -49,7 +49,7 @@ export default function CourseCard({ course, onDeleteCourse }: CourseCardProps) 
 
   const baseActions = getCourseActions({
     onDeleteCourse: () => onDeleteCourse(course.id),
-    onDeleteAllLinks: undefined,
+    onUpdateLinks: undefined,
     onOpenColor: handleChangeColorClick,
     onOpenDaypart: () => setShowDaypartDialog(true),
   });

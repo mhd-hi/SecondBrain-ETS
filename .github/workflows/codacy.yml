@@ -24,6 +24,8 @@ on:
 
 permissions:
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
   codacy-security-scan:
@@ -55,7 +57,34 @@ jobs:
           max-allowed-issues: 2147483647
 
       # Upload the SARIF file generated in the previous step
+      - name: Ensure SARIF file exists and is non-empty
+        run: |
+          if [ ! -f results.sarif ]; then
+            echo "SARIF file not found: results.sarif" >&2
+            ls -la || true
+            exit 1
+          fi
+          if [ ! -s results.sarif ]; then
+            echo "SARIF file is empty: results.sarif" >&2
+            echo "---- begin sarif ----"
+            cat results.sarif || true
+            echo "---- end sarif ----"
+            exit 1
+          fi
+      - name: Inspect SARIF file and set outputs
+        id: sarif-inspect
+        run: |
+          echo "SARIF top-level keys:"
+          jq 'keys' results.sarif || true
+          runs_count=$(jq '.runs | length' results.sarif || echo 0)
+          echo "runs_count=$runs_count" >> $GITHUB_OUTPUT
+
       - name: Upload SARIF results file
-        uses: github/codeql-action/upload-sarif@v3
+        if: ${{ steps.sarif-inspect.outputs.runs_count != '0' }}
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+
+      - name: Skip SARIF upload when no findings
+        if: ${{ steps.sarif-inspect.outputs.runs_count == '0' }}
+        run: echo "No findings in results.sarif — skipping upload"

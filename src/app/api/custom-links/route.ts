@@ -52,7 +52,7 @@ export const GET = withAuth(async (req: NextRequest, { user }) => {
 export const POST = withAuth(async (req: NextRequest, { user }) => {
   try {
     const body = await req.json();
-    const { title, url, type = LINK_TYPES.CUSTOM, imageUrl, courseId } = body ?? {};
+    const { title, url, type = LINK_TYPES.CUSTOM, courseId } = body ?? {};
 
     if (!title || !url) {
       return NextResponse.json({ success: false, error: 'Missing title or url' }, { status: 400 });
@@ -70,7 +70,6 @@ export const POST = withAuth(async (req: NextRequest, { user }) => {
       title,
       url: normalizedUrl,
       type,
-      imageUrl: imageUrl ?? null,
       userId: user.id,
       courseId: courseId ?? null,
       createdAt: new Date(),
