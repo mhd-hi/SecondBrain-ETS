@@ -175,7 +175,6 @@ export const customLinks = pgTable(
     url: text('url').notNull(),
     title: text('title').notNull(),
     type: text('type').notNull().default('custom'),
-    imageUrl: text('image_url'),
 
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     courseId: uuid('course_id').references(() => courses.id, {

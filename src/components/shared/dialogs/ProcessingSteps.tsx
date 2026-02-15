@@ -28,6 +28,7 @@ export function ProcessingSteps({
     if (stepName === 'create-tasks') {
       return '/favicon-16x16.png';
     }
+
     return '/favicon-16x16.png';
   };
 

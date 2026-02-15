@@ -12,7 +12,7 @@ type CustomLinkStore = {
   setCustomLinks: (customLinks: CustomLinkItem[]) => void;
   addCustomLink: (customLink: CustomLinkItem) => void;
   updateCustomLink: (customLinkId: string, updates: Partial<CustomLinkItem>) => void;
-  deleteCustomLink: (customLinkId: string) => void;
+  removeLocalCustomLink: (customLinkId: string) => void;
 
   getCustomLink: (customLinkId: string) => CustomLinkItem | undefined;
   getCustomLinksByCourse: (courseId: string) => CustomLinkItem[];
@@ -23,7 +23,6 @@ type CustomLinkStore = {
     title: string;
     url: string;
     type?: CustomLink;
-    imageUrl?: string | null;
     courseId?: string | null;
   }) => Promise<CustomLinkItem>;
   removeCustomLink: (customLinkId: string) => Promise<boolean>;
@@ -64,7 +63,7 @@ export const useCustomLinkStore = create<CustomLinkStore>((set, get) => ({
     });
   },
 
-  deleteCustomLink: (customLinkId) => {
+  removeLocalCustomLink: (customLinkId) => {
     set((state) => {
       const newCustomLinks = new Map(state.customLinks);
       newCustomLinks.delete(customLinkId);
@@ -109,7 +108,6 @@ export const useCustomLinkStore = create<CustomLinkStore>((set, get) => ({
       title: data.title,
       url: data.url,
       type: data.type ?? 'custom',
-      imageUrl: data.imageUrl ?? null,
       courseId: data.courseId ?? null,
     };
 
@@ -120,7 +118,6 @@ export const useCustomLinkStore = create<CustomLinkStore>((set, get) => ({
       url: data.url,
       title: data.title,
       type: data.type ?? 'custom',
-      imageUrl: data.imageUrl ?? null,
       courseId: data.courseId,
       userId: null,
       createdAt: new Date().toISOString(),
@@ -134,14 +131,14 @@ export const useCustomLinkStore = create<CustomLinkStore>((set, get) => ({
       const customLink = response.customLink;
 
       // Replace optimistic with real
-      get().deleteCustomLink(tempId);
+      get().removeLocalCustomLink(tempId);
       get().addCustomLink(customLink);
 
       set({ isLoading: false });
       return customLink;
     } catch (error) {
       // Rollback optimistic update
-      get().deleteCustomLink(tempId);
+      get().removeLocalCustomLink(tempId);
 
       const errorMessage = 'Failed to create custom link';
       set({ isLoading: false, error: errorMessage });
@@ -158,7 +155,7 @@ export const useCustomLinkStore = create<CustomLinkStore>((set, get) => ({
     }
 
     // Optimistic delete
-    get().deleteCustomLink(customLinkId);
+    get().removeLocalCustomLink(customLinkId);
 
     set({ isLoading: true, error: null });
     try {

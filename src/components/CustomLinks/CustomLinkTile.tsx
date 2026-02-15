@@ -8,17 +8,13 @@ import { getDefaultImageFor } from '@/lib/utils/url-util';
 
 type CustomLinkTileProps = {
   item: CustomLinkItem;
-  onDelete?: (id: string) => void;
 };
 
-export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLinkTileProps) {
+export default function CustomLinkTile({ item }: CustomLinkTileProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
 
-  // Use imageUrl if available, otherwise fall back to default image for type
-  const finalImageUrl = item.imageUrl || getDefaultImageFor(item.type);
-
-  // Check if image is local (starts with /) or external
+  const finalImageUrl = getDefaultImageFor(item.type);
   const isLocalImage = finalImageUrl.startsWith('/');
 
   return (
@@ -30,7 +26,7 @@ export default function CustomLinkTile({ item, onDelete: _onDelete }: CustomLink
       title={item.title}
     >
       <div className="relative w-8 h-8">
-        {/* Skeleton - always present to maintain layout */}
+        {/* Skeleton */}
         <div className={`absolute inset-0 bg-muted/50 rounded transition-opacity duration-200 ${imageLoading ? 'opacity-100 animate-pulse' : 'opacity-0'}`} />
         {isLocalImage
           ? (

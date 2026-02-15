@@ -7,6 +7,7 @@ const DEFAULT_IMAGES: Record<CustomLink, string> = {
   [LINK_TYPES.NOTEBOOK_LM]: '/assets/notebooklm.png',
   [LINK_TYPES.SPOTIFY]: '/assets/spotify.png',
   [LINK_TYPES.YOUTUBE]: '/assets/youtube.webp',
+  [LINK_TYPES.CHATGPT]: '/assets/logo_openai.png',
   [LINK_TYPES.CUSTOM]: '/assets/pochita.webp',
 };
 
