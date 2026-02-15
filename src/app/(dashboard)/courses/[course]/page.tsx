@@ -12,7 +12,7 @@ import { getCourseActions } from '@/components/shared/atoms/get-course-actions';
 import { SearchBar } from '@/components/shared/atoms/SearchBar';
 
 import { AddTaskDialog } from '@/components/shared/dialogs/AddTaskDialog';
-import { CourseUpdateDialog } from '@/components/shared/dialogs/CourseUpdateDialog';
+import { CourseUpdateDialog } from '@/components/shared/dialogs/UpdateCourseDialog';
 import UpdateCustomLinksDialog from '@/components/shared/dialogs/UpdateCustomLinksDialog';
 import { CourseSkeleton } from '@/components/shared/skeletons/CourseSkeleton';
 
