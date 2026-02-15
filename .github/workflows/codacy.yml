@@ -71,8 +71,20 @@ jobs:
             echo "---- end sarif ----"
             exit 1
           fi
+      - name: Inspect SARIF file and set outputs
+        id: sarif-inspect
+        run: |
+          echo "SARIF top-level keys:"
+          jq 'keys' results.sarif || true
+          runs_count=$(jq '.runs | length' results.sarif || echo 0)
+          echo "runs_count=$runs_count" >> $GITHUB_OUTPUT
 
       - name: Upload SARIF results file
+        if: ${{ steps.sarif-inspect.outputs.runs_count != '0' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: results.sarif
+
+      - name: Skip SARIF upload when no findings
+        if: ${{ steps.sarif-inspect.outputs.runs_count == '0' }}
+        run: echo "No findings in results.sarif — skipping upload"
