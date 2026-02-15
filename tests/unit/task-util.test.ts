@@ -1,3 +1,4 @@
+/* eslint-disable ts/no-explicit-any */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as taskUtil from '@/lib/utils/task/task-util';
@@ -91,6 +92,7 @@ describe('task-util', () => {
     // classes: should return a non-empty string for known statuses
     const bg = taskUtil.getStatusBgClass(StatusTask.COMPLETED);
     const text = taskUtil.getStatusTextClass(StatusTask.COMPLETED);
+
     expect(typeof bg).toBe('string');
     expect(bg.length).toBeGreaterThan(0);
     expect(typeof text).toBe('string');

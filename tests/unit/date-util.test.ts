@@ -108,11 +108,13 @@ describe('date-util', () => {
     });
 
     it('falls back to `new Date` when parseISO throws', async () => {
-      // Spy on parseISO from date-fns before importing the module under test
-      const dateFns = await import('date-fns');
-      const parseSpy = vi.spyOn(dateFns as any, 'parseISO').mockImplementation(() => {
-        throw new Error('boom');
-      });
+      // Mock date-fns.parseISO in an ESM-safe way before importing the module under test
+      // Provide a minimal ESM-safe mock that only overrides `parseISO`
+      vi.mock('date-fns', () => ({
+        parseISO: () => {
+          throw new Error('boom');
+        },
+      }));
 
       const { getEventStart: getStartMocked } = await import('../../src/calendar/date-utils');
 
@@ -130,8 +132,7 @@ describe('date-util', () => {
       expect(d).toBeInstanceOf(Date);
       expect(ev.startDateObj).toBe(d);
 
-      // cleanup mocked implementation
-      parseSpy.mockRestore();
+      // mocked module cleanup not required in this environment
     });
   });
 });
