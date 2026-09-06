@@ -7,7 +7,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
-    AUTH_SECRET: z.string(),
+    AUTH_SECRET: z.string().min(32, 'AUTH_SECRET must be at least 32 characters'),
     AUTH_DISCORD_ID: z.string(),
     AUTH_DISCORD_SECRET: z.string(),
     AUTH_GOOGLE_ID: z.string(),
@@ -19,7 +19,7 @@ export const env = createEnv({
     OPENROUTER_API_KEY: z.string().optional(),
     XAI_API_KEY: z.string().optional(),
     DATABASE_URL: z.string().url(),
-    CRON_SECRET: z.string(),
+    CRON_SECRET: z.string().min(32, 'CRON_SECRET must be at least 32 characters'),
     SENTRY_DSN: z.string().optional(),
     SENTRY_ORG: z.string().optional(),
     SENTRY_PROJECT: z.string().optional(),

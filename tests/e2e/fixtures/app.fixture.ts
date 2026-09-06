@@ -90,7 +90,7 @@ export async function createAppFixture({
   return {
     dashboard: {
       goto: async () => {
-        await page.goto('/');
+        await page.goto('/dashboard');
 
         await expect(page.getByTestId(TEST_IDS.dashboard.page)).toBeVisible();
       },

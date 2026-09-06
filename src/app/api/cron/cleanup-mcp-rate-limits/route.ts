@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from 'drizzle-orm';
+import { env } from '@/env';
+import { isValidCronAuth } from '@/lib/auth/cron';
 import { db } from '@/server/db';
 import { mcpRateLimits } from '@/server/db/schema';
 
@@ -10,7 +12,7 @@ import { mcpRateLimits } from '@/server/db/schema';
  */
 export async function GET(request: Request): Promise<Response> {
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isValidCronAuth(authHeader, env.CRON_SECRET)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const deleted = await db

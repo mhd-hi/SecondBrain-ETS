@@ -226,14 +226,17 @@ export function buildTaskReviewHtml(boot: TaskReviewBoot): string {
 
   // Minimal MCP Apps bridge: JSON-RPC 2.0 over window.postMessage to the
   // host frame (same wire format as the official PostMessageTransport).
+  // Outbound uses '*' because the MCP host origin is dynamic; inbound is
+  // restricted to messages from the parent frame with valid JSON-RPC shape.
   window.addEventListener('message', function (event) {
+    if (event.source !== window.parent) return;
     var message = event.data;
     if (!message || typeof message !== 'object') return;
-    if (message.id !== undefined && pending[message.id]) {
-      var resolve = pending[message.id];
-      delete pending[message.id];
-      resolve(message);
-    }
+    if (message.jsonrpc !== '2.0') return;
+    if ((typeof message.id !== 'string' && typeof message.id !== 'number') || !pending[message.id]) return;
+    var resolve = pending[message.id];
+    delete pending[message.id];
+    resolve(message);
   });
 
   function callTool(name, args) {

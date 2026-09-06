@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { generateCoursePlanTasks } from '@/lib/ai/course-plan';
 import { AIError } from '@/lib/ai/error';
 import { withAuthSimple } from '@/lib/auth/api';
+import { checkUserRateLimit } from '@/lib/auth/rate-limit';
 import { assertValidCourseCode } from '@/lib/utils/course/course';
 import { courseExists } from '@/lib/utils/course/queries';
 import { sanitizeUserInput, validateUserContext } from '@/lib/utils/sanitize';
@@ -41,6 +42,14 @@ export async function handleCoursePipelinePost(
     if (!term) {
       return NextResponse.json(
         { error: 'term is required', code: 'MISSING_TERM' },
+        { status: 400 },
+      );
+    }
+    // Allowlist term charset (session codes like H2025/A2025) — blocks query
+    // smuggling (&, #, =, /, ?) even before encodeURIComponent.
+    if (typeof term !== 'string' || !/^[A-Z0-9-]{1,20}$/i.test(term)) {
+      return NextResponse.json(
+        { error: 'Invalid term format', code: 'INVALID_TERM' },
         { status: 400 },
       );
     }
@@ -101,7 +110,7 @@ export async function handleCoursePipelinePost(
     } catch (err) {
       console.error('Failed to check course existence in pipeline:', err);
       return NextResponse.json(
-        { error: 'Failed to check course existence' },
+        { error: 'Database is currently unavailable, please try again later' },
         { status: 500 },
       );
     }
@@ -135,18 +144,14 @@ export async function handleCoursePipelinePost(
           data: result.data,
         } as PipelineStepResult);
       } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? `Failed to fetch course data: ${error.message}`
-            : 'Failed to fetch course data from Planets';
-
+        console.error('PlanETS fetch failed:', error);
         return NextResponse.json(
           {
             step: {
               id: 'planets',
               name: 'PlanETS Data Fetch',
               status: 'error',
-              error: errorMessage,
+              error: 'Course data service is currently unavailable, please try again later',
               endTime: new Date().toISOString(),
             },
             data: null,
@@ -226,10 +231,8 @@ export async function handleCoursePipelinePost(
           );
         }
 
-        const errorMessage =
-          error instanceof Error
-            ? `Failed to process with AI: ${error.message}`
-            : 'Failed to process with AI';
+        const errorMessage = 'AI service is currently unavailable, please try again later';
+        console.error('AI processing failed:', error);
         return NextResponse.json(
           {
             step: {
@@ -254,8 +257,7 @@ export async function handleCoursePipelinePost(
     console.error('Error in course pipeline:', error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : 'Unknown error occurred',
+        error: 'Service is currently unavailable, please try again later',
       },
       { status: 500 },
     );
@@ -289,4 +291,13 @@ export async function handleCoursePipelinePost(
  *       409:
  *         description: Course already exists
  */
-export const POST = withAuthSimple(handleCoursePipelinePost);
+export const POST = withAuthSimple(async (request, user) => {
+  const limit = checkUserRateLimit(`course-pipeline:${user.id}`, 10 * 60_000, 30);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests, please try again later' },
+      { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+    );
+  }
+  return handleCoursePipelinePost(request, user);
+});
