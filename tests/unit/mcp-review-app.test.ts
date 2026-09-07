@@ -71,7 +71,7 @@ describe('MCP App review resource (plan 19.1 / 21.7)', () => {
     expect(html).not.toContain('<script>alert(1)</script>');
     // The document's own script tag is still present exactly once (the
     // static inline bundle) plus the JSON island.
-    expect(html.match(/<script>/g)).toHaveLength(1);
+    expect(html.split('<script>').length - 1).toBe(1);
   });
 
   it('never emits user-controlled values as script source (plan 21.7)', () => {

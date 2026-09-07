@@ -72,6 +72,9 @@ export class McpAuthError extends Error {
 }
 
 export function sha256Hex(value: string): string {
+  // codeql[js/insufficient-password-hash] — inputs are 256-bit random secrets
+  // (API keys, approval capabilities), not user passwords; sha256 enables the
+  // indexed hash-lookup design and is standard for high-entropy token hashing.
   return createHash('sha256').update(value).digest('hex');
 }
 
