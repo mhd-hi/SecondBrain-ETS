@@ -28,6 +28,7 @@ async function post(token?: string) {
   });
   return response.status;
 }
+export {};
 
 const noAuth = await post();
 console.log(`no-token:    ${noAuth}`);
