@@ -4,14 +4,16 @@ import type {
 } from '@/types/server-pipelines/pipelines';
 import type { AIErrorCode } from '@/lib/ai/error';
 import { NextResponse } from 'next/server';
-import { generateCoursePlanTasks } from '@/lib/ai/course-plan';
 import { AIError } from '@/lib/ai/error';
 import { withAuthSimple } from '@/lib/auth/api';
 import { checkUserRateLimit } from '@/lib/auth/rate-limit';
-import { assertValidCourseCode } from '@/lib/utils/course/course';
-import { courseExists } from '@/lib/utils/course/queries';
-import { sanitizeUserInput, validateUserContext } from '@/lib/utils/sanitize';
-import { SchoolCourseDataSource } from '@/pipelines/data-sources/planets';
+import {
+  assertCourseNotExists,
+  CourseCreationError,
+  fetchCoursePlanHtml,
+  parseCoursePlanToTasks,
+  validateCourseCreationInput,
+} from '@/lib/courses/create-course-pipeline';
 import { SCHOOL } from '@/types/school';
 
 const AI_ROUTE_ERRORS = new Map<
@@ -45,14 +47,6 @@ export async function handleCoursePipelinePost(
         { status: 400 },
       );
     }
-    // Allowlist term charset (session codes like H2025/A2025) — blocks query
-    // smuggling (&, #, =, /, ?) even before encodeURIComponent.
-    if (typeof term !== 'string' || !/^[A-Z0-9-]{1,20}$/i.test(term)) {
-      return NextResponse.json(
-        { error: 'Invalid term format', code: 'INVALID_TERM' },
-        { status: 400 },
-      );
-    }
     if (!courseCode) {
       return NextResponse.json(
         { error: 'Missing required parameter: courseCode' },
@@ -60,45 +54,48 @@ export async function handleCoursePipelinePost(
       );
     }
 
-    // Validate and sanitize userContext
-    let sanitizedContext: string | undefined;
-    if (userContext) {
-      try {
-        validateUserContext(userContext);
-        sanitizedContext = sanitizeUserInput(userContext);
-      } catch (error) {
+    // Shared validation (strict YYYY[1-3] term, code format, sanitized
+    // context). Single source with Lucy/MCP — no duplicated checks.
+    let validated: ReturnType<typeof validateCourseCreationInput>;
+    try {
+      validated = validateCourseCreationInput({
+        courseCode,
+        term,
+        school: SCHOOL.ETS,
+        userContext,
+      });
+    } catch (error) {
+      if (error instanceof CourseCreationError) {
+        const status =
+          error.code === 'UNSUPPORTED_SCHOOL' ? 400 : 400;
+        const code =
+          error.code === 'INVALID_TERM'
+            ? 'INVALID_TERM'
+            : error.code === 'INVALID_COURSE_CODE'
+              ? undefined
+              : error.code;
         return NextResponse.json(
-          {
-            error:
-              error instanceof Error ? error.message : 'Invalid user context',
-          },
-          { status: 400 },
+          code ? { error: error.message, code } : { error: error.message },
+          { status },
         );
       }
-    }
-
-    // Validate course code format
-    let cleanCode: string;
-    try {
-      cleanCode = assertValidCourseCode(
-        courseCode,
-        'Invalid course code format',
-      );
-    } catch (error) {
       return NextResponse.json(
         {
           error:
-            error instanceof Error
-              ? error.message
-              : 'Invalid course code format',
+            error instanceof Error ? error.message : 'Invalid user context',
         },
         { status: 400 },
       );
     }
+    const { code: cleanCode, term: cleanTerm, sanitizedContext } = validated;
 
     try {
-      const existsResult = await courseExists(user.id, cleanCode, term);
-      if (existsResult.exists) {
+      await assertCourseNotExists(user.id, cleanCode, cleanTerm);
+    } catch (error) {
+      if (
+        error instanceof CourseCreationError &&
+        error.code === 'COURSE_EXISTS'
+      ) {
         return NextResponse.json(
           {
             error: `Course ${cleanCode} already exists in your account`,
@@ -107,8 +104,7 @@ export async function handleCoursePipelinePost(
           { status: 409 },
         );
       }
-    } catch (err) {
-      console.error('Failed to check course existence in pipeline:', err);
+      console.error('Failed to check course existence in pipeline:', error);
       return NextResponse.json(
         { error: 'Database is currently unavailable, please try again later' },
         { status: 500 },
@@ -118,14 +114,9 @@ export async function handleCoursePipelinePost(
     if (step === 'planets') {
       try {
         const startTime = new Date().toISOString();
-        const planetsSource = new SchoolCourseDataSource(SCHOOL.ETS);
-        const result = await planetsSource.fetch(cleanCode, term);
+        const html = await fetchCoursePlanHtml(validated);
+        const data = html ?? '';
         const endTime = new Date().toISOString();
-
-        // Validate that we have meaningful content
-        if (!result.data || result.data.trim().length < 100) {
-          throw new Error('Course data appears to be empty or invalid');
-        }
 
         return NextResponse.json({
           step: {
@@ -135,13 +126,13 @@ export async function handleCoursePipelinePost(
             startTime,
             endTime,
             data: {
-              contentLength: result.data.length,
+              contentLength: data.length,
               source: 'planets',
               courseCode: cleanCode,
-              term,
+              term: cleanTerm,
             },
           },
-          data: result.data,
+          data,
         } as PipelineStepResult);
       } catch (error) {
         console.error('PlanETS fetch failed:', error);
@@ -179,7 +170,7 @@ export async function handleCoursePipelinePost(
             ? `Present (${sanitizedContext.length} chars)`
             : 'Not provided',
         );
-        const result = await generateCoursePlanTasks(
+        const tasks = await parseCoursePlanToTasks(
           htmlData,
           sanitizedContext,
           request.signal,
@@ -190,8 +181,8 @@ export async function handleCoursePipelinePost(
         const endTime = new Date().toISOString();
         const courseData = {
           courseCode: cleanCode,
-          term,
-          tasks: result.tasks,
+          term: cleanTerm,
+          tasks,
         };
 
         return NextResponse.json({
@@ -204,7 +195,7 @@ export async function handleCoursePipelinePost(
             data: {
               contentLength: htmlData.length,
               courseCode: cleanCode,
-              term,
+              term: cleanTerm,
             },
           },
           data: courseData,

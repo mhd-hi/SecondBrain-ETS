@@ -18,17 +18,12 @@ export const env = createEnv({
     NVIDIA_API_KEY: z.string().optional(),
     OPENROUTER_API_KEY: z.string().optional(),
     XAI_API_KEY: z.string().optional(),
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.url(),
     CRON_SECRET: z.string().min(32, 'CRON_SECRET must be at least 32 characters'),
     SENTRY_DSN: z.string().optional(),
     SENTRY_ORG: z.string().optional(),
     SENTRY_PROJECT: z.string().optional(),
     SENTRY_AUTH_TOKEN: z.string().optional(),
-    MCP_OAUTH_ISSUER: z.string().url().optional(),
-    MCP_OAUTH_AUDIENCE: z.string().optional(),
-    MCP_OAUTH_JWKS_URI: z.string().url().optional(),
-    MCP_OAUTH_SECRET: z.string().optional(),
-    MCP_ENABLED_USERS: z.string().optional(),
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
@@ -40,7 +35,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().optional(),
+    NEXT_PUBLIC_APP_URL: z.url().optional(),
     NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA: z.string().optional(),
     NEXT_PUBLIC_VERCEL_GIT_COMMIT_REF: z.string().optional(),
   },
@@ -67,11 +62,6 @@ export const env = createEnv({
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
-    MCP_OAUTH_ISSUER: process.env.MCP_OAUTH_ISSUER,
-    MCP_OAUTH_AUDIENCE: process.env.MCP_OAUTH_AUDIENCE,
-    MCP_OAUTH_JWKS_URI: process.env.MCP_OAUTH_JWKS_URI,
-    MCP_OAUTH_SECRET: process.env.MCP_OAUTH_SECRET,
-    MCP_ENABLED_USERS: process.env.MCP_ENABLED_USERS,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA:

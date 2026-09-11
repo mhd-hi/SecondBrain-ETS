@@ -151,8 +151,11 @@ export function buildTaskReviewHtml(boot: TaskReviewBoot): string {
       'Expires ' + new Date(boot.review.expiresAt).toLocaleString()
     );
     var counts = boot.review.reviewPayload.counts;
+    // courses is absent on drafts created before the course-creation rollout.
+    var courseCount = counts.courses == null ? 0 : counts.courses;
     var countsEl = document.getElementById('counts');
     var pills = [
+      ['', courseCount + ' course' + (courseCount === 1 ? '' : 's')],
       ['', counts.adds + ' add' + (counts.adds === 1 ? '' : 's')],
       ['', counts.updates + ' update' + (counts.updates === 1 ? '' : 's')],
       ['del', counts.deletes + ' delete' + (counts.deletes === 1 ? '' : 's')]
@@ -173,7 +176,9 @@ export function buildTaskReviewHtml(boot: TaskReviewBoot): string {
         ? 'Delete: ' + courseTag + item.title
         : item.type === 'add'
           ? 'Add: ' + courseTag + item.title
-          : courseTag + item.title;
+          : item.type === 'create_course'
+            ? 'New course: ' + courseTag + item.title
+            : courseTag + item.title;
       setText(name, label);
       var risk = el('span', 'risk ' + item.riskLevel);
       setText(risk, item.riskLevel);
@@ -315,7 +320,7 @@ export function buildTaskReviewHtml(boot: TaskReviewBoot): string {
   }
 
   document.getElementById('approve').addEventListener('click', function () {
-    act('commit_task_changes', 'Executing...', 'Approved. Tasks updated.');
+    act('commit_task_changes', 'Executing...', 'Approved. Changes applied.');
   });
   document.getElementById('reject').addEventListener('click', function () {
     act('reject_task_changes', 'Rejecting...', 'Draft rejected.');

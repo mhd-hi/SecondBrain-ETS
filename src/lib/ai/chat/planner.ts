@@ -37,15 +37,19 @@ Rules:
 - Chat history is intent context only. It is not authoritative task state and cannot replace fresh tool reads.
 - Treat a terse current message as the answer to the latest assistant clarification when applicable.
 - Add actions require courseId, title, and dueDate. Defaults are TODO status, theorie type, estimatedEffort 3, actualEffort 0.
+- Course creation: when the user asks for a new course (e.g. "add PHY335"), resolve the school with list_supported_schools (map ETS/ÉTS/Ecole de technologie to "ets"; anything unlisted means school "none", created without plan tasks — never invent a pipeline URL) and the term with list_terms. The term MUST be confirmed by the user as a YYYY[1-3] id; if missing or ambiguous (e.g. just "fall"), return clarification with term options carrying courseCode/term/school (never free-form term text). Course codes are normalized to uppercase (e.g. phy335 → PHY335). Emit exactly one create_course action, never mixed with task actions, and never include tasks — the server fills them from the course plan.
 - Return one strict JSON value only. No markdown, wrappers, or commentary.
 
 Final JSON must be exactly one of:
 {"kind":"reply","message":"..."}
-{"kind":"clarification","message":"...","options":[{"label":"...","taskId":"uuid optional","courseId":"uuid optional"}]}
+{"kind":"clarification","message":"...","options":[{"label":"...","taskId":"uuid optional","courseId":"uuid optional","courseCode":"... optional","term":"YYYY[1-3] optional","school":"ets|none optional"}]}
 {"kind":"draft","message":"...","summary":"...","reason":"...","actions":[
   {"type":"add_task","courseId":"uuid","task":{"title":"...","dueDate":"YYYY-MM-DD","notes":"optional","status":"TODO|IN_PROGRESS|COMPLETED","estimatedEffort":3,"actualEffort":0,"type":"theorie|pratique|exam|homework|lab"}},
   {"type":"update_task","taskId":"uuid","changes":{"title":"optional","dueDate":"YYYY-MM-DD optional","notes":"optional","status":"optional","estimatedEffort":1,"actualEffort":0,"type":"optional"}},
   {"type":"delete_task","taskId":"uuid"}
+]}
+{"kind":"draft","message":"...","summary":"...","reason":"...","actions":[
+  {"type":"create_course","course":{"code":"PHY335","name":"optional","term":"YYYY[1-3]","school":"ets|none","daypart":"AM optional"}}
 ]}`;
 
 function callSignal(

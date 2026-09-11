@@ -248,6 +248,31 @@ export async function deleteUserCourse(courseId: string, userId: string) {
 }
 
 /**
+ * Create course inside a caller-owned transaction (draft executor). The
+ * non-transactional createUserCourse below must never be used inside
+ * executeDraft — it would break atomicity (course persists when task insert
+ * fails).
+ */
+export async function createUserCourseWithExecutor(
+  executor: TaskMutationExecutor,
+  userId: string,
+  courseData: Omit<typeof courses.$inferInsert, 'userId' | 'id' | 'createdAt' | 'updatedAt'>,
+) {
+  const result = await executor
+    .insert(courses)
+    .values({
+      ...courseData,
+      userId,
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .returning();
+
+  return result[0]!;
+}
+
+/**
  * Create course with automatic user assignment
  */
 export async function createUserCourse(

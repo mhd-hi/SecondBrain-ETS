@@ -1,12 +1,18 @@
 import { and, asc, eq, gt, inArray, isNull, sql } from 'drizzle-orm';
 import {
+  createUserCourseWithExecutor,
   createUserTaskWithExecutor,
   deleteUserTaskWithExecutor,
   updateUserTaskWithExecutor,
 } from '@/lib/auth/db';
 import { recordMcpAuditEvent } from '@/lib/auth/mcp';
+import { ensureTermExistsWithExecutor } from '@/lib/courses/create-course-pipeline';
+import { generateRandomCourseColor } from '@/lib/utils/colors-util';
+import { buildPlanETSUrl } from '@/lib/utils/url-util';
 import { db } from '@/server/db';
-import { aiActionDrafts, courses, tasks } from '@/server/db/schema';
+import { aiActionDrafts, courses, customLinks, tasks } from '@/server/db/schema';
+import { LINK_TYPES } from '@/types/custom-link';
+import { SCHOOL } from '@/types/school';
 import { parseTorontoDueDate } from './date';
 import { getOwnedDraft } from './drafts';
 import {
@@ -153,7 +159,9 @@ function capabilityClaimPredicate(
     eq(aiActionDrafts.approvalCapabilityHash, approval.capabilityHash),
     gt(aiActionDrafts.approvalCapabilityExpiresAt, now),
     isNull(aiActionDrafts.approvalCapabilityConsumedAt),
-    sql`${aiActionDrafts.payload}->>'payloadVersion' = ${String(AI_DRAFT_PAYLOAD_VERSION)}`,
+    // v1 (task-only) and v2 (task + create_course) payloads both execute;
+    // getOwnedDraft already rejects unknown versions by marking failed.
+    sql`${aiActionDrafts.payload}->>'payloadVersion' IN ('1', ${String(AI_DRAFT_PAYLOAD_VERSION)})`,
   );
 }
 
@@ -202,6 +210,114 @@ class DraftStaleSignal extends Error {
   }
 }
 
+// Course already exists at execute time (created via UI/another draft after
+// prepare). Distinct from task-version staleness so the failure code tells
+// the reviewer what changed.
+class CourseExistsSignal extends DraftStaleSignal {
+  constructor() {
+    super();
+    this.name = 'CourseExistsSignal';
+  }
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  const wrapped = error as {
+    code?: string;
+    cause?: { code?: string };
+  };
+  const code = wrapped?.code ?? wrapped?.cause?.code;
+  if (code === '23505') {
+    return true;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return /duplicate key|unique constraint/i.test(message);
+}
+
+type DraftExecutorTx = Parameters<typeof createUserTaskWithExecutor>[0] &
+  Pick<typeof db, 'select' | 'execute'>;
+
+async function executeCourseCreation(
+  tx: DraftExecutorTx,
+  userId: string,
+  action: Extract<
+    import('./types').DraftAction,
+    { type: 'create_course' }
+  >,
+  addedTaskIds: string[],
+  addedTaskSnapshots: Record<string, unknown>[],
+): Promise<string> {
+  const { course, tasks: courseTasks } = action;
+  // FK guard inside the transaction: the term row must exist before the
+  // course insert (courses.term references terms.id).
+  await ensureTermExistsWithExecutor(tx, course.term);
+
+  const existing = await tx
+    .select({ id: courses.id })
+    .from(courses)
+    .where(
+      and(
+        eq(courses.userId, userId),
+        eq(courses.code, course.code),
+        eq(courses.term, course.term),
+      ),
+    )
+    .limit(1);
+  if (existing[0]) {
+    throw new CourseExistsSignal();
+  }
+
+  let created: typeof courses.$inferSelect;
+  try {
+    created = await createUserCourseWithExecutor(tx, userId, {
+      code: course.code,
+      name: course.name ?? course.code,
+      term: course.term,
+      daypart: course.daypart,
+      color: generateRandomCourseColor(),
+    });
+  } catch (error) {
+    // Unique race with a concurrent UI/API create after prepare.
+    if (isUniqueViolation(error)) {
+      throw new CourseExistsSignal();
+    }
+    throw error;
+  }
+
+  for (const task of courseTasks) {
+    const inserted = await createUserTaskWithExecutor(tx, userId, {
+      courseId: created.id,
+      title: task.title,
+      notes: task.notes,
+      dueDate: parseTorontoDueDate(task.dueDate),
+      status: task.status,
+      type: task.type,
+      estimatedEffort: task.estimatedEffort,
+      actualEffort: task.actualEffort,
+    });
+    addedTaskIds.push(inserted.id);
+    addedTaskSnapshots.push(taskSnapshotOf(inserted));
+  }
+
+  // Best-effort PlanETS shortcut, mirroring the UI flow. Never fails the draft.
+  if (course.school === SCHOOL.ETS) {
+    try {
+      await tx.insert(customLinks).values({
+        title: LINK_TYPES.PLANETS,
+        url: buildPlanETSUrl(course.code, course.term),
+        type: LINK_TYPES.PLANETS,
+        userId,
+        courseId: created.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      console.error('Failed to create PlanETS link:', error);
+    }
+  }
+
+  return created.id;
+}
+
 function taskSnapshotOf(task: typeof tasks.$inferSelect) {
   return {
     id: task.id,
@@ -222,6 +338,7 @@ export type ExecutionReceipt = {
   draftId: string;
   approvalChannel: 'web' | 'mcp_app';
   connectionId: string | null;
+  addedCourseId: string | null;
   addedTaskIds: string[];
   addedTaskSnapshots: Record<string, unknown>[];
   updatedTaskIds: string[];
@@ -280,7 +397,7 @@ export async function executeDraft(
                 eq(aiActionDrafts.userId, userId),
                 eq(aiActionDrafts.status, 'pending'),
                 gt(aiActionDrafts.expiresAt, now),
-                sql`${aiActionDrafts.payload}->>'payloadVersion' = ${String(AI_DRAFT_PAYLOAD_VERSION)}`,
+                sql`${aiActionDrafts.payload}->>'payloadVersion' IN ('1', ${String(AI_DRAFT_PAYLOAD_VERSION)})`,
               ),
         )
         .returning();
@@ -295,10 +412,16 @@ export async function executeDraft(
       const taskVersions = new Map(
         Object.entries(claimed[0].taskVersions as Record<string, string>),
       );
-      const existingTaskIds = payload.actions
-        .filter((action) => action.type !== 'add_task')
-        .map((action) => action.taskId)
-        .sort();
+      // Control-flow narrowing (not Array.filter guards): payload is a
+      // v1|v2 union, and filter predicates over indexed union members do not
+      // narrow reliably. Loops discriminate correctly on every version.
+      const existingTaskIds: string[] = [];
+      for (const action of payload.actions) {
+        if (action.type === 'update_task' || action.type === 'delete_task') {
+          existingTaskIds.push(action.taskId);
+        }
+      }
+      existingTaskIds.sort();
       const lockedTasks = existingTaskIds.length
         ? await tx
             .select()
@@ -318,13 +441,13 @@ export async function executeDraft(
         throw new DraftStaleSignal();
       }
 
-      const addCourseIds = [
-        ...new Set(
-          payload.actions
-            .filter((action) => action.type === 'add_task')
-            .map((action) => action.courseId),
-        ),
-      ].sort();
+      const addCourseIdSet = new Set<string>();
+      for (const action of payload.actions) {
+        if (action.type === 'add_task') {
+          addCourseIdSet.add(action.courseId);
+        }
+      }
+      const addCourseIds = [...addCourseIdSet].sort();
       const lockedCourses = addCourseIds.length
         ? await tx
             .select({ id: courses.id })
@@ -347,7 +470,18 @@ export async function executeDraft(
       const updatedTaskIds: string[] = [];
       const updatedTaskSnapshots: Record<string, unknown>[] = [];
       const deletedTaskIds: string[] = [];
+      let addedCourseId: string | null = null;
       for (const action of payload.actions) {
+        if (action.type === 'create_course') {
+          addedCourseId = await executeCourseCreation(
+            tx,
+            userId,
+            action,
+            addedTaskIds,
+            addedTaskSnapshots,
+          );
+          continue;
+        }
         if (action.type === 'add_task') {
           const inserted = await createUserTaskWithExecutor(tx, userId, {
             courseId: action.courseId,
@@ -389,6 +523,7 @@ export async function executeDraft(
         draftId,
         approvalChannel: isMcp ? 'mcp_app' : 'web',
         connectionId: isMcp ? approval.connectionId : null,
+        addedCourseId,
         addedTaskIds,
         addedTaskSnapshots,
         updatedTaskIds,
@@ -452,7 +587,10 @@ export async function executeDraft(
         .update(aiActionDrafts)
         .set({
           status: 'stale',
-          failureCode: 'task_state_changed',
+          failureCode:
+            error instanceof CourseExistsSignal
+              ? 'course_already_exists'
+              : 'task_state_changed',
           terminalAt: new Date(),
         })
         .where(

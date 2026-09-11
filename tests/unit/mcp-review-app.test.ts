@@ -10,7 +10,7 @@ import type { ReviewPayload } from '@/lib/ai/chat/types';
 
 const maliciousPayload: ReviewPayload = {
   summary: '<img src=x onerror=alert(1)> inject summary',
-  counts: { adds: 1, updates: 0, deletes: 0 },
+  counts: { adds: 1, updates: 0, deletes: 0, courses: 0 },
   items: [
     {
       type: 'add',
@@ -35,7 +35,7 @@ function bootWith(review: Partial<TaskReviewBoot['review']>): TaskReviewBoot {
       expiresAt: new Date('2026-09-01T00:00:00Z').toISOString(),
       reviewPayload: {
         summary: 'Test',
-        counts: { adds: 0, updates: 0, deletes: 0 },
+        counts: { adds: 0, updates: 0, deletes: 0, courses: 0 },
         items: [],
       },
       ...review,
@@ -104,6 +104,37 @@ describe('MCP App review resource (plan 19.1 / 21.7)', () => {
     const stripped = html.replace(islandMatch![0], '');
 
     expect(stripped).not.toContain('capability-raw-value-0123456789');
+  });
+
+  it('renders course-creation drafts with a course pill and label', () => {
+    const html = buildTaskReviewHtml(
+      bootWith({
+        summary: 'Create PHY335',
+        reviewPayload: {
+          summary: 'Create PHY335',
+          counts: { adds: 0, updates: 0, deletes: 0, courses: 1 },
+          items: [
+            {
+              type: 'create_course',
+              title: 'PHY335',
+              courseCode: 'PHY335',
+              courseName: 'Physique des ondes',
+              after: { code: 'PHY335', term: '20263' },
+              diff: { code: { after: 'PHY335' } },
+              warnings: [],
+              riskLevel: 'low',
+            },
+          ],
+        } satisfies ReviewPayload,
+      }),
+    );
+
+    // Pill text and item labels render client-side from the island; the
+    // static document must carry the branch plus the courses count.
+    expect(html).toContain('New course: ');
+    expect(html).toContain('courseCount');
+    expect(html).toContain('"courses":1');
+    expect(html).toContain('"type":"create_course"');
   });
 
   it('renders approval controls disabled without a capability (web fallback)', () => {

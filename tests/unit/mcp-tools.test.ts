@@ -56,7 +56,7 @@ describe('MCP tool surface metadata (plan 19.1 / 21.4)', () => {
   const server = createMcpServer(context);
   const tools = extractRegisteredTools(server);
 
-  it('registers all ten planned tools', () => {
+  it('registers all thirteen planned tools', () => {
     const names = new Set(tools.keys());
     for (const name of [
       'search_courses',
@@ -64,7 +64,10 @@ describe('MCP tool surface metadata (plan 19.1 / 21.4)', () => {
       'get_task',
       'list_course_tasks',
       'resolve_course_week',
+      'list_supported_schools',
+      'list_terms',
       'prepare_task_changes',
+      'prepare_course_creation',
       'render_task_review',
       'get_task_draft',
       'commit_task_changes',
@@ -117,10 +120,24 @@ describe('MCP tool surface metadata (plan 19.1 / 21.4)', () => {
       'get_task',
       'list_course_tasks',
       'resolve_course_week',
+      'list_supported_schools',
+      'list_terms',
       'get_task_draft',
     ]) {
       expect(tools.get(name)?.annotations?.readOnlyHint, name).toBe(true);
     }
+  });
+
+  it('gives prepare_course_creation a school- and term-constrained schema', () => {
+    const schema = JSON.stringify(tools.get('prepare_course_creation')?.inputSchema ?? {});
+
+    expect(schema).toContain('courseCode');
+    expect(schema).toContain('school');
+    expect(schema).toContain('term');
+    expect(schema).toContain('ets');
+    expect(schema).toContain('none');
+    expect(tools.get('prepare_course_creation')?.annotations?.readOnlyHint).toBe(false);
+    expect(tools.get('prepare_course_creation')?.annotations?.idempotentHint).toBe(true);
   });
 
   it('marks commit_task_changes conservatively destructive (plan 11.3)', () => {

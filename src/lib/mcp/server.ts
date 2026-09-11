@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerAppResource } from '@modelcontextprotocol/ext-apps/server';
 import type { McpAuthContext } from '@/lib/auth/mcp';
+import { registerCourseTools } from './course-tools';
 import { registerReadTools } from './read-tools';
 import { registerTaskTools } from './task-tools';
 import {
@@ -29,11 +30,12 @@ export function createMcpServer(context: {
 }): McpServer {
   const server = new McpServer(
     { name: 'second-brain', version: '1.0.0' },
-    { instructions: 'Second Brain course and task tools. Reads are automatic; task changes go through an immutable review draft that the user approves.' },
+    { instructions: 'Second Brain course and task tools. Reads are automatic; task changes and course creation go through an immutable review draft that the user approves.' },
   );
 
   registerReadTools(server, context);
   registerTaskTools(server, context as McpAuthContext);
+  registerCourseTools(server, context as McpAuthContext);
 
   registerAppResource(
     server,
@@ -55,7 +57,7 @@ export function createMcpServer(context: {
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           reviewPayload: {
             summary: 'Task review',
-            counts: { adds: 0, updates: 0, deletes: 0 },
+            counts: { adds: 0, updates: 0, deletes: 0, courses: 0 },
             items: [],
           },
         },

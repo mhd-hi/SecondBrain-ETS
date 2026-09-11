@@ -51,7 +51,9 @@ export const POST = withAuth<{ actionId: string }>(
             error.code === 'DRAFT_EXPIRED'
               ? 'Draft expired'
               : error.code === 'DRAFT_STALE'
-                ? 'Tasks changed since this draft was created'
+                ? draft?.failureCode === 'course_already_exists'
+                  ? 'Course already exists'
+                  : 'Tasks changed since this draft was created'
                 : 'Draft cannot be approved',
           draft: draft ? publicDraft(draft) : null,
           tasks: await getAuthoritativeTasks(user.id, taskIds),

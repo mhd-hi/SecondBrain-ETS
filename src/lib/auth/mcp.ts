@@ -1,7 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { eq } from 'drizzle-orm';
 import { db } from '@/server/db';
 import { mcpAuditEvents, mcpConnections } from '@/server/db/schema';
 
@@ -10,26 +9,20 @@ import { mcpAuditEvents, mcpConnections } from '@/server/db/schema';
  *
  * Every `/api/mcp` request is authenticated here, independently: the Auth.js
  * browser session cookie is never consulted (plan section 6.3/16). The token
- * must be issued by the configured authorization server, bound to this MCP
- * resource audience, carry the required scopes, and resolve to exactly one
- * active (non-revoked) Second Brain connection keyed by
- * `(issuer, grant_id)`.
- *
- * Provider selection (plan section 8.4) is not finalized yet; this boundary
- * only depends on the claim shape defined in the plan's example claims block,
- * so swapping providers never touches domain tools.
+ * is a static API key (`sb_mcp_` prefix, created in Preferences > MCP & AI
+ * Clients) that resolves to exactly one active (non-revoked) `mcp_connections`
+ * row by its sha256 hash. Identity comes from that key's row, never from tool
+ * input.
  */
 
 export const MCP_SCOPES = ['secondbrain:read', 'secondbrain:write'] as const;
 export type McpScope = (typeof MCP_SCOPES)[number];
 
-export const MCP_RESOURCE_AUDIENCE = 'second-brain-mcp';
-
 /**
  * Prefix for user-created static API keys (Preferences > MCP API keys).
  * Keys are 256-bit random secrets, shown once, stored only as sha256 hashes
- * (fine for high-entropy secrets, unlike passwords). The prefix lets
- * authenticateMcpRequest route between key auth and OAuth JWT auth.
+ * (fine for high-entropy secrets, unlike passwords). The prefix is the
+ * boundary's fast-path signal that this is an API key.
  */
 export const MCP_API_KEY_PREFIX = 'sb_mcp_';
 
@@ -49,8 +42,7 @@ export type McpAuthFailure = {
     | 'invalid_token'
     | 'insufficient_scope'
     | 'token_required'
-    | 'connection_revoked'
-    | 'connection_mismatch';
+    | 'connection_revoked';
   errorDescription: string;
   scope?: string;
 };
@@ -84,34 +76,6 @@ function timingSafeEqualStr(a: string, b: string): boolean {
   return bufA.length === bufB.length && timingSafeEqual(bufA, bufB);
 }
 
-function requiredEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new McpAuthError({
-      status: 401,
-      code: 'invalid_token',
-      errorDescription: 'MCP authentication is not configured',
-    });
-  }
-  return value;
-}
-
-type TokenClaims = {
-  sub?: unknown;
-  aud?: unknown;
-  iss?: unknown;
-  exp?: unknown;
-  nbf?: unknown;
-  scope?: unknown;
-  client_id?: unknown;
-  grant_id?: unknown;
-};
-
-function claimString(claims: TokenClaims, key: keyof TokenClaims): string {
-  const value = claims[key];
-  return typeof value === 'string' ? value : '';
-}
-
 export function buildWwwAuthenticateChallenge({
   code,
   errorDescription,
@@ -126,84 +90,6 @@ export function buildWwwAuthenticateChallenge({
 }): string {
   const base = `Bearer realm="second-brain-mcp", error="${code}", error_description="${errorDescription.replaceAll('"', "'")}", resource_metadata="${resourceMetadataUrl}"`;
   return scope ? `${base}, scope="${scope}"` : base;
-}
-
-type VerifiedToken = {
-  payload: TokenClaims & { [key: string]: unknown };
-  claims: {
-    sub: string;
-    clientId: string;
-    grantId: string;
-    issuer: string;
-    scope: string;
-  };
-};
-
-async function verifyTokenStructure(
-  token: string,
-): Promise<VerifiedToken['payload']> {
-  const issuer = requiredEnv('MCP_OAUTH_ISSUER');
-  const audience = requiredEnv('MCP_OAUTH_AUDIENCE');
-
-  let payload: VerifiedToken['payload'];
-  try {
-    const verifyOptions: Parameters<typeof jwtVerify>[2] = {
-      issuer,
-      audience,
-      clockTolerance: 5,
-    };
-    const jwksUri = process.env.MCP_OAUTH_JWKS_URI;
-    const verification = jwksUri
-      ? await jwtVerify(token, createRemoteJWKSet(new URL(jwksUri)), verifyOptions)
-      : await jwtVerify(
-          token,
-          async (header) => {
-            if (header.alg === 'HS256') {
-              // Symmetric tokens: production uses the authorization server's
-              // MCP_OAUTH_SECRET.
-              const rawSecret = process.env.MCP_OAUTH_SECRET;
-              if (!rawSecret) {
-                throw new McpAuthError({
-                  status: 401,
-                  code: 'invalid_token',
-                  errorDescription:
-                    'MCP authentication is not configured for symmetric tokens',
-                });
-              }
-              return new TextEncoder().encode(rawSecret);
-            }
-            throw new McpAuthError({
-              status: 401,
-              code: 'invalid_token',
-              errorDescription: `Unsupported signing algorithm: ${header.alg ?? 'unknown'}`,
-            });
-          },
-          verifyOptions,
-        );
-    payload = verification.payload as VerifiedToken['payload'];
-  } catch (error) {
-    if (error instanceof McpAuthError) {
-      throw error;
-    }
-    throw new McpAuthError({
-      status: 401,
-      code: 'invalid_token',
-      errorDescription: 'Token validation failed',
-    });
-  }
-
-  const sub = claimString(payload, 'sub');
-  const clientId = claimString(payload, 'client_id');
-  const grantId = claimString(payload, 'grant_id');
-  const scope = claimString(payload, 'scope');
-  if (!sub || !clientId || !grantId || !scope) {
-    throw new McpAuthError({
-      status: 401,
-      code: 'invalid_token',
-      errorDescription: 'Token is missing required claims (sub, client_id, grant_id, scope)',
-    });
-  }
-  return payload;
 }
 
 function extractBearerToken(request: Request): string | null {
@@ -222,12 +108,11 @@ function extractBearerToken(request: Request): string | null {
 /**
  * Authenticate one MCP request. Throws McpAuthError on any failure.
  *
- * Bearer tokens starting with sb_mcp_ are static API keys (hashed lookup,
- * below); everything else is treated as an OAuth JWT.
+ * The bearer token must be a static API key (sb_mcp_ prefix). Anything else
+ * fails closed as an unknown key — there is no other token format.
  *
- * Order of checks: bearer presence -> structural verification (signature,
- * issuer, audience, expiry) -> claim presence -> scope -> connection
- * resolution and revocation check.
+ * Order of checks: bearer presence -> sb_mcp_ prefix -> hash lookup and
+ * timing-safe compare -> revocation check.
  */
 export async function authenticateMcpRequest(
   request: Request,
@@ -241,80 +126,15 @@ export async function authenticateMcpRequest(
     });
   }
 
-  if (token.startsWith(MCP_API_KEY_PREFIX)) {
-    return authenticateApiKey(token);
-  }
-
-  const payload = await verifyTokenStructure(token);
-  const sub = claimString(payload, 'sub');
-  const clientId = claimString(payload, 'client_id');
-  const grantId = claimString(payload, 'grant_id');
-  const scope = claimString(payload, 'scope');
-  const issuer = claimString(payload, 'iss');
-
-  const connection = await db
-    .select()
-    .from(mcpConnections)
-    .where(
-      and(
-        eq(mcpConnections.oauthGrantId, grantId),
-        eq(mcpConnections.oauthIssuer, issuer),
-      ),
-    )
-    .limit(1)
-    .then((rows) => rows[0]);
-  if (!connection) {
+  if (!token.startsWith(MCP_API_KEY_PREFIX)) {
     throw new McpAuthError({
       status: 401,
-      code: 'connection_revoked',
-      errorDescription: 'No active connection for this authorization grant',
+      code: 'invalid_token',
+      errorDescription: 'Unknown API key',
     });
   }
-  if (
-    connection.revokedAt ||
-    connection.userId !== sub ||
-    connection.oauthClientId !== clientId ||
-    connection.oauthIssuer !== issuer ||
-    connection.oauthSubject !== sub
-  ) {
-    throw new McpAuthError({
-      status: 401,
-      code: 'connection_revoked',
-      errorDescription: 'Connection revoked or token claims do not match',
-    });
-  }
-  assertUserAllowed(sub);
 
-  return {
-    userId: sub,
-    connectionId: connection.id,
-    clientId,
-    grantId,
-    issuer,
-    scopes: scope.split(/[\s+]/).filter(Boolean),
-  };
-}
-
-// Staged rollout allowlist (plan section 20, Phase 6 / section 22.1 private
-// alpha): when MCP_ENABLED_USERS is set, only listed user IDs may connect or
-// create API keys. Empty/unset means the MCP surface is open to all
-// authenticated users.
-export function isUserMcpEnabled(userId: string): boolean {
-  const allowlist = (process.env.MCP_ENABLED_USERS ?? '')
-    .split(',')
-    .map((id) => id.trim())
-    .filter(Boolean);
-  return allowlist.length === 0 || allowlist.includes(userId);
-}
-
-function assertUserAllowed(userId: string): void {
-  if (!isUserMcpEnabled(userId)) {
-    throw new McpAuthError({
-      status: 403,
-      code: 'insufficient_scope',
-      errorDescription: 'This account is not enabled for MCP access',
-    });
-  }
+  return authenticateApiKey(token);
 }
 
 /**
@@ -327,9 +147,9 @@ function assertUserAllowed(userId: string): void {
  * sha256 of the token, which every request performs exactly once up front.
  * Each failure path then burns one additional same-input-size sha256 and one
  * timing-safe compare before throwing, so response latency cannot distinguish
- * unknown key from revoked key from allowlisted user. The DB read is an
- * indexed unique-key point read with the same cost whether or not a row
- * matches. Network jitter far exceeds the residual differences.
+ * unknown key from revoked key. The DB read is an indexed unique-key point
+ * read with the same cost whether or not a row matches. Network jitter far
+ * exceeds the residual differences.
  */
 async function authenticateApiKey(token: string): Promise<McpAuthContext> {
   const hash = sha256Hex(token);
@@ -359,14 +179,6 @@ async function authenticateApiKey(token: string): Promise<McpAuthContext> {
       status: 401,
       code: 'connection_revoked',
       errorDescription: 'API key has been revoked',
-    });
-  }
-  if (!isUserMcpEnabled(connection.userId)) {
-    timingSafeEqualStr(sha256Hex(hash), hash);
-    throw new McpAuthError({
-      status: 403,
-      code: 'insufficient_scope',
-      errorDescription: 'This account is not enabled for MCP access',
     });
   }
 
@@ -428,4 +240,3 @@ export async function recordMcpAuditEvent(entry: {
     durationMs: entry.durationMs ?? null,
   });
 }
-// env values are read at request time; see docs/mcp-adr.md

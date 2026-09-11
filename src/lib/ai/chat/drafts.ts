@@ -1,5 +1,12 @@
 import { and, asc, eq, inArray, lte } from 'drizzle-orm';
+import {
+  assertCourseNotExists,
+  CourseCreationError,
+  previewCourseCreation,
+  validateCourseCreationInput,
+} from '@/lib/courses/create-course-pipeline';
 import { db } from '@/server/db';
+import { StatusTask } from '@/types/status-task';
 import { aiActionDrafts, courses, tasks } from '@/server/db/schema';
 import { formatTorontoDate, parseTorontoDueDate } from './date';
 import type { PlannerOutput, ReviewPayload } from './types';
@@ -23,6 +30,7 @@ function counts(actions: Extract<PlannerOutput, { kind: 'draft' }>['actions']) {
     adds: actions.filter((action) => action.type === 'add_task').length,
     updates: actions.filter((action) => action.type === 'update_task').length,
     deletes: actions.filter((action) => action.type === 'delete_task').length,
+    courses: actions.filter((action) => action.type === 'create_course').length,
   };
 }
 
@@ -65,18 +73,135 @@ export type PreparedDraft = {
   reviewPayload: ReviewPayload;
 };
 
+async function prepareCourseDraft(
+  userId: string,
+  output: Extract<PlannerOutput, { kind: 'draft' }>,
+): Promise<PreparedDraft> {
+  const action = output.actions[0];
+  if (!action || action.type !== 'create_course') {
+    throw new DraftValidationError();
+  }
+
+  let preview: Awaited<ReturnType<typeof previewCourseCreation>>;
+  try {
+    const validated = validateCourseCreationInput({
+      courseCode: action.course.code,
+      term: action.course.term,
+      school: action.course.school,
+      daypart: action.course.daypart,
+      firstDayOfClass: action.course.firstDayOfClass,
+      userContext: action.course.userContext,
+      courseName: action.course.name,
+    });
+    await assertCourseNotExists(userId, validated.code, validated.term);
+    preview = await previewCourseCreation(userId, {
+      courseCode: validated.code,
+      term: validated.term,
+      school: validated.school,
+      daypart: validated.daypart,
+      firstDayOfClass: validated.firstDayOfClass,
+      userContext: validated.sanitizedContext,
+      courseName: validated.name,
+    });
+  } catch (error) {
+    if (error instanceof CourseCreationError) {
+      // Duplicate or invalid identity: same signal as unknown task targets.
+      throw new DraftValidationError();
+    }
+    throw error;
+  }
+
+  const storedAction = {
+    type: 'create_course' as const,
+    course: {
+      code: preview.course.code,
+      name: preview.course.name,
+      term: preview.course.term,
+      school: preview.course.school,
+      daypart: preview.course.daypart,
+    },
+    tasks: preview.tasks.map((task) => ({
+      title: task.title,
+      notes: task.notes,
+      dueDate: formatTorontoDate(task.dueDate),
+      status: StatusTask.TODO,
+      estimatedEffort: task.estimatedEffort,
+      actualEffort: 0,
+      type: task.type,
+    })),
+  };
+
+  const after = {
+    code: preview.course.code,
+    name: preview.course.name,
+    term: preview.course.term,
+    school: preview.course.school,
+    daypart: preview.course.daypart,
+    taskCount: preview.tasks.length,
+  };
+  const reviewPayload = reviewPayloadSchema.parse({
+    summary: output.summary,
+    counts: counts([storedAction]),
+    items: [
+      {
+        type: 'create_course' as const,
+        title: preview.course.code,
+        courseCode: preview.course.code,
+        courseName: preview.course.name,
+        after,
+        diff: diffRecords(undefined, after),
+        warnings:
+          preview.source === 'empty'
+            ? ['Created without course-plan tasks (unsupported school)']
+            : [],
+        riskLevel: 'low' as const,
+      },
+    ],
+  });
+
+  return {
+    payload: {
+      payloadVersion: AI_DRAFT_PAYLOAD_VERSION,
+      actions: [storedAction],
+    },
+    taskVersions: {},
+    reviewPayload,
+  };
+}
+
 export async function prepareDraft(
   userId: string,
   output: Extract<PlannerOutput, { kind: 'draft' }>,
 ): Promise<PreparedDraft> {
+  // create_course drafts are exclusive by schema (never mixed with task
+  // actions): validate identity, run the shared PlanETS pipeline for a
+  // preview, and freeze the server-generated tasks into the payload.
+  // The model never supplies tasks — any model-provided list is discarded.
+  const firstAction = output.actions[0];
+  if (firstAction?.type === 'create_course') {
+    return prepareCourseDraft(userId, output);
+  }
+
   const existingTaskIds = output.actions
-    .filter((action) => action.type !== 'add_task')
+    .filter(
+      (
+        action,
+      ): action is Extract<
+        (typeof output.actions)[number],
+        { type: 'update_task' | 'delete_task' }
+      > => action.type === 'update_task' || action.type === 'delete_task',
+    )
     .map((action) => action.taskId)
     .sort();
   const addCourseIds = [
     ...new Set(
       output.actions
-        .filter((action) => action.type === 'add_task')
+        .filter(
+          (
+            action,
+          ): action is Extract<(typeof output.actions)[number], { type: 'add_task' }> =>
+            action.type === 'add_task',
+        )
         .map((action) => action.courseId),
     ),
   ].sort();
@@ -168,6 +293,12 @@ export async function prepareDraft(
         ),
         riskLevel: duplicates.length ? ('medium' as const) : ('low' as const),
       };
+    }
+
+    if (action.type === 'create_course') {
+      // Unreachable: schema forbids mixing, and a leading create_course
+      // returns early via prepareCourseDraft. Fail closed if it ever occurs.
+      throw new DraftValidationError();
     }
 
     const task = tasksById.get(action.taskId)!;

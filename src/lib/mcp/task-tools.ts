@@ -10,8 +10,8 @@ import {
 } from '@/lib/ai/chat/drafts';
 import { executeDraft, rejectDraft } from '@/lib/ai/chat/executor';
 import { plannerOutputSchema, reviewPayloadSchema } from '@/lib/ai/chat/types';
-import {  requireScopes, sha256Hex } from '@/lib/auth/mcp';
-import type {McpAuthContext} from '@/lib/auth/mcp';
+import { requireScopes, sha256Hex } from '@/lib/auth/mcp';
+import type { McpAuthContext } from '@/lib/auth/mcp';
 import {
   ApprovalCapabilityError,
   canonicalRequestHash,
@@ -48,20 +48,20 @@ function hasUiExtension(meta: unknown): boolean {
   return Boolean(extensions?.[UI_EXTENSION_ID]);
 }
 
-type ToolResult = {
+export type ToolResult = {
   content: { type: 'text'; text: string }[];
   structuredContent?: Record<string, unknown>;
   isError?: boolean;
   _meta?: Record<string, unknown>;
 };
 
-function textResult(payload: unknown): ToolResult {
+export function textResult(payload: unknown): ToolResult {
   return {
     content: [{ type: 'text', text: JSON.stringify(payload) }],
   };
 }
 
-function errorResult(code: string, message: string): ToolResult {
+export function errorResult(code: string, message: string): ToolResult {
   return {
     content: [{ type: 'text', text: JSON.stringify({ code, message }) }],
     isError: true,
@@ -72,7 +72,7 @@ function webReviewUrlFromExtra(
   extra: ToolExtra | undefined,
   draftId: string,
 ): string {
-  let origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  let origin = process.env.NEXT_PUBLIC_APP_URL;
   const url = extra?.requestInfo?.url;
   if (url) {
     try {
@@ -84,7 +84,7 @@ function webReviewUrlFromExtra(
   return `${origin}/mcp/review/${draftId}`;
 }
 
-type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
+export type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>;
 
 const prepareInputSchema = z.strictObject({
   requestId: z.uuid(),
@@ -117,7 +117,7 @@ const draftActionSchemaLoose = z.discriminatedUnion('type', [
   }),
 ]);
 
-async function reviewDraftForConnection(
+export async function reviewDraftForConnection(
   draftId: string,
   context: McpAuthContext,
 ) {
@@ -142,11 +142,15 @@ const READ_ANNOTATIONS = {
   openWorldHint: false,
 } as const;
 
-export function registerTaskTools(
-  server: McpServer,
-  context: McpAuthContext,
-) {
-  const reviewBase = async (
+/**
+ * Shared review renderer for task AND course drafts (course-tools.ts reuses
+ * this; no duplicated approval plumbing). Returns the text review plus —
+ * only for hosts negotiating the MCP Apps UI extension — a rotated approval
+ * capability in `_meta`. Hosts without the extension fail closed to text +
+ * web review URL.
+ */
+export function createDraftReviewer(context: McpAuthContext) {
+  return async (
     draft: NonNullable<Awaited<ReturnType<typeof reviewDraftForConnection>>>,
     extra: ToolExtra | undefined,
   ) => {
@@ -179,6 +183,13 @@ export function registerTaskTools(
       },
     } satisfies ToolResult;
   };
+}
+
+export function registerTaskTools(
+  server: McpServer,
+  context: McpAuthContext,
+) {
+  const reviewBase = createDraftReviewer(context);
 
   server.registerTool(
     'prepare_task_changes',
@@ -394,7 +405,7 @@ export function registerTaskTools(
     'commit_task_changes',
     {
       description:
-        'App-only: commit an approved task-change draft using the approval capability held by the review component.',
+        'App-only: commit an approved task-change or course-creation draft using the approval capability held by the review component.',
       inputSchema: {
         draftId: z.uuid(),
         approvalCapability: z.string().min(16).max(128),
@@ -430,7 +441,7 @@ export function registerTaskTools(
     'reject_task_changes',
     {
       description:
-        'App-only: reject a pending task-change draft using the approval capability held by the review component.',
+        'App-only: reject a pending task-change or course-creation draft using the approval capability held by the review component.',
       inputSchema: {
         draftId: z.uuid(),
         approvalCapability: z.string().min(16).max(128),
@@ -460,7 +471,7 @@ export function registerTaskTools(
   );
 }
 
-function handleError(error: unknown): ToolResult {
+export function handleError(error: unknown): ToolResult {
   if (error instanceof z.ZodError) {
     return errorResult('INVALID_INPUT', 'Invalid tool input');
   }

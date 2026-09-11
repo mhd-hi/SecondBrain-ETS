@@ -1,10 +1,8 @@
 # Second Brain MCP Integration
 
 Second Brain exposes a remote Model Context Protocol (MCP) server so
-compatible AI clients (Hermes, Claude, ChatGPT, OpenCode, any MCP client)
+compatible AI clients (Claude, ChatGPT, OpenCode, any MCP client)
 can read your courses and tasks and propose task changes that you approve.
-
-Architecture and security decisions: [docs/mcp-adr.md](mcp-adr.md).
 
 ## Endpoint
 
@@ -18,29 +16,36 @@ accepted on this endpoint.
 
 ## Tools
 
-| Tool | Scope | Model-visible | What it does |
-| --- | --- | --- | --- |
-| `search_courses` | read | yes | Find courses by code or name |
-| `search_tasks` | read | yes | Search tasks with filters |
-| `get_task` | read | yes | One task with full notes |
-| `list_course_tasks` | read | yes | All tasks of one course |
-| `resolve_course_week` | read | yes | Calendar dates for course week N |
-| `prepare_task_changes` | write | yes | Validate and store a review draft |
-| `render_task_review` | write | yes | Re-render a pending draft, rotate capability |
-| `get_task_draft` | read | yes | Draft status + execution receipt |
-| `commit_task_changes` | write | app-only | Execute an approved draft |
-| `reject_task_changes` | write | app-only | Reject a pending draft |
+| Tool                      | Scope | Model-visible | What it does                                                    |
+| ------------------------- | ----- | ------------- | --------------------------------------------------------------- |
+| `search_courses`          | read  | yes           | Find courses by code or name                                    |
+| `search_tasks`            | read  | yes           | Search tasks with filters                                       |
+| `get_task`                | read  | yes           | One task with full notes                                        |
+| `list_course_tasks`       | read  | yes           | All tasks of one course                                         |
+| `resolve_course_week`     | read  | yes           | Calendar dates for course week N                                |
+| `list_supported_schools`  | read  | yes           | Universities with a course-plan pipeline                        |
+| `list_terms`              | read  | yes           | Previous, current, and next terms                               |
+| `prepare_task_changes`    | write | yes           | Validate and store a review draft                               |
+| `prepare_course_creation` | write | yes           | Validate a new course, preview plan tasks, store a review draft |
+| `render_task_review`      | write | yes           | Re-render a pending draft (task or course), rotate capability   |
+| `get_task_draft`          | read  | yes           | Draft status + execution receipt (task or course)               |
+| `commit_task_changes`     | write | app-only      | Execute an approved draft (task or course)                      |
+| `reject_task_changes`     | write | app-only      | Reject a pending draft (task or course)                         |
 
 The model never sees the approval capability. In hosts that implement MCP
 Apps the commit/reject tools are hidden from the model tool list and called
 only by the review card component. Clients without MCP Apps support receive
 a web review URL instead of a capability (fail closed).
 
-## Task-change flow
+## Task-change and course-creation flow
 
 1. The model calls `prepare_task_changes` with the proposed actions
-   (add/update/delete, 1-20 per request). Nothing changes yet; an immutable
-   draft is stored with before/after review data.
+   (add/update/delete, 1-20 per request), or `prepare_course_creation`
+   with a course code, a user-confirmed term (`YYYY[1-3]`, via
+   `list_terms`), and a school (via `list_supported_schools`; `ets` runs
+   the PlanETS pipeline, `none` creates an empty course). Nothing changes
+   yet; an immutable draft is stored with before/after review data. Course
+   drafts freeze the server-parsed plan tasks at prepare time.
 2. A review card (in the host) or the web review page
    (`/mcp/review/<draftId>`) shows exactly what will change, with warnings
    and risk levels. Deletions are styled destructively.
@@ -55,11 +60,11 @@ Drafts expire after 24 hours; approval capabilities expire after 10 minutes.
 ## Connecting a client
 
 Step-by-step instructions (server URL and a copyable example config) are
-shown in the app under **Preferences > Profile > Connected AI clients**.
+shown in the app under **Preferences > MCP & AI Clients**.
 
 ### API keys (personal use)
 
-Create a static API key under **Preferences > Profile > MCP API keys**
+Create a static API key under **Preferences > MCP & AI Clients**
 (read-only, or read + write to allow proposing task changes). The key is
 shown exactly once and stored only as a sha256 hash; it authenticates as
 your account. Point the client at `https://<app-origin>/api/mcp`:
@@ -72,20 +77,12 @@ mcp_servers:
       Authorization: "Bearer sb_mcp_<your-api-key>"
 ```
 
-### OAuth tokens (hosted providers)
-
-Production authorization-server tokens are also accepted: a bearer JWT
-signed by the configured issuer, bound to the `second-brain-mcp` audience,
-carrying the `secondbrain:read` and/or `secondbrain:write` scopes and the
-required claims (`sub`, `client_id`, `grant_id`). See
-[docs/mcp-adr.md](mcp-adr.md).
-
-Revoking any client or key from **Preferences > Profile** takes effect
-immediately, even for unexpired tokens.
+Revoking an MCP API key from **Preferences > MCP & AI Clients** takes effect
+immediately.
 
 ## What is sent to the AI provider
 
-When a connected client works with your account, your course and task data
+When an MCP client using your API key works with your account, your course and task data
 returned by the read tools (titles, notes, dates, statuses) is processed by
 that client's AI model. Second Brain never invokes a model itself and never
 sends data to an AI provider on its own. Approval capabilities are never

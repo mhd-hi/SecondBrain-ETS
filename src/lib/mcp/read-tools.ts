@@ -20,6 +20,8 @@ export const MCP_READ_TOOL_NAMES = [
   'get_task',
   'list_course_tasks',
   'resolve_course_week',
+  'list_supported_schools',
+  'list_terms',
 ] as const;
 
 const READ_ANNOTATIONS = {
@@ -38,6 +40,10 @@ const READ_TOOL_DESCRIPTIONS: Record<string, string> = {
   list_course_tasks: 'List owned tasks for one owned course.',
   resolve_course_week:
     'Resolve a numbered course week to authoritative calendar dates. Always use this for "week N" or "semaine N".',
+  list_supported_schools:
+    'List the universities with a built-in course-plan pipeline (id + label). The school must be one of these for prepare_course_creation ("none" creates an empty course).',
+  list_terms:
+    'List the previous, current, and next academic terms (id YYYY[1-3] + label). The term for prepare_course_creation must be user-confirmed from these options.',
 };
 
 const searchTasksInputSchema = z.strictObject({
@@ -80,6 +86,9 @@ function validateReadToolInput(name: string, input: unknown): unknown {
       })
       .parse(input);
   }
+  if (name === 'list_supported_schools' || name === 'list_terms') {
+    return z.strictObject({}).parse(input);
+  }
   throw new Error(`Unknown read tool: ${name}`);
 }
 
@@ -109,6 +118,8 @@ export function registerReadTools(
       courseId: z.uuid(),
       week: z.number().int().min(1).max(13),
     },
+    list_supported_schools: {},
+    list_terms: {},
   } as const;
 
   for (const name of MCP_READ_TOOL_NAMES) {
