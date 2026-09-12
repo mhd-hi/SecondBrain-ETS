@@ -5,6 +5,8 @@ import {
   MAX_PLANNER_NOTES_CHARACTERS,
 } from '@/lib/ai/chat/tools';
 import type { NotesBudget } from '@/lib/ai/chat/tools';
+import { requireScopes } from '@/lib/auth/mcp';
+import type { McpScope } from '@/lib/auth/mcp';
 
 /**
  * Adapter mapping the existing OpenAI-shaped chat read tools (plan 11.1) to
@@ -94,7 +96,7 @@ function validateReadToolInput(name: string, input: unknown): unknown {
 
 export function registerReadTools(
   server: McpServer,
-  context: { userId: string; scopes: string[] },
+  context: { userId: string; scopes: McpScope[] | string[] },
 ) {
   // Zod raw shapes (SDK inputSchema format); the JSON Schemas are generated
   // from them by the SDK. Limits mirror tools.ts schemas exactly.
@@ -131,6 +133,7 @@ export function registerReadTools(
         annotations: READ_ANNOTATIONS,
       },
       async (args: Record<string, unknown>) => {
+        requireScopes(context, ['secondbrain:read']);
         const budget: NotesBudget = {
           remaining: MAX_PLANNER_NOTES_CHARACTERS,
         };

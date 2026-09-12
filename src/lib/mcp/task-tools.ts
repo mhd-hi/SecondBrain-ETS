@@ -69,18 +69,10 @@ export function errorResult(code: string, message: string): ToolResult {
 }
 
 function webReviewUrlFromExtra(
-  extra: ToolExtra | undefined,
+  _extra: ToolExtra | undefined,
   draftId: string,
 ): string {
-  let origin = process.env.NEXT_PUBLIC_APP_URL;
-  const url = extra?.requestInfo?.url;
-  if (url) {
-    try {
-      origin = new URL(url).origin;
-    } catch {
-      // keep default
-    }
-  }
+  const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   return `${origin}/mcp/review/${draftId}`;
 }
 

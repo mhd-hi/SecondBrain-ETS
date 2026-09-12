@@ -194,7 +194,7 @@ async function authenticateApiKey(token: string): Promise<McpAuthContext> {
 }
 
 export function requireScopes(
-  context: McpAuthContext,
+  context: Pick<McpAuthContext, 'scopes'>,
   needed: readonly McpScope[],
 ): void {
   const granted = new Set(context.scopes);

@@ -61,22 +61,26 @@ describe('NavigationProgress', () => {
 
     window.history.pushState({}, '', '/courses/abc');
     await flushMicrotasks();
+
     expect(document.querySelector('[role="progressbar"]')).not.toBeNull();
 
     // Route commits: pathname change hides the bar.
     currentPathname = '/courses/abc';
     await view.rerender(<NavigationProgress />);
     await flushMicrotasks();
+
     expect(document.querySelector('[role="progressbar"]')).toBeNull();
 
     // Hash-only jump commits no new route: the bar must stay hidden.
     window.history.pushState({}, '', '/courses/abc#task-1');
     await flushMicrotasks();
+
     expect(document.querySelector('[role="progressbar"]')).toBeNull();
 
     // Identical push likewise commits nothing: the bar must stay hidden.
     window.history.pushState({}, '', '/courses/abc#task-1');
     await flushMicrotasks();
+
     expect(document.querySelector('[role="progressbar"]')).toBeNull();
 
     await view.unmount();
@@ -95,6 +99,7 @@ describe('NavigationProgress', () => {
 
     window.history.pushState({}, '', '/kanban');
     await flushMicrotasks();
+
     expect(document.querySelector('[role="progressbar"]')).toBeNull();
 
     await view.unmount();

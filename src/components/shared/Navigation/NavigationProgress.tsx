@@ -48,6 +48,11 @@ export function NavigationProgress() {
   const lastHrefRef = React.useRef<string | null>(null);
   const wantedKeyRef = React.useRef<string | null>(null);
 
+  // Hide once the new route commits.
+  const routeKey = `${pathname}?${searchParams.toString()}`;
+  const routeKeyRef = React.useRef(routeKey);
+  routeKeyRef.current = routeKey;
+
   const start = React.useCallback((key: string | null) => {
     wantedKeyRef.current = key;
     // Next's router calls history.pushState inside its own useInsertionEffect
@@ -72,10 +77,6 @@ export function NavigationProgress() {
     });
   }, []);
 
-  // Hide once the new route commits.
-  const routeKey = `${pathname}?${searchParams.toString()}`;
-  const routeKeyRef = React.useRef(routeKey);
-  routeKeyRef.current = routeKey;
   React.useEffect(() => {
     setPending(false);
     wantedKeyRef.current = null;
@@ -84,7 +85,6 @@ export function NavigationProgress() {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeKey]);
 
   React.useEffect(() => {
@@ -108,7 +108,7 @@ export function NavigationProgress() {
         }
         start(`${url.pathname}?${url.searchParams.toString()}`);
       } catch {
-        return;
+        // Invalid hrefs cannot start a route transition.
       }
     };
 
